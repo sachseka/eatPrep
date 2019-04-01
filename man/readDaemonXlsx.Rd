@@ -6,15 +6,12 @@
 \description{This function is primarily intended for internal use at the Institute for Educational Quality Improvement (IQB). The xlsx-files for this function are produced by the software ZKDaemon using information stored in the IQB-Databases (DB2/DB3/DB4).
 }
 \usage{
-readDaemonXlsx(filename, type = c("ZKDaemon", "Merkmalsauszug", "Itemkennwertetabelle") )
+readDaemonXlsx(filename)
 }
 \arguments{
   \item{filename}{
 A character string containing path, name and extension of .xlsx produced by
 ZKDaemon.
-}
-  \item{type}{
-A character which spacifies what type of database export file should be read in.
 }
 }
 \details{
