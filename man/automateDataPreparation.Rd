@@ -63,7 +63,7 @@ Numeric vector passed on to function \code{\link{mnrCoding}} containing the numb
 numeric vector (argument used by ).
 }
  \item{nMbi}{
-Numeric vector of length 1 passed on to function \code{\link{mnrCoding}} containing the number of \code{mbi}-Codes required at the end of a block to code \code{mnr}. Needs to be >=1..
+Numeric vector of length 1 passed on to function \code{\link{mnrCoding}} containing the number of \code{mbi}-Codes required at the end of a block to code \code{mnr}. Needs to be > 0.
 }
  \item{rotation.id}{
 

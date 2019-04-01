@@ -38,7 +38,7 @@ Recode Missing by Intention to Missing not Reached
 	Optional: A data frame with subunit information if a dataset is used that has been recoded with \code{recodeData}. This data frame will be used to find the names of recoded subunits in \code{dat}. 
 	}
 	\item{nMbi}{
-		Number of \code{mbi}-Codes required at the end of a block to code \code{mnr}. Needs to be >=1. 
+		Number of \code{mbi}-Codes required at the end of a block to code \code{mnr}. Needs to be > 0. 
 	}   	
 	\item{mbiCode}{
 		Character indicating \code{mbi} (missing by intention) in dataset. 
