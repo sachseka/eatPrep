@@ -16,7 +16,7 @@ ZKDaemon.
 }
 \details{
 The xlsx-file produced by 'ZKDaemon' is expected to have the following sheets: \dQuote{units}, \dQuote{subunits}, \dQuote{values}, \dQuote{unitrecoding}, \dQuote{sav-files}, \dQuote{params}, \dQuote{aggregate-missings}, \dQuote{itemproperties}, \dQuote{propertylabels}, \dQuote{booklets}, and \dQuote{blocks}. \code{readDaemonXlsx} will produce a warning if any sheets are missing or wrongly specified.
-The xlsx-file produced by 'Merkmalsauszug' is expected to have the following sheets: \dQuote{Aufgabenmerkmale}, \dQuote{Itemmerkmale}. \code{readDaemonXlsx} will produce a warning if any sheets are missing or wrongly specified.
+\code{readDaemonXlsx} will produce a warning if any sheets are missing or wrongly specified.
 The xlsx-file produced by 'Itemkennwertetabelle' is expected to have the following sheet: \dQuote{Daten}. \code{readDaemonXlsx} will produce a warning if any sheets are missing or wrongly specified.
 }
 \value{
