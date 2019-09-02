@@ -1,10 +1,10 @@
 Package: eatPrep
 Type: Package
 Title: Prepare Data for IRT Analyses
-Version: 0.2.20
-Depends: R (>= 3.0.0), lubridate
-Imports: xlsx, car, foreign, reshape2, eatTools 
-Date: 2019-08-27
+Version: 0.2.21
+Depends: R (>= 3.0.0), lubridate, xlsx
+Imports: car, foreign, reshape2, eatTools 
+Date: 2019-09-02
 Author: Nicole Mahler, Karoline Sachse, Martin Hecht, Sebastian Weirich
 Maintainer: Karoline Sachse <karoline.sachse@iqb.hu-berlin.de>
 Description: Prepare test item data for IRT analyses. 

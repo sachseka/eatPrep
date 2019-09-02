@@ -58,6 +58,14 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
    }
 
    if(alleM & dim(meL[["Itemmerkmale"]])[1]>0 & dim(meL[["Aufgabenmerkmale"]])[1]>0) {
+
+     if(any(nchar(setdiff(intersect(names(meL[["Itemmerkmale"]]),names(meL[["Aufgabenmerkmale"]])),c("AufgID", "AufgTitel", "Aufgabe"))) > 0)) {
+       for(pp in setdiff(intersect(names(meL[["Itemmerkmale"]]),names(meL[["Aufgabenmerkmale"]])),c("AufgID", "AufgTitel", "Aufgabe"))) {
+         names(meL[["Itemmerkmale"]])[grep(pp,names(meL[["Itemmerkmale"]]))] <- paste0(names(meL[["Itemmerkmale"]])[grep(pp,names(meL[["Itemmerkmale"]]))],".I")
+         names(meL[["Aufgabenmerkmale"]])[grep(pp,names(meL[["Aufgabenmerkmale"]]))] <- paste0(names(meL[["Aufgabenmerkmale"]])[grep(pp,names(meL[["Aufgabenmerkmale"]]))],".A")
+       }
+     }
+
      meL[["AlleMerkmale"]] <- merge(x= meL[["Itemmerkmale"]], y=meL[["Aufgabenmerkmale"]], by=c("AufgID", "AufgTitel", "Aufgabe"))
      meL[["AlleMerkmale"]] <- eatTools::reinsort.col(meL[["AlleMerkmale"]],"ItemID", "Item")
 
