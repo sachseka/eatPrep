@@ -6,26 +6,25 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
 
   for(pp in sheetNameVec) {
     if(pp=="Aufgabenmerkmale") {
-      if(inherits(try( meL[[pp]] <- read.xlsx(filename, sheet=pp, colNames=TRUE, na.strings = "NA", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
+      if(inherits(try( meL[[pp]] <- data.frame(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text")), silent=TRUE)	, "try-error")) {
         cat(paste("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.\n", sep = ""))
       } else {
         cat(paste("Reading sheet '", pp, "'.\n", sep = ""))
-        if(dim(meL[[pp]])[2]==1) {
-          aa <- which(meL[[pp]] == "Aufgabe")+1
-          if(inherits(try( meL[[pp]] <- read.xlsx(filename, sheet=pp, colNames=TRUE, na.strings = "NA", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
+        if(meL[[pp]][1,1]!="Aufgabe") {
+          aa <- which(meL[[pp]] == "Aufgabe")-1
+          if(inherits(try( meL[[pp]] <- data.frame(read_excel(filename, sheet=pp, col_names=TRUE, na = "", skip=aa, col_types="text")), silent=TRUE)	, "try-error")) {
             cat(paste("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.\n", sep = ""))
           }
         }
       }
     } else {
-      if(inherits(try( meL[[pp]] <- read.xlsx(filename, sheet=pp, colNames=TRUE, na.strings = "NA", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
+      if(inherits(try( meL[[pp]] <- data.frame(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text")), silent=TRUE)	, "try-error")) {
         cat(paste("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.\n", sep = ""))
       } else {
         cat(paste("Reading sheet '", pp, "'.\n", sep = ""))
       }
     }
   }
-
 
    removeEmptyR <- function(dfr) {
      if(length(which(apply(dfr,1,function(pp) all(pp %in% ""))))> 0) dfr <- dfr[-which(apply(dfr,1,function(pp) all(pp %in% ""))),]
@@ -42,7 +41,7 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
    meL[["Aufgabenmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Aufgabenmerkmale"]]$Aufgabe,"_"), function(ii) ii[[2]]))
 
    for(j in seq(along=meL[["Itemmerkmale"]]$Aufgabe)) {
-     if(meL[["Itemmerkmale"]]$Aufgabe[j] == "") {
+     if(is.na(meL[["Itemmerkmale"]]$Aufgabe[j])) {
        meL[["Itemmerkmale"]]$Aufgabe[j] <- meL[["Itemmerkmale"]]$Aufgabe[j-1]
      }
    }
