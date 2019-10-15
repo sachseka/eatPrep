@@ -19,7 +19,7 @@ export(scoreData)
 export(writeSpss)
 # export(checkInput)
 # export(loadSav)
-export(makeCodebookInput)
+# export(makeCodebookInput)
 # export(makeInputLists)
 
 
