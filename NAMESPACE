@@ -1,5 +1,5 @@
 importFrom(car, recode)
-# importFrom(xlsx, read.xlsx, read.xlsx2, write.xlsx)
+# importFrom(readxl, read.xlsx, read.xlsx2, write.xlsx)
 importFrom(foreign, write.foreign, read.spss)
 importFrom(reshape2, dcast, melt)
 importFrom(eatTools, asNumericIfPossible, crop, set.col.type, multiseq)
