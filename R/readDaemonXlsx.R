@@ -5,14 +5,14 @@ readDaemonXlsx <- function(filename) {
   sheetNameVec <- c("units", "subunits", "values", "unitrecoding", "sav-files", "params", "aggregate-missings", "booklets", "blocks")
 
   for(pp in sheetNameVec) {
-    if(inherits(try( inL[[pp]] <- read.xlsx2(filename, sheetName=pp, as.data.frame=TRUE, header=TRUE, colClasses="character", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
+    if(inherits(try( inL[[pp]] <- read.xlsx(filename, sheet=pp, colNames=TRUE, na.strings = "NA", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
       cat(paste("No .xlsx sheet '", pp, "' available. InputList will be created without '", pp, "'.\n", sep = ""))
     } else {
       cat(paste("Reading sheet '", pp, "'.\n", sep = ""))
     }
   }
-  fileS <- system.file("tests", "test_import.xlsx", package = "xlsx")
-  res <- read.xlsx(fileS, 1)
+  #fileS <- system.file("tests", "test_import.xlsx", package = "xlsx")
+  #res <- read.xlsx(fileS, 1)
 
   if(!is.null(inL$units) & !all(c("unit", "unitType", "unitAggregateRule") %in% colnames(inL$units))) {
     cat("Something seems to be wrong with your 'units' sheet. Please check columns! \n")
