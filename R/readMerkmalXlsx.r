@@ -6,19 +6,19 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
 
   for(pp in sheetNameVec) {
     if(pp=="Aufgabenmerkmale") {
-      if(inherits(try( meL[[pp]] <- read.xlsx2(filename, sheetName=pp, as.data.frame=TRUE, header=TRUE, colClasses="character", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
+      if(inherits(try( meL[[pp]] <- read.xlsx(filename, sheet=pp, colNames=TRUE, na.strings = "NA", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
         cat(paste("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.\n", sep = ""))
       } else {
         cat(paste("Reading sheet '", pp, "'.\n", sep = ""))
         if(dim(meL[[pp]])[2]==1) {
           aa <- which(meL[[pp]] == "Aufgabe")+1
-          if(inherits(try( meL[[pp]] <- read.xlsx2(filename, sheetName=pp, startRow=aa, as.data.frame=TRUE, header=TRUE, colClasses="character", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
+          if(inherits(try( meL[[pp]] <- read.xlsx(filename, sheet=pp, colNames=TRUE, na.strings = "NA", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
             cat(paste("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.\n", sep = ""))
           }
         }
       }
     } else {
-      if(inherits(try( meL[[pp]] <- read.xlsx2(filename, sheetName=pp, as.data.frame=TRUE, header=TRUE, colClasses="character", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
+      if(inherits(try( meL[[pp]] <- read.xlsx(filename, sheet=pp, colNames=TRUE, na.strings = "NA", stringsAsFactors=FALSE), silent=TRUE)	, "try-error")) {
         cat(paste("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.\n", sep = ""))
       } else {
         cat(paste("Reading sheet '", pp, "'.\n", sep = ""))
