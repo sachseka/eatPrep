@@ -16,8 +16,6 @@ ZKDaemon.
 }
 \details{
 The xlsx-file produced by 'ZKDaemon' is expected to have the following sheets: \dQuote{units}, \dQuote{subunits}, \dQuote{values}, \dQuote{unitrecoding}, \dQuote{sav-files}, \dQuote{params}, \dQuote{aggregate-missings}, \dQuote{itemproperties}, \dQuote{propertylabels}, \dQuote{booklets}, and \dQuote{blocks}. \code{readDaemonXlsx} will produce a warning if any sheets are missing or wrongly specified.
-\code{readDaemonXlsx} will produce a warning if any sheets are missing or wrongly specified.
-The xlsx-file produced by 'Itemkennwertetabelle' is expected to have the following sheet: \dQuote{Daten}. \code{readDaemonXlsx} will produce a warning if any sheets are missing or wrongly specified.
 }
 \value{
 A list of data frames containing information that is required by the data preparation functions in \code{eatPrep}. \code{\link{inputList}} shows an example of this list.

@@ -68,15 +68,15 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
      meL[["AlleMerkmale"]] <- merge(x= meL[["Itemmerkmale"]], y=meL[["Aufgabenmerkmale"]], by=c("AufgID", "AufgTitel", "Aufgabe"))
      meL[["AlleMerkmale"]] <- eatTools::reinsort.col(meL[["AlleMerkmale"]],"ItemID", "Item")
 
-     if(any(grepl("Zeit",names(meL[["AlleMerkmale"]])))){
-       for(i in grep("Zeit",names(meL[["AlleMerkmale"]]))) {
-         meL[["AlleMerkmale"]][,paste0(names(meL[["AlleMerkmale"]][i]),"lu")] <- lubridate::ms( meL[["AlleMerkmale"]][,i])
-       }
-       ee <- grep("Zeit",names(meL[["AlleMerkmale"]]))
-       ff <- which(names(meL[["AlleMerkmale"]]) == "ItemID")
-       meL[["AlleMerkmale"]] <- eatTools::reinsort.col(meL[["AlleMerkmale"]],ee, ff)
-     }
-     cat("Data frame 'AlleMerkmale' has been created. (Use lubridate::as.duration for addition of times.) \n")
+     #if(any(grepl("Zeit",names(meL[["AlleMerkmale"]])))){
+    #   for(i in grep("Zeit",names(meL[["AlleMerkmale"]]))) {
+     #    meL[["AlleMerkmale"]][,paste0(names(meL[["AlleMerkmale"]][i]),"lu")] <- lubridate::ms( meL[["AlleMerkmale"]][,i])
+    #   }
+     #  ee <- grep("Zeit",names(meL[["AlleMerkmale"]]))
+    #   ff <- which(names(meL[["AlleMerkmale"]]) == "ItemID")
+     #  meL[["AlleMerkmale"]] <- eatTools::reinsort.col(meL[["AlleMerkmale"]],ee, ff)
+     #}
+     cat("Data frame 'AlleMerkmale' has been created.\n")# (Use lubridate::as.duration for addition of times.) \n")
    }
 
 
