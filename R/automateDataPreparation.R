@@ -44,7 +44,10 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			stopifnot(class(inputList$savFiles) == "data.frame")
 		} else {
 			stopifnot(class(datList) == "data.frame" || class(datList) == "list")
-			if(class(datList) == "data.frame") {datList <- list(datList)}
+			if(class(datList) == "data.frame") {
+			  datList <- list(datList)
+			  names(datList) <- "dat"
+			}
 		}
 
 		### ggf. sav-files einlesen
