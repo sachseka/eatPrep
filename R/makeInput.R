@@ -2,16 +2,16 @@
 makeInputLists <- function (values, subunits, units, recodedData = TRUE) {
 
   checkedInput  <- checkInput(values, subunits, units)
-  
+
   # make lists
   varinfoRaw        <- .makeVarinfoRaw(checkedInput$values, checkedInput$subunits)
   varinfoRecoded    <- .makeVarinfoRecoded(checkedInput$values, checkedInput$subunits)
   varinfoAggregated <- .makeVarinfoAggregated(checkedInput$units)
   recodeinfo        <- .makeRecodeinfo(checkedInput$values, checkedInput$subunits)
-  aggregateinfo     <- .makeAggregateinfo(checkedInput$subunits, checkedInput$units, recodedData = recodedData) 
+  aggregateinfo     <- .makeAggregateinfo(checkedInput$subunits, checkedInput$units, recodedData = recodedData)
 
   return (list(varinfoRaw = varinfoRaw, varinfoRecoded = varinfoRecoded,
-            varinfoAggregated = varinfoAggregated, 
+            varinfoAggregated = varinfoAggregated,
             recodeinfo = recodeinfo, aggregateinfo = aggregateinfo ))
 }
 
@@ -21,18 +21,18 @@ makeInputLists <- function (values, subunits, units, recodedData = TRUE) {
 
 makeInputCheckData <- function (values, subunits, units) {
 
-  checkedInput  <- checkInput(values = values, subunits = subunits, units = units)  
+  checkedInput  <- checkInput(values = values, subunits = subunits, units = units)
 
   # make varinfo
   varinfoRaw        <- .makeVarinfoRaw(checkedInput$values, checkedInput$subunits)
   varinfoRecoded    <- .makeVarinfoRecoded(checkedInput$values, checkedInput$subunits)
   varinfoAggregated <- .makeVarinfoAggregated(checkedInput$units)
-  
+
   varinfoAll <- c(varinfoRaw, varinfoRecoded, varinfoAggregated)
   if (any(duplicated(names(varinfoAll)))){
     varinfoAll <- varinfoAll [ - which(duplicated(names(varinfoAll))) ]
   }
-  
+
   return(varinfoAll)
 }
 
@@ -43,17 +43,17 @@ makeInputCheckData <- function (values, subunits, units) {
 makeInputRecodeData <- function (values, subunits) {
 
  nSubunits <- length(grep("subunit", colnames(subunits)))
- 
+
  if (nSubunits == 0 ) {
-    
+
    subunits <- subunits [ subunits$unit %in% values$unit , ]
-   subunits <- data.frame ( subunit = subunits$unit, subunitLabel = subunits$unitLabel, 
+   subunits <- data.frame ( subunit = subunits$unit, subunitLabel = subunits$unitLabel,
         subunitDescription = subunits$unitDescription, subunitType = subunits$unitType,
-        subunitRecoded = subunits$unit, subunitLabelRecoded = subunits$unitLabel, 
+        subunitRecoded = subunits$unit, subunitLabelRecoded = subunits$unitLabel,
         stringsAsFactors = FALSE)
-        
-   colnames(values) [ which (colnames(values) == "unit") ] <- "subunit"     
-   
+
+   colnames(values) [ which (colnames(values) == "unit") ] <- "subunit"
+
  }
 
   checkedInput  <- checkInput(values = values, subunits = subunits, checkUnits = FALSE)
@@ -70,7 +70,7 @@ makeInputAggregateData <- function (subunits, units, recodedData = TRUE) {
   checkedInput  <- checkInput(subunits = subunits, units = units, checkValues = FALSE)
 
   # make lists
-  aggregateinfo     <- .makeAggregateinfo(checkedInput$subunits, checkedInput$units, recodedData = recodedData) 
+  aggregateinfo     <- .makeAggregateinfo(checkedInput$subunits, checkedInput$units, recodedData = recodedData)
 
   return (aggregateinfo)
 }
@@ -91,14 +91,14 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
         stop("Argument values is not a data frame.")
       }
     }
-  
+
     # if subunit input is missing: use default values for subitems
     if (missing(subunits)) {
       subunit  <- unique(values$subunit)
       subunitRecoded <- paste(subunit, "R", sep = "")
       subunitLabelRecoded <- paste("Recoded", subunit)
       subunits <- data.frame(unit = subunit, subunit = subunit, subunitType = "", subunitLabel = subunit,# subunitDescription = "",
-                subunitPosition = "", #subunitTransniveau = "", 
+                subunitPosition = "", #subunitTransniveau = "",
 				subunitRecoded = subunitRecoded,
                 subunitLabelRecoded = subunitLabelRecoded, stringsAsFactors = FALSE)
       cat("Found no subunits input. All subunit labels will be defaulted to subunit name.\n")
@@ -109,10 +109,10 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
       }
     }
   }
-  
+
   # check subunit labels
-  if (any(subunits$subunitLabel == "" )) {
-   emptyLabels <- which(subunits$subunitLabel == "")
+  if (any(is.na(subunits$subunitLabel) | subunits$subunitLabel == "" )) {
+   emptyLabels <- which(is.na(subunits$subunitLabel) |subunits$subunitLabel == "")
    cat("Found no subunit label for subunit(s)", emptyLabels, "\nSubunit label will be defaulted to subunit name.\n")
    subunits$subunitLabel[ emptyLabels ] <- subunits$subunit [ emptyLabels ]
   }
@@ -137,7 +137,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
      checkedValuesSubunits <- .checkValuesSubunits (values, subunits)
      values   <- checkedValuesSubunits$values
      subunits <- checkedValuesSubunits$subunits
-  }   
+  }
   if (checkUnits == TRUE) {
     checkedSubunitsUnits  <- .checkSubunitsUnits(subunits, units)
     subunits <- checkedSubunitsUnits$subunits
@@ -154,7 +154,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
   } else {
     if (checkValues == TRUE) {
       returnList <- list(values = values, subunits = subunits)
-    } 
+    }
   }
 
 
@@ -171,14 +171,14 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
         "\nNo varinfo and/or recodeinfo will be written for this/these subunit(s).\n")
     subunits <- subunits[ - which(subunits$subunit %in% subunitsWithoutValues) , ]
   }
-  
+
   valuesWithoutSubunits <- setdiff(values$subunit, subunits$subunit)
   if (length(valuesWithoutSubunits) > 0 ) {
     cat("Found only values for subunit(s)", valuesWithoutSubunits,
         "\nSubunit label will be defaulted to subunit name for this/these subunit(s).\n")
   missingSubunits <- data.frame ( unit = valuesWithoutSubunits, subunit = valuesWithoutSubunits,
               subunitType = "", subunitLabel = valuesWithoutSubunits, subunitDescription = "",
-              subunitPosition = "", #subunitTransniveau = "", 
+              subunitPosition = "", #subunitTransniveau = "",
 			  subunitRecoded = paste(valuesWithoutSubunits, "R", sep = ""),
               subunitLabelRecoded = paste("Recoded", valuesWithoutSubunits), stringsAsFactors = FALSE)
   subunits <- rbind(subunits, missingSubunits)
@@ -194,9 +194,9 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
   unitsWithoutSubunits <- setdiff(units$unit, subunits$unit)
   if (any(units[ units$unit %in% unitsWithoutSubunits, "unitType"] == "ID")){
     idName <- units [units$unitType == "ID", "unit"]
-    unitsWithoutSubunits <- setdiff(unitsWithoutSubunits, idName)    
+    unitsWithoutSubunits <- setdiff(unitsWithoutSubunits, idName)
   }
-  if (length(unitsWithoutSubunits) > 0 ) {  
+  if (length(unitsWithoutSubunits) > 0 ) {
     cat("Found no subunits for unit(s)", unitsWithoutSubunits, "\n")
  #       "\nNo varinfo and recodeinfo will be written for this/these unit(s).\n")
  #   units <- units[ - which(units$unit %in% unitsWithoutSubunits) , ]
@@ -209,7 +209,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 		if("unitScoreRule" %in% colnames(units)){
  		    missingunits <- data.frame ( unit = SubunitsWithoutUnits, unitLabel = SubunitsWithoutUnits,
               unitDescription = "", unitType = "",
-              unitAggregateRule = "", # unitScoreRule = "", 
+              unitAggregateRule = "", # unitScoreRule = "",
 			  stringsAsFactors = FALSE)
 		} else {
 		missingunits <- data.frame ( unit = SubunitsWithoutUnits, unitLabel = SubunitsWithoutUnits,
@@ -225,13 +225,13 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 #-----------------------------------------------------------------------------------------
 
 .makeVarinfoRawValues <- function(subunitName, values) {
-  
+
   if ( ! subunitName %in% values$subunit ) {
     stop(paste("Found no values for subunit" , subunitName, "."))
-  }  
-  
+  }
+
   subValues <- values [ values$subunit == subunitName , ]
-  varinfoValues <- mapply(list, label = subValues$valueLabel, description = subValues$valueDescription, 
+  varinfoValues <- mapply(list, label = subValues$valueLabel, description = subValues$valueDescription,
                         type = subValues$valueType, SIMPLIFY=FALSE, USE.NAMES = FALSE)
   names(varinfoValues) <- subValues$value
   return(varinfoValues)
@@ -240,14 +240,14 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 #-----------------------------------------------------------------------------------------
 
 .makeVarinfoRecodedValues <- function(subunitName, values) {
-  
+
   if ( ! subunitName %in% values$subunit ) {
     stop(paste("Found no values for subunit" , subunitName, "."))
-  }  
-  
+  }
+
   subValues <- values [ values$subunit == subunitName , ]
   subValues <- subValues [ ! duplicated(subValues$valueRecode) , ]
-  varinfoValues <- mapply(list, label = subValues$valueLabelRecoded, #description = subValues$valueDescriptionRecoded, 
+  varinfoValues <- mapply(list, label = subValues$valueLabelRecoded, #description = subValues$valueDescriptionRecoded,
                         type = subValues$valueType, SIMPLIFY=FALSE, USE.NAMES = FALSE)
   names(varinfoValues) <- subValues$valueRecode
   return(varinfoValues)
@@ -258,56 +258,56 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 .makeVarinfoRaw <- function(values, subunits) {
  # values: ZKD-Input-Dataframe values
  # subunits: ZKD-Input-Dataframe subunits
-  
+
   # make varinfo
-  varinfoValues <- mapply(.makeVarinfoRawValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)  
-  varinfoList <- mapply(list, label = subunits$subunitLabel, #description = subunits$subunitDescription, 
-  type = subunits$subunitType, #transniveau=subunits$subunitTransniveau, 
-  values = varinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)  
-  
+  varinfoValues <- mapply(.makeVarinfoRawValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)
+  varinfoList <- mapply(list, label = subunits$subunitLabel, #description = subunits$subunitDescription,
+  type = subunits$subunitType, #transniveau=subunits$subunitTransniveau,
+  values = varinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)
+
   names(varinfoList) <- subunits$subunit
-  
+
   return(varinfoList)
 }
-  
+
 #-----------------------------------------------------------------------------------------
 
 .makeVarinfoRecoded <- function(values, subunits) {
  # values: ZKD-Input-Dataframe values
  # subunits: ZKD-Input-Dataframe subunits
-  
+
   # make varinfo
-  varinfoValues <- mapply(.makeVarinfoRecodedValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)  
-  varinfoList <- mapply(list, label = subunits$subunitLabelRecoded,# description = subunits$subunitDescriptionRecoded, 
-  type = subunits$subunitType, values = varinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)  
-  
+  varinfoValues <- mapply(.makeVarinfoRecodedValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)
+  varinfoList <- mapply(list, label = subunits$subunitLabelRecoded,# description = subunits$subunitDescriptionRecoded,
+  type = subunits$subunitType, values = varinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)
+
   names(varinfoList) <- subunits$subunitRecoded
-  
+
   return(varinfoList)
 }
 
 #-----------------------------------------------------------------------------------------
 
 .makeVarinfoAggregated <- function(units) {
-  
+
   # make varinfo
- # varinfoValues <- mapply(.makeVarinfoRecodedValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)  
-  varinfoList <- mapply(list, label = units$unitLabel, description = units$unitDescription, 
-  type = units$unitType, # values = varinfoValues, 
-  SIMPLIFY=FALSE, USE.NAMES = FALSE)  
-  
+ # varinfoValues <- mapply(.makeVarinfoRecodedValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)
+  varinfoList <- mapply(list, label = units$unitLabel, description = units$unitDescription,
+  type = units$unitType, # values = varinfoValues,
+  SIMPLIFY=FALSE, USE.NAMES = FALSE)
+
   names(varinfoList) <- units$unit
-  
+
   return(varinfoList)
 }
-  
+
 #-----------------------------------------------------------------------------------------
 
 .makeRecodeinfoValues <- function(subunitName, values) {
-  
+
   if ( ! subunitName %in% values$subunit ) {
     stop(paste("Found no values for subunit" , subunitName, "."))
-  }  
+  }
   subValues <- values [ values$subunit == subunitName , ]
   recodeinfoValues <- as.list(subValues$valueRecode)
   names(recodeinfoValues) <- subValues$value
@@ -321,9 +321,9 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
  # subunits: ZKD-Input-Dataframe subunits
 
  # make recodeinfo
-  recodeinfoValues <- mapply(.makeRecodeinfoValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)  
-  recodeinfoList   <- mapply(list, label = subunits$subunitLabelRecoded, newID = subunits$subunitRecoded, 
-     values = recodeinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)  
+  recodeinfoValues <- mapply(.makeRecodeinfoValues, subunits$subunit, MoreArgs = list(values), SIMPLIFY=FALSE)
+  recodeinfoList   <- mapply(list, label = subunits$subunitLabelRecoded, newID = subunits$subunitRecoded,
+     values = recodeinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)
   names(recodeinfoList) <- subunits$subunit
 
   return(recodeinfoList)
@@ -331,7 +331,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 
 #-----------------------------------------------------------------------------------------
 .makeAggregateinfo <- function (subunits, units, recodedData = TRUE) {
-  
+
   # welche units bestehen aus mehr als einem Subunit?
   aggregateunits <- unique ( names(table(subunits$unit))[ table(subunits$unit) > 1] )
   if (recodedData == TRUE){
@@ -343,7 +343,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 #  srule <- units$unitScoreRule [ match(aggregateunits, units$unit) ]
 
   # aggregateinfo erstellen
-  aggregateinfo <- mapply(list, arule = arule, #srule = srule, 
+  aggregateinfo <- mapply(list, arule = arule, #srule = srule,
 			subunits=aggregateSubunits, SIMPLIFY=FALSE, USE.NAMES=FALSE)
   names(aggregateinfo) <- aggregateunits
   return(aggregateinfo)
