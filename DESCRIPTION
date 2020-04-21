@@ -1,9 +1,9 @@
 Package: eatPrep
 Type: Package
 Title: Prepare Data for IRT Analyses
-Version: 0.2.29
+Version: 0.2.30
 Depends: R (>= 3.5.0), readxl
-Imports: car, foreign, reshape2, eatTools (>= 0.2.10)
+Imports: car, foreign, reshape2, irr, eatTools (>= 0.2.10)
 Date: 2020-04-21
 Author: Nicole Mahler, Karoline Sachse, Martin Hecht, Sebastian Weirich
 Maintainer: Karoline Sachse <karoline.sachse@iqb.hu-berlin.de>

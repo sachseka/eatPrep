@@ -40,5 +40,5 @@ If \code{oldID} and \code{newID} are used, the ID variable in the SPSS dataset w
   A data frame. All columns are of class \code{character}.
 }
 \author{
-Nicole Haag, Sebastian Weirich
+Nicole Haag
 }
