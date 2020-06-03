@@ -66,7 +66,7 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
      }
 
      meL[["AlleMerkmale"]] <- merge(x= meL[["Itemmerkmale"]], y=meL[["Aufgabenmerkmale"]], by=c("AufgID", "AufgTitel", "Aufgabe"))
-     meL[["AlleMerkmale"]] <- eatTools::reinsort.col(meL[["AlleMerkmale"]],"ItemID", "Item")
+     meL[["AlleMerkmale"]] <- eatTools::insert.col(meL[["AlleMerkmale"]],"ItemID", "Item")
 
      #if(any(grepl("Zeit",names(meL[["AlleMerkmale"]])))){
     #   for(i in grep("Zeit",names(meL[["AlleMerkmale"]]))) {

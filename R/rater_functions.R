@@ -42,7 +42,7 @@ meanAgree <- function( dat , tolerance = 0 , weight.mean = TRUE ){
         dfr <- rbind( dfr , c( colnames(dat)[ii] , colnames(dat)[jj] , a.ii.jj$subjects , a.ii.jj$value / 100 )  )
       }
     } }
-  dfr <- data.frame(dfr)
+  dfr <- data.frame(dfr, stringsAsFactors=TRUE)
   colnames(dfr) <- c("Coder1","Coder2","N" , "agree" )
   for (vv in 3:4){ dfr[,vv] <- as.numeric( paste( dfr[,vv] ) ) }
   meanagree <- ifelse( weight.mean == TRUE , weighted.mean( dfr$agree , dfr$N ) , mean( dfr$agree ) )
@@ -65,7 +65,7 @@ meanKappa <- function( dat , weight = "unweighted" , weight.mean = TRUE ){
         dfr <- rbind( dfr , c( colnames(dat)[ii] , colnames(dat)[jj] , a.ii.jj$subjects , a.ii.jj$value  ) )
       }
     } }
-  dfr <- data.frame(dfr)
+  dfr <- data.frame(dfr, stringsAsFactors=TRUE)
   colnames(dfr) <- c("Coder1","Coder2","N" , "kappa" )
   for (vv in 3:4){ dfr[,vv] <- as.numeric( paste( dfr[,vv] ) ) }
   meankappa <- ifelse( weight == TRUE , weighted.mean( dfr$kappa , dfr$N ) , mean( dfr$kappa , na.rm = TRUE) )

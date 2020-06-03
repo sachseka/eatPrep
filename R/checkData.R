@@ -134,7 +134,7 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
   	}
 
   	# zuerst missingInd in dataframe umwandeln, damit sie nicht mehr character ist
-  	missingInd <- data.frame(missingInd, stringsAsFactors = F)
+  	missingInd <- data.frame(missingInd, stringsAsFactors = FALSE)
   	idCol <- which(colnames(missingInd) == idvarname)
 
   	# check for variables with only missing values
