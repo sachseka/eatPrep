@@ -1,4 +1,4 @@
-aggregateDataOld <- function(all.daten,spalten, unexpected.pattern.as.na = TRUE, verboseAll = FALSE ) {
+aggregateDataOld <- function(all.daten,spalten, unexpected.pattern.as.na = TRUE, printCases = FALSE, printPattern = FALSE ) {
         if(missing(spalten)) {spalten <- colnames(all.daten)}
         spalten <- existsBackgroundVariables(dat = all.daten, variable=spalten)
         noAgg <- setdiff(colnames(all.daten), spalten)
@@ -18,11 +18,16 @@ aggregateDataOld <- function(all.daten,spalten, unexpected.pattern.as.na = TRUE,
           isNA         <- table(rowSums(is.na(sub.dat)))
           isNA.names   <- as.numeric(names(isNA))
           unexpected   <- setdiff(isNA.names, c(0,ncol.sub.dat))
+    # if ( substr(colnames(sub.dat)[1], 1, 8) == "M3621603") {browser()}
           if( length( unexpected ) > 0  )   {
             cases      <- sum(as.numeric(isNA[as.character(unexpected)]))
             cat(paste("Caution! Found unexpected missing pattern in variables for item ",items[i], " in ",cases," cases.\n", sep= "" ) ) ; flush.console()
             whichUnexp <- which( rowSums(is.na(sub.dat)) %in% unexpected)
-            if (verboseAll == TRUE) {cat("   Cases in question: "); cat(paste(whichUnexp, collapse=", ")); cat("\n")}
+            if (printCases)   {cat("   Cases in question: "); cat(paste(whichUnexp, collapse=", ")); cat("\n")}
+            if (printPattern) {
+                patt <- apply(sub.dat[whichUnexp,], MARGIN = 1, FUN = function ( zeile ) { paste(zeile, collapse = "_")})
+                print(table(patt))
+            }
           }
           if(ncol.sub.dat == 1) {sub.dat[,"summe"] <- sub.dat[,1]}
           if(ncol.sub.dat >  1) {sub.dat[,"summe"] <- apply(sub.dat, 1, FUN = function ( uu ) {ifelse( all(is.na(uu)), NA, sum(uu, na.rm=!unexpected.pattern.as.na))}) }

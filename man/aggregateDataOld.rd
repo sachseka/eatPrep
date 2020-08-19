@@ -3,11 +3,11 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Aggregate variables to items and/or scales.}
 \description{This is the old version of the \code{aggregateData} function from the \code{eatPrep}
-package. The function is currently deprecated and was only kept in the package to keep older scripts
-executable. For the same reason, inappropriate argument names of \code{aggregateDataOld} have not been
+package. The function is currently deprecated and was only kept in the package to keep older scripts 
+executable. For the same reason, inappropriate argument names of \code{aggregateDataOld} have not been 
 modified. The function might be beneficial if aggregation information from the IQB database is not available.}
 \usage{
-aggregateDataOld (all.daten,spalten, unexpected.pattern.as.na = TRUE, verboseAll = FALSE )
+aggregateDataOld (all.daten,spalten, unexpected.pattern.as.na = TRUE, printCases = FALSE, printPattern = FALSE )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,9 +23,13 @@ Column names or numbers with variables to aggregate
 %%     ~~Describe \code{file} here~~
 Logical: TRUE, if non-valid patterns should be aggregated to NA.
 }
-  \item{verboseAll}{
+  \item{printCases}{
 %%     ~~Describe \code{file} here~~
 Logical: Specifies whether exhaustive aggregation information should be printed on console.
+}
+  \item{printPattern}{
+%%     ~~Describe \code{file} here~~
+Logical: Print the unexpected patterns to console?
 }
 }
 \details{
@@ -44,7 +48,7 @@ Sebastian Weirich
 \examples{
 ### create artificial data
 dat <- data.frame ( id = paste0("P", 11:50),
-       matrix(data = sample(x=0:1, size = 400, replace = TRUE),nrow=40, ncol = 10), stringsAsFactors=TRUE)
+       matrix(data = sample(x=0:1, size = 400, replace = TRUE),nrow=40, ncol = 10))
 ### aggregate Item 0+1+2 and 4+5 and 8+9: define sequential letter
 colnames(dat)[-1] <- c("I1a", "I1b", "I1c", "I2a", "I3a", "I3b", "I4a", "I5a", "I6a", "I6b")
 agg <- aggregateDataOld(dat, -1)
