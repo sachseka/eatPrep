@@ -7,7 +7,8 @@ package. The function is currently deprecated and was only kept in the package t
 executable. For the same reason, inappropriate argument names of \code{aggregateDataOld} have not been 
 modified. The function might be beneficial if aggregation information from the IQB database is not available.}
 \usage{
-aggregateDataOld (all.daten,spalten, unexpected.pattern.as.na = TRUE, printCases = FALSE, printPattern = FALSE )
+aggregateDataOld (all.daten,spalten, unexpected.pattern.as.na = TRUE, printCases = FALSE, printPattern = FALSE,
+       inputList=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,11 +32,19 @@ Logical: Specifies whether exhaustive aggregation information should be printed 
 %%     ~~Describe \code{file} here~~
 Logical: Print the unexpected patterns to console?
 }
+  \item{inputList}{
+%%     ~~Describe \code{file} here~~
+Optional: ZKD input list to differentiate between variables (subitems) and items. If \code{NULL},
+all variables in the data frame which share the same ID except for the kast sign are considered
+to belong to the same item.
+}
 }
 \details{
 The function use a rather simple aggregation rule: all variables which share a common ``stem''
 are considered to belong together. The ``stem'' is everything except the last sign. The item
 is considered to be correct if all variables are correct. See examples for further details.
+Note: if \code{inputList} is specified, aggregation rules are executed as specified in the
+ZKD input list.
 }
 \value{
 A list. First element is a data frame with sum scores. Second element is a data frame
