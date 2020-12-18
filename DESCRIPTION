@@ -7,7 +7,7 @@ Imports: car, foreign, reshape2, irr, eatTools (>= 0.2.10)
 Date: 2020-09-09
 Author: Nicole Mahler, Karoline Sachse, Martin Hecht, Sebastian Weirich
 Maintainer: Karoline Sachse <karoline.sachse@iqb.hu-berlin.de>
-Description: Prepare test item data for IRT analyses. 
+Description: Prepare test item data for IRT analyses, e.g. recode, aggregate
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyLoad: yes
