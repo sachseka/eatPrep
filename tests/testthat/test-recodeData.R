@@ -10,16 +10,18 @@ test_that("recoded data contains only 0, 1, missings", {
 
 # gehört eigentlich nicht hierher
 #  expect_equal(as.character(tempdat$hisei), tempdatR$hisei)
-
   tempdatR <- recodeData(inputDat[[1]], inputList$values, inputList$subunits)
-
   expect_setequal(unique(unlist(tempdatR[ , -c(1,2)])), c("0", "1","mbi", "mir"))
 })
 
 test_that("recoded data preserves all rows and columns", {
-
   tempdatR <- recodeData(inputDat[[1]], inputList$values, inputList$subunits)
-
   expect_equal(nrow(inputDat[[1]]), nrow(tempdatR))
   expect_equal(ncol(inputDat[[1]]), ncol(tempdatR))
+})
+
+test_that("warning if a data point value has no recode value", {
+  tempdat <- inputDat[[1]]
+  tempdat$I06[10] <- 5
+  expect_warning(recodeData(tempdat, inputList$values, inputList$subunits), "Incomplete recode information" )
 })
