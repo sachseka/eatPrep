@@ -4,26 +4,35 @@
 ### codCol: Nummer oder Name der Kodiererspalte
 ### n.pseudo: wieviele Pseudocodierer?
 ### randomize.order: soll die Reihenfolge der Pseudocodes nach Zufall bestimmt werden?
-make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE)   {
-  allVars     <- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
-  all.Names   <- lapply(allVars, FUN=function(ii) {existsBackgroundVariables(dat = datLong, variable=ii)})
-  if(length(all.Names) != length(unique(all.Names)) ) {stop("'idCol', 'varCol', 'codCol' and 'valueCol' overlap.\n")}
-  dat.i       <- datLong[,unlist(all.Names), drop = FALSE]         ### untere zeilen "only for the sake of speed": wir sortieren alle Faelle VORHER aus, wo nichts gesampelt werden kann!
-  dat.i[,"index"] <- paste( dat.i[,unlist(all.Names[c("idCol")])], dat.i[,unlist(all.Names[c("varCol")])], sep="_")
-  index       <- table(dat.i[,"index"])
-  datWeg      <- dat.i[ which ( dat.i[,"index"] %in% names(index)[which ( index <= n.pseudo )] ) , ]
-  datSample   <- dat.i[ which ( dat.i[,"index"] %in% names(index)[which ( index > n.pseudo )] ) , ]
-  if(nrow(datSample)>0) {
-    datPseudo   <- do.call("rbind", by(data = datSample, INDICES = datSample[, unlist(all.Names[c("idCol", "varCol")])], FUN = function ( sub.dat) {
-      stopifnot(nrow(sub.dat)>n.pseudo)
-      auswahl     <- sample(1:nrow(sub.dat), n.pseudo, replace = FALSE )
-      if(!randomize.order) { auswahl <- sort(auswahl) }
-      sub.dat     <- sub.dat[auswahl,]
-      return(sub.dat)}))
-    datWeg   <- rbind(datWeg, datPseudo)
-  }
-  if(n.pseudo>1) { datWeg[,unlist(all.Names[c("codCol")])] <- paste("Cod",multiseq(datWeg[,"index"]),sep="_") }
-  return(datWeg)}
+make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE, verbose = FALSE)   {
+      allVars     <- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
+      all.Names   <- lapply(allVars, FUN=function(ii) {existsBackgroundVariables(dat = datLong, variable=ii)})
+      if(length(all.Names) != length(unique(all.Names)) ) {stop("'idCol', 'varCol', 'codCol' and 'valueCol' overlap.\n")}
+      dat.i       <- datLong[,unlist(all.Names), drop = FALSE]                  ### untere zeilen "only for the sake of speed": wir sortieren alle Faelle VORHER aus, wo nichts gesampelt werden kann!
+      dat.i[,"index"] <- paste( dat.i[,unlist(all.Names[c("idCol")])], dat.i[,unlist(all.Names[c("varCol")])], sep="_")
+      index       <- table(dat.i[,"index"])
+      datWeg      <- dat.i[ which ( dat.i[,"index"] %in% names(index)[which ( index <= n.pseudo )] ) , ]
+      datSample   <- dat.i[ which ( dat.i[,"index"] %in% names(index)[which ( index > n.pseudo )] ) , ]
+  ### Variableninformationen geben
+      if ( isTRUE(verbose)) {
+           cpr <- ### coder per response
+           cat(paste0("                      N.persons: ",length(unique(datLong[,all.Names[["idCol"]]]))  ,
+               "\n                         N.vars: ", length(unique(datLong[,all.Names[["varCol"]]]))  ,
+               "\n                        N.coder: ", length(unique(datLong[,all.Names[["codCol"]]])) ,
+               "\n            coders per response: minimum ", min(index), ", maximum ",max(index) ,
+               "\nresponses with multiple ratings: ", length(which(index > 1)) , " of ",length(index) , " (",round(100*length(which(index > 1)) / length(index), digits = 1) , " %)\n"))
+      }
+      if(nrow(datSample)>0) {
+        datPseudo   <- do.call("rbind", by(data = datSample, INDICES = datSample[, unlist(all.Names[c("idCol", "varCol")])], FUN = function ( sub.dat) {
+          stopifnot(nrow(sub.dat)>n.pseudo)
+          auswahl     <- sample(1:nrow(sub.dat), n.pseudo, replace = FALSE )
+          if(!randomize.order) { auswahl <- sort(auswahl) }
+          sub.dat     <- sub.dat[auswahl,]
+          return(sub.dat)}))
+        datWeg   <- rbind(datWeg, datPseudo)
+      }
+      if(n.pseudo>1) { datWeg[,unlist(all.Names[c("codCol")])] <- paste("Cod",multiseq(datWeg[,"index"]),sep="_") }
+      return(datWeg)}
 
 ### function by Alexander Robitzsch calculates mean agreement among raters
 meanAgree <- function( dat , tolerance = 0 , weight.mean = TRUE ){
@@ -42,7 +51,7 @@ meanAgree <- function( dat , tolerance = 0 , weight.mean = TRUE ){
         dfr <- rbind( dfr , c( colnames(dat)[ii] , colnames(dat)[jj] , a.ii.jj$subjects , a.ii.jj$value / 100 )  )
       }
     } }
-  dfr <- data.frame(dfr, stringsAsFactors=TRUE)
+  dfr <- data.frame(dfr, stringsAsFactors = FALSE)
   colnames(dfr) <- c("Coder1","Coder2","N" , "agree" )
   for (vv in 3:4){ dfr[,vv] <- as.numeric( paste( dfr[,vv] ) ) }
   meanagree <- ifelse( weight.mean == TRUE , weighted.mean( dfr$agree , dfr$N ) , mean( dfr$agree ) )
@@ -65,7 +74,7 @@ meanKappa <- function( dat , weight = "unweighted" , weight.mean = TRUE ){
         dfr <- rbind( dfr , c( colnames(dat)[ii] , colnames(dat)[jj] , a.ii.jj$subjects , a.ii.jj$value  ) )
       }
     } }
-  dfr <- data.frame(dfr, stringsAsFactors=TRUE)
+  dfr <- data.frame(dfr, stringsAsFactors = FALSE)
   colnames(dfr) <- c("Coder1","Coder2","N" , "kappa" )
   for (vv in 3:4){ dfr[,vv] <- as.numeric( paste( dfr[,vv] ) ) }
   meankappa <- ifelse( weight == TRUE , weighted.mean( dfr$kappa , dfr$N ) , mean( dfr$kappa , na.rm = TRUE) )
