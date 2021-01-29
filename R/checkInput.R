@@ -13,19 +13,21 @@
 
 checkValuesSubunits <- function(values, subunits) {
 
-  if (class(values) != "data.frame")  stop("Argument values is not a data frame.")
-  if (class(subunits) != "data.frame") stop("Argument subunits is not a data frame.")
+  if (class(values) != "data.frame")  stop("values must be a data frame.")
+  if (any( ! c("subunit", "value") %in% colnames(values))) stop("values needs to respect naming conventions. See help(inputList) for details.")
+  if (class(subunits) != "data.frame") stop("subunits must be a data frame.")
+  if (any( ! c("unit", "subunit") %in% colnames(subunits))) stop("subunits needs to respect naming conventions. See help(inputList) for details.")
 
   subunitsWithoutValues <- setdiff(subunits$subunit, values$subunit)
   if (length(subunitsWithoutValues) > 0 ) {
-    cat("Found no values for subunit(s)", subunitsWithoutValues,
+    message("Found no values for subunit(s)", subunitsWithoutValues,
         "\nThis/these subunit(s) will be removed from input.\n")
     subunits <- subunits[ - which(subunits$subunit %in% subunitsWithoutValues) , ]
   }
 
   valuesWithoutSubunits <- setdiff(values$subunit, subunits$subunit)
   if (length(valuesWithoutSubunits) > 0 ) {
-    cat("Found only values for subunit(s)", valuesWithoutSubunits,  ".",
+    message("Found only values for subunit(s)", valuesWithoutSubunits,  ".",
         "\nThis/these subunits(s) will be appended to subunits sheet.\n")
     missingSubunits <- data.frame(unit = valuesWithoutSubunits, subunit = valuesWithoutSubunits,
                                     subunitRecoded = paste(valuesWithoutSubunits, "R", sep = ""),
@@ -52,8 +54,9 @@ checkValuesSubunits <- function(values, subunits) {
 
 checkSubunitsUnits <- function(subunits, units) {
 
-  if (class(subunits) != "data.frame") stop("Argument subunits is not a data frame.")
-  if (class(units) != "data.frame") stop("Argument units is not a data frame.")
+  if (class(subunits) != "data.frame") stop("subunits must be a data frame.")
+  if (any( ! c("unit", "subunit") %in% colnames(subunits))) stop("subunits needs to respect naming conventions. See help(inputList) for details.")
+  if (class(units) != "data.frame") stop("units must be a data frame.")
 
 
     # check consistency of unit names in units & subunits
@@ -63,14 +66,14 @@ checkSubunitsUnits <- function(subunits, units) {
     unitsWithoutSubunits <- setdiff(unitsWithoutSubunits, idName)
   }
   if (length(unitsWithoutSubunits) > 0 ) {
-    cat("Found no subunits for unit(s)", unitsWithoutSubunits,
+    message("Found no subunits for unit(s)", unitsWithoutSubunits,
            "\nThis/these unit(s) will be removed from input.\n")
     units <- units[ - which(units$unit %in% unitsWithoutSubunits) , ]
   }
 
   SubunitsWithoutUnits <- setdiff(subunits$unit, units$unit)
   if (length(SubunitsWithoutUnits) > 0 ) {
-    cat(paste("Found only subunits for unit(s)", paste(SubunitsWithoutUnits, collapse = ", "), ".",
+    message(paste("Found only subunits for unit(s)", paste(SubunitsWithoutUnits, collapse = ", "), ".",
            "\nThis/these unit(s) will be appended to units sheet.\n"))
     missingunits <- data.frame ( unit = SubunitsWithoutUnits, unitLabel = SubunitsWithoutUnits, stringsAsFactors = F)
     units <- dplyr::add_row(units, missingunits)

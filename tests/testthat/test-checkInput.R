@@ -19,8 +19,3 @@ test_that("subunits only found in subunits sheet will be appended to unit sheet"
   subs <- dplyr::add_row(inputList$subunits, data.frame(unit = "I30", subunit = "I30", subunitRecoded = "I30R"))
   expect_true("I30" %in% checkSubunitsUnits(subunits = subs, units = inputList$units)$units$unit)
 })
-
-
-
-
-
