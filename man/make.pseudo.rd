@@ -54,5 +54,5 @@ twoRaters<- make.pseudo (datLong=rater, idCol="id", varCol="variable", codCol="r
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }
+%\keyword{ ~kwd1 }
+%\keyword{ ~kwd2 }

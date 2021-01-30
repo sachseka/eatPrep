@@ -43,7 +43,7 @@ makeInputRecodeData <- function (values, subunits) {
   checkedInput  <- checkValuesSubunits(values, subunits)
   recodeinfoValues <- mapply(.makeRecodeinfoValues, checkedInput$subunits$subunit,
                              MoreArgs = list(checkedInput$values), SIMPLIFY=FALSE)
-  recodeinfoList   <- mapply(list, label = checkedInput$subunits$subunitLabelRecoded,
+  recodeinfoList   <- mapply(list,# label = checkedInput$subunits$subunitLabelRecoded,
                              newID = checkedInput$subunits$subunitRecoded,
                              values = recodeinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)
   names(recodeinfoList) <- checkedInput$subunits$subunit

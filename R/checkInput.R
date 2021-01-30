@@ -12,11 +12,19 @@
 #'
 
 checkValuesSubunits <- function(values, subunits) {
-
   if (class(values) != "data.frame")  stop("values must be a data frame.")
-  if (any( ! c("subunit", "value") %in% colnames(values))) stop("values needs to respect naming conventions. See help(inputList) for details.")
   if (class(subunits) != "data.frame") stop("subunits must be a data frame.")
-  if (any( ! c("unit", "subunit") %in% colnames(subunits))) stop("subunits needs to respect naming conventions. See help(inputList) for details.")
+
+  # make unitrecodings and units adhere to naming conventions
+  nSubunits <- length(grep("subunit", colnames(subunits)))
+  if (nSubunits == 0 ) {
+    subunits <- subunits [ subunits$unit %in% values$unit , ]
+    subunits <- data.frame ( subunit = subunits$unit, subunitRecoded = subunits$unit, stringsAsFactors = FALSE)
+    colnames(values) [ which (colnames(values) == "unit") ] <- "subunit"
+  }
+
+  if (any( ! c("value", "valueRecode") %in% colnames(values))) stop("values needs to respect naming conventions. See help(inputList) for details.")
+  if (! "subunit" %in% colnames(subunits)) stop("subunits needs to respect naming conventions. See help(inputList) for details.")
 
   subunitsWithoutValues <- setdiff(subunits$subunit, values$subunit)
   if (length(subunitsWithoutValues) > 0 ) {
