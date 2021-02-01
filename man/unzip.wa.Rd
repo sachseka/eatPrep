@@ -36,5 +36,5 @@ unzip.wa(zipfile = "q:/BT2016/BT/05_Anschreiben/03_Anschreiben_IQB_an_Eltern_Leh
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+%\keyword{ ~kwd1 }
+%\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
