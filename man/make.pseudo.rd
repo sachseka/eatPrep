@@ -6,7 +6,8 @@
 multiple raters. This function reduces the number of raters by the use
 of ``pseudo raters''.}
 \usage{
-make.pseudo (datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE)
+make.pseudo (datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE,
+             verbose = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -37,6 +38,10 @@ How many pseudo rater should be used? (value must be lower than the number of re
   \item{randomize.order}{
 %%     ~~Describe \code{file} here~~
 Logical: if TRUE, the selection of raters to pseudo raters is random.
+}
+  \item{verbose}{
+%%     ~~Describe \code{file} here~~
+Logical: give information about number of persons, variables, raters?
 }
 }
 \value{
