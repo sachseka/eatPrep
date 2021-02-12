@@ -38,29 +38,17 @@ makeInputCheckData <- function (values, subunits, units) {
 
 #-----------------------------------------------------------------------------------------
 ## fuer recodeData benoetigte Inputs erstellen
-### ACHTUNG: HOTFIX!!!
 
 makeInputRecodeData <- function (values, subunits) {
+  checkedInput  <- checkValuesSubunits(values, subunits)
+  recodeinfoValues <- mapply(.makeRecodeinfoValues, checkedInput$subunits$subunit,
+                             MoreArgs = list(checkedInput$values), SIMPLIFY=FALSE)
+  recodeinfoList   <- mapply(list,# label = checkedInput$subunits$subunitLabelRecoded,
+                             newID = checkedInput$subunits$subunitRecoded,
+                             values = recodeinfoValues, SIMPLIFY=FALSE, USE.NAMES = FALSE)
+  names(recodeinfoList) <- checkedInput$subunits$subunit
 
- nSubunits <- length(grep("subunit", colnames(subunits)))
-
- if (nSubunits == 0 ) {
-
-   subunits <- subunits [ subunits$unit %in% values$unit , ]
-   subunits <- data.frame ( subunit = subunits$unit, subunitLabel = subunits$unitLabel,
-        subunitDescription = subunits$unitDescription, subunitType = subunits$unitType,
-        subunitRecoded = subunits$unit, subunitLabelRecoded = subunits$unitLabel,
-        stringsAsFactors = FALSE)
-
-   colnames(values) [ which (colnames(values) == "unit") ] <- "subunit"
-
- }
-
-  checkedInput  <- checkInput(values = values, subunits = subunits, checkUnits = FALSE)
-  # make lists
-  recodeinfo        <- .makeRecodeinfo(checkedInput$values, checkedInput$subunits)
-
-  return (recodeinfo)
+  return(recodeinfoList)
 }
 
 #-----------------------------------------------------------------------------------------

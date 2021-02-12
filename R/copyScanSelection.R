@@ -13,7 +13,7 @@ copyScanSelection <- function ( vars, dat, id, sourceDir, targetDir, codebook, s
                 id <- dat[which(dat[,va] == co),allN[["ID"]] ]                  ### alle IDs raussuchen, die diesen code haben
                 rw <- grep(va, codebook[,varColumn])                            ### in welchen testheften (Zeilen) kommt die variable "va" vor?
                 if(length(rw) == 0) {stop(paste0("Cannot find variable '",va,"' in the codebook.\n"))}
-                if ( length(setdiff(unique(codebook[rw,"Variable"]), "")) > 1) { 
+                if ( length(setdiff(unique(codebook[rw,"Variable"]), "")) > 1) {
                    cat(paste0("Item '",va,"' seems to be aggregated from '",paste(setdiff(unique(codebook[rw,"Variable"]), ""), collapse= "', '"),"'. \nScan selection is skipped as aggregated scores do not match variable raw scores.\n"))
                    return(NULL)}
                 th <- codebook[rw[1], grep(paste0("^", bookletColumnPrefix), colnames(codebook), value=TRUE)]
@@ -33,7 +33,7 @@ copyScanSelection <- function ( vars, dat, id, sourceDir, targetDir, codebook, s
     scan2<- halveString(string = scans, pattern="/", first=FALSE)
     if (length(intersect(liste[,"scans"], scan2[,2])) == 0) {warning("keine Scans im Verzeichnis gefunden.\n")}
     weg  <- setdiff(liste[,"scans"], scan2[,2])
-    if ( length(weg)>0) { liste <- liste[-whereAre(weg, liste[,"scans"], quiet = TRUE),]}
+    if ( length(weg)>0) { liste <- liste[-whereAre(weg, liste[,"scans"]),]}
     b    <- match(liste[,"scans"],scan2[,2])
     liste[,"quelle"] <- file.path(sourceDir, scans[b])
     if ( dir.exists(targetDir) == FALSE ) {dir.create(targetDir)}
