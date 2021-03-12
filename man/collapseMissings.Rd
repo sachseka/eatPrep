@@ -3,11 +3,11 @@
 \title{Recode Character Missings of Different Types to 0 or \code{NA}
 }
 \description{
-This function is used to recode character missings in datasets that were prepared 
+This function is used to recode character missings in datasets that were prepared
 using the \code{eatPrep} package to 0 or \code{NA}. Additionally, all variables are converted to \code{numeric}. It should be called to recode the missing values prior to passing datasets on to \code{eatModel}.
 }
 \usage{
-collapseMissings(dat, missing.rule = NULL, items)
+collapseMissings(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA,                                                      mbd = NA, mir = 0, mbi = 0), items = NULL)
 }
 
 \arguments{
@@ -15,16 +15,16 @@ collapseMissings(dat, missing.rule = NULL, items)
 A data frame containing character missings (e.g., \code{mbd} - missing by design). See \sQuote{Details} for supported character missing values.
 }
   \item{missing.rule}{
-A named list with definitions how to recode the different types of missings in the dataset. The names correspond to the character missings and the list elements correspond to their recode values. If \code{NULL}, the default is used (\code{list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0)}). Please note that only the recode value 0 and \code{NA} are currently supported.
+A named list with definitions how to recode the different types of missings in the dataset. The names correspond to the character missings and the list elements correspond to their recode values.
 }
   \item{items}{
 A character vector containing the column names of the data frame for the which character missings should be recoded.
 }
 }
 \details{
-One main idea of the \code{eatPrep} package is that different types of 
-missing values should remain distinguishable during data preparation, thus allowing the user to flexibly recode them to different values during the IRT scaling process. \code{collapseMissings} facilitates recoding of the different 
-types of character missings before IRT analysis or when exporting the data to other software packages (e.g., SPSS). 
+One main idea of the \code{eatPrep} package is that different types of
+missing values should remain distinguishable during data preparation, thus allowing the user to flexibly recode them to different values during the IRT scaling process. \code{collapseMissings} facilitates recoding of the different
+types of character missings before IRT analysis or when exporting the data to other software packages (e.g., SPSS).
 
 The \code{eatPrep} package currently supports six different types of missings, namely
 
@@ -40,7 +40,7 @@ The \code{eatPrep} package currently supports six different types of missings, n
 
 \code{mbi} (missing by intention): used whenever a person was expected to answer an item but did not provide a response.
 
-The default recode values for these missing types are: 
+The default recode values for these missing types are:
 text volume insufficient = 0, missing not reached = 0, missing coding impossible = \code{NA}, missing by design = \code{NA}, missing invalid response = 0, missing by intention = 0
 
 }
@@ -59,7 +59,7 @@ Karoline Sachse, Martin Hecht
 \examples{
 data(inputDat)
 dat1 <- inputDat[[1]]  # get first dataset from inputDat
-datColMis <- collapseMissings(dat = dat1, 
-    missing.rule = list(mvi = 0, mnr = 0, mci = 0, mbd = NA, mir = 0, mbi = 0), 
+datColMis <- collapseMissings(dat = dat1,
+    missing.rule = list(mvi = 0, mnr = 0, mci = 0, mbd = NA, mir = 0, mbi = 0),
     items = colnames(dat1)[ -c(1:2) ])
 }

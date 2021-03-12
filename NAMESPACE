@@ -1,4 +1,3 @@
-importFrom(car, recode)
 # importFrom(readxl, read.xlsx, read.xlsx2, write.xlsx)
 importFrom("irr", agree, kappa2)
 importFrom(readxl, read_excel)
@@ -25,7 +24,6 @@ export(mnrCoding)
 export(scoreData)
 export(writeSpss)
 # removed from eatTools to eatPrep
-export(aggregateDataOld)
 export(copyScanSelection)
 export(make.pseudo)
 export(meanAgree)
