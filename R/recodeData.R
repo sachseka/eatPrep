@@ -2,7 +2,8 @@ recodeData <- function (dat, values, subunits, verbose = FALSE) {
 
   if (class(dat) != "data.frame") stop ("'dat' must be a data.frame.\n")
 
-  recodeinfo <- makeInputRecodeData (values = values, subunits = subunits)
+#  recodeinfo <- makeInputRecodeData (values = values, subunits = subunits)
+  recodeinfo <- dplyr::full_join(subunits, values, by = "subunit")
 
   # make recoded data.frame
   datR <- data.frame(mapply(.recodeData.recode, dat,
@@ -23,24 +24,23 @@ recodeData <- function (dat, values, subunits, verbose = FALSE) {
     variable <- as.character(variable)
   }
 
-  if (is.null(recodeinfo[[variableName]]$values)) {
+  recinfoVar <- recodeinfo[which(recodeinfo$subunit == variableName), ]
+
+  if (nrow(recinfoVar) == 0) {
     variableRecoded <- variable
     message(paste("Found no recode information for variable ", variableName, ". This variable will not be recoded.\n", sep =""))
   } else {
     dontcheck <- c("mbd")
     variable.unique <- na.omit(unique(variable[which(!variable %in% dontcheck)]))
-    recodeinfoCheck <- (variable.unique %in% names(unlist(recodeinfo[[variableName]]$values)))
+    recodeinfoCheck <- (variable.unique %in% recinfoVar$value)
     if (!all(recodeinfoCheck == TRUE)) {
       warning(paste("Incomplete recode information for variable ",
       variableName, ". Value(s) ",
       paste(sort(variable.unique[!recodeinfoCheck]), collapse = ", "), " will not be recoded.\n", sep = ""))
     }
 
-    recodeString <- paste(paste("'", names(unlist(recodeinfo[[variableName]]$values)),
-    "'", "=", "'", unlist(recodeinfo[[variableName]]$values), "'",
-    sep = ""), collapse = "; ")
-    variableRecoded <- car::recode(variable, recodeString, as.factor = FALSE,
-    as.numeric = FALSE)
+    lookupVar <- recinfoVar[ , c("value", "valueRecode") ]
+    variableRecoded <- eatTools::recodeLookup(variable, lookupVar)
 	if (verbose) message(paste(variableName, " has been recoded.\n", sep =""))
   }
   return(variableRecoded)
