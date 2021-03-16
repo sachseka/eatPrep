@@ -1,13 +1,18 @@
-recodeData <- function (dat, values, subunits, verbose = FALSE) {
+recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
 
   if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
+  if(!is.null(subunits)) {
+    inp <- checkValuesSubunits(values, subunits)
+    recodeinfo <- dplyr::inner_join(inp$subunits, inp$values, by = "subunit")
+  } else {
+    recodeinfo <- values
+  }
 
-  recodeinfo <- dplyr::inner_join(subunits, values, by = "subunit")
-
-  # make recoded data.frame
-  datR <- data.frame(mapply(.recodeData.recode, dat,
+    datR <- data.frame(mapply(.recodeData.recode, dat,
   colnames(dat), MoreArgs = list(recodeinfo = recodeinfo, verbose = verbose), USE.NAMES = TRUE),
   stringsAsFactors = FALSE)
+  if(!is.null(subunits))
+    colnames(datR) <- eatTools::recodeLookup(colnames(datR), subunits[ , c("subunit", "subunitRecoded")])
 
   return(datR)
 }
