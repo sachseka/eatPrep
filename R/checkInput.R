@@ -28,15 +28,15 @@ checkValuesSubunits <- function(values, subunits) {
 
   subunitsWithoutValues <- setdiff(subunits$subunit, values$subunit)
   if (length(subunitsWithoutValues) > 0 ) {
-    message("Found no values for subunit(s)", subunitsWithoutValues,
+    message("Found no values for subunit(s) ", paste(subunitsWithoutValues, collapse = ", "),  ".",
         "\nThis/these subunit(s) will be removed from input.\n")
     subunits <- subunits[ - which(subunits$subunit %in% subunitsWithoutValues) , ]
   }
 
   valuesWithoutSubunits <- setdiff(values$subunit, subunits$subunit)
   if (length(valuesWithoutSubunits) > 0 ) {
-    message("Found only values for subunit(s)", valuesWithoutSubunits,  ".",
-        "\nThis/these subunits(s) will be appended to subunits sheet.\n")
+    message("Found only values for subunit(s) ", paste(valuesWithoutSubunits, collapse = ", "),  ".",
+        "\nThis/these subunit(s) will be appended to subunits sheet.\n")
     missingSubunits <- data.frame(unit = valuesWithoutSubunits, subunit = valuesWithoutSubunits,
                                     subunitRecoded = paste(valuesWithoutSubunits, "R", sep = ""),
                                     stringsAsFactors = FALSE)
@@ -74,15 +74,15 @@ checkSubunitsUnits <- function(subunits, units) {
     unitsWithoutSubunits <- setdiff(unitsWithoutSubunits, idName)
   }
   if (length(unitsWithoutSubunits) > 0 ) {
-    message("Found no subunits for unit(s)", unitsWithoutSubunits,
+    message("Found no subunits for unit(s) ", paste(unitsWithoutSubunits, collapse = ", "), ".",
            "\nThis/these unit(s) will be removed from input.\n")
     units <- units[ - which(units$unit %in% unitsWithoutSubunits) , ]
   }
 
   SubunitsWithoutUnits <- setdiff(subunits$unit, units$unit)
   if (length(SubunitsWithoutUnits) > 0 ) {
-    message(paste("Found only subunits for unit(s)", paste(SubunitsWithoutUnits, collapse = ", "), ".",
-           "\nThis/these unit(s) will be appended to units sheet.\n"))
+    message("Found only subunits for unit(s) ", paste(SubunitsWithoutUnits, collapse = ", "), ".",
+           "\nThis/these unit(s) will be appended to units sheet.\n")
     missingunits <- data.frame ( unit = SubunitsWithoutUnits, unitLabel = SubunitsWithoutUnits, stringsAsFactors = F)
     units <- dplyr::add_row(units, missingunits)
   }

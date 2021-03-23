@@ -7,7 +7,8 @@ This function is used to recode character missings in datasets that were prepare
 using the \code{eatPrep} package to 0 or \code{NA}. Additionally, all variables are converted to \code{numeric}. It should be called to recode the missing values prior to passing datasets on to \code{eatModel}.
 }
 \usage{
-collapseMissings(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA,                                                      mbd = NA, mir = 0, mbi = 0), items = NULL)
+collapseMissings(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA,
+mbd = NA, mir = 0, mbi = 0), items = NULL)
 }
 
 \arguments{
@@ -26,7 +27,7 @@ One main idea of the \code{eatPrep} package is that different types of
 missing values should remain distinguishable during data preparation, thus allowing the user to flexibly recode them to different values during the IRT scaling process. \code{collapseMissings} facilitates recoding of the different
 types of character missings before IRT analysis or when exporting the data to other software packages (e.g., SPSS).
 
-The \code{eatPrep} package currently supports six different types of missings, namely
+The \code{eatPrep} package currently suggests six different types of missings, namely
 
 \code{mvi} (text volume insufficient): used in writing tasks if a person wrote to little to evaluate whether they met a specific criterion.
 
@@ -53,13 +54,15 @@ OECD (2005). \emph{PISA 2003 Technical Report}. OECD Publishing.
 }
 
 \author{
-Karoline Sachse, Martin Hecht
+Nicole Mahler, Karoline Sachse, Martin Hecht
 }
 
 \examples{
 data(inputDat)
+data(inputList)
+
 dat1 <- inputDat[[1]]  # get first dataset from inputDat
-datColMis <- collapseMissings(dat = dat1,
-    missing.rule = list(mvi = 0, mnr = 0, mci = 0, mbd = NA, mir = 0, mbi = 0),
-    items = colnames(dat1)[ -c(1:2) ])
-}
+datRec <- recodeData(dat1, inputList$values, inputList$subunits, verbose = TRUE)
+str(datRec)
+datColMis <- collapseMissings(datRec)
+str(datColMis)}

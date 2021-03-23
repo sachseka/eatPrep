@@ -6,20 +6,23 @@ collapseMissings <- function(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA
   if(!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
 
   if(! all(unlist(missing.rule) %in% c(0, NA))){
-    warning("Recoding missings to values other than 0 and NA is not recommended. Please check if this is intended.")
+    unexp_rec <- which( ! unlist(missing.rule) %in% c(0, NA))
+    warning(paste0("Found unexpected recode value(s): ",
+                  paste(names(missing.rule)[unexp_rec], missing.rule[unexp_rec], collapse = ", "),
+                  ". Recoding missings to values other than 0 and NA is not recommended. Please check if this is intended."))
   }
   missruleCheck1 <- (names(missing.rule) %in% c("mbd", "mbi", "mci", "mir", "mnr", "mvi"))
   if (!all(missruleCheck1 == TRUE)) {
     warning(paste("Found unexpected missing type(s) ",
                   paste(sort(names(missing.rule)[!missruleCheck1]), collapse = ", "),
-                  ". Please check if this is intended.\n", sep =""))
+                  " in missing.rule. Please check if this is intended.\n", sep =""))
   }
 
     missruleCheck2 <- (c("mbd", "mbi", "mci", "mir", "mnr", "mvi") %in% names(missing.rule))
   if (!all(missruleCheck2 == TRUE)) {
     warning(paste("Found no recode information for missing type(s) ",
-                  paste(sort(names(missing.rule)[!missruleCheck2]), collapse = ", "),
-                  ". Please check if this is intended.\n", sep =""))
+                  paste(c("mbd", "mbi", "mci", "mir", "mnr", "mvi")[!missruleCheck2], collapse = ", "),
+                  " in missing.rule. Please check if this is intended.\n", sep =""))
   }
 
 	if (is.null(items)) {items <- colnames(dat)}
