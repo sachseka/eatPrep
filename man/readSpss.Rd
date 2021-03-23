@@ -18,7 +18,6 @@ addLeadingZeros = FALSE, truncateSpaceChar = TRUE)
   \item{file}{
  Name of the SPSS data file to be read in
  }
- }
   \item{oldID}{
   Optional: A character string containing the ID name in the original SPSS dataset.
 }
@@ -30,6 +29,7 @@ addLeadingZeros = FALSE, truncateSpaceChar = TRUE)
 }
   \item{truncateSpaceChar}{
   Logical: whether leading and trailing spaces should be removed from character variables.
+}
 }
 \details{
 If \code{addLeadingZeros=TRUE}, the values in each column are transformed to have uniform width by adding leading zeros. The width of a column is determined by the longest value in this column, e.g., if a column contains the values \code{1, 10, 100} the transformed column will be \code{001, 010, 100}. This can be useful if the  values had leading zeros which were removed by reading in the SPSS file.

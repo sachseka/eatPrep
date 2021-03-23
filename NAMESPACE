@@ -1,11 +1,11 @@
-# importFrom(readxl, read.xlsx, read.xlsx2, write.xlsx)
+importFrom(haven, read_sav)
 importFrom("irr", agree, kappa2)
 importFrom(readxl, read_excel)
 importFrom(foreign, write.foreign, read.spss)
 importFrom(reshape2, dcast, melt)
 importFrom(eatTools, asNumericIfPossible, crop, set.col.type, multiseq,
            insert.col, existsBackgroundVariables, whereAre, halveString,
-           recodeLookup)
+           recodeLookup, addLeadingZerosToCharInt)
 importFrom("stats", "aggregate", "cor", "lag", "na.omit", "runif",
                "weighted.mean")
 importFrom("utils", "flush.console", "write.csv2", "write.table")
