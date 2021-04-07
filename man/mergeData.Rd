@@ -1,10 +1,10 @@
 \name{mergeData}
 \alias{mergeData}
-\title{Merge Data Frames, Check For Inconsistencies, and Replace NA Values}
-\description{This function merges a list of data frames, checks whether cases with the same value on the identifier variable have different values in different datasets. Additionally, \code{NA} resulting from the merge (e.g., in repeated block designs) can be replaced with a customed character missing to facilitate future data preparation of the merged dataset. See \code{\link{collapseMissings}} for details on supported character missings for other functions in the \code{eatPrep} package. 
+\title{Merge Many Data Frames, Check For Inconsistencies, and Replace NA Values}
+\description{This function merges a list of data frames. Further, it provides detailed diagnostics about value mismatches. If two identically named columns in two datasets do not have identical values, NAs are replaced by valid codes stemming from the other dataset(s) and if two different valid values are found, the first value will be kept and the other dropped, and the user will be informed about the mismatch. Additionally, \code{NA} resulting from the merge (e.g., in repeated block designs) can be replaced with a customed character missing to facilitate future data preparation of the merged dataset. See \code{\link{collapseMissings}} for details on supported character missings for other functions in the \code{eatPrep} package.
 }
 \usage{
-mergeData(newID = "ID", datList, oldIDs=NULL, addMbd = FALSE, verbose=FALSE)
+mergeData(newID = "ID", datList, oldIDs=NULL, addMbd = FALSE, verbose = TRUE)
 }
 
 \arguments{
