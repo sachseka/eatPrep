@@ -1,6 +1,6 @@
 importFrom(car, recode)
 # importFrom(readxl, read.xlsx, read.xlsx2, write.xlsx)
-importFrom("irr", agree, kappa2)
+importFrom(irr, agree, kappa2)
 importFrom(readxl, read_excel)
 importFrom(foreign, write.foreign, read.spss)
 importFrom(reshape2, dcast, melt)
