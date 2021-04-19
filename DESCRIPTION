@@ -4,7 +4,7 @@ Title: Prepare Data for IRT Analyses
 Version: 0.3.1
 Depends: R (>= 3.5.0), readxl, haven
 Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10)
-Date: 2021-04-07
+Date: 2021-04-19
 Author: Nicole Mahler, Karoline Sachse, Martin Hecht, Sebastian Weirich
 Maintainer: Karoline Sachse <karoline.sachse@iqb.hu-berlin.de>
 Description: Prepare test item data for IRT analyses, e.g. recode, aggregate
