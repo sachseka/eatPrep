@@ -5,9 +5,9 @@ scoreData <- function (dat, unitrecodings, units, verbose = FALSE) {
   dontcheck <- c("mbd","mvi", "mnr", "mci", "mbd", "mir", "mbi")
 
   if(length(setdiff(colnames(dat), names(scoreinfo))) > 0) {
-	message(paste("Found no scoring information for variable(s) ",
+	message(paste("Found no recode information for variable(s) ",
 		paste(setdiff(colnames(dat), names(scoreinfo)), collapse = ", "),
-			". \nThis/These variable(s) will not be scored.\n", sep =""))
+			". \nThis/These variable(s) will not be recoded.\n", sep =""))
   }
 
   # make scored data.frame

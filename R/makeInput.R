@@ -50,19 +50,6 @@ makeInputRecodeData <- function (values, subunits) {
 
   return(recodeinfoList)
 }
-
-#-----------------------------------------------------------------------------------------
-## fuer aggregateData benoetigte Inputs erstellen
-
-makeInputAggregateData <- function (subunits, units, recodedData = TRUE) {
-  checkedInput  <- checkInput(subunits = subunits, units = units, checkValues = FALSE)
-
-  # make lists
-  aggregateinfo     <- .makeAggregateinfo(checkedInput$subunits, checkedInput$units, recodedData = recodedData)
-
-  return (aggregateinfo)
-}
-
 #-----------------------------------------------------------------------------------------
 checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits = TRUE ) {
 
@@ -316,24 +303,3 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 
   return(recodeinfoList)
 }
-
-#-----------------------------------------------------------------------------------------
-.makeAggregateinfo <- function (subunits, units, recodedData = TRUE) {
-
-  # welche units bestehen aus mehr als einem Subunit?
-  aggregateunits <- unique ( names(table(subunits$unit))[ table(subunits$unit) > 1] )
-  if (recodedData == TRUE){
-    aggregateSubunits <- lapply( aggregateunits, function(ll) { subunits$subunitRecoded [subunits$unit == ll ] } )
-  } else {
-    aggregateSubunits <- lapply( aggregateunits, function(ll) { subunits$subunit [subunits$unit == ll ] } )
-  }
-  arule <- units$unitAggregateRule [ match(aggregateunits, units$unit) ]
-#  srule <- units$unitScoreRule [ match(aggregateunits, units$unit) ]
-
-  # aggregateinfo erstellen
-  aggregateinfo <- mapply(list, arule = arule, #srule = srule,
-			subunits=aggregateSubunits, SIMPLIFY=FALSE, USE.NAMES=FALSE)
-  names(aggregateinfo) <- aggregateunits
-  return(aggregateinfo)
-}
-
