@@ -16,4 +16,92 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(eatPrep)
+library(knitr)
 ```
+
+```{r tempsetup}
+inputMinimal <- list(#units = inputList$units[ -nrow(inputList$units), c("unit")],
+                     subunits = inputList$subunits[, c("unit", "subunit","subunitRecoded")],
+                     values = inputList$values[ , c("subunit", "value", "valueRecode")],
+                     unitRecodings = inputList$unitRecodings[ , c("unit", "value", "valueRecode")],
+                     blocks = inputList$blocks,
+                     booklets = inputList$booklets,
+                     rotation = inputList$rotation)
+```
+
+## Introduction
+
+prepare item response test data
+additional functions to check design, recode missing values (mnrCoding, collapseMissings) and work with rater data
+
+prototypical scenario: we are constructing a test, e.g., for educational purposes. for our pilot study we construct several overlapping booklets and a number of items with different item formats (constructed response, multiple choice). we want to prepare data for scaling and preserve missing values. moreover we want to know whether the booklets are speeded (number of mnr). for the actual scaling, we want to be able to use different missing treatments, therefore we preserve missing values during data preparation. Before we move on to scaling the data, we recode the missing values. 
+
+
+eatPrep can help us to do that.
+
+we have several layers:
+
+booklets, containing blocks
+blocks, containing units (= items)
+units, containing subunits/subitems
+subunits, having values with recode values
+
+
+we also want to include additional information about the items (merkmalstabelle) --> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR!
+
+
+## Input
+
+Information/meta data about items. is stored in many different ways, e.g., databases, excel sheets, sometimes even in item names. eatPrep requires this metadata to have a specific form, namely a series of relational tables. For eatPrep it is most convenient to store these tables in a list.
+
+sheets have specific names, also the columns in those sheets have specific names
+
+Example: inputList, inputMinimal
+
+inputMinimal contains the bare minimum for all functions in eatPrep to work, inputList contains additional metadata about the items (such as information about the task's content)
+
+### Input tables
+let's look at the tables from bottom to top, starting with items and their values. in the values sheet, we define values and recode values for each subitem.
+
+
+here we see 3 items (called units) from inputList bzw. inputMinimal
+one mc (item 1), one short response (item 2), one item with 3 subitems short response (item 12)
+
+```{r inputList}
+items <- c("I01", "I05", "I12")
+subitems <- c("I01", "I05", "I12a", "I12b", "I12c")
+
+#kable(inputMinimal$units[which(inputMinimal$units$unit %in% items), ])
+kable(inputMinimal$subunits[which(inputMinimal$subunits$subunit %in% subitems), ])
+kable(inputMinimal$values[which(inputMinimal$values$subunit %in% subitems), ])
+kable(inputMinimal$unitRecodings)
+
+```
+
+values sheet contains all possible values for each subitem and scoring information for each value (e.g., whether it is true, false, or missing). there are several types of missing values.
+
+--> talk more about values in the data for different item types (mc, cr) and about missing values in the data. missing values do not need to be the same for each variable in the data.
+
+
+subunits sheet contains information about the relationship between subitems and items. this information is used to aggregate subitems to items. if recoded subitems should be named differently than the unrecoded variables in the original data, this can be specified via subunitRecoded. The only type of aggregation currently supported by eatPrep is to count the number of correct subitems per item.
+
+unitrecodings contains the same information as the values sheet, but for aggregated items. here, the value on an item is the aggregated number of correct subitems and the recode value gives a threshold of how many subitems need to be solved to obtain a credit for the item. in the example, I12 has 3 subitems, and one receives a credit if all subitems are solved correctly.
+
+the minimal use case is that each subitem corresponds to an item. in this case, the value sheet contains all information needed for recoding the items (apart from possibly renaming the recoded items).
+
+## input data
+
+we have several overlapping booklets with several blocks in each booklet. moreover, there is a unique identifier for each person and some additonal information about each student such as their gender or their socioeconomic status. there is one data set per booklet. in order to prepare the data, we need to construct one large dataset.
+
+```{r inputDat}
+str(inputDat)
+```
+
+
+## Recode
+
+## Aggregate
+
+## Score
+
+## Collapse
