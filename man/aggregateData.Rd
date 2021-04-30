@@ -53,8 +53,11 @@ dat1 <- inputDat[[1]]  # get first dataset from inputDat
 # recode data
 datRec <- recodeData(dat1, inputList$values, inputList$subunits)
 
-# define matrix for missing aggregation: combination of valid code and missing by intention produces missing by intention
-# --> if any subunit is missing by intention, the aggregated unit is coded missing by intention
+# define matrix for missing aggregation:
+# combination of valid code and missing by intention produces missing by intention
+# --> if any subunit is missing by intention,
+# the aggregated unit is coded missing by intention
+
 am <- matrix(c(
   "vc" , "mvi", "vc" , "mci", "err", "vc" , "mbi", "err",
   "mvi", "mvi", "err", "mci", "err", "err", "err", "err",
