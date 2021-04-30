@@ -8,7 +8,8 @@ Calculate Item Discrimination for Each Category of Categorical Variables
 }
 
 \usage{
-catPbc(datRaw, datRec, idRaw, idRec, context.vars = NULL, values, subunits, file.name = NULL, verbose = F)
+catPbc(datRaw, datRec, idRaw, idRec, context.vars = NULL,
+values, subunits, file.name = NULL, verbose = F)
 }
 
 \arguments{
@@ -16,7 +17,7 @@ catPbc(datRaw, datRec, idRaw, idRec, context.vars = NULL, values, subunits, file
 		A merged unrecoded dataset
 	}
 	\item{datRec}{
-		The same dataset as in \code{datRaw}, in recoded form 
+		The same dataset as in \code{datRaw}, in recoded form
 	}
 	\item{idRaw}{
 		Name or column number of the identifier (ID) variable in unrecoded dataset
@@ -41,7 +42,7 @@ catPbc(datRaw, datRec, idRaw, idRec, context.vars = NULL, values, subunits, file
 	}
 }
 \details{
-The column names of \code{datRaw} and \code{datRec} must be consistent with the names provided by the columns \code{subunit} and \code{subunitRecoded} in data.frame \code{subunits}. Otherwise, \code{catPbc} will fail. 
+The column names of \code{datRaw} and \code{datRec} must be consistent with the names provided by the columns \code{subunit} and \code{subunitRecoded} in data.frame \code{subunits}. Otherwise, \code{catPbc} will fail.
 }
 \value{
 A data frame with the discrimination values for each category of categorical variables. The data frame contains the following columns:
@@ -62,9 +63,9 @@ data(inputDat)
 data(inputList)
 
 datRaw <- mergeData(newID = "ID", datList = inputDat, addMbd = TRUE)
-datRec <- recodeData(datRaw, values = inputList$values, 
+datRec <- recodeData(datRaw, values = inputList$values,
     subunits=inputList$subunits)
-pbcs   <- catPbc(datRaw, datRec, idRaw = "ID", idRec = "ID", 
-    context.vars = "hisei", values = inputList$values, 
+pbcs   <- catPbc(datRaw, datRec, idRaw = "ID", idRec = "ID",
+    context.vars = "hisei", values = inputList$values,
     subunits = inputList$subunits)
 }

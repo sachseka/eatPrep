@@ -38,7 +38,3 @@ v01 <- subset(rater, variable == "V01")
 dat <- reshape2::dcast( v01, id~rater, value.var = "value")
 agr <- meanAgree(dat[,-1])
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }

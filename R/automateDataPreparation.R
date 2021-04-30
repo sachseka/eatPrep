@@ -14,8 +14,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		###folder erstellen
 		if( is.null ( path ) ) {path <- getwd()}
 		folder.e <- path
-		folder.aDP <- file.path ( path , "_eat_writeSPSS_" )
-		if ( ! file.exists ( folder.aDP ) ) { dir.create ( folder.aDP , recursive = TRUE ) }
+#		folder.aDP <- file.path ( path , "_eat_writeSPSS_" )
+#		if ( ! file.exists ( folder.aDP ) ) { dir.create ( folder.aDP , recursive = TRUE ) }
 
 		### Begruessung
 		if(verbose) cat ( "\n" )
@@ -202,7 +202,9 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			}
 			if(inherits(try( writeSpss (dat=dat , values=inputList$values, subunits=inputList$subunits, units=inputList$units,
 					filedat = filedat, filesps = filesps, missing.rule = missing.rule,
-					path = folder.aDP, sep = "\t", dec = ",", verbose = verbose)  ),"try-error")) {
+#					path = folder.aDP,
+					path = folder.e,
+					sep = "\t", dec = ",", verbose = verbose)  ),"try-error")) {
 				if(verbose) cat ( "\n" )
 				warning ( paste ( f.n , "No SPSS-File could be written.\n" ) )
 			}
