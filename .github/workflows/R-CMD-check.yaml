@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - master
+      - overhaul
   pull_request:
     branches:
       - main
       - master
+      - overhaul
 
 name: R-CMD-check
 
