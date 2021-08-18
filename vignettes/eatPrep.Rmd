@@ -31,23 +31,24 @@ inputMinimal <- list(#units = inputList$units[ -nrow(inputList$units), c("unit")
 
 ## Introduction
 
-prepare item response test data
-additional functions to check design, recode missing values (mnrCoding, collapseMissings) and work with rater data
+The goal of `eatPrep`, short for `Educational Assesment Tools: Preparation`, is to automate the preparation of item response test data; especially but not exclusively for typical use cases at the *Institute for Educational Quality Improvement* (IQB).
+Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDeamon`.
 
-prototypical scenario: we are constructing a test, e.g., for educational purposes. for our pilot study we construct several overlapping booklets and a number of items with different item formats (constructed response, multiple choice). we want to prepare data for scaling and preserve missing values. moreover we want to know whether the booklets are speeded (number of mnr). for the actual scaling, we want to be able to use different missing treatments, therefore we preserve missing values during data preparation. Before we move on to scaling the data, we recode the missing values. 
+The main purpose of `eatPrep` is to read, score, aggregate and merge data from a regular `SPSS` (`.sav`) data file (via the function `readSpss()`) and metadata from databases (`readDaemonXlsx()`) and Excel spreadsheets (`readMerkmalXlsx()`). Additional functions include checking the design (`checkData()`, `checkDesign()`), recoding of missing values (`recodeData()`, `mnrCoding()`, `collapseMissings()`) and working with rater data (`meanAgree()`, `meanKappa()`).  
+Most of this can be done with a single function call to `automateDataPreparation()`.
 
+In a prototypical scenario, we are constructing a test at the IQB, e.g. for educational purposes. For our pilot study, we have created several overlapping booklets and a variety of items with different item formats (constructed response, multiple choice).  
+Thereby, the data consists of several layers:
 
-eatPrep can help us to do that.
+* booklets, containing blocks,
+* blocks, containing units (= items), 
+* units, containing subunits/subitems,
+* subunits, having values and
+* values, including missings and recode values
 
-we have several layers:
+Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that.
 
-booklets, containing blocks
-blocks, containing units (= items)
-units, containing subunits/subitems
-subunits, having values with recode values
-
-
-we also want to include additional information about the items (merkmalstabelle) --> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR!
+<!-- we also want to include additional information about the items (merkmalstabelle) -> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR! -->
 
 
 ## Input
