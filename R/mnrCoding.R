@@ -1,22 +1,22 @@
 mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , subunits = NULL , nMbi = 2 , mbiCode = "mbi" , mnrCode = "mnr" , invalidCodes = c ( "mbd", "mir", "mci" ) , verbose = FALSE ) {
-		
+
 		# Startzeit
 		st <- Sys.time()
-	
+
 		# Identifizieren der Items im Datensatz
 		# mit ggf. Abgleich der rekodierten Namen aus subunits
 		if ( verbose ) {
 				cat ( "\nidentifying items in data (reference is blocks$subunit)\n" )
 		}
 		# colnames
-		cn <- colnames ( dat ) 
+		cn <- colnames ( dat )
 		cn1 <- cn %in% blocks$subunit
 		check1 <- all ( cn1 )
 		if ( !check1 ) {
 				# geht natuerlich nur wenn subunits da ist
 				if ( !is.null ( subunits ) ) {
 						cn2 <- cn[! cn %in% blocks$subunits]
-						
+
 						# jetzt versuchen, herauszufinden ob das rekodierte Variablen sind
 						check2 <- any ( cn2 %in% subunits$subunitRecoded )
 						# fuer diese in blocks den Rekodierungsnamen setzen
@@ -25,7 +25,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								# Rekodierungsnamen
 								rn <- subunits$subunitRecoded[subunits$subunitRecoded %in% cn3]
 								names(rn) <- subunits$subunit[subunits$subunitRecoded %in% cn3]
-								
+
 								# check ob in blocks$subunit
 								check4 <- any ( blocks$subunit %in% names(rn) )
 								if ( check4 ) {
@@ -38,8 +38,8 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 		}
 
 		# Ausgabe, welche Variablen im Datensatz nicht gefunden wurden
-		items <- colnames(dat)[ colnames(dat) %in% blocks$subunit]		
-		not.items <- colnames(dat)[! colnames(dat) %in% blocks$subunit]		
+		items <- colnames(dat)[ colnames(dat) %in% blocks$subunit]
+		not.items <- colnames(dat)[! colnames(dat) %in% blocks$subunit]
 		if ( verbose ) {
 				check5 <- length(not.items) > 0
 				if ( check5 ) {
@@ -48,21 +48,21 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 						cat ( "     (and thus be used for mnr coding) check 'blocks', 'subunits', 'dat'.\n" )
 				}
 		}
-		
+
 		# wenn keine Items, dann auch nicht weiter machen
 		if ( identical ( items , character(0) ) ) {
 				if ( verbose ) {
 						cat ( paste ( "No items in data. nothing recoded. data is returned unchanged.\n" ) )
 				}
 		} else {
-		
+
 				# zur convenience noch Items identifizieren die gar kein mbiCode haben
 				if ( verbose ) {
 						cat ( paste ( "\nidentifying items with no mbi-codes ('" , mbiCode , "'):\n" , sep = "" ) )
 						f1 <- function ( sp , mbiCode ) {
 								if ( !any(sp %in% mbiCode ) ) TRUE else FALSE
 						}
-						nombi <- sapply ( dat[,items] , f1 , mbiCode ) 
+						nombi <- sapply ( dat[,items] , f1 , mbiCode )
 						if ( any ( nombi ) ) {
 								cat ( paste ( paste ( items[nombi] , collapse = ", " ) , "\n" , sep = "" ) )
 								cat ( "     If you expect mbi-codes on these variables check your data and option 'mbiCode'\n\n" )
@@ -70,14 +70,14 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								cat ( "none\n\n" )
 						}
 				}
-				
+
 				# Blocks
 				# blocks$subunit reduzieren auf colnames des Datensatzes
 				blocks <- blocks[ blocks$subunit %in% colnames(dat) , , drop = FALSE ]
 				blocks$subunitBlockPosition <- as.integer ( blocks$subunitBlockPosition )
 
 				# booklet long
-				bookl.long <- reshape2::melt (booklets, id.vars = "booklet", na.rm = FALSE ) 
+				bookl.long <- reshape2::melt (booklets, id.vars = "booklet", na.rm = FALSE )
 				colnames(bookl.long) <- c("booklet","block.wide.name","block")
 				bookl.long$booklet <- as.character ( bookl.long$booklet )
 				bookl.long$block.wide.name <- as.character ( bookl.long$block.wide.name )
@@ -108,28 +108,28 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 
 				# Abschnittsliste
 				abschn <- split ( bookl.long2 , bookl.long2$ba )
-				
+
 				# identifizieren der Zellen, die zu "mnr" kodiert werden sollen
 				fun <- function ( abschn , dat , rotation.id , nMbi , mbiCode , pid , verbose , invalidCodes ) {
-	
+
 						# Teildaten
 						d <- dat[ dat[,rotation.id] == unique ( abschn$booklet ) , c ( pid , abschn$subunit ) ]
-						
+
 						# Zeilenweise ueber Teildaten
 						fun2 <- function ( z , nMbi , mbiCode , invalidCodes ) {
 
 								# reversen, also alles von vorn
 								# (is leichter zu verstehen)
 								z2 <- rev ( z )
-								
+
 								# bestimmen welche Werte alles mbi
 								z2.mbi <- z2 %in% mbiCode
 								# %in% loescht die names (== nicht)
 								names(z2.mbi) <- names ( z2 )
-							
+
 								# bestimmen ob alles mbi oder invalid
 								z2.invalid <- all ( z2 %in% c ( mbiCode , invalidCodes ) )
-								
+
 								# wenn alles mbi oder alle Codes mbi+invalid, dann nix machen
 								if ( all ( z2.mbi ) | z2.invalid ) {
 										ret <- NULL
@@ -137,7 +137,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								# ansonsten mnr bestimmen
 										# erstes nicht mbi
 										notmbi <- min ( which ( !z2.mbi ) )
-										
+
 										# wenn nMbi kleiner als notmbi
 										# dann muss alles bis notmbi als mnr
 										if ( nMbi < notmbi ) {
@@ -147,10 +147,10 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 										}
 								}
 								return ( ret )
-					
+
 						}
 						x <- apply ( d , 1 , fun2 , nMbi , mbiCode , invalidCodes )
-						
+
 						if ( !is.null ( x ) ) {
 								names ( x ) <- d[,pid]
 								x <- x [ ! sapply ( x , is.null ) ]
@@ -161,7 +161,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 										# cat ( paste ( paste ( paste ( "  " , l , " items for case " , names ( l ) , sep = "" ) , collapse = "\n" ) ) , "\n" , sep = "" )
 										# flush.console()
 								# }
-								
+
 								fun3 <- function ( items , id , durchgang , pid , abschnitt.name , booklet.name ) {
 										da <- data.frame ( "item" = items , stringsAsFactors = FALSE )
 										da$pid <- id
@@ -170,7 +170,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 										da$booklet.section <- abschnitt.name
 										return ( da )
 								}
-								da <- mapply ( fun3 , x , names ( x ) , seq(along=x) , MoreArgs = list ( pid , unique ( abschn$abschnitt ) , unique ( abschn$booklet ) ) , SIMPLIFY = FALSE ) 
+								da <- mapply ( fun3 , x , names ( x ) , seq(along=x) , MoreArgs = list ( pid , unique ( abschn$abschnitt ) , unique ( abschn$booklet ) ) , SIMPLIFY = FALSE )
 								da <- da[!sapply ( da , is.null)]
 								da <- do.call ( "rbind" , da )
 						} else {
@@ -178,11 +178,11 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 						}
 						return ( da )
 				}
-				
+
 				da <- mapply ( fun , abschn , MoreArgs = list ( dat , rotation.id , nMbi , mbiCode , pid , verbose , invalidCodes ) , SIMPLIFY = FALSE )
 				da <- da[!sapply ( da , is.null)]
 				da <- do.call ( "rbind" , da )
-				
+
 				# da gruendlich checken, nur weiter wenn valide bzw. Zeilen im Data.frame
 				# hier koennte man auch noch nen bisschen verbosieren/warnen
 				weiter <- FALSE
@@ -193,17 +193,17 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								}
 						}
 				}
-				
+
 				if ( weiter ) {
-						
+
 						# da aufhuebschen
-						da <- da [ order ( da$item ) , ]		
+						da <- da [ order ( da$item ) , ]
 						rownames(da) <- seq ( along = rownames ( da ) )
-						
+
 						# uniqe Items und Personen bestimmen
 						unpid <- da[!duplicated(da[,pid]),pid]
 						unitems <- da[!duplicated(da[,"item"]),"item"]
-				
+
 						# Zellen/Personen/Items ausgeben
 						if ( verbose ) {
 								cat ( paste ( "mnr statistics:\n" ) )
@@ -224,13 +224,13 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								colnames ( da.agg2 ) <- c ( "booklet" , "booklet.section" , paste ( "N." , pid , sep = "" ) )
 								da.agg2 <- da.agg2[order(da.agg2$booklet,da.agg2$booklet.section),]
 								rownames ( da.agg2 ) <- seq ( along = rownames ( da.agg2 ) )
-						
+
 								# ausgeben
 								cat ( paste ( "unique cases ('" , pid , "') per booklet and booklet section (0s omitted):\n\n" , sep = "" ) )
 								print ( da.agg2 )
 								cat ( "\n" )
 						}
-						
+
 						# Manipulationsstring bauen
 						fun4 <- function ( item , da , pid , mnrCode ) {
 								pids <- da[da$item %in% item, pid]
@@ -240,7 +240,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 
 						# wenn verbose noch Fortschrittszahlen zu do adden
 						if ( verbose ) {
-								
+
 								fun5 <- function ( durchgang ) {
 										zufall <- runif ( 10 )
 										if ( zufall[5] > 0.90 ) lb <- "\n" else lb <- ""
@@ -252,15 +252,15 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								do <- c ( do , z )
 								do <- do [ order ( as.numeric ( names ( do ) ) ) ]
 								do <- unname ( do )
-						} 
-						
+						}
+
 						# Rekodierung durchfuehren
 						if ( verbose ) {
 								cat ( "start recoding (item-wise)\n" )
 						}
-						
+
 						eval ( parse ( text = do ) )
-						
+
 						# Ausgabe gebrauchte Zeit
 						if ( verbose ) {
 								cat ( "\ndone\n" )
@@ -269,16 +269,16 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								et <- unclass ( et )
 								cat ( paste ( "elapsed time: " , formatC ( et , digits = 1 , format = "f" ) , " " ,  einh , "\n" , sep = "" ) )
 						}
-				
+
 				} else {
 						# wenn keine identifizierte Zellen vorliegen oder bei internem Fehler (kein data.frame)
 						if ( verbose ) {
 								cat ( "no mnr identified for any case. nothing recoded.\n" )
-						}			
+						}
 				}
 		}
-		
+
 		if ( verbose ) flush.console()
-		
+
 		return ( dat )
 }

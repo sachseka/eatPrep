@@ -4,7 +4,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 						filedat = "mydata.txt", filesps = "readmydata.sps", breaks=NULL, nMbi = 2,
 						rotation.id = NULL, suppressErr = FALSE, recodeErr = "mci",
 						aggregatemissings = NULL, rename = TRUE, recodedData = TRUE,
-            correctDigits=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
+						addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
             missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0), verbose=FALSE) {
 
 		### Funktionsname fuer Meldungen
@@ -35,7 +35,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		stopifnot(is.logical(scoreData))
 		stopifnot(is.logical(writeSpss))
 		stopifnot(is.logical(collapseMissings))
-		stopifnot(is.logical(correctDigits))
+		stopifnot(is.logical(addLeadingZeros))
 		stopifnot(is.logical(truncateSpaceChar))
 		stopifnot(is.logical(verbose))
 
@@ -78,7 +78,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 			if ( ! identical ( fls3 , character(0) ) ) {
 					dat <- datList <- mapply(readSpss, file = fls3, oldID = oldIDs,
-						MoreArgs = list(correctDigits=correctDigits, truncateSpaceChar = truncateSpaceChar, newID = newID ),
+						MoreArgs = list(newID = newID, addLeadingZeros=addLeadingZeros, truncateSpaceChar = truncateSpaceChar),
 						SIMPLIFY=FALSE)
 			} else {
 					stop ( "No data available. Check 'datList', 'inputList' and/or 'path'." )
@@ -137,8 +137,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		if( recodeMnr ) {
 			if(verbose) cat ( "\n" )
 			if(verbose) cat ( paste ( f.n , "Start recoding Mbi to Mnr\n" ) )
-			if(is.null(inputList$booklets)) {warning ( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$booklets. Data frame not available!\n" ) ) }
-			if(is.null(inputList$blocks)) {warning ( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$blocks. Data frame not available!\n" ) ) }
+			# if(is.null(inputList$booklets)) {stop( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$booklets. Data frame not available!\n" ) ) }
+			# if(is.null(inputList$blocks)) {stop( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$blocks. Data frame not available!\n" ) ) }
 
 		if( is.null(inputList$rotation) ) {
 				if (is.character(rotation.id)) {
@@ -152,8 +152,10 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		}
 
 		if(is.null(inputList$rotation) & is.null(rotation.id)) {
-				warning ( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$rotation or rotation.id. These are not available!\n" ) )
+				stop ( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$rotation or rotation.id. These are not available!\n" ) )
 		}
+
+		if(is.null(breaks)) stop("Please set 'breaks'.")
 
 		if ( any ( is.null(inputList$booklets), is.null(inputList$blocks) ) ) {
 			warning ( "RecodeMnr had to be skipped due to missing input variables.\n" )
