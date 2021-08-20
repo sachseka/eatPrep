@@ -83,7 +83,7 @@ checkSubunitsUnits <- function(subunits, units) {
   if (length(SubunitsWithoutUnits) > 0 ) {
     message("Found only subunits for unit(s) ", paste(SubunitsWithoutUnits, collapse = ", "), ".",
            "\nThis/these unit(s) will be appended to units sheet.\n")
-    missingunits <- data.frame ( unit = SubunitsWithoutUnits, unitLabel = SubunitsWithoutUnits, stringsAsFactors = F)
+    missingunits <- data.frame ( unit = SubunitsWithoutUnits, unitAggregateRule = "", stringsAsFactors = F)
     units <- dplyr::add_row(units, missingunits)
   }
 
