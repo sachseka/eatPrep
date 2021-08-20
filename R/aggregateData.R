@@ -68,6 +68,13 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   # add recode values for err: always recode combinations with err to err
   am <- cbind(am, err = "err") ;  am <- rbind(am, err = "err")
 
+  # check aggregatemissings against standard codes
+  standard_codes <- c("vc", "mvi", "mnr", "mci", "mbd", "mir", "mbi", "err")
+  am_codes <- unique(c(unlist(dimnames(am)), unlist(am)))
+
+  if (any(am_codes %in% standard_codes == FALSE)) {
+    stop( paste("Found nonstandard missing value code(s) in 'aggregatemissings':", paste(setdiff(am_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes, collapse = ", "), "\n"))
+  }
 
   # make aggregateinfo
   aggregateinfo <- makeInputAggregateData(subunits, units, recodedData = recodedData)
@@ -77,12 +84,19 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   if (length(aggregateinfo) == 0)	stop("Found none of the specified subitems to aggregate in dataset.\n")
 
   # which subunits should be aggregated?
-  unitsToAggregate <- names(aggregateinfo)
+  unitsToAggregate    <- names(aggregateinfo)
   subunitsToAggregate <- unname(unlist(lapply(aggregateinfo, "[[", "subunits")))
   subunitsToKeep      <- setdiff(colnames(dat), subunitsToAggregate)
 
   # initialize aggregated dataset with subunits to keep
   datAggregated <- dat[ , subunitsToKeep ]
+
+  # check data against standard codes
+  data_codes <- unique(gsub("[[:digit:]]", "vc", unlist(dat[ , subunitsToAggregate])))
+
+  if (any(data_codes %in% standard_codes == FALSE)) {
+    stop(paste("Found nonstandard missing value code(s) in 'dat':", paste(setdiff(data_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes[-length(standard_codes)], collapse = ", "), "\n"))
+  }
 
   if (rename == TRUE) {
   	if (recodedData == TRUE) {
