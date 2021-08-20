@@ -20,10 +20,10 @@ library(knitr)
 ```
 
 ```{r tempsetup}
-inputMinimal <- list(#units = inputList$units[ -nrow(inputList$units), c("unit")],
+inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", "unitAggregateRule")],
                      subunits = inputList$subunits[, c("unit", "subunit","subunitRecoded")],
-                     values = inputList$values[ , c("subunit", "value", "valueRecode")],
-                     unitRecodings = inputList$unitRecodings[ , c("unit", "value", "valueRecode")],
+                     values = inputList$values[ , c("subunit", "value", "valueRecode", "valueType")],
+                     unitRecodings = inputList$unitRecodings[ , c("unit", "value", "valueRecode", "valueType")],
                      blocks = inputList$blocks,
                      booklets = inputList$booklets,
                      rotation = inputList$rotation)
@@ -72,7 +72,7 @@ one mc (item 1), one short response (item 2), one item with 3 subitems short res
 items <- c("I01", "I05", "I12")
 subitems <- c("I01", "I05", "I12a", "I12b", "I12c")
 
-#kable(inputMinimal$units[which(inputMinimal$units$unit %in% items), ])
+kable(inputMinimal$units[which(inputMinimal$units$unit %in% items), ])
 kable(inputMinimal$subunits[which(inputMinimal$subunits$subunit %in% subitems), ])
 kable(inputMinimal$values[which(inputMinimal$values$subunit %in% subitems), ])
 kable(inputMinimal$unitRecodings)
