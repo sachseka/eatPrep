@@ -73,7 +73,10 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   am_codes <- unique(c(unlist(dimnames(am)), unlist(am)))
 
   if (any(am_codes %in% standard_codes == FALSE)) {
-    stop( paste("Found nonstandard missing value code(s) in 'aggregatemissings':", paste(setdiff(am_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes, collapse = ", "), "\n"))
+    stop(paste("Found nonstandard missing value code(s) in 'aggregatemissings':", paste(setdiff(am_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes, collapse = ", "), "\n"))
+  }
+  if (any(standard_codes %in% am_codes == FALSE)) {
+    warning(paste("Standard missing code(s)", paste(setdiff(standard_codes, am_codes), collapse = ", "), "are not specified in  'aggregatemissings'. Please check whether this is desired. \n"))
   }
 
   # make aggregateinfo
