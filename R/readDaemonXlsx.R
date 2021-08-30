@@ -5,7 +5,7 @@ readDaemonXlsx <- function(filename) {
   sheetNameVec <- c("units", "subunits", "values", "unitrecoding", "sav-files", "params", "aggregate-missings", "booklets", "blocks")
 
   for(pp in sheetNameVec) {
-    if(inherits(try( inL[[pp]] <-data.frame(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text")), silent=TRUE)	, "try-error")) {
+    if(inherits(try( inL[[pp]] <-data.frame(suppressMessages(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text"))), silent=TRUE)	, "try-error")) {
       cat(paste("No .xlsx sheet '", pp, "' available. InputList will be created without '", pp, "'.\n", sep = ""))
     } else {
       cat(paste("Reading sheet '", pp, "'.\n", sep = ""))
