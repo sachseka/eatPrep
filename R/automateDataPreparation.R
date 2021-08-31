@@ -7,19 +7,16 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 						addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
             missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0), verbose=FALSE) {
 
-		### Funktionsname fuer Meldungen
-		f. <- "automateDataPreparation"
-		f.n <- paste ( f. , ":" , sep = "" )
 
 		###folder erstellen
-		if( is.null ( path ) ) {path <- getwd()}
-		folder.e <- path
-#		folder.aDP <- file.path ( path , "_eat_writeSPSS_" )
-#		if ( ! file.exists ( folder.aDP ) ) { dir.create ( folder.aDP , recursive = TRUE ) }
+		if(is.null(path)) {
+		  folder.e <- getwd()
+		  } else {
+		    folder.e <- file.path(path)
+		  }
 
 		### Begruessung
-		if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste (f.n , "Starting automateDataPreparation", Sys.time(), "\n" ) )
+		if(verbose) message("Starting automateDataPreparation", Sys.time())
 
 		### Checks
 		if(!is.null(newID)) {
@@ -40,8 +37,16 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		stopifnot(is.logical(verbose))
 
 		if(is.null(datList)) {
-			stopifnot(readSpss == TRUE)
-			stopifnot(class(inputList$savFiles) == "data.frame")
+			stopifnot(readSpss)
+			if(class(inputList$savFiles) != "data.frame") {
+			  if(verbose) {
+			    if(is.null(path)) {
+			      message("No appropriate inputList$savFiles data.frame provided. I will try to read .sav-files from getwd().")
+			    } else {
+			      message("No appropriate inputList$savFiles data.frame provided. I will read .sav-files from path = ", path)
+			    }
+			  }
+			  }
 		} else {
 			stopifnot(class(datList) == "data.frame" || class(datList) == "list")
 			if(class(datList) == "data.frame") {
@@ -51,129 +56,108 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		}
 
 		### ggf. sav-files einlesen
-		idname <- NULL
-		if( readSpss ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Load .sav Files\n" ) )
+		if(readSpss) {
+			if(verbose) message("Load .sav-files.")
 			if(!is.null(datList)) {
-				warning(paste ( f.n , "If readSpss == TRUE, datList will be ignored." ) )
+				warning("If readSpss == TRUE, datList will be ignored.")
 			}
 
-			savFiles <- inputList$savFiles$filename
-			if( is.null (oldIDs) ) {oldIDs <- inputList$savFiles$case.id}
-			if( is.null (newID) ) {
-				if( !is.null (inputList$newID$value[which(inputList$newID$key == "master-id")]) ) {
-					newID <- inputList$newID$value[which(inputList$newID$key == "master-id")]
-				}
-			}
-			if( is.null (newID) ) {newID <- "ID"}
-
-			fulln <- inputList$savFiles$fullname
-			names(fulln) <- inputList$savFiles$filename
-			fls <- file.path (folder.e, savFiles)
-			ex <- sapply ( fls , file.exists )
-			fls2 <- unname ( mapply ( function ( fls, ex , fulln ) if ( ex ) fls else fulln[basename(fls)] , fls , ex , MoreArgs = list ( fulln ) ) )
-			ex2 <- sapply ( fls2 , file.exists )
-			fls3 <- fls2[ex2]
-
-			if ( ! identical ( fls3 , character(0) ) ) {
-					dat <- datList <- mapply(readSpss, file = fls3, oldID = oldIDs,
-						MoreArgs = list(newID = newID, addLeadingZeros=addLeadingZeros, truncateSpaceChar = truncateSpaceChar),
+		  if(class(inputList$savFiles) != "data.frame") {
+        # if no savFiles sheet, then take all .sav files in path or getwd
+		    savFiles <- grep(".sav$",dir(folder.e),value=TRUE)
+        if(!length(savFiles) > 0) stop("No .sav-files found in ", folder.e)
+        fulln <- file.path(folder.e, savFiles)
+        names(fulln) <- basename(savFiles)
+		  } else {
+  			savFiles <- inputList$savFiles$filename
+  			fulln <- inputList$savFiles$fullname
+  			names(fulln) <- inputList$savFiles$filename
+  			ex <- !sapply(fulln, file.exists)
+  			if(all(ex)) stop("All file(s) not found: ", paste(names(ex)[ex], collapse=", "))
+  			if(any(ex)) warning("Some file(s) not found: ", paste(names(ex)[ex], collapse=", "))
+		  }
+		dat <- datList <- mapply(readSpss, file = fulln,
+						MoreArgs = list(addLeadingZeros=addLeadingZeros, truncateSpaceChar = truncateSpaceChar),
 						SIMPLIFY=FALSE)
-			} else {
-					stop ( "No data available. Check 'datList', 'inputList' and/or 'path'." )
+		  if(verbose) message("Successfully read in: ", paste(names(datList),collapse=", "))
 			}
-		}
 
 		# Checks
-		stopifnot ( class ( datList ) == "list" )
-		stopifnot ( class ( inputList ) == "list" )
-		if( is.null (oldIDs) ) {oldIDs <- inputList$savFiles$case.id}
-		stopifnot ( !is.null (oldIDs) )
+		stopifnot(class(datList) == "list")
+		stopifnot(class(inputList) == "list")
+		if(is.null(oldIDs)) {oldIDs <- inputList$savFiles$case.id}
+		stopifnot(!is.null(oldIDs))
 
-		if( checkData ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Check data...\n" ) )
+		if(checkData) {
+			if(verbose) message("Check data...")
 			mapply(checkData, datList, names(datList), MoreArgs = list(inputList$values, inputList$subunits, inputList$units, verbose))
-		} else {if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Check has been skipped\n" ) )}
+		} else {if(verbose) message("Check has been skipped\n" )}
 
-		# ne Warnung wenn
-		# mergeData=FALSE ist, aber mehrere Datensaetze in der Liste
-		if ( !mergeData & length ( datList ) > 1 ) {
-				warning ( "More than one data.frame has been loaded, a list of datasets will be returned \n" )
-		}
 
-		if( mergeData ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Start merging\n" ) )
-			if( readSpss) {oldIDs <- rep(newID, length(datList))}
-			if(is.null(newID)) {newID <- "ID"}
+		if(mergeData) {
+			if(verbose) message("Start merging.")
+			if(is.null(newID)) {
+			  if(is.null(inputList$newID)) {
+			    newID <- "ID"
+			  } else {
+			    newID <- inputList$newID$value
+			  }
+			}
 			dat <- mergeData(newID = newID, datList = datList, oldIDs = oldIDs, addMbd=TRUE, verbose=verbose)
-			aaa <- FALSE
+			idname <- newID
 		} else {
-			aaa <- TRUE
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Merge has been skipped\n Only the first dataset in datList will be considered for the following steps\n" ) )
+			if(length(datList) > 1) warning("Merge has been skipped. Only the first dataset in datList will be considered for the following steps.")
 			dat <- datList[[1]]
 			idname <- oldIDs[1]
 		}
 
-		if( recodeData ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Start recoding\n" ) )
+		if(recodeData) {
+			if(verbose) message("Start recoding.")
+  		if(is.data.frame(dat)) {
+  					if(nrow(dat) == 0 | ncol(dat) == 0) dat <- NULL
+  			}
+  	  if (!is.data.frame(dat)) {
+  	    stop("internal error: 'dat' is not a data.frame or empty")
+  	  }
+			dat <- recodeData(dat=dat, values=inputList$values, subunits=inputList$subunits, verbose=verbose)
+		} else {
+		  if(verbose) message("Recode has been skipped.")
+    }
 
-		if ( is.data.frame(dat)) {
-					if ( nrow ( dat ) == 0 | ncol ( dat ) == 0 ) dat <- NULL
-			}
-			if (!is.data.frame(dat)) {
-					stop ( "internal error: 'dat' is not a data.frame or empty" )
-			}
-
-			dat <- recodeData (dat= dat, values=inputList$values, subunits=inputList$subunits, verbose=verbose)
-		} else {if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste ( f.n , "Recode has been skipped\n" ) )}
-
-		if( recodeMnr ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Start recoding Mbi to Mnr\n" ) )
-			# if(is.null(inputList$booklets)) {stop( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$booklets. Data frame not available!\n" ) ) }
-			# if(is.null(inputList$blocks)) {stop( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$blocks. Data frame not available!\n" ) ) }
-
-		if( is.null(inputList$rotation) ) {
-				if (is.character(rotation.id)) {
-						if ( rotation.id %in% colnames ( dat ) ) {
-								idname <- inputList$newID[inputList$newID$key=="master-id","value"]
-								if ( idname %in% colnames ( dat ) ) {
-										inputList$rotation <- dat[,c(idname,rotation.id),drop=FALSE]
-								}
-						}
-				}
+		if(recodeMnr) {
+			if(verbose) message("Start recoding Mbi to Mnr.")
+			if(is.null(inputList$booklets)) stop("Recoding Mnr in automateDataPreparation requires inputList$booklets. Data frame not available.")
+			if(is.null(inputList$blocks)) stop("Recoding Mnr in automateDataPreparation requires inputList$blocks. Data frame not available.")
+  		if(is.null(inputList$rotation)) {
+  				if(is.character(rotation.id)) {
+  						if(rotation.id %in% colnames(dat)) {
+  								if(idname %in% colnames(dat)) {
+  									inputList$rotation <- dat[,c(idname,rotation.id),drop=FALSE]
+  								}
+  						}
+  				}
 		}
 
 		if(is.null(inputList$rotation) & is.null(rotation.id)) {
-				stop ( paste ( f.n , "Recoding Mnr in automateDataPreparation requires inputList$rotation or rotation.id. These are not available!\n" ) )
+				stop("Recoding Mnr in automateDataPreparation requires inputList$rotation or rotation.id. These are not available.")
 		}
 
-		if(is.null(breaks)) stop("Please set 'breaks'.")
+		if(is.null(breaks)) stop("Recoding Mnr in automateDataPreparation requires 'breaks'.")
 
-		if ( any ( is.null(inputList$booklets), is.null(inputList$blocks) ) ) {
-			warning ( "RecodeMnr had to be skipped due to missing input variables.\n" )
-		} else {
-			if(is.null(rotation.id)) {
+		if(is.null(rotation.id)) {
 				dat <- mergeData(newID, list(dat, inputList$rotation))
 				rotation.id <- names(inputList$rotation)[2]
 			}
-			dat <- mnrCoding ( dat = dat , pid = newID , rotation.id = rotation.id , blocks = inputList$blocks , booklets = inputList$booklets , breaks = breaks , subunits = inputList$subunits , nMbi = nMbi  , mbiCode = "mbi" , mnrCode = "mnr" , invalidCodes = c ( "mbd", "mir", "mci" ) , verbose = verbose )
-		}
-
-		} else {if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste ( f.n , "RecodeMnr has been skipped\n" ) )}
+			dat <- mnrCoding(dat = dat , pid = newID , rotation.id = rotation.id , blocks = inputList$blocks , booklets = inputList$booklets , breaks = breaks , subunits = inputList$subunits , nMbi = nMbi  , mbiCode = "mbi" , mnrCode = "mnr" , invalidCodes = c ( "mbd", "mir", "mci" ) , verbose = verbose )
 
 
-		if( aggregateData ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Start aggregating\n" ) )
+		} else {
+		  if(verbose) message("RecodeMnr has been skipped.")
+		  }
+
+
+		if(aggregateData) {
+			if(verbose) message("Start aggregating\n" )
 			if ( length(aggregatemissings) > 0 && aggregatemissings == "seeInputList" ) {
 				stopifnot(!is.null(inputList$aggrMiss))
 				aMiss <- unname(inputList$aggrMiss[,-1])
@@ -186,50 +170,43 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			}
 			dat <- aggregateData (dat=dat, subunits=inputList$subunits, units=inputList$units,
             aggregatemissings = aggregatemissings, rename = rename, recodedData = recodedData, verbose = verbose, suppressErr = suppressErr, recodeErr = recodeErr)
-		} else {if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste ( f.n , "Aggregate has been skipped\n" ) )}
+		} else {
+		if(verbose) message("Aggregate has been skipped." )
+		  }
 
-		if( scoreData ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Start scoring\n" ) )
+		if(scoreData) {
+			if(verbose) message("Start scoring.")
 				dat <- scoreData (dat= dat, unitrecodings=inputList$unitRecodings, units=inputList$units, verbose = verbose)
-		} else {if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste ( f.n , "Scoring has been skipped\n" ) )}
+		} else {
+		if(verbose) message("Scoring has been skipped." )
+		  }
 
-		if( writeSpss ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Writing dataset in last transformation status to disk\n" ) )
+		if(writeSpss) {
+			if(verbose) message("Writing dataset in last transformation status to disk\n" )
 			if (class(dat) != "data.frame") {
-				warning ( paste ( f.n , "Data is no data frame (data frames probably need to be merged).\n" ) )
+				warning ("Data is no data frame (data frames probably need to be merged)." )
 			}
 			if(inherits(try( writeSpss (dat=dat , values=inputList$values, subunits=inputList$subunits, units=inputList$units,
 					filedat = filedat, filesps = filesps, missing.rule = missing.rule,
 					path = folder.e, # path = folder.aDP,
 					sep = "\t", dec = ",", verbose = verbose)  ),"try-error")) {
-				if(verbose) cat ( "\n" )
-				warning ( paste ( f.n , "No SPSS-File could be written.\n" ) )
+				if(verbose)
+				warning ("No SPSS-File could be written.")
 			}
-		} else {if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste ( f.n , "No SPSS-File has been written.\n" ) )}
+		} else {
+		if(verbose) message("No SPSS-File has been written." ) }
 
-		if( collapseMissings ) {
-			if(verbose) cat ( "\n" )
-			if(verbose) cat ( paste ( f.n , "Collapsing missings\n" ) )
+		if(collapseMissings) {
+			if(verbose) message("Collapsing missings.")
 			dat <- collapseMissings(dat=dat, missing.rule = missing.rule)
-		} else {if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste ( f.n , "Missings are UNcollapsed.\n" ) )}
+		} else {
+		if(verbose) message("Missings are UNcollapsed.")
+		  }
 
 		# finale Ausgabe
-		if(verbose) cat ( "\n" )
-		if(verbose) cat ( paste ( f.n , "terminated successfully!", Sys.time(), "\n\n" ) )
+		if(verbose) message("automateDataPreparation terminated successfully!", Sys.time())
 
-		# Ergebnisse returnen
-		if (aaa) {
-			datList[[1]] <- dat
-			return(datList)
-		} else {
-			return ( dat )
-		}
+		return(dat)
 }
 
 # data(inputList)

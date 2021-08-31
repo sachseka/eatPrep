@@ -22,7 +22,7 @@ This function facilitates automated data preparation and wraps most functions fr
   A list of data frames containing neccessary information for data preparaton (see \code{data(inputList)} for details).
 }
   \item{path}{
-A character vector containing the path required by \code{\link{readSpss}} (source of SPSS files) and \code{\link{writeSpss}}.
+A character vector containing the path required by for \code{\link{writeSpss}}.
 Default is the current \R working directory.
 }
   \item{readSpss}{
