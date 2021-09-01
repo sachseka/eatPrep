@@ -114,7 +114,7 @@ Karoline Sachse
 data(inputList)
 data(inputDat)
 preparedData <- automateDataPreparation(inputList = inputList,
-    datList = inputDat,	path = "c:/temp/test_eat",
+    datList = inputDat,	path = getwd(),
     readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
