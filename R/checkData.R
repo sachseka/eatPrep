@@ -1,4 +1,4 @@
-checkData <- function (dat, datnam, values, subunits, units, verbose = TRUE) {
+checkData <- function (dat, datnam, values, subunits, units, ID=NULL, verbose = TRUE) {
 
   funVersion <- "checkData: "
 	varinfo <- makeInputCheckData (values, subunits, units)
@@ -12,9 +12,12 @@ checkData <- function (dat, datnam, values, subunits, units, verbose = TRUE) {
 	# ID-Check <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   # find ID - stop if ID cannot be found
 	#	eatTools:::sunk(paste(funVersion, "Checking IDs", sep =""))
-  idvarname <- getID(varinfo)
-  checkID (dat, idvarname, verbose)
-
+	if(is.null(ID)) {
+    idvarname <- getID(varinfo)
+	} else {
+	  idvarname <- ID
+	}
+	checkID (dat, idvarname, verbose)
 
 	# Variables-Check <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   #	eatTools:::sunk(paste(funVersion, "Checking variables", sep = ""))

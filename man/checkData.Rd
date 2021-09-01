@@ -9,10 +9,11 @@
   \item{values}{A data frame with code information. See \sQuote{Details}.}
   \item{subunits}{A data frame with subunit information. See \sQuote{Details}.}
   \item{units}{A data frame with unit information. See \sQuote{Details}.}
+    \item{ID}{A string for ID column name.}
     \item{verbose}{Logical. If \code{FALSE} no information is printed.}
 }
 \details{
-The results of \code{checkData} will be written to the console. 
+The results of \code{checkData} will be written to the console.
 
 Examples of data frames \code{values}, \code{subunits} and \code{units} can be found via \code{data(inputList)}.
 }

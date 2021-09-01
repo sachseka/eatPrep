@@ -16,7 +16,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		  }
 
 		### Begruessung
-		if(verbose) message("Starting automateDataPreparation", Sys.time())
+		if(verbose) message("Starting automateDataPreparation ", Sys.time())
 
 		### Checks
 		if(!is.null(newID)) {
@@ -73,8 +73,9 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
   			fulln <- inputList$savFiles$fullname
   			names(fulln) <- inputList$savFiles$filename
   			ex <- !sapply(fulln, file.exists)
-  			if(all(ex)) stop("All file(s) not found: ", paste(names(ex)[ex], collapse=", "))
-  			if(any(ex)) warning("Some file(s) not found: ", paste(names(ex)[ex], collapse=", "))
+  			folders.e <- unique(sapply(inputList$savFiles$fullname, function(jj) gsub(basename(jj),"",jj)))
+  			if(all(ex)) stop("All file(s) not found in: ", paste(folders.e, collapse=", "), " : ", paste(names(ex)[ex], collapse=", "))
+  			if(any(ex)) warning("Some file(s) not found in: ", paste(folders.e, collapse=", "), " : ", paste(names(ex)[ex], collapse=", "))
 		  }
 		dat <- datList <- mapply(readSpss, file = fulln,
 						MoreArgs = list(addLeadingZeros=addLeadingZeros, truncateSpaceChar = truncateSpaceChar),
@@ -90,9 +91,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		if(checkData) {
 			if(verbose) message("Check data...")
-			mapply(checkData, datList, names(datList), MoreArgs = list(inputList$values, inputList$subunits, inputList$units, verbose))
-		} else {if(verbose) message("Check has been skipped\n" )}
-
+			mapply(checkData, dat=datList, datnam=names(datList), ID=oldIDs, MoreArgs = list(values=inputList$values, subunits=inputList$subunits, units=inputList$units, verbose=verbose))
+		} else {if(verbose) message("Check has been skipped." )}
 
 		if(mergeData) {
 			if(verbose) message("Start merging.")
@@ -106,9 +106,16 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			dat <- mergeData(newID = newID, datList = datList, oldIDs = oldIDs, addMbd=TRUE, verbose=verbose)
 			idname <- newID
 		} else {
-			if(length(datList) > 1) warning("Merge has been skipped. Only the first dataset in datList will be considered for the following steps.")
-			dat <- datList[[1]]
-			idname <- oldIDs[1]
+			if(length(datList) > 1 & (recodeData|recodeMnr|aggregateData|scoreData|writeSpss))  {
+			  warning("Merge has been skipped. Only the first dataset in datList will be considered for the following steps.")
+			  dat <- datList[[1]]
+			  idname <- oldIDs[1]
+			}
+			if(length(datList) > 1 & !(recodeData|recodeMnr|aggregateData|scoreData|writeSpss) & verbose) {
+			  message("Merge has been skipped, but more than one dataset has been loaded. A list of datasets will be returned." )
+			  } else {
+			  message("Merge has been skipped." )
+			}
 		}
 
 		if(recodeData) {
@@ -204,7 +211,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		  }
 
 		# finale Ausgabe
-		if(verbose) message("automateDataPreparation terminated successfully!", Sys.time())
+		if(verbose) message("automateDataPreparation terminated successfully! ", Sys.time())
 
 		return(dat)
 }
