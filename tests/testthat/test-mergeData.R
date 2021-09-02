@@ -61,21 +61,21 @@ test_that("default merge works as expected 2", {
 
 
 test_that("no data sets", {
-  expect_warning(mergeData("ID",list(), verbose=FALSE),
-                 "mergeData_ 0.8.0 : Found no datasets." )
+  expect_error(mergeData("ID",list(), verbose=FALSE),
+                 "Found no datasets." )
 })
 
 
 
 test_that("wrong ID", {
   expect_error(mergeData("IDs",list(dat0,dat2), verbose=FALSE),
-                 "mergeData_0.8.0: Did not find ID variable in dataset 1" )
+                 "Did not find ID variable in dataset 1" )
 })
 
 
 
 test_that("missings in ID", {
   expect_warning(mergeData("v1",list(dat2,dat3), verbose=FALSE),
-               "mergeData_0.8.0: Found missing value in ID variable in dataset 1. Output may not be as desired." )
+               "Found missing value in ID variable in dataset 1. Output may not be as desired." )
 })
 
