@@ -1,6 +1,4 @@
-mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE) {
-  versNr <- "0.8.0"
-  mReturn <- NULL
+mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE) {
 
   stopifnot(is.list(datList))
   stopifnot(is.character(newID))
@@ -11,10 +9,10 @@ mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbos
   stopifnot(length(datList) == length(oldIDs))
 
 
-  if ( length(datList) > 0 ) {
+  if(length(datList) > 0) {
 
     fkNam <- list()
-    for ( i in seq(along = datList)) {
+    for(i in seq(along = datList)) {
 
       stopifnot(is.data.frame(datList[[i]]))
 
@@ -23,26 +21,26 @@ mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbos
         datList[[i]] <- set.col.type(datList[[i]], col.type = list ( "character" = fkNam[[i]] ))
       }
 
-		  if(verbose) {cat(paste ( "mergeData_", versNr, ": Start merging of dataset ", i, ".\n", sep=""))}
+		  if(verbose) message("Start merging of dataset ", i, ".")
 
 			if(i==1) {
 
 				if(is.character(oldIDs)) {IDname1 <- oldIDs[i]}
 				if(is.numeric(oldIDs)) {IDname1 <- colnames(datList[[i]])[oldIDs[i]]}
 
-			  if ( is.character(IDname1) & IDname1 %in% names(datList[[i]])) {
+			  if(is.character(IDname1) & IDname1 %in% names(datList[[i]])) {
 			    if(any(is.na(datList[[i]][,IDname1]))) {
-			      warning(paste0("mergeData_", versNr, ": Found missing value in ID variable in dataset ", i, ". Output may not be as desired."))
+			      warning("Found missing value in ID variable in dataset ", i, ". Output may not be as desired.")
 			    }
   				if(length(na.omit(datList[[i]][,IDname1])) != length(na.omit(unique(datList[[i]][,IDname1])))) {
   							doppelt <- na.omit(unique(datList[[i]][,IDname1][duplicated(datList[[i]][,IDname1])]))
-  							cat(paste("mergeData_",versNr, ": Multiple IDs in dataset ", i, " in " ,length(doppelt)," cases. \n",sep=""))
-  							stop(cat(paste("Multiple IDs: ", paste( doppelt, collapse = ", "), "\n" )))}
+  							message("Multiple IDs in dataset ", i, " in " ,length(doppelt)," cases.")
+  							stop("Multiple IDs: ", paste(doppelt, collapse = ", "))
+  							}
 					names(datList[[i]])[names(datList[[i]]) == IDname1] <- newID
 					mergedData <- datList[[i]]
 				} else {
-					stop(paste0( "mergeData_", versNr, ": Did not find ID variable in dataset ", i, "\n"))
-					mReturn <- FALSE
+					stop("Did not find ID variable in dataset ", i)
 				}
 
 			} else {
@@ -52,12 +50,13 @@ mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbos
 
 				if(is.character(IDname2) & IDname2 %in% names(datList[[i]])) {
 				  if(any(is.na(datList[[i]][,IDname2]))) {
-				    warning(paste0("mergeData_", versNr, ": Found missing values in ID variable in dataset ", i, ". Output may not be as desired."))
+				    warning("Found missing values in ID variable in dataset ", i, ". Output may not be as desired.")
 				  }
 				  if(length(na.omit(datList[[i]][,IDname2])) != length(na.omit(unique(datList[[i]][,IDname2])))) {
 				    doppelt <- na.omit(unique(datList[[i]][,IDname2][duplicated(datList[[i]][,IDname2])]))
-				    cat(paste("mergeData_",versNr, ": Multiple IDs in dataset ", i, " in " ,length(doppelt)," cases. \n",sep=""))
-				    stop(cat(paste("Multiple IDs: ", paste( doppelt, collapse = ", "), "\n" )))}
+				    message("Multiple IDs in dataset ", i, " in " ,length(doppelt)," cases.")
+				    stop("Multiple IDs: ", paste(doppelt, collapse = ", "))
+				    }
 
 					names(datList[[i]])[names(datList[[i]]) == IDname2] <- newID
 
@@ -75,7 +74,7 @@ mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbos
 					    a <- cbind(x[!is.na(x) & !is.na(y)],y[!is.na(x) & !is.na(y)])[b,]
 					    if(verbose & length(a) > 0) {
 					      ab <- paste(apply(data.frame(a),1, function(vv) paste(vv, collapse=("&"))),collapse=", ")
-					      cat(paste0("Multiple different valid codes in variable: ",gg,": \n The first value has been kept. \n Rows: ", paste(b,collapse=", "),"\n Values: ", ab, "\n"))
+					      message("Multiple different valid codes in variable: ",gg," in dataset ",i,": \n The first value has been kept. \n Rows: ", paste(b,collapse=", "),"\n Values: ", ab, "\n")
 					    }
 					    return(z)
 					  }))
@@ -87,8 +86,7 @@ mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbos
 					mergedData  <- partialdata[,srtn]
 
 				} else {
-				  stop(paste0( "mergeData_", versNr, ": Did not find ID variable in dataset ", i, "\n"))
-				  mReturn <- FALSE
+				  stop("Did not find ID variable in dataset ", i)
 				}
 			}
      }
@@ -98,8 +96,7 @@ mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbos
 		  if(addMbd == TRUE) {mReturn[is.na(mReturn)] <- "mbd"}
 
 		} else {
-	  	warning(paste("mergeData_", versNr, ": Found no datasets."), "\n")
-	  	mReturn <- FALSE
+	  	stop("Found no datasets.")
 	  }
 
   	if(is.data.frame(mReturn)) {
@@ -108,5 +105,5 @@ mergeData <- function ( newID="ID", datList, oldIDs=NULL, addMbd = FALSE, verbos
   		}
   	}
 
-	return (mReturn)
+	return(mReturn)
 }
