@@ -7,7 +7,6 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 						addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
             missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0), verbose=FALSE) {
 
-
 		###folder erstellen
 		if(is.null(path)) {
 		  folder.e <- getwd()
@@ -87,7 +86,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		stopifnot(class(datList) == "list")
 		stopifnot(class(inputList) == "list")
 		if(is.null(oldIDs)) {oldIDs <- inputList$savFiles$case.id}
-		stopifnot(!is.null(oldIDs))
+		if(is.null(oldIDs)) stop("Please specify oldIDs. Case ID in inputList$savFiles$case.id seems to be empty.")
 
 		if(checkData) {
 			if(verbose) message("Check data...")
@@ -113,6 +112,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			}
 			if(length(datList) > 1 & !(recodeData|recodeMnr|aggregateData|scoreData|writeSpss) & verbose) {
 			  message("Merge has been skipped, but more than one dataset has been loaded. A list of datasets will be returned." )
+			  dat <- datList
 			  } else {
 			  message("Merge has been skipped." )
 			}
