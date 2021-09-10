@@ -21,7 +21,7 @@ makeInputAggregateData <- function (subunits, units, recodedData = TRUE) {
 aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, rename = FALSE,
                         recodedData = TRUE, suppressErr = FALSE, recodeErr = "mci", verbose = FALSE) {
 
-  if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
+  if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.")
 
   if(suppressErr == TRUE){
     if(length(recodeErr) != 1){
@@ -73,10 +73,10 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   am_codes <- unique(c(unlist(dimnames(am)), unlist(am)))
 
   if (any(am_codes %in% standard_codes == FALSE)) {
-    stop(paste("Found nonstandard missing value code(s) in 'aggregatemissings':", paste(setdiff(am_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes, collapse = ", "), "\n"))
+    stop("Found nonstandard missing value code(s) in 'aggregatemissings':", paste(setdiff(am_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes, collapse = ", "))
   }
   if (any(standard_codes %in% am_codes == FALSE)) {
-    warning(paste("Standard missing code(s)", paste(setdiff(standard_codes, am_codes), collapse = ", "), "are not specified in  'aggregatemissings'. Please check whether this is desired. \n"))
+    warning("Standard missing code(s)", paste(setdiff(standard_codes, am_codes), collapse = ", "), "are not specified in  'aggregatemissings'. Please check whether this is desired.")
   }
 
   # make aggregateinfo
@@ -84,7 +84,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   nSubunitsInDat <- lapply(lapply(aggregateinfo, "[[", "subunits"), function(ll) { sum( ll %in% colnames(dat)) })
   aggregateinfo <- aggregateinfo[ which(nSubunitsInDat > 0) ]
 
-  if (length(aggregateinfo) == 0)	stop("Found none of the specified subitems to aggregate in dataset.\n")
+  if (length(aggregateinfo) == 0)	stop("Found none of the specified subitems to aggregate in dataset.")
 
   # which subunits should be aggregated?
   unitsToAggregate    <- names(aggregateinfo)
@@ -98,7 +98,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   data_codes <- unique(gsub("[[:digit:]]", "vc", unlist(dat[ , subunitsToAggregate])))
 
   if (any(data_codes %in% standard_codes == FALSE)) {
-    stop(paste("Found nonstandard missing value code(s) in 'dat':", paste(setdiff(data_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes[-length(standard_codes)], collapse = ", "), "\n"))
+    stop("Found nonstandard missing value code(s) in 'dat':", paste(setdiff(data_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes[-length(standard_codes)], collapse = ", "))
   }
 
   if (rename == TRUE) {
@@ -113,7 +113,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   	}
 
 	  if(verbose){message(paste0("Found ", nrow(oneSubunitUnits), " unit(s) with only one subunit in 'dat'. This/these subunit(s) will be renamed to their respective unit name(s).\nUnits ",
-                              paste(oneSubunitUnits$unit, collapse = ", "), "\n"))  }
+                              paste(oneSubunitUnits$unit, collapse = ", ")))  }
   }
 
   # aggregate units
@@ -137,7 +137,7 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
 
   if( !exists ("aggRule") | is.na(aggRule) | nchar(aggRule) == 0) {
 		aggRule <- "SUM"
-		warning(paste0("Missing aggregation rule for unit " , unitName , " defaulted to SUM.\n"))
+		message("Missing aggregation rule for unit " , unitName , " defaulted to SUM.")
   }
 
 #  if(!is.character(aggRule) ) {
@@ -146,23 +146,23 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
 #  }
 
   if ( !aggRule %in% c("SUM") ) {
-		warning(paste0("Aggregation rule (\"" , aggRule , "\") for unit ", unitName , " is currently not supported. Changed aggregation rule to SUM.\n"))
+		warning("Aggregation rule (\"" , aggRule , "\") for unit ", unitName , " is currently not supported. Changed aggregation rule to SUM.")
     aggRule <- "SUM"
   }
 
     unitVars <- aggregateinfo$subunits
 
 
-  if(verbose) message(paste0("Aggregate unit ", unitName, ".\n"))
+  if(verbose) message("Aggregate unit ", unitName, ".")
   if (any((unitVars %in% colnames(dat)) == FALSE)) {
-  	stop(paste("Subunits", paste(setdiff(unitVars, colnames(dat)), collapse = ", "), "not in 'dat'.\n"))
+  	stop("Subunits", paste(setdiff(unitVars, colnames(dat)), collapse = ", "), "not in 'dat'.")
   }
 
   unitDat        <- dat[ , unitVars]
 
   # rename NA to mbd
   if (any(is.na(unitDat))) {
-      message(paste0("Data contains NA values. These values will be converted to 'mbd'.\n"))
+      message("Data contains NA values. These values will be converted to 'mbd'.")
 	    unitDat[ is.na(unitDat) ] <- "mbd"
   }
 
@@ -170,10 +170,10 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
   unitAggregated <- unname(agg)
 
   if(any(agg == "err"))  {
-    message(paste0("Aggregation of missing values for unit ", unitName, " produced 'err' for row(s) ",
-                   paste(which(agg == "err"), collapse = ", "), ".\n"))
+    message("Aggregation of missing values for unit ", unitName, " produced 'err' for row(s) ",
+                   paste(which(agg == "err"), collapse = ", "))
     if (suppressErr == TRUE) {
-      message(paste("'err' in unit ", unitName, " will be recoded to 'mci'.\n",sep=""))
+      message("'err' in unit ", unitName, " will be recoded to 'mci'.")
       unitAggregated[unitAggregated == "err"] <- recodeErr
     }
   }
