@@ -18,7 +18,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		if(verbose) message("Starting automateDataPreparation ", Sys.time())
 
 		### Checks
-		if(!is.null(newID)) {
+	newID2 <- newID
+  if(!is.null(newID)) {
 			stopifnot(is.character(newID))
 			stopifnot(length(newID) == 1)
 			}
@@ -105,6 +106,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			dat <- mergeData(newID = newID, datList = datList, oldIDs = oldIDs, addMbd=TRUE, verbose=verbose)
 			idname <- newID
 		} else {
+		  if(!is.null(newID2) & verbose) message("Argument 'newID' will be ignored, because merge has been skipped.")
 			if(length(datList) > 1 & (recodeData|recodeMnr|aggregateData|scoreData|writeSpss))  {
 			  warning("Merge has been skipped. Only the first dataset in datList will be considered for the following steps.")
 			  dat <- datList[[1]]
