@@ -6,19 +6,19 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
 
   for(pp in sheetNameVec) {
     if(pp=="Aufgabenmerkmale") {
-      if(inherits(try( meL[[pp]] <- data.frame(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text")), silent=TRUE)	, "try-error")) {
+      if(inherits(try( meL[[pp]] <- data.frame(suppressMessages(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text"))), silent=TRUE)	, "try-error")) {
         message("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.")
       } else {
         message("Reading sheet '", pp, "'.")
         if(meL[[pp]][1,1]!="Aufgabe") {
           aa <- which(meL[[pp]] == "Aufgabe")-1
-          if(inherits(try( meL[[pp]] <- data.frame(read_excel(filename, sheet=pp, col_names=TRUE, na = "", skip=aa, col_types="text")), silent=TRUE)	, "try-error")) {
+          if(inherits(try( meL[[pp]] <- data.frame(suppressMessages(read_excel(filename, sheet=pp, col_names=TRUE, na = "", skip=aa, col_types="text"))), silent=TRUE)	, "try-error")) {
             message("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.")
           }
         }
       }
     } else {
-      if(inherits(try( meL[[pp]] <- data.frame(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text")), silent=TRUE)	, "try-error")) {
+      if(inherits(try( meL[[pp]] <- data.frame(suppressMessages(read_excel(filename, sheet=pp, col_names=TRUE, na = "", col_types="text"))), silent=TRUE)	, "try-error")) {
         message("No .xlsx sheet '", pp, "' available. Merkmalsauszug will be created without '", pp, "'.")
       } else {
         message("Reading sheet '", pp, "'.")
@@ -38,8 +38,7 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
    }
 
    meL[["Aufgabenmerkmale"]]$AufgID <- unlist(lapply(strsplit(meL[["Aufgabenmerkmale"]]$Aufgabe,"_"), function(ii) ii[[1]]))
-   if(inherits(try( meL[["Aufgabenmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Aufgabenmerkmale"]]$Aufgabe,"_"), function(ii) ii[[2]])), silent=TRUE)	, "try-error")) xyz <- TRUE
-
+   meL[["Aufgabenmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Aufgabenmerkmale"]]$Aufgabe,"_"), function(ii) if(inherits(try(ii[[2]], silent=TRUE), "try-error")) return(NA)))
 
    for(j in seq(along=meL[["Itemmerkmale"]]$Aufgabe)) {
      if(is.na(meL[["Itemmerkmale"]]$Aufgabe[j])) {
@@ -48,7 +47,7 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
    }
 
    meL[["Itemmerkmale"]]$AufgID <- unlist(lapply(strsplit(meL[["Itemmerkmale"]]$Aufgabe,"_"), function(ii) ii[[1]]))
-   if(inherits(try( meL[["Itemmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Itemmerkmale"]]$Aufgabe,"_"), function(ii) ii[[2]]))), "try-error")) xyz <- TRUE
+   meL[["Itemmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Itemmerkmale"]]$Aufgabe,"_"), function(ii) { if(inherits(try(ii[[2]], silent=TRUE), "try-error")) return(NA)}))
 
    if(tolcl) {
      cc <- paste0(meL[["Itemmerkmale"]]$AufgID,c(letters,LETTERS)[asNumericIfPossible(meL[["Itemmerkmale"]]$Item)])
@@ -66,10 +65,10 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
        }
      }
 
-      if(!xyz) {
+      if(!all(is.na(c(meL[["Aufgabenmerkmale"]]$AufgTitel,meL[["Itemmerkmale"]]$AufgTitel)))) {
      meL[["AlleMerkmale"]] <- merge(x= meL[["Itemmerkmale"]], y=meL[["Aufgabenmerkmale"]], by=c("AufgID", "AufgTitel", "Aufgabe"))
       } else {
-        meL[["AlleMerkmale"]] <- merge(x= meL[["Itemmerkmale"]], y=meL[["Aufgabenmerkmale"]], by=c("AufgID", "Aufgabe"))
+        meL[["AlleMerkmale"]] <- merge(x= meL[["Itemmerkmale"]][,-which(names(meL[["Itemmerkmale"]]) %in% "AufgTitel")], y=meL[["Aufgabenmerkmale"]][,-which(names(meL[["Aufgabenmerkmale"]]) %in% "AufgTitel")], by=c("AufgID", "Aufgabe"))
       }
      meL[["AlleMerkmale"]] <- eatTools::insert.col(meL[["AlleMerkmale"]],"ItemID", "Item")
 
