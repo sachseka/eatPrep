@@ -73,8 +73,12 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					    b <- which(x[!is.na(x) & !is.na(y)] != y[!is.na(x) & !is.na(y)])
 					    a <- cbind(x[!is.na(x) & !is.na(y)],y[!is.na(x) & !is.na(y)])[b,]
 					    if(verbose & length(a) > 0) {
-					      ab <- paste(apply(data.frame(a),1, function(vv) paste(vv, collapse=("&"))),collapse=", ")
-					      message("Multiple different valid codes in variable: ",gg," in dataset ",i,": \n The first value has been kept. \n Rows: ", paste(b,collapse=", "),"\n Values: ", ab, "\n")
+					      if(dim(data.frame(a))[2] == 1) {
+					        ab <- paste(a,collapse="&")
+					      } else {
+					        ab <- paste(apply(data.frame(a),1, function(vv) paste(vv, collapse=("&"))),collapse=", ")
+					      }
+					      message("Multiple different valid codes in variable: ",gg," in dataset ",i,": \n The first value has been kept. \n IDs: ", paste(dat2[,newID][b],collapse=", "),"\n Values: ", ab)
 					    }
 					    return(z)
 					  }))
