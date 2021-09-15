@@ -42,12 +42,14 @@ readDaemonXlsx <- function(filename) {
     cat("Something seems to be wrong with your 'blocks' sheet. Please check columns! \n")
   }
 
-
   # paar ueberfluessige Umbenennungen für Folgefunktionen
   names(inL)[which(names(inL) == "sav-files")] <- "savFiles"
   names(inL)[which(names(inL) == "params")] <- "newID"
   names(inL)[which(names(inL) == "aggregate-missings")] <- "aggrMiss"
   names(inL)[which(names(inL) == "unitrecoding")] <- "unitRecodings"
+
+  names(inL$aggrMiss)[1] <- "nam"
+  inL$aggrMiss <- inL$aggrMiss[,c("nam",inL$aggrMiss[,1])]
 
   removeEmptyR <- function(dfr) {
     if(length(which(apply(dfr,1,function(pp) all(pp %in% ""))))> 0) dfr <- dfr[-which(apply(dfr,1,function(pp) all(pp %in% ""))),]
