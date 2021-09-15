@@ -14,11 +14,23 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis="NA", id="ID", s
 
   bl1 <- unique(unlist(booklets[,-match("booklet",names(booklets))]))
   bl2 <- unique(blocks$block)
-  if(!setequal(bl1,bl2)) warning("Block names set in 'blocks' does not equal block names set in 'booklets'. Please check.")
+  if(!setequal(bl1,bl2)) {
+    warning("Block names set in 'blocks' does not equal block names set in 'booklets'. Please check.")
+    if(verbose) {
+      if(length(setdiff(bl1,bl2)) > 0) message("The following blocks are in 'booklets' but not in 'blocks': ",setdiff(bl1,bl2))
+      if(length(setdiff(bl2,bl1)) > 0) message("The following blocks are in 'blocks' but not in 'booklets': ", setdiff(bl2,bl1))
+    }
+  }
 
   th1 <- unique(rotation$booklet)
   th2 <- unique(booklets$booklet)
-  if(!setequal(th1,th2)) warning("Booklet names set in 'rotation' does not equal booklet names set in 'booklets'. Please check.")
+  if(!setequal(th1,th2))  {
+    warning("Booklet names set in 'rotation' does not equal booklet names set in 'booklets'. Please check.")
+    if(verbose) {
+      if(length(setdiff(th1,th2)) > 0) message("The following blocks are in 'rotation' but not in 'booklets': ",setdiff(th1,th2))
+      if(length(setdiff(th2,th1)) > 0) message("The following blocks are in 'booklets' but not in 'rotation': ", setdiff(th2,th1))
+    }
+  }
 
 	if(!is.null(subunits)){
 		if(verbose) message("Use names for recoded subunits.")
