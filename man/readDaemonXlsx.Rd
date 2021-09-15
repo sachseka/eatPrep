@@ -20,6 +20,9 @@ The xlsx-file produced by 'ZKDaemon' is expected to have the following sheets: \
 \value{
 A list of data frames containing information that is required by the data preparation functions in \code{eatPrep}. \code{\link{inputList}} shows an example of this list.
 }
+\examples{
+readDaemonXlsx(system.file("extdata", "inputList.xlsx", package = "eatPrep"))
+}
 \author{
 Karoline Sachse
 }
