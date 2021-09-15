@@ -38,7 +38,7 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
    }
 
    meL[["Aufgabenmerkmale"]]$AufgID <- unlist(lapply(strsplit(meL[["Aufgabenmerkmale"]]$Aufgabe,"_"), function(ii) ii[[1]]))
-   meL[["Aufgabenmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Aufgabenmerkmale"]]$Aufgabe,"_"), function(ii) if(inherits(try(ii[[2]], silent=TRUE), "try-error")) return(NA)))
+   meL[["Aufgabenmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Aufgabenmerkmale"]]$Aufgabe,"_"), function(ii) if(inherits(try(ii[[2]], silent=TRUE), "try-error")) return(NA) else return(ii[[2]])))
 
    for(j in seq(along=meL[["Itemmerkmale"]]$Aufgabe)) {
      if(is.na(meL[["Itemmerkmale"]]$Aufgabe[j])) {
@@ -47,7 +47,7 @@ readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
    }
 
    meL[["Itemmerkmale"]]$AufgID <- unlist(lapply(strsplit(meL[["Itemmerkmale"]]$Aufgabe,"_"), function(ii) ii[[1]]))
-   meL[["Itemmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Itemmerkmale"]]$Aufgabe,"_"), function(ii) { if(inherits(try(ii[[2]], silent=TRUE), "try-error")) return(NA)}))
+   meL[["Itemmerkmale"]]$AufgTitel <- unlist(lapply(strsplit(meL[["Itemmerkmale"]]$Aufgabe,"_"), function(ii) { if(inherits(try(ii[[2]], silent=TRUE), "try-error")) return(NA) else return(ii[[2]])}))
 
    if(tolcl) {
      cc <- paste0(meL[["Itemmerkmale"]]$AufgID,c(letters,LETTERS)[asNumericIfPossible(meL[["Itemmerkmale"]]$Item)])
