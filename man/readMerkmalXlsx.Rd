@@ -28,4 +28,6 @@ A list of data frames containing Itemmerkmale, Aufgabenmerkmale and AlleMerkmale
 \examples{
 readMerkmalXlsx(system.file("extdata", "itemmerkmale.xlsx", package = "eatPrep"))
 }
-
+\author{
+Karoline Sachse
+}

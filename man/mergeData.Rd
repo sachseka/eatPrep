@@ -40,3 +40,6 @@ str(mergedDataset)
 mergedDataset <- mergeData("ID", inputDat, verbose=TRUE)
 str(mergedDataset)
 }
+\author{
+Karoline Sachse
+}

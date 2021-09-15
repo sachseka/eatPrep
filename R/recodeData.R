@@ -34,19 +34,19 @@ recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
 
   if (nrow(recinfoVar) == 0) {
     variableRecoded <- variable
-    message(paste("Found no recode information for variable ", variableName, ". This variable will not be recoded.\n", sep =""))
+    message(paste("Found no recode information for variable ", variableName, ". This variable will not be recoded.", sep =""))
   } else {
     variable.unique <- na.omit(unique(variable[which(!variable %in% dontcheck)]))
     recodeinfoCheck <- (variable.unique %in% recinfoVar$value)
     if (!all(recodeinfoCheck == TRUE)) {
       warning(paste("Incomplete recode information for variable ",
       variableName, ". Value(s) ",
-      paste(sort(variable.unique[!recodeinfoCheck]), collapse = ", "), " will not be recoded.\n", sep = ""))
+      paste(sort(variable.unique[!recodeinfoCheck]), collapse = ", "), " will not be recoded.", sep = ""))
     }
 
     lookupVar <- recinfoVar[ , c("value", "valueRecode") ]
     variableRecoded <- eatTools::recodeLookup(variable, lookupVar)
-	if (verbose) message(paste(variableName, " has been recoded.\n", sep =""))
+	if (verbose) message(paste(variableName, " has been recoded.", sep =""))
   }
   return(variableRecoded)
 }
