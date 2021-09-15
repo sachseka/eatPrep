@@ -6,8 +6,7 @@
 writeSpss(dat, values, subunits, units,
     filedat = "mydata.txt", filesps = "readmydata.sps",
     missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0),
-    path = getwd(), sep = "\t", dec = ",", collapseMiss=TRUE,
-    fileEncoding = "UTF-8", verbose = FALSE)
+    path = getwd(), sep = "\t", dec = ",", verbose = FALSE)
 }
 \arguments{
 
@@ -25,8 +24,6 @@ writeSpss(dat, values, subunits, units,
 
   \item{missing.rule}{A list containing recode information for character missings. See \code{\link{collapseMissings}} for a description of default values.}
 
-  \item{collapseMiss}{Logical. If \code{TRUE}, missings will be collapsed.
-
   \item{path}{A character string containing the path of the output file.
   The value in \code{path} is appended to \code{filedat} and \code{filesps}.
   By default, files are written to the current \R working directory.
@@ -35,8 +32,6 @@ writeSpss(dat, values, subunits, units,
   \item{sep}{The separator between the data fields.}
 
   \item{dec}{The decimal separator for numerical data.}
-
-  \item{fileEncoding}{Data file encoding for SPSS. Default is "UTF-8".}
 
   \item{verbose}{Logical. If \code{TRUE}, file names and additional information are printed.
 }
@@ -50,8 +45,6 @@ The SPSS syntax file has the proper file names and separators set, so in princip
 
 \value{Used for its side effects. The return value is \code{NULL}.}
 
-\author{
-Karoline Sachse
-}
+\author{Nicole Haag}
 
 \seealso{\code{\link{inputList}}}
