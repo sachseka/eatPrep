@@ -17,8 +17,8 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis="NA", id="ID", s
   if(!setequal(bl1,bl2)) {
     warning("Block names set in 'blocks' does not equal block names set in 'booklets'. Please check.")
     if(verbose) {
-      if(length(setdiff(bl1,bl2)) > 0) message("The following blocks are in 'booklets' but not in 'blocks': ",setdiff(bl1,bl2))
-      if(length(setdiff(bl2,bl1)) > 0) message("The following blocks are in 'blocks' but not in 'booklets': ", setdiff(bl2,bl1))
+      if(length(setdiff(bl1,bl2)) > 0) message("The following blocks are in 'booklets' but not in 'blocks': ", paste(setdiff(bl1,bl2),collapse=", "))
+      if(length(setdiff(bl2,bl1)) > 0) message("The following blocks are in 'blocks' but not in 'booklets': ", paste(setdiff(bl2,bl1),collapse=", "))
     }
   }
 
