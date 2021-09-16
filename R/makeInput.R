@@ -85,12 +85,12 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
     }
   }
 
-  # check subunit labels
-  if (any(is.na(subunits$subunitLabel) | subunits$subunitLabel == "" )) {
-   emptyLabels <- which(is.na(subunits$subunitLabel) |subunits$subunitLabel == "")
-   message("Found no subunit label for subunit(s) ", paste(subunits$subunit[emptyLabels], collapse=" "), ". Subunit label will be defaulted to subunit name.")
-   subunits$subunitLabel[ emptyLabels ] <- subunits$subunit [ emptyLabels ]
-  }
+  # # check subunit labels
+  # if (any(is.na(subunits$subunitLabel) | subunits$subunitLabel == "" )) {
+  #  emptyLabels <- which(is.na(subunits$subunitLabel) |subunits$subunitLabel == "")
+  #  message("Found no subunit label for subunit(s) ", paste(subunits$subunit[emptyLabels], collapse=" "), ". Subunit label will be defaulted to subunit name.")
+  #  subunits$subunitLabel[ emptyLabels ] <- subunits$subunit [ emptyLabels ]
+  # }
 
   if (checkUnits == TRUE) {
     # if unit input is missing: use default values for units

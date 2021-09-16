@@ -62,7 +62,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   }
 
   if(!isSymmetric(am)){
-    warning("Matrix used for missing aggregation is not symmetrical. This may lead to unexpected results.")
+    stop("Matrix used for missing aggregation is not symmetrical.")
   }
 
   # add recode values for err: always recode combinations with err to err
