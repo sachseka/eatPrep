@@ -6,7 +6,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 		# Identifizieren der Items im Datensatz
 		# mit ggf. Abgleich der rekodierten Namen aus subunits
 		if ( verbose ) {
-				cat ( "\nidentifying items in data (reference is blocks$subunit)\n" )
+				message( "\nidentifying items in data (reference is blocks$subunit)" )
 		}
 		# colnames
 		cn <- colnames ( dat )
@@ -43,31 +43,30 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 		if ( verbose ) {
 				check5 <- length(not.items) > 0
 				if ( check5 ) {
-						cat ( paste ( "variables in data not recognized as items:\n" , paste ( not.items , collapse = ", " ) , "\n" , sep = "" ) )
-						cat ( "     if some of these excluded variables should have been identified as items\n" )
-						cat ( "     (and thus be used for mnr coding) check 'blocks', 'subunits', 'dat'.\n" )
+						message( "variables in data not recognized as items:\n" , paste ( not.items , collapse = ", " ))
+				  message( "     if some of these excluded variables should have been identified as items (and thus be used for mnr coding) check 'blocks', 'subunits', 'dat'." )
 				}
 		}
 
 		# wenn keine Items, dann auch nicht weiter machen
 		if ( identical ( items , character(0) ) ) {
 				if ( verbose ) {
-						cat ( paste ( "No items in data. nothing recoded. data is returned unchanged.\n" ) )
+				  message( "No items in data. nothing recoded. data is returned unchanged." )
 				}
 		} else {
 
 				# zur convenience noch Items identifizieren die gar kein mbiCode haben
 				if ( verbose ) {
-						cat ( paste ( "\nidentifying items with no mbi-codes ('" , mbiCode , "'):\n" , sep = "" ) )
+				  message( "identifying items with no mbi-codes ('" , mbiCode , "'):")
 						f1 <- function ( sp , mbiCode ) {
 								if ( !any(sp %in% mbiCode ) ) TRUE else FALSE
 						}
 						nombi <- sapply ( dat[,items] , f1 , mbiCode )
 						if ( any ( nombi ) ) {
-								cat ( paste ( paste ( items[nombi] , collapse = ", " ) , "\n" , sep = "" ) )
-								cat ( "     If you expect mbi-codes on these variables check your data and option 'mbiCode'\n\n" )
+						  message( paste ( items[nombi] , collapse = ", " ))
+						  message( "     If you expect mbi-codes on these variables check your data and option 'mbiCode'" )
 						} else {
-								cat ( "none\n\n" )
+						  message( "none" )
 						}
 				}
 
@@ -206,10 +205,10 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 
 						# Zellen/Personen/Items ausgeben
 						if ( verbose ) {
-								cat ( paste ( "mnr statistics:\n" ) )
-								cat ( paste ( "     mnr cells: ", nrow(da) , "\n" , sep = "" ) )
-								cat ( paste ( "     unique cases with at least one mnr code: ", length(unpid) , "\n" , sep = "" ) )
-								cat ( paste ( "     unique items with at least one mnr code: ", length(unitems) , "\n\n" , sep = "" ) )
+						  message( "mnr statistics:" )
+						  message( "     mnr cells: ", nrow(da))
+						  message( "     unique cases with at least one mnr code: ", length(unpid) )
+						  message( "     unique items with at least one mnr code: ", length(unitems) , "\n" )
 						}
 
 						# Ausgabe von Deskriptives von TH/Abschnitt (auf Wunsch einzelner)
@@ -226,7 +225,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								rownames ( da.agg2 ) <- seq ( along = rownames ( da.agg2 ) )
 
 								# ausgeben
-								cat ( paste ( "unique cases ('" , pid , "') per booklet and booklet section (0s omitted):\n\n" , sep = "" ) )
+								message( "unique cases ('" , pid , "') per booklet and booklet section (0s omitted):")
 								print ( da.agg2 )
 								cat ( "\n" )
 						}
@@ -256,24 +255,24 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 
 						# Rekodierung durchfuehren
 						if ( verbose ) {
-								cat ( "start recoding (item-wise)\n" )
+							 message( "start recoding (item-wise)" )
 						}
 
 						eval ( parse ( text = do ) )
 
 						# Ausgabe gebrauchte Zeit
 						if ( verbose ) {
-								cat ( "\ndone\n" )
+								message( "done" )
 								et <- Sys.time() - st
 								einh <- attributes ( et )$units
 								et <- unclass ( et )
-								cat ( paste ( "elapsed time: " , formatC ( et , digits = 1 , format = "f" ) , " " ,  einh , "\n" , sep = "" ) )
+								message( "elapsed time: " , formatC ( et , digits = 1 , format = "f" ) , " " ,  einh)
 						}
 
 				} else {
 						# wenn keine identifizierte Zellen vorliegen oder bei internem Fehler (kein data.frame)
 						if ( verbose ) {
-								cat ( "no mnr identified for any case. nothing recoded.\n" )
+						  message( "no mnr identified for any case. nothing recoded." )
 						}
 				}
 		}
