@@ -154,7 +154,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		if(is.null(breaks)) stop("Recoding Mnr in automateDataPreparation requires 'breaks'.")
 
 		if(is.null(rotation.id)) {
-				dat <- mergeData(newID, list(dat, inputList$rotation))
+				dat <- mergeData(newID, list(dat, inputList$rotation), verbose=FALSE)
 				rotation.id <- names(inputList$rotation)[2]
 			}
 			dat <- mnrCoding(dat = dat , pid = newID , rotation.id = rotation.id , blocks = inputList$blocks , booklets = inputList$booklets , breaks = breaks , subunits = inputList$subunits , nMbi = nMbi  , mbiCode = "mbi" , mnrCode = "mnr" , invalidCodes = c ( "mbd", "mir", "mci" ) , verbose = verbose )
@@ -213,7 +213,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		  }
 
 		# finale Ausgabe
-		if(verbose) message("automateDataPreparation terminated successfully! \n", Sys.time())
+		if(verbose) message("automateDataPreparation terminated successfully! ", Sys.time(), "\n")
 
 		return(dat)
 }

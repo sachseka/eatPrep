@@ -6,7 +6,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 		# Identifizieren der Items im Datensatz
 		# mit ggf. Abgleich der rekodierten Namen aus subunits
 		if ( verbose ) {
-				message( "\nidentifying items in data (reference is blocks$subunit)" )
+				message( "...identifying items in data (reference is blocks$subunit)" )
 		}
 		# colnames
 		cn <- colnames ( dat )
@@ -43,8 +43,8 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 		if ( verbose ) {
 				check5 <- length(not.items) > 0
 				if ( check5 ) {
-						message( "variables in data not recognized as items:\n" , paste ( not.items , collapse = ", " ))
-				  message( "     if some of these excluded variables should have been identified as items (and thus be used for mnr coding) check 'blocks', 'subunits', 'dat'." )
+						message( "Variables in data not recognized as items:\n" , paste ( not.items , collapse = ", " ))
+				  message( "If some of these excluded variables should have been identified as items (and thus be used for mnr coding) check 'blocks', 'subunits', 'dat'." )
 				}
 		}
 
@@ -57,14 +57,14 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 
 				# zur convenience noch Items identifizieren die gar kein mbiCode haben
 				if ( verbose ) {
-				  message( "identifying items with no mbi-codes ('" , mbiCode , "'):")
+				  message( "...identifying items with no mbi-codes ('" , mbiCode , "'):")
 						f1 <- function ( sp , mbiCode ) {
 								if ( !any(sp %in% mbiCode ) ) TRUE else FALSE
 						}
 						nombi <- sapply ( dat[,items] , f1 , mbiCode )
 						if ( any ( nombi ) ) {
 						  message( paste ( items[nombi] , collapse = ", " ))
-						  message( "     If you expect mbi-codes on these variables check your data and option 'mbiCode'" )
+						  message( "If you expect mbi-codes on these variables check your data and option 'mbiCode'" )
 						} else {
 						  message( "none" )
 						}
