@@ -76,7 +76,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
                 subunitPosition = "", #subunitTransniveau = "",
 				subunitRecoded = subunitRecoded,
                 subunitLabelRecoded = subunitLabelRecoded, stringsAsFactors = FALSE)
-      cat("Found no subunits input. All subunit labels will be defaulted to subunit name.\n")
+      message("Found no subunits input. All subunit labels will be defaulted to subunit name.")
   #    stop("Missing argument: subunits")
     } else {
       if (class(subunits) != "data.frame"){
@@ -88,7 +88,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
   # check subunit labels
   if (any(is.na(subunits$subunitLabel) | subunits$subunitLabel == "" )) {
    emptyLabels <- which(is.na(subunits$subunitLabel) |subunits$subunitLabel == "")
-   cat("Found no subunit label for subunit(s)", emptyLabels, "\nSubunit label will be defaulted to subunit name.\n")
+   message("Found no subunit label for subunit(s) ", paste(subunits$subunit[emptyLabels], collapse=" "), ". Subunit label will be defaulted to subunit name.")
    subunits$subunitLabel[ emptyLabels ] <- subunits$subunit [ emptyLabels ]
   }
 
@@ -99,7 +99,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
               unitDescription = subunits$subunitDescription, unitAggregateRule = "",
               unitScoreRule = "", stringsAsFactors = FALSE )
       units <- units [ !duplicated(units) , ]
-      cat("Found no units input. Use unit names from subunit input. Unit labels will be defaulted to unit names.\n")
+      message("Found no units input. Use unit names from subunit input. Unit labels will be defaulted to unit names.")
     } else {
       if (class(units) != "data.frame"){
         stop("Argument units is not a data frame.")
@@ -142,15 +142,15 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
   # check consistency of subunit names in subunits & values
   subunitsWithoutValues <- setdiff(subunits$subunit, values$subunit)
   if (length(subunitsWithoutValues) > 0 ) {
-    cat("Found no values for subunit(s)", subunitsWithoutValues,
-        "\nNo varinfo and/or recodeinfo will be written for this/these subunit(s).\n")
+    message("Found no values for subunit(s)", paste(subunitsWithoutValues, collapse=" "),
+        "\nNo varinfo and/or recodeinfo will be written for this/these subunit(s).")
     subunits <- subunits[ - which(subunits$subunit %in% subunitsWithoutValues) , ]
   }
 
   valuesWithoutSubunits <- setdiff(values$subunit, subunits$subunit)
   if (length(valuesWithoutSubunits) > 0 ) {
-    cat("Found only values for subunit(s)", valuesWithoutSubunits,
-        "\nSubunit label will be defaulted to subunit name for this/these subunit(s).\n")
+    message("Found only values for subunit(s)", paste(valuesWithoutSubunits, collapse=" "),
+        "\nSubunit label will be defaulted to subunit name for this/these subunit(s).")
   missingSubunits <- data.frame ( unit = valuesWithoutSubunits, subunit = valuesWithoutSubunits,
               subunitType = "", subunitLabel = valuesWithoutSubunits, subunitDescription = "",
               subunitPosition = "", #subunitTransniveau = "",
@@ -172,15 +172,15 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
     unitsWithoutSubunits <- setdiff(unitsWithoutSubunits, idName)
   }
   if (length(unitsWithoutSubunits) > 0 ) {
-    cat("Found no subunits for unit(s)", unitsWithoutSubunits, "\n")
+    message("Found no subunits for unit(s)",  paste(unitsWithoutSubunits, collapse=" "))
  #       "\nNo varinfo and recodeinfo will be written for this/these unit(s).\n")
  #   units <- units[ - which(units$unit %in% unitsWithoutSubunits) , ]
   }
 
   SubunitsWithoutUnits <- setdiff(subunits$unit, units$unit)
   if (length(SubunitsWithoutUnits) > 0 ) {
-    cat(paste("Found only subunits for unit(s)", paste(SubunitsWithoutUnits, collapse = ", "), ".\n",
-        "Unit label will be defaulted to unit name for this/these unit(s). Unit type, aggregate rule and score rule will be empty.\n"))
+    message("Found only subunits for unit(s)", paste(SubunitsWithoutUnits, collapse = ", "), ".\n",
+        "Unit label will be defaulted to unit name for this/these unit(s). Unit type, aggregate rule and score rule will be empty.")
 		if("unitScoreRule" %in% colnames(units)){
  		    missingunits <- data.frame ( unit = SubunitsWithoutUnits, unitLabel = SubunitsWithoutUnits,
               unitDescription = "", unitType = "",
@@ -202,7 +202,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 .makeVarinfoRawValues <- function(subunitName, values) {
 
   if ( ! subunitName %in% values$subunit ) {
-    stop(paste("Found no values for subunit" , subunitName, "."))
+    stop("Found no values for subunit" , subunitName, ".")
   }
 
   subValues <- values [ values$subunit == subunitName , ]
@@ -217,7 +217,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 .makeVarinfoRecodedValues <- function(subunitName, values) {
 
   if ( ! subunitName %in% values$subunit ) {
-    stop(paste("Found no values for subunit" , subunitName, "."))
+    stop("Found no values for subunit" , subunitName, ".")
   }
 
   subValues <- values [ values$subunit == subunitName , ]
@@ -281,7 +281,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
 .makeRecodeinfoValues <- function(subunitName, values) {
 
   if ( ! subunitName %in% values$subunit ) {
-    stop(paste("Found no values for subunit" , subunitName, "."))
+    stop("Found no values for subunit" , subunitName, ".")
   }
   subValues <- values [ values$subunit == subunitName , ]
   recodeinfoValues <- as.list(subValues$valueRecode)
