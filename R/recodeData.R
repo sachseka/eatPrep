@@ -9,7 +9,7 @@ recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
   }
 
     datR <- data.frame(mapply(.recodeData.recode, dat,
-  colnames(dat), MoreArgs = list(recodeinfo = recodeinfo, verbose = verbose), USE.NAMES = TRUE),
+  colnames(dat), MoreArgs = list(recodeinfo = recodeinfo, mode = "recode", verbose = verbose), USE.NAMES = TRUE),
   stringsAsFactors = FALSE)
   if(!is.null(subunits))
     colnames(datR) <- eatTools::recodeLookup(colnames(datR), subunits[ , c("subunit", "subunitRecoded")])
@@ -19,7 +19,7 @@ recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
 
 #-----------------------------------------------------------------------------------------
 
-.recodeData.recode <- function (variable, variableName, recodeinfo, dontcheck = "mbd", verbose = TRUE) {
+.recodeData.recode <- function (variable, variableName, recodeinfo, dontcheck = "mbd", mode = c("recode", "score"), verbose = TRUE) {
   variableRecoded <- NULL
 
   if (!is.character(variable)) {
@@ -34,7 +34,9 @@ recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
 
   if (nrow(recinfoVar) == 0) {
     variableRecoded <- variable
-    message(paste("Found no recode information for variable ", variableName, ". This variable will not be recoded.", sep =""))
+    if (mode == "recode"){
+      message(paste("Found no recode information for variable ", variableName, ". This variable will not be recoded.", sep =""))
+    }
   } else {
     variable.unique <- na.omit(unique(variable[which(!variable %in% dontcheck)]))
     recodeinfoCheck <- (variable.unique %in% recinfoVar$value)
