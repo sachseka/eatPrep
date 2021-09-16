@@ -243,7 +243,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 								fun5 <- function ( durchgang ) {
 										zufall <- runif ( 10 )
 										if ( zufall[5] > 0.90 ) lb <- "\n" else lb <- ""
-										z <- paste ( "cat('",durchgang," ');cat('", lb ,"');flush.console()", sep = "" )
+									#	z <- paste ( "cat('",durchgang," ');cat('", lb ,"');flush.console()", sep = "" )
 								}
 								z <- sapply ( seq(along=do) , fun5 )
 								names(z) <- seq(along=z)
