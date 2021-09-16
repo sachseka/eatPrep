@@ -57,7 +57,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		### ggf. sav-files einlesen
 		if(readSpss) {
-			if(verbose) message("Load .sav-files.")
+			if(verbose) message("\nLoad .sav-files.")
 			if(!is.null(datList)) {
 				warning("If readSpss == TRUE, datList will be ignored.")
 			}
@@ -90,12 +90,12 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		if(is.null(oldIDs)) stop("Please specify oldIDs. Case ID in inputList$savFiles$case.id seems to be empty.")
 
 		if(checkData) {
-			if(verbose) message("Check data...")
+			if(verbose) message("\nCheck data...")
 			mapply(checkData, dat=datList, datnam=names(datList), ID=oldIDs, MoreArgs = list(values=inputList$values, subunits=inputList$subunits, units=inputList$units, verbose=verbose))
-		} else {if(verbose) message("Check has been skipped." )}
+		} else {if(verbose) message("\nCheck has been skipped." )}
 
 		if(mergeData) {
-			if(verbose) message("Start merging.")
+			if(verbose) message("\nStart merging.")
 			if(is.null(newID)) {
 			  if(is.null(inputList$newID)) {
 			    newID <- "ID"
@@ -116,12 +116,12 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			  message("Merge has been skipped, but more than one dataset has been loaded. A list of datasets will be returned." )
 			  dat <- datList
 			  } else {
-			  message("Merge has been skipped." )
+			  message("\nMerge has been skipped." )
 			}
 		}
 
 		if(recodeData) {
-			if(verbose) message("Start recoding.")
+			if(verbose) message("\nStart recoding.")
   		if(is.data.frame(dat)) {
   					if(nrow(dat) == 0 | ncol(dat) == 0) dat <- NULL
   			}
@@ -130,11 +130,11 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
   	  }
 			dat <- recodeData(dat=dat, values=inputList$values, subunits=inputList$subunits, verbose=verbose)
 		} else {
-		  if(verbose) message("Recode has been skipped.")
+		  if(verbose) message("\nRecode has been skipped.")
     }
 
 		if(recodeMnr) {
-			if(verbose) message("Start recoding Mbi to Mnr.")
+			if(verbose) message("\nStart recoding Mbi to Mnr.")
 			if(is.null(inputList$booklets)) stop("Recoding Mnr in automateDataPreparation requires inputList$booklets. Data frame not available.")
 			if(is.null(inputList$blocks)) stop("Recoding Mnr in automateDataPreparation requires inputList$blocks. Data frame not available.")
   		if(is.null(inputList$rotation)) {
@@ -161,12 +161,12 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 
 		} else {
-		  if(verbose) message("RecodeMnr has been skipped.")
+		  if(verbose) message("\nRecodeMnr has been skipped.")
 		  }
 
 
 		if(aggregateData) {
-			if(verbose) message("Start aggregating\n" )
+			if(verbose) message("\nStart aggregating" )
 			if ( length(aggregatemissings) > 0 && aggregatemissings == "seeInputList" ) {
 				stopifnot(!is.null(inputList$aggrMiss))
 				aMiss <- unname(inputList$aggrMiss[,-1])
@@ -180,18 +180,18 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			dat <- aggregateData (dat=dat, subunits=inputList$subunits, units=inputList$units,
             aggregatemissings = aggregatemissings, rename = rename, recodedData = recodedData, verbose = verbose, suppressErr = suppressErr, recodeErr = recodeErr)
 		} else {
-		if(verbose) message("Aggregate has been skipped." )
+		if(verbose) message("\nAggregate has been skipped." )
 		  }
 
 		if(scoreData) {
-			if(verbose) message("Start scoring.")
+			if(verbose) message("\nStart scoring.")
 				dat <- scoreData (dat= dat, unitrecodings=inputList$unitRecodings, units=inputList$units, verbose = verbose)
 		} else {
-		if(verbose) message("Scoring has been skipped." )
+		if(verbose) message("\nScoring has been skipped." )
 		  }
 
 		if(writeSpss) {
-			if(verbose) message("Writing dataset in last transformation status to disk\n" )
+			if(verbose) message("\nWriting dataset in last transformation status to disk" )
 			if (class(dat) != "data.frame") {
 				warning ("Data is no data frame (data frames probably need to be merged)." )
 			}
@@ -203,17 +203,17 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 				warning ("No SPSS-File could be written.")
 			}
 		} else {
-		if(verbose) message("No SPSS-File has been written." ) }
+		if(verbose) message("\nNo SPSS-File has been written." ) }
 
 		if(collapseMissings) {
-			if(verbose) message("Collapsing missings.")
+			if(verbose) message("\nCollapsing missings.")
 			dat <- collapseMissings(dat=dat, missing.rule = missing.rule)
 		} else {
-		if(verbose) message("Missings are UNcollapsed.")
+		if(verbose) message("\nMissings are UNcollapsed.")
 		  }
 
 		# finale Ausgabe
-		if(verbose) message("automateDataPreparation terminated successfully! ", Sys.time())
+		if(verbose) message("automateDataPreparation terminated successfully! \n", Sys.time())
 
 		return(dat)
 }

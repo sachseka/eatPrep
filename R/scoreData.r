@@ -4,16 +4,16 @@ scoreData <- function (dat, unitrecodings, units, verbose = FALSE) {
   scoreinfo <- dplyr::inner_join(units, unitrecodings, by = "unit")
   dontcheck <- c("mbd","mvi", "mnr", "mci", "mbd", "mir", "mbi")
 
-   if(length(setdiff(colnames(dat), names(scoreinfo))) > 0) {
- 	  warning(paste("Found no scoring information for variable(s) ",
- 		paste(setdiff(colnames(dat), names(scoreinfo)), collapse = ", "),
- 			". \nThis/These variable(s) will not be scored.\n", sep =""))
-   }
+  # if(length(setdiff(colnames(dat), names(scoreinfo))) > 0) {
+ 	 # warning(paste("Found no scoring information for variable(s) ",
+ 	#	paste(setdiff(colnames(dat), names(scoreinfo)), collapse = ", "),
+ #			". \nThis/These variable(s) will not be scored.\n", sep =""))
+  # }
 
   # make scored data.frame
   datS <- data.frame(mapply(.recodeData.recode, dat,
   colnames(dat), MoreArgs = list(scoreinfo, dontcheck = dontcheck,
-                                 mode = "score", verbose = FALSE), USE.NAMES = TRUE),
+                                 mode = "score", verbose = TRUE), USE.NAMES = TRUE),
   stringsAsFactors = FALSE)
 
 #  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)
