@@ -1,5 +1,5 @@
 catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL,
-                   values, subunits, file.name = NULL, verbose = F) {
+                   values, subunits, file.name = NULL, verbose = FALSE) {
 
 	# Pruefen, ob IDs in beiden Datensaetzen uebereinstimmen
 	idrec <- datRec [ , idRec ]
