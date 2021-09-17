@@ -1,0 +1,108 @@
+---
+title: "eatPrep"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{eatPrep}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(eatPrep)
+library(knitr)
+```
+
+```{r tempsetup}
+inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", "unitAggregateRule")],
+                     subunits = inputList$subunits[, c("unit", "subunit","subunitRecoded")],
+                     values = inputList$values[ , c("subunit", "value", "valueRecode", "valueType")],
+                     unitRecodings = inputList$unitRecodings[ , c("unit", "value", "valueRecode", "valueType")],
+                     blocks = inputList$blocks,
+                     booklets = inputList$booklets,
+                     rotation = inputList$rotation)
+```
+
+## Introduction
+
+The goal of `eatPrep`, short for `Educational Assesment Tools: Preparation`, is to automate the preparation of item response test data; especially but not exclusively for typical use cases at the *Institute for Educational Quality Improvement* (IQB).
+Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDeamon`.
+
+The main purpose of `eatPrep` is to read, score, aggregate and merge data from a regular `SPSS` (`.sav`) data file (via the function `readSpss()`) and metadata from databases (`readDaemonXlsx()`) and Excel spreadsheets (`readMerkmalXlsx()`). Additional functions include checking the design (`checkData()`, `checkDesign()`), recoding of missing values (`recodeData()`, `mnrCoding()`, `collapseMissings()`) and working with rater data (`meanAgree()`, `meanKappa()`).  
+Most of this can be done with a single function call to `automateDataPreparation()`.
+
+In a prototypical scenario, we are constructing a test at the IQB, e.g. for educational purposes. For our pilot study, we have created several overlapping booklets and a variety of items with different item formats (constructed response, multiple choice).  
+Thereby, the data consists of several layers:
+
+* booklets, containing blocks,
+* blocks, containing units (= items), 
+* units, containing subunits/subitems,
+* subunits, having values and
+* values, including missings and recode values
+
+Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that.
+
+<!-- we also want to include additional information about the items (merkmalstabelle) -> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR! -->
+
+
+## Input
+
+Information/meta data about items. is stored in many different ways, e.g., databases, excel sheets, sometimes even in item names. eatPrep requires this metadata to have a specific form, namely a series of relational tables. For eatPrep it is most convenient to store these tables in a list.
+
+sheets have specific names, also the columns in those sheets have specific names
+
+Example: inputList, inputMinimal
+
+inputMinimal contains the bare minimum for all functions in eatPrep to work, inputList contains additional metadata about the items (such as information about the task's content)
+
+### Input tables
+let's look at the tables from bottom to top, starting with items and their values. in the values sheet, we define values and recode values for each subitem.
+
+
+here we see 3 items (called units) from inputList bzw. inputMinimal
+one mc (item 1), one short response (item 2), one item with 3 subitems short response (item 12)
+
+```{r inputList}
+items <- c("I01", "I05", "I12")
+subitems <- c("I01", "I05", "I12a", "I12b", "I12c")
+
+kable(inputMinimal$units[which(inputMinimal$units$unit %in% items), ])
+kable(inputMinimal$subunits[which(inputMinimal$subunits$subunit %in% subitems), ])
+kable(inputMinimal$values[which(inputMinimal$values$subunit %in% subitems), ])
+kable(inputMinimal$unitRecodings)
+
+```
+
+values sheet contains all possible values for each subitem and scoring information for each value (e.g., whether it is true, false, or missing). there are several types of missing values.
+
+--> talk more about values in the data for different item types (mc, cr) and about missing values in the data. missing values do not need to be the same for each variable in the data.
+
+
+subunits sheet contains information about the relationship between subitems and items. this information is used to aggregate subitems to items. if recoded subitems should be named differently than the unrecoded variables in the original data, this can be specified via subunitRecoded. The only type of aggregation currently supported by eatPrep is to count the number of correct subitems per item.
+
+unitrecodings contains the same information as the values sheet, but for aggregated items. here, the value on an item is the aggregated number of correct subitems and the recode value gives a threshold of how many subitems need to be solved to obtain a credit for the item. in the example, I12 has 3 subitems, and one receives a credit if all subitems are solved correctly.
+
+the minimal use case is that each subitem corresponds to an item. in this case, the value sheet contains all information needed for recoding the items (apart from possibly renaming the recoded items).
+
+## input data
+
+we have several overlapping booklets with several blocks in each booklet. moreover, there is a unique identifier for each person and some additonal information about each student such as their gender or their socioeconomic status. there is one data set per booklet. in order to prepare the data, we need to construct one large dataset.
+
+```{r inputDat}
+str(inputDat)
+```
+
+
+## Recode
+
+## Aggregate
+
+## Score
+
+## Collapse

@@ -57,3 +57,4 @@ oneRater <- make.pseudo (datLong=rater, idCol="id", varCol="variable", codCol="r
 twoRaters<- make.pseudo (datLong=rater, idCol="id", varCol="variable", codCol="rater",
             valueCol="value", n.pseudo=2)
 }
+

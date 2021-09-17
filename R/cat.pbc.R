@@ -1,4 +1,5 @@
-catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL, values, subunits, file.name = NULL, verbose = F) {
+catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL,
+                   values, subunits, file.name = NULL, verbose = F) {
 
 	# Pruefen, ob IDs in beiden Datensaetzen uebereinstimmen
 	idrec <- datRec [ , idRec ]
@@ -47,7 +48,7 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL, values, su
     if(is.numeric(idRaw)) {
       idRaw <- colnames(datRaw)[idRaw]
     }
-	    
+
     # Variablen mit nur missings ausschliessen
     if(any(colMeans(is.na(datRaw)) == 1)){
       raus <- colnames(datRaw)[colMeans(is.na(datRaw)) == 1]
@@ -74,7 +75,7 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL, values, su
 			validCodes <- names(valueTypes)  [ valueTypes == "vc" ]
       valuesToNA <- c( "mbd", "mci", names(valueTypes) [ valueTypes %in% c("mbd", "mci") ] )
 			dat.vv [ dat.vv %in% valuesToNA] <- NA
-			
+
 			# check: gibt es im rekodierten Datensatz mnr-Codes?
 			datRec.vv <- datRec[ , which( colnames(datRec) == subunits$subunitRecoded[subunits$subunit == var.vv]  ) ]
 			if(any(na.omit(datRec.vv) == "mnr")) {
@@ -85,7 +86,7 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL, values, su
               " in datRaw for variable ", var.vv, " with code ", names(which(valueTypes == "mnr")), "\n"))
         }
       }
-      
+
 			# Haeufigkeitsverteilung der Codes, ohne mbd & mci
 			tvv <- table( dat.vv )
 			kat.vv <- names(tvv)

@@ -5,14 +5,14 @@
 This function facilitates automated data preparation and wraps most functions from the \code{eatPrep} package.
 
 }
-\usage{automateDataPreparation(datList = NULL, inputList, path = NULL, 
+\usage{automateDataPreparation(datList = NULL, inputList, path = NULL,
     readSpss, checkData,  mergeData, recodeData, recodeMnr = FALSE,
-    aggregateData, scoreData, writeSpss, collapseMissings = FALSE, 
-    filedat = "mydata.txt", filesps = "readmydata.sps", breaks=NULL, 
+    aggregateData, scoreData, writeSpss, collapseMissings = FALSE,
+    filedat = "mydata.txt", filesps = "readmydata.sps", breaks=NULL,
     nMbi = 2, rotation.id = NULL, suppressErr = FALSE, recodeErr = "mci",
-    aggregatemissings = NULL, rename = TRUE, recodedData = TRUE, 
-    correctDigits=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL, 
-    missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0), 
+    aggregatemissings = NULL, rename = TRUE, recodedData = TRUE,
+    addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
+    missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0),
     verbose=FALSE)}
 \arguments{
   \item{datList}{
@@ -22,7 +22,7 @@ This function facilitates automated data preparation and wraps most functions fr
   A list of data frames containing neccessary information for data preparaton (see \code{data(inputList)} for details).
 }
   \item{path}{
-A character vector containing the path required by \code{\link{readSpss}} (source of SPSS files) and \code{\link{writeSpss}}.
+A character vector containing the path required by for \code{\link{writeSpss}}.
 Default is the current \R working directory.
 }
   \item{readSpss}{
@@ -67,7 +67,7 @@ Numeric vector of length 1 passed on to function \code{\link{mnrCoding}} contain
 }
  \item{rotation.id}{
 
-Character vector of length 1 passed on to function \code{\link{mnrCoding}} indicating the name of the rotation indicator (e.g. \dQuote{booklet}) in the dataset. 
+Character vector of length 1 passed on to function \code{\link{mnrCoding}} indicating the name of the rotation indicator (e.g. \dQuote{booklet}) in the dataset.
 }
  \item{suppressErr}{
 Logical passed on to function \code{\link{aggregateData}} indicating whether aggregated cells with \code{err} should be recoded to another value..
@@ -82,7 +82,7 @@ A symmetrical \emph{n x n} matrix or a data frame from \code{inputList$aggrMiss}
   \item{rename}{Logical passed on to function \code{\link{aggregateData}} indicating whether units with only one subunit should be renamed to their unit name? Default is \code{FALSE}.}
   \item{recodedData}{Logical passed on to function \code{\link{aggregateData}}indicating whether colnames in \code{dat} are the subunit names (as in \code{subunits$subunit}) or recoded subunit names (as in \code{subunits$subunitRecoded}). Default is \code{TRUE}, meaning that colnames are recoded subitem names.}
 
-  \item{correctDigits}{
+  \item{addLeadingZeros}{
 logical. See \code{\link{readSpss}}.
 }
   \item{truncateSpaceChar}{
@@ -113,10 +113,10 @@ Karoline Sachse
 \examples{
 data(inputList)
 data(inputDat)
-preparedData <- automateDataPreparation(inputList = inputList, 
-    datList = inputDat,	path = "c:/temp/test_eat", 
-    readSpss = FALSE, checkData = TRUE,	mergeData = TRUE, 
+preparedData <- automateDataPreparation(inputList = inputList,
+    datList = inputDat,	path = getwd(),
+    readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
-    aggregateData = TRUE, scoreData = TRUE, 
+    aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
 }

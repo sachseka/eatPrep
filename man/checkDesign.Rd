@@ -3,13 +3,13 @@
 \title{Check Datasets for Deviations From Test Design}
 \description{
 This function checks whether a data frame corresponds to a particular rotated block design, i.e. whether all persons have valid codes on all items they were presented with and one consistent missing code for all items they were not presented with.}
-\usage{checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID", 
+\usage{checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID",
     subunits = NULL, verbose = TRUE)}
 \arguments{
   \item{dat}{A data frame}
-  \item{booklets}{A data frame containing information about the number of blocks in each booklet and the names of these blocks. See \sQuote{Examples}.}
-  \item{blocks}{A data frame containing the names of subunits and their order within each block. See \sQuote{Examples}.}
-  \item{rotation}{A data frame containing information about which participant worked on which booklet. See \sQuote{Examples}.}
+  \item{booklets}{A data frame containing information about the number of blocks in each booklet and the names of these blocks with column names 'subunit', 'block', 'subunitBlockPosition'. See \sQuote{Examples}.}
+  \item{blocks}{A data frame containing the names of subunits and their order within each block with column names 'booklet', 'block1', 'block2' ... etc. See \sQuote{Examples}.}
+  \item{rotation}{A data frame containing information about which participant worked on which booklet with column names [id as specified above], 'booklet'. See \sQuote{Examples}.}
    \item{sysMis}{A character vector of length 1 indicating the missing code for items that were not administered to a participant. Default is "NA".}
   \item{id}{A character vector of length 1 indicating the name of the participant identifier variable in \code{dat}. Default is \code{ID}.}
   	\item{subunits}{
@@ -28,18 +28,18 @@ data(inputDat)
 data(inputList)
 
 prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
-    readSpss = FALSE, checkData = FALSE, mergeData = TRUE, recodeData = TRUE, 
+    readSpss = FALSE, checkData = FALSE, mergeData = TRUE, recodeData = TRUE,
     aggregateData = FALSE, scoreData = FALSE, writeSpss = FALSE, verbose = TRUE)
-		
-checkDesign(dat = prepDat, booklets = inputList$booklets, blocks = inputList$blocks, 
-    rotation = inputList$rotation, sysMis = "mbd", id="ID", 
+
+checkDesign(dat = prepDat, booklets = inputList$booklets, blocks = inputList$blocks,
+    rotation = inputList$rotation, sysMis = "mbd", id="ID",
     subunits = inputList$subunits, verbose = TRUE)
 
 prepDat[1:7,"I22R"] <- "1"
 prepDat[1,c("I01R","I02R","I03R")] <- "mbd"
 
-checkDesign(dat = prepDat, booklets = inputList$booklets, blocks = inputList$blocks, 
-    rotation = inputList$rotation, sysMis = "mbd", id="ID", 
+checkDesign(dat = prepDat, booklets = inputList$booklets, blocks = inputList$blocks,
+    rotation = inputList$rotation, sysMis = "mbd", id="ID",
     subunits = inputList$subunits, verbose = TRUE)
 }
 

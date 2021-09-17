@@ -6,7 +6,7 @@
 \description{Recode datasets with special consideration of missing values. See \code{\link{collapseMissings}} for supported types of missing values.
 }
 \usage{
-recodeData(dat, values, subunits, verbose = FALSE)
+recodeData(dat, values, subunits = NULL, verbose = FALSE)
 }
 \arguments{
   \item{dat}{A data frame}
@@ -22,14 +22,14 @@ Examples of data frames \code{values} and \code{subunits} can be found via \code
 
 }
 \value{
-A data frame with recoded variables according to the specifications in \code{values} and \code{subunits}. The columns will be named according to the specifications in \code{subunits$subunitRecoded}. 
+A data frame with recoded variables according to the specifications in \code{values} and \code{subunits}. The columns will be named according to the specifications in \code{subunits$subunitRecoded} If \code{subunits} is not provided, item names will not be changed for recoded items.
 }
 \author{
-Martin Hecht, Christiane Penk, Nicole Haag
+Nicole Mahler, Martin Hecht, Christiane Penk
 }
 
 \seealso{
-	\code{\link{aggregateData}},  \code{\link{automateDataPreparation}}, \code{\link{inputList}}
+	\code{\link{scoreData}},  \code{\link{automateDataPreparation}}, \code{\link{inputList}}
 }
 \examples{
 data(inputDat)

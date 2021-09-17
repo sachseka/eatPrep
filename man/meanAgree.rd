@@ -38,3 +38,4 @@ v01 <- subset(rater, variable == "V01")
 dat <- reshape2::dcast( v01, id~rater, value.var = "value")
 agr <- meanAgree(dat[,-1])
 }
+

@@ -25,6 +25,9 @@ The xlsx-file produced by 'IQB Item-DB' is expected to have the following sheets
 \value{
 A list of data frames containing Itemmerkmale, Aufgabenmerkmale and AlleMerkmale (optional).
 }
+\examples{
+readMerkmalXlsx(system.file("extdata", "itemmerkmale.xlsx", package = "eatPrep"))
+}
 \author{
 Karoline Sachse
 }

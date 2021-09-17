@@ -1,62 +1,54 @@
-recodeData <- function (dat, values, subunits, verbose = FALSE) {
-  funVersion <- "recodeData: "
-  
-  if (class(dat) != "data.frame") {
-  stop (paste(funVersion, "'dat' must be a data.frame.\n", sep = ""))
-  }  
+recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
 
-  recodeinfo <- makeInputRecodeData (values = values, subunits = subunits)
-  
-  # make recoded data.frame
-  datR <- data.frame(mapply(.recodeData.recode, dat, 
-  colnames(dat), MoreArgs = list(recodeinfo = recodeinfo, verbose = verbose), USE.NAMES = TRUE), 
+  if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
+  if(!is.null(subunits)) {
+    inp <- checkValuesSubunits(values, subunits)
+    recodeinfo <- dplyr::inner_join(inp$subunits, inp$values, by = "subunit")
+  } else {
+    recodeinfo <- values
+  }
+
+    datR <- data.frame(mapply(.recodeData.recode, dat,
+  colnames(dat), MoreArgs = list(recodeinfo = recodeinfo, mode = "recode", verbose = verbose), USE.NAMES = TRUE),
   stringsAsFactors = FALSE)
-  
-  colnames(datR) <- sapply(colnames(datR), .recodeData.renameIDs, recodeinfo, USE.NAMES = FALSE)
-  
+  if(!is.null(subunits))
+    colnames(datR) <- eatTools::recodeLookup(colnames(datR), subunits[ , c("subunit", "subunitRecoded")])
+
   return(datR)
 }
 
 #-----------------------------------------------------------------------------------------
 
-.recodeData.recode <- function (variable, variableName, recodeinfo, verbose = TRUE) {
+.recodeData.recode <- function (variable, variableName, recodeinfo, dontcheck = "mbd", mode = c("recode", "score"), verbose = TRUE) {
   variableRecoded <- NULL
-  funVersion <- "recodeData: "
-  
-  if (!(class(variable) == "character")) { 
+
+  if (!is.character(variable)) {
     variable <- as.character(variable)
   }
-  
-  if (is.null(recodeinfo[[variableName]]$values)) {
-    variableRecoded <- variable
-    if (verbose) cat(paste(funVersion, "Found no recode information for variable ", variableName, ". This variable will not be recoded.\n", sep =""))
+
+  if(any(colnames(recodeinfo) == "subunit")) {
+    recinfoVar <- recodeinfo[which(recodeinfo$subunit == variableName), ]
   } else {
-    dontcheck <- c("mbd")
-    variable.unique <- na.omit(unique(variable[which(!variable %in% dontcheck)]))
-    recodeinfoCheck <- (variable.unique %in% names(unlist(recodeinfo[[variableName]]$values)))
-    if (!all(recodeinfoCheck == TRUE)) {
-      if (verbose) cat(paste(funVersion, "Incomplete recode information for variable ", 
-      variableName, ". Value(s) ",  
-      paste(sort(variable.unique[!recodeinfoCheck]), collapse = ", "), " will not be recoded.\n", sep = ""))
+    recinfoVar <- recodeinfo[which(recodeinfo$unit == variableName), ]
+  }
+
+  if (nrow(recinfoVar) == 0) {
+    variableRecoded <- variable
+    if (mode == "recode"){
+      message(paste("Found no recode information for variable ", variableName, ". This variable will not be recoded.", sep =""))
     }
-    
-    recodeString <- paste(paste("'", names(unlist(recodeinfo[[variableName]]$values)), 
-    "'", "=", "'", unlist(recodeinfo[[variableName]]$values), "'", 
-    sep = ""), collapse = "; ")
-    variableRecoded <- car::recode(variable, recodeString, as.factor = FALSE,
-    as.numeric = FALSE)
-	if (verbose) cat(paste(funVersion, variableName, " has been recoded.\n", sep =""))
+  } else {
+    variable.unique <- na.omit(unique(variable[which(!variable %in% dontcheck)]))
+    recodeinfoCheck <- (variable.unique %in% recinfoVar$value)
+    if (!all(recodeinfoCheck == TRUE)) {
+      warning(paste("Incomplete recode information for variable ",
+      variableName, ". Value(s) ",
+      paste(sort(variable.unique[!recodeinfoCheck]), collapse = ", "), " will not be recoded.", sep = ""))
+    }
+
+    lookupVar <- recinfoVar[ , c("value", "valueRecode") ]
+    variableRecoded <- eatTools::recodeLookup(variable, lookupVar)
+	if (verbose) message(paste(variableName, " has been recoded.", sep =""))
   }
   return(variableRecoded)
-}
-
-#-----------------------------------------------------------------------------------------
-
-.recodeData.renameIDs <-  function(colname, recodeinfo) {
-  newID <- recodeinfo[[colname]]$newID
-  if (is.null(newID)) {
-   colname
-  } else {
-    newID
-  }
 }
