@@ -17,6 +17,7 @@ checkData <- function (dat, datnam, values, subunits, units, ID=NULL, verbose = 
 	} else {
 	  idvarname <- ID
 	}
+
 	checkID (dat, idvarname, verbose)
 
 	# Variables-Check <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -102,7 +103,7 @@ checkVars <- function(dat, varinfo, verbose) {
 	varsWithoutVarinfo <- setdiff(colnames(dat), names(varinfo))
 	if (length(varsWithoutVarinfo) > 0) {
 		if(verbose) message("Found no variable information about variable(s) ", paste(varsWithoutVarinfo, collapse = ", "),
-			".\nThis/These variables will not be checked for missings and invalid codes.")
+			". This/These variables will not be checked for missings and invalid codes.")
 	}
 }
 #-----------------------------------------------------------------------------------------
@@ -113,7 +114,11 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
 
   # funVersion <- "checkMissings: "
 
-  vars <- intersect(colnames(dat), names(varinfo)[- which(names(varinfo) == idvarname)])
+  if(length(which(names(varinfo) == idvarname))> 0) {
+    vars <- intersect(colnames(dat), names(varinfo)[- which(names(varinfo) == idvarname)])
+  } else {
+    vars <- intersect(colnames(dat), names(varinfo))
+  }
 
   if (length(vars) == 0){
     if(verbose) message("Found no variable informations for any of the variables in 'dat'. Check for missing values will be skipped.")
@@ -161,7 +166,12 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
 checkCodes <- function(dat, varinfo, idvarname, verbose) {
   # funVersion <- "checkCodes: "
 
-  vars <- intersect(colnames(dat), names(varinfo)[- which(names(varinfo) == idvarname)])
+  if(length(which(names(varinfo) == idvarname))> 0) {
+    vars <- intersect(colnames(dat), names(varinfo)[- which(names(varinfo) == idvarname)])
+  } else {
+    vars <- intersect(colnames(dat), names(varinfo))
+  }
+
   if (length(vars) == 0){
     if(verbose) message("Found no variable informations for any of the variables in 'dat'. Check for invalid codes will be skipped.")
   } else {
