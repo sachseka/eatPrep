@@ -1,19 +1,21 @@
-scoreData <- function (dat, unitrecodings, units, verbose = FALSE) {
+scoreData <- function (dat, unitrecodings, units, subunits, verbose = FALSE) {
   if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
 
   scoreinfo <- dplyr::inner_join(units, unitrecodings, by = "unit")
   dontcheck <- c("mbd","mvi", "mnr", "mci", "mbd", "mir", "mbi")
 
-  # if(length(setdiff(colnames(dat), names(scoreinfo))) > 0) {
- 	 # warning(paste("Found no scoring information for variable(s) ",
- 	#	paste(setdiff(colnames(dat), names(scoreinfo)), collapse = ", "),
- #			". \nThis/These variable(s) will not be scored.\n", sep =""))
-  # }
+  unitsToScore <- unique(subunits$unit[duplicated(subunits$unit)])
+
+   if(length(setdiff(unitsToScore, unique(unitrecodings$unit))) > 0) {
+   warning(paste("Found no scoring information for variable(s) ",
+   paste(setdiff(unitsToScore, unique(unitrecodings$unit)), collapse = ", "),
+   		". \nThis/These variable(s) will not be scored.\n", sep =""))
+   }
 
   # make scored data.frame
   datS <- data.frame(mapply(.recodeData.recode, dat,
   colnames(dat), MoreArgs = list(scoreinfo, dontcheck = dontcheck,
-                                 mode = "score", verbose = TRUE), USE.NAMES = TRUE),
+                                 mode = "score", verbose = verbose), USE.NAMES = TRUE),
   stringsAsFactors = FALSE)
 
 #  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)

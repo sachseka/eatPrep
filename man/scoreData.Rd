@@ -6,12 +6,13 @@
 \description{Score datasets with special consideration of missing values.
 }
 \usage{
-scoreData(dat, unitrecodings, units, verbose = FALSE)
+scoreData(dat, unitrecodings, units, subunits, verbose = FALSE)
 }
 \arguments{
   \item{dat}{A data frame}
   \item{unitrecodings}{A data frame with information about the scoring of units. See \sQuote{Details}.}
   \item{units}{A data frame with unit information. See \sQuote{Details}.}
+  \item{subunits}{A data frame with subunit information. See \sQuote{Details}.}
   \item{verbose}{logical. If \code{TRUE} additional information is printed.}
 }
 \details{
@@ -21,10 +22,10 @@ Examples of data frames \code{unitrecodings} and \code{units} can be found via \
 
 }
 \value{
-A data frame with scored variables according to the specifications in \code{unitrecodings} and \code{units}. 
+A data frame with scored variables according to the specifications in \code{unitrecodings} and \code{units}.
 }
 \author{
-Nicole Haag
+Nicole Mahler
 }
 
 \seealso{
@@ -35,10 +36,10 @@ data(inputDat)
 data(inputList)
 
 prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
-    readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE, 
+    readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
     aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
-           
-datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$units, 
+
+datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$units, inputList$subunits,
     verbose = TRUE)
 str(datSco)
 

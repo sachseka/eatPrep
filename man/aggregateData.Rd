@@ -32,7 +32,7 @@ Examples of data frames \code{subunits} and \code{units} can be found via \code{
 \value{A data frame with aggregated units and, if \code{rename = TRUE}, renamed subunits.
 }
 
-\author{Nicole Haag, Anna Lenski
+\author{Nicole Mahler, Anna Lenski
 }
 %\note{
 %%  ~~further notes~~

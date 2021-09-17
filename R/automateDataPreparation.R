@@ -185,7 +185,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		if(scoreData) {
 			if(verbose) message("\nStart scoring.")
-				dat <- scoreData (dat= dat, unitrecodings=inputList$unitRecodings, units=inputList$units, verbose = verbose)
+				dat <- scoreData (dat= dat, unitrecodings=inputList$unitRecodings, units=inputList$units, subunits=inputList$subunits, verbose = verbose)
 		} else {
 		if(verbose) message("\nScoring has been skipped." )
 		  }
