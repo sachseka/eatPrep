@@ -9,7 +9,7 @@ Calculate Item Discrimination for Each Category of Categorical Variables
 
 \usage{
 catPbc(datRaw, datRec, idRaw, idRec, context.vars = NULL, values,
-subunits, file.name = NULL, verbose = F)
+subunits, file.name = NULL, verbose = FALSE)
 }
 
 \arguments{

@@ -1,5 +1,6 @@
+
 importFrom(haven, read_sav)
-importFrom("irr", agree, kappa2)
+importFrom(irr, agree, kappa2)
 importFrom(readxl, read_excel)
 importFrom(foreign, write.foreign, read.spss)
 importFrom(reshape2, dcast, melt)
