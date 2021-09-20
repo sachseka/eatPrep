@@ -1,4 +1,3 @@
-
 importFrom(haven, read_sav)
 importFrom(irr, agree, kappa2)
 importFrom(readxl, read_excel)
