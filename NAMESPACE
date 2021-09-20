@@ -1,5 +1,6 @@
 
 importFrom(haven, read_sav)
+importFrom(eatGADS, new_GADSdat)
 importFrom(irr, agree, kappa2)
 importFrom(readxl, read_excel)
 importFrom(foreign, write.foreign, read.spss)
