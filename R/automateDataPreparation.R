@@ -107,7 +107,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			idname <- newID
 		} else {
 		  if(!is.null(newID2) & verbose) message("Argument 'newID' will be ignored, because merge has been skipped.")
-			if(length(datList) > 1 & (recodeData|recodeMnr|aggregateData|scoreData|writeSpss))  {
+			if(recodeData|recodeMnr|aggregateData|scoreData|writeSpss)  {
 			  warning("Merge has been skipped. Only the first dataset in datList will be considered for the following steps.")
 			  dat <- datList[[1]]
 			  idname <- oldIDs[1]
