@@ -61,14 +61,13 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					names(datList[[i]])[names(datList[[i]]) == IDname2] <- newID
 
 					dat2 <- dplyr::full_join(mergedData, datList[[i]], by=newID)
-
 					srtn <- unique(gsub(".[x|y]$","",names(dat2)))
 					compar <- gsub(".[x|y]$","",names(dat2)[which(duplicated(gsub(".[x|y]$", "", names(dat2))))])
 					if(length(compar) > 0) {
 					  ncompar <- setdiff(gsub(".[x|y]$","",names(dat2)),compar)
 					  bb <- data.frame(lapply(compar, function(gg)   {
-					    x <- dat2[,grep(gg, names(dat2))[1]]
-					    y <- dat2[,grep(gg, names(dat2))[2]]
+					    x <- dat2[,paste0(gg, ".x")]
+					    y <- dat2[,paste0(gg, ".y")]
 					    z <- ifelse(is.na(x),y,x)
 					    b <- which(x[!is.na(x) & !is.na(y)] != y[!is.na(x) & !is.na(y)])
 					    a <- cbind(x[!is.na(x) & !is.na(y)],y[!is.na(x) & !is.na(y)])[b,]
