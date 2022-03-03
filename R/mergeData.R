@@ -71,6 +71,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					    z <- ifelse(is.na(x),y,x)
 					    b <- which(x[!is.na(x) & !is.na(y)] != y[!is.na(x) & !is.na(y)])
 					    a <- cbind(x[!is.na(x) & !is.na(y)],y[!is.na(x) & !is.na(y)])[b,]
+					    b <- which(x!=y)
 					    if(verbose & length(a) > 0) {
 					      if(dim(data.frame(a))[2] == 1) {
 					        ab <- paste(a,collapse="&")

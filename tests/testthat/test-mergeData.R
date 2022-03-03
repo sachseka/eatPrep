@@ -4,7 +4,8 @@ dat0 <- data.frame(ID=c(1,2,3,4),
                    v2=c("0","909","1000",NA),
                    v3=c("k","kk9","kkk",NA),
                    v4=NA,
-                   v5=c("0","90","100","1"))
+                   v5=c("0","90","100","1"),
+                   v11 = c("1","300","e","l"))
 
 dat1 <- data.frame( v1 = c("0","300",NA,"j"),
                     v2=c("0","90","10000",NA),
@@ -21,7 +22,8 @@ dat2 <- data.frame(ID=c(1,2,3,4),
 
 
 dat3 <- data.frame(v1 = c("0","300","e","l"),
-                    tb=c(1,2,3,4))
+                    tb=c(1,2,3,4),
+                   v11 = c("1","300","e","l"))
 
 
 test_that("default merge works as expected 1", {
@@ -31,7 +33,8 @@ test_that("default merge works as expected 1", {
                               v2=c("0","909","1000",NA),
                               v3=c("k","kk9","kkk","kk"),
                               v4=c("k",2,"kkk","kk"),
-                              v5=c("0","90","100","1")))
+                              v5=c("0","90","100","1"),
+                              v11=c("1", "300", "e","l")))
 })
 
 
@@ -43,7 +46,8 @@ test_that("default merge works as expected 1", {
                               v2=c("0","909","1000",NA),
                               v3=c("k","kk9","kkk","kk"),
                               v4=c("k",2,"kkk","kk"),
-                              v5=c("0","90","100","1")))
+                              v5=c("0","90","100","1"),
+                              v11=c("1", "300", "e","l")))
 })
 
 
@@ -55,7 +59,8 @@ test_that("default merge works as expected 2", {
                               v2=c("0","909","1000",NA),
                               v3=c("k","kk9","kkk",NA),
                               v4=c(NA,2,3,4),
-                              v5=c("0","90","100","1")))
+                              v5=c("0","90","100","1"),
+                              v11=c("1", "300", "e","l")))
 })
 
 
@@ -72,7 +77,15 @@ test_that("wrong ID", {
                  "Did not find ID variable in dataset 1" )
 })
 
+test_that("multiple different valid codes", {
+  expect_message(mergeData("ID",list(dat0[,1:2],dat2[,1:2]), verbose=TRUE),
+               "Multiple different valid codes in variable: v1 in dataset 2: \n The first value has been kept. \n IDs: 3\n Values: j&e")
+})
 
+test_that("multiple different valid codes II", {
+  expect_message(mergeData("ID",list(dat0,dat3), c("ID", "tb"), verbose=TRUE),
+                 "Multiple different valid codes in variable: v1 in dataset 2: \n The first value has been kept. \n IDs: 3\n Values: j&e")
+})
 
 test_that("missings in ID", {
   expect_warning(mergeData("v1",list(dat2,dat3), verbose=FALSE),
