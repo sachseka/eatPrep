@@ -1,3 +1,5 @@
+importFrom(ragree, bp.coeff.raw)
+importFrom(combinat, combn)
 importFrom(haven, read_sav)
 importFrom(irr, agree, kappa2)
 importFrom(readxl, read_excel)
@@ -32,12 +34,3 @@ export(meanKappa)
 # export(loadSav)
 # export(makeCodebookInput)
 # export(makeInputLists)
-
-
-
-
-
-
-
-
-

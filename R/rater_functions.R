@@ -41,41 +41,37 @@ meanAgree <- function( dat , tolerance = 0 , weight.mean = TRUE ){
   # tolerance ... see function agree
   # weight.mean ... = T, if agreement is weighted by number of rater subjects,
   #            = F, if it is averaged among all rater pairs
-  R <- ncol(dat)
-  dfr <- NULL
-  for (ii in 1:(R-1)){
-    for (jj in (ii+1):R){
-      dat.ii.jj <- na.omit(  dat[ , c(ii,jj)]  )
-      if ( dim(dat.ii.jj)[1] > 0 ){
-        a.ii.jj <-  agree( dat.ii.jj , tolerance )
-        dfr <- rbind( dfr , c( colnames(dat)[ii] , colnames(dat)[jj] , a.ii.jj$subjects , a.ii.jj$value / 100 )  )
-      }
-    } }
-  dfr <- data.frame(dfr, stringsAsFactors = FALSE)
-  colnames(dfr) <- c("Coder1","Coder2","N" , "agree" )
-  for (vv in 3:4){ dfr[,vv] <- as.numeric( paste( dfr[,vv] ) ) }
-  meanagree <- ifelse( weight.mean == TRUE , weighted.mean( dfr$agree , dfr$N ) , mean( dfr$agree ) )
-  list( "agree.pairwise" = dfr , "meanagree" = meanagree )   }
+  pairs<- combn(1:ncol(dat),2, simplify=FALSE)
+  dfr  <- do.call("rbind", lapply(pairs, FUN = function (comb) {
+          dat.ij <- na.omit(dat[,comb])
+          if ( nrow(dat.ij) == 0 ){return(NULL)}
+          agr <- agree( dat.ij , tolerance )
+          ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=agr[["subjects"]], agree = agr[["value"]]/100, stringsAsFactors = FALSE)
+          return(ret)}))
+  meanagree <- ifelse( weight.mean == TRUE , weighted.mean( dfr$agree , dfr$N ) , mean( dfr$agree, na.rm=TRUE ) )
+  list( agree.pairwise = dfr , meanagree = meanagree )   }
 
 ### function by Alexander Robitzsch calculates mean Cohen's kappa among raters
-meanKappa <- function( dat , weight = "unweighted" , weight.mean = TRUE ){
+meanKappa <- function( dat , type = c("Cohen", "BrennanPrediger"), weight = "unweighted" , weight.mean = TRUE ){
   # INPUT:
-  # dat       ... dataframe
+  # dat       ... dataframe with at least 2 columns
   # weight    ... see function kappa2 in irr
   # weight.mean ... = T, if agreement is weighted by number of rater subjects,
   #            = F, if it is averaged among all rater pairs
-  R <- ncol(dat)
-  dfr <- NULL
-  for (ii in 1:(R-1)){
-    for (jj in (ii+1):R){
-      dat.ii.jj <- na.omit(  dat[ , c(ii,jj)]  )
-      if ( dim(dat.ii.jj)[1] > 0 ){
-        a.ii.jj <-  kappa2( dat.ii.jj , weight )
-        dfr <- rbind( dfr , c( colnames(dat)[ii] , colnames(dat)[jj] , a.ii.jj$subjects , a.ii.jj$value  ) )
-      }
-    } }
-  dfr <- data.frame(dfr, stringsAsFactors = FALSE)
-  colnames(dfr) <- c("Coder1","Coder2","N" , "kappa" )
-  for (vv in 3:4){ dfr[,vv] <- as.numeric( paste( dfr[,vv] ) ) }
-  meankappa <- ifelse( weight == TRUE , weighted.mean( dfr$kappa , dfr$N ) , mean( dfr$kappa , na.rm = TRUE) )
-  list( "agree.pairwise" = dfr , "meankappa" = meankappa )     }
+  type <- match.arg(type)
+  pairs<- combn(1:ncol(dat),2, simplify=FALSE)
+  dfr  <- do.call("rbind", lapply(pairs, FUN = function (comb) {
+          dat.ij <- na.omit(dat[,comb])
+          if ( nrow(dat.ij) == 0 ){return(NULL)}
+          if ( type == "Cohen") {
+                if ( inherits(weight, "character")){ wgt <- match.arg(weight, choices = c("unweighted", "equal", "squared"))}
+                kap <- kappa2( dat.ij , wgt )
+                ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=kap[["subjects"]], kappa = kap[["value"]], stringsAsFactors = FALSE)
+          }  else  {
+                if ( inherits(weight, "character")){ wgt <- match.arg(weight, choices = c("quadratic","linear", "ordinal", "radical","ratio", "circular", "bipolar", "unweighted"))}
+                kap <- bp.coeff.raw(ratings = dat.ij, weights=wgt, print=FALSE)
+                ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=nrow(dat.ij), agree = kap[["pa"]], kappa = kap[["bp.coeff"]], SE = kap[["stderr"]], stringsAsFactors = FALSE)
+          }
+          return(ret)}))
+  meankappa <- ifelse( weight.mean == TRUE , weighted.mean( dfr$kappa , dfr$N ) , mean( dfr$kappa , na.rm = TRUE) )
+  list( agree.pairwise = dfr , meankappa = meankappa )     }
