@@ -2,7 +2,7 @@
 \alias{meanKappa}
 \title{Cohens kappa and Brennan/Predigers kappa among several raters}
 \description{This is a wrapper for the \code{\link[irr]{kappa2}} or the
-\code{\link[ragree]{bp.coeff.raw}} function. Computes Cohens kappa among several
+\code{\link[irrCAC]{bp.coeff.raw}} function. Computes Cohens kappa among several
 raters (at least 2) for one item and several persons.}
 \usage{
 meanKappa( dat , type = c("Cohen", "BrennanPrediger"), weight = "unweighted" ,
@@ -14,7 +14,7 @@ Data frame with at least two columns, with examinees in the rows and raters in t
 }
   \item{type}{
 Which type of kappa should be computed? If \code{"Cohen"}, \code{\link[irr]{kappa2}}
-is called, if \code{"BrennanPrediger"}, \code{\link[ragree]{bp.coeff.raw}} is called.
+is called, if \code{"BrennanPrediger"}, \code{\link[irrCAC]{bp.coeff.raw}} is called.
 }
   \item{weight}{
 either a character string specifying one predefined set of weights or a numeric
