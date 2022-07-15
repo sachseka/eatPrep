@@ -1,9 +1,9 @@
 Package: eatPrep
 Type: Package
 Title: Prepare Data for IRT Analyses
-Version: 0.4.4
+Version: 0.4.6
 Depends: R (>= 3.5.0), readxl, haven
-Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), irrCAC
+Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), irrCAC, combinat
 Date: 2022-07-15
 Authors@R: c(
     person("Nicole", "Mahler", email = "nicole.mahler@ibbw.kv.bwl.de", role = c("aut")),

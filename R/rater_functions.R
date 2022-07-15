@@ -69,8 +69,8 @@ meanKappa <- function( dat , type = c("Cohen", "BrennanPrediger"), weight = "unw
                 ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=kap[["subjects"]], kappa = kap[["value"]], stringsAsFactors = FALSE)
           }  else  {
                 if ( inherits(weight, "character")){ wgt <- match.arg(weight, choices = c("quadratic","linear", "ordinal", "radical","ratio", "circular", "bipolar", "unweighted"))}
-                kap <- bp.coeff.raw(ratings = dat.ij, weights=wgt, print=FALSE)
-                ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=nrow(dat.ij), agree = kap[["pa"]], kappa = kap[["bp.coeff"]], SE = kap[["stderr"]], stringsAsFactors = FALSE)
+                kap <- bp.coeff.raw(ratings = dat.ij, weights=wgt)
+                ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=nrow(dat.ij), agree = kap[["est"]][["pa"]], kappa = kap[["est"]][["coeff.val"]], SE = kap[["est"]][["coeff.se"]], stringsAsFactors = FALSE)
           }
           return(ret)}))
   meankappa <- ifelse( weight.mean == TRUE , weighted.mean( dfr$kappa , dfr$N ) , mean( dfr$kappa , na.rm = TRUE) )
