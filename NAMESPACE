@@ -1,4 +1,4 @@
-importFrom(ragree, bp.coeff.raw)
+importFrom(irrCAC, bp.coeff.raw)
 importFrom(combinat, combn)
 importFrom(haven, read_sav)
 importFrom(irr, agree, kappa2)

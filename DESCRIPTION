@@ -1,10 +1,10 @@
 Package: eatPrep
 Type: Package
 Title: Prepare Data for IRT Analyses
-Version: 0.4.3
+Version: 0.4.4
 Depends: R (>= 3.5.0), readxl, haven
-Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), ragree
-Date: 2022-07-14
+Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), irrCAC
+Date: 2022-07-15
 Authors@R: c(
     person("Nicole", "Mahler", email = "nicole.mahler@ibbw.kv.bwl.de", role = c("aut")),
     person("Karoline A.", "Sachse", email = "karoline.sachse@iqb.hu-berlin.de", role = c("aut", "cre")),
@@ -20,6 +20,5 @@ Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown
-Remotes: raredd/ragree
 Config/testthat/edition: 3
 VignetteBuilder: knitr
