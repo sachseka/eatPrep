@@ -65,11 +65,16 @@ meanKappa <- function( dat , type = c("Cohen", "BrennanPrediger"), weight = "unw
           if ( nrow(dat.ij) == 0 ){return(NULL)}
           if ( type == "Cohen") {
                 if ( inherits(weight, "character")){ wgt <- match.arg(weight, choices = c("unweighted", "equal", "squared"))}
-                kap <- kappa2( dat.ij , wgt )
+                kap <- irr::kappa2( dat.ij , wgt )
                 ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=kap[["subjects"]], kappa = kap[["value"]], stringsAsFactors = FALSE)
           }  else  {
                 if ( inherits(weight, "character")){ wgt <- match.arg(weight, choices = c("quadratic","linear", "ordinal", "radical","ratio", "circular", "bipolar", "unweighted"))}
-                kap <- bp.coeff.raw(ratings = dat.ij, weights=wgt)
+                kap <- irrCAC::bp.coeff.raw(ratings = dat.ij, weights=wgt)
+                if(is.na(kap$est$coeff.val)) {
+                  if(identical(dat.ij[,1],dat.ij[,2])) {
+                    kap$est$coeff.val <- 1
+                  }
+                }
                 ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=nrow(dat.ij), agree = kap[["est"]][["pa"]], kappa = kap[["est"]][["coeff.val"]], SE = kap[["est"]][["coeff.se"]], stringsAsFactors = FALSE)
           }
           return(ret)}))
