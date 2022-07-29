@@ -66,6 +66,11 @@ meanKappa <- function( dat , type = c("Cohen", "BrennanPrediger"), weight = "unw
           if ( type == "Cohen") {
                 if ( inherits(weight, "character")){ wgt <- match.arg(weight, choices = c("unweighted", "equal", "squared"))}
                 kap <- irr::kappa2( dat.ij , wgt )
+                if(is.na(kap[["value"]])) {
+                  if(identical(dat.ij[,1],dat.ij[,2])) {
+                    kap[["value"]] <- 1
+                  }
+                }
                 ret <- data.frame ( Coder1 = colnames(dat.ij)[1], Coder2 = colnames(dat.ij)[2], N=kap[["subjects"]], kappa = kap[["value"]], stringsAsFactors = FALSE)
           }  else  {
                 if ( inherits(weight, "character")){ wgt <- match.arg(weight, choices = c("quadratic","linear", "ordinal", "radical","ratio", "circular", "bipolar", "unweighted"))}
