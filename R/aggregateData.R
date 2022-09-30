@@ -137,7 +137,7 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
 
   if( !exists ("aggRule") | is.na(aggRule) | nchar(aggRule) == 0) {
 		aggRule <- "SUM"
-		message("Missing aggregation rule for unit " , unitName , " defaulted to SUM.")
+		if(verbose) message("Missing aggregation rule for unit " , unitName , " defaulted to SUM.")
   }
 
 #  if(!is.character(aggRule) ) {

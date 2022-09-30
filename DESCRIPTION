@@ -1,13 +1,13 @@
 Package: eatPrep
 Type: Package
 Title: Prepare Data for IRT Analyses
-Version: 0.4.6
+Version: 0.4.7
 Depends: R (>= 3.5.0), readxl, haven
 Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), irrCAC, combinat
-Date: 2022-07-15
+Date: 2022-09-09
 Authors@R: c(
-    person("Nicole", "Mahler", email = "nicole.mahler@ibbw.kv.bwl.de", role = c("aut")),
     person("Karoline A.", "Sachse", email = "karoline.sachse@iqb.hu-berlin.de", role = c("aut", "cre")),
+    person("Nicole", "Mahler", email = "nicole.mahler@ibbw.kv.bwl.de", role = c("aut")),
     person("Martin", "Hecht", role = c("ctb")),
     person("Sebastian", "Weirich", role = c("ctb")))
 Maintainer: Karoline Sachse <karoline.sachse@iqb.hu-berlin.de>
