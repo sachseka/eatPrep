@@ -5,6 +5,7 @@
 ### n.pseudo: wieviele Pseudocodierer?
 ### randomize.order: soll die Reihenfolge der Pseudocodes nach Zufall bestimmt werden?
 make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE, verbose = FALSE)   {
+      datLong     <- eatTools::makeDataFrame(datLong)
       allVars     <- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
       all.Names   <- lapply(allVars, FUN=function(ii) {existsBackgroundVariables(dat = datLong, variable=ii)})
       if(length(all.Names) != length(unique(all.Names)) ) {stop("'idCol', 'varCol', 'codCol' and 'valueCol' overlap.\n")}
@@ -41,6 +42,7 @@ meanAgree <- function( dat , tolerance = 0 , weight.mean = TRUE ){
   # tolerance ... see function agree
   # weight.mean ... = T, if agreement is weighted by number of rater subjects,
   #            = F, if it is averaged among all rater pairs
+  dat  <- eatTools::makeDataFrame(dat)
   pairs<- combn(1:ncol(dat),2, simplify=FALSE)
   dfr  <- do.call("rbind", lapply(pairs, FUN = function (comb) {
           dat.ij <- na.omit(dat[,comb])
@@ -58,6 +60,7 @@ meanKappa <- function( dat , type = c("Cohen", "BrennanPrediger"), weight = "unw
   # weight    ... see function kappa2 in irr
   # weight.mean ... = T, if agreement is weighted by number of rater subjects,
   #            = F, if it is averaged among all rater pairs
+  dat  <- eatTools::makeDataFrame(dat)
   type <- match.arg(type)
   pairs<- combn(1:ncol(dat),2, simplify=FALSE)
   dfr  <- do.call("rbind", lapply(pairs, FUN = function (comb) {
