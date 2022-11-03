@@ -112,8 +112,8 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   		colnames(datAggregated)[ match(oneSubunitUnits$subunit, colnames(datAggregated) )] <- oneSubunitUnits$unit
   	}
 
-	  if(verbose){message(paste0("Found ", nrow(oneSubunitUnits), " unit(s) with only one subunit in 'dat'. This/these subunit(s) will be renamed to their respective unit name(s).\nUnits ",
-                              paste(oneSubunitUnits$unit, collapse = ", ")))  }
+	  if(verbose){message(paste0("Found ", nrow(oneSubunitUnits), " unit(s) with only one subunit in 'dat'. This/these subunit(s) will not be aggregated and renamed to their respective unit name(s): ",
+                              paste(oneSubunitUnits$unit, collapse = ", ")), ".\n")  }
   }
 
   # aggregate units
@@ -134,10 +134,11 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
                                     verbose = FALSE, suppressErr = suppressErr, recodeErr = recodeErr){
 
   aggRule <- toupper(aggregateinfo$arule)
-
+  defau1 <- defau2 <- FALSE
   if( !exists ("aggRule") | is.na(aggRule) | nchar(aggRule) == 0) {
 		aggRule <- "SUM"
-		if(verbose) message("Missing aggregation rule for unit " , unitName , " defaulted to SUM.")
+		defau1 <- TRUE
+		#if(verbose) message("Missing aggregation rule for unit " , unitName , " defaulted to SUM.")
   }
 
 #  if(!is.character(aggRule) ) {
@@ -146,14 +147,23 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
 #  }
 
   if ( !aggRule %in% c("SUM") ) {
-		warning("Aggregation rule (\"" , aggRule , "\") for unit ", unitName , " is currently not supported. Changed aggregation rule to SUM.")
+		#warning("Aggregation rule (\"" , aggRule , "\") for unit ", unitName , " is currently not supported. Changed aggregation rule to SUM.")
     aggRule <- "SUM"
+    defau2 <- TRUE
   }
 
     unitVars <- aggregateinfo$subunits
 
 
-  if(verbose) message("Aggregate unit ", unitName, ".")
+  if(verbose) {
+    if(defau1) message("Aggregate unit ", unitName, ". Missing aggregation rule was defaulted to 'SUM'.")
+    if(defau2) message("Aggregate unit ", unitName, ". Specified aggregation rule is currently not supported. Changed aggregation rule to 'SUM'.")
+    if(!(defau1 | defau2))  message("Aggregate unit ", unitName, ".")
+  }
+
+
+
+
   if (any((unitVars %in% colnames(dat)) == FALSE)) {
   	stop("Subunits", paste(setdiff(unitVars, colnames(dat)), collapse = ", "), "not in 'dat'.")
   }

@@ -14,7 +14,7 @@ recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
   stringsAsFactors = FALSE)
 
  info2 <- lapply(info, data.frame)
-  info2 <- eatTools::rbind_common(info2)
+  info2 <- rbind_common(info2)
 
   if(sum(!is.na(info2$incomplRecInfo))>0) {
     message(paste0("Incomplete recode information for variable(s): \n",
