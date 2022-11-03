@@ -25,7 +25,7 @@ Examples of data frames \code{values} and \code{subunits} can be found via \code
 A data frame with recoded variables according to the specifications in \code{values} and \code{subunits}. The columns will be named according to the specifications in \code{subunits$subunitRecoded} If \code{subunits} is not provided, item names will not be changed for recoded items.
 }
 \author{
-Nicole Mahler, Martin Hecht, Christiane Penk
+Nicole Mahler, Karoline Sachse, Martin Hecht, Christiane Penk
 }
 
 \seealso{
