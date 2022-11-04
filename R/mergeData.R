@@ -17,7 +17,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
       stopifnot(is.data.frame(datList[[i]]))
 
       if(any(unlist(lapply(datList[[i]], class)) == "factor")) {
-        fkNam[[i]] <- names(which(unlist(lapply(datList[[i]], class)) == "factor"))
+        fkNam[[i]] <- names(which(unlist(lapply(lapply(datList[[i]], class), function(hh) "factor" %in% hh))))
         datList[[i]] <- set.col.type(datList[[i]], col.type = list ( "character" = fkNam[[i]] ))
       }
 
@@ -78,7 +78,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					      } else {
 					        ab <- paste(apply(data.frame(a),1, function(vv) paste(vv, collapse=("&"))),collapse=", ")
 					      }
-					      message("Multiple different valid codes in variable: ",gg," in dataset ",i,": \n The first value has been kept. \n IDs: ", paste(dat2[,newID][b],collapse=", "),"\n Values: ", ab)
+					      message("Multiple different valid codes in variable: '",gg,"' in 'dataset ",i,"': \n The first value has been kept. \n IDs: ", paste(dat2[,newID][b],collapse=", "),"\n Values: ", ab)
 					    }
 					    return(z)
 					  }))
