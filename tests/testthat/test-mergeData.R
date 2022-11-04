@@ -79,12 +79,12 @@ test_that("wrong ID", {
 
 test_that("multiple different valid codes", {
   expect_message(mergeData("ID",list(dat0[,1:2],dat2[,1:2]), verbose=TRUE),
-               "Multiple different valid codes in variable: v1 in dataset 2: \n The first value has been kept. \n IDs: 3\n Values: j&e")
+               "Multiple different valid codes in variable: 'v1' in 'dataset 2': \n The first value has been kept. \n IDs: 3\n Values: j&e")
 })
 
 test_that("multiple different valid codes II", {
   expect_message(mergeData("ID",list(dat0,dat3), c("ID", "tb"), verbose=TRUE),
-                 "Multiple different valid codes in variable: v1 in dataset 2: \n The first value has been kept. \n IDs: 3\n Values: j&e")
+                 "Multiple different valid codes in variable: 'v1' in 'dataset 2': \n The first value has been kept. \n IDs: 3\n Values: j&e")
 })
 
 test_that("missings in ID", {
