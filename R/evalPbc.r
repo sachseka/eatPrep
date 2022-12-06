@@ -1,0 +1,40 @@
+evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi")) {
+
+  ret <- TRUE
+
+  if(any(pbcs$freq[pbcs$recodevalue==1] == 0)) {
+    message("The attractors (score 1) of the following items were chosen with a frequency of zero: ", paste0(pbcs$item[pbcs$recodevalue==1 & pbcs$freq==0], collapse=", "), ". This should not happen. Please check.\n")
+    ret <- FALSE
+  } else {
+    message("Excellent, no attractors (score 1) were chosen with a frequency of zero.\n")
+  }
+
+   if(any(pbcs$freq[pbcs$recodevalue==0] == 0)) {
+    message("The distractors (score 0) of the following items were chosen with a frequency of zero: ", paste(pbcs$item[pbcs$recodevalue==0 & pbcs$freq==0], pbcs$cat[pbcs$recodevalue==0 & pbcs$freq==0], sep="_", collapse=", "), ". This may happen, but is probably not intended.\n")
+   } else {
+     message("Excellent, no distractors (score 0) were chosen with a frequency of zero.\n")
+   }
+
+
+  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==1] < 0.05 | is.na(pbcs$catPbc[pbcs$recodevalue==1]), TRUE, FALSE)
+    if(sum(ad) > 0) {
+      message("catPbcs for attractors (score 1) of the following items are worrisome low or missing: ", paste(pbcs[pbcs$recodevalue==1,][ad,]$item, round(pbcs[pbcs$recodevalue==1,][ad,]$catPbc, 2), sep=":_", collapse= ", "), "\n")
+      ret <- FALSE
+  }
+
+  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==0] > 0.005 & !is.na(pbcs$catPbc[pbcs$recodevalue==0]), TRUE, FALSE)
+  if(sum(ad) > 0) {
+    message("catPbcs for distractors (score 0) of the following items are unexpectedly high: ", paste(pbcs[pbcs$recodevalue==0,][ad,]$item, pbcs[pbcs$recodevalue==0,][ad,]$cat, round(pbcs[pbcs$recodevalue==0,][ad,]$catPbc, 2), sep="_", collapse= ", "), "\n")
+    ret <- FALSE
+  }
+
+  for(mm in mistypes) {
+    ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==mm] > 0.07 & !is.na(pbcs$catPbc[pbcs$recodevalue==mm]), TRUE, FALSE)
+    if(sum(ad) > 0) {
+      message("catPbcs for mistype '", mm, "' of the following items are relatively high: ", paste(pbcs[pbcs$recodevalue==mm,][ad,]$item, pbcs[pbcs$recodevalue==mm,][ad,]$cat, round(pbcs[pbcs$recodevalue==mm,][ad,]$catPbc, 2), sep="_", collapse= ", "), "\n")
+      ret <- FALSE
+    }
+  }
+
+  return(ret)
+}

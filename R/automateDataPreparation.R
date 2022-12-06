@@ -38,7 +38,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		if(is.null(datList)) {
 			stopifnot(readSpss)
-			if(class(inputList$savFiles) != "data.frame") {
+			if(!("data.frame" %in% class(inputList$savFiles))) {
 			  if(verbose) {
 			    if(is.null(path)) {
 			      message("No appropriate inputList$savFiles data.frame provided. I will try to read .sav-files from getwd().")
@@ -48,8 +48,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			  }
 			  }
 		} else {
-			stopifnot(class(datList) == "data.frame" || class(datList) == "list")
-			if(class(datList) == "data.frame") {
+			stopifnot("data.frame" %in% class(datList) || "list" %in% class(datList))
+			if("data.frame" %in% class(datList)) {
 			  datList <- list(datList)
 			  names(datList) <- "dat"
 			}
