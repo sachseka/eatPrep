@@ -118,7 +118,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
 
   # aggregate units
   unitsAggregated <- mapply(aggregateData.aggregate, unitsToAggregate, aggregateinfo,
-                            MoreArgs = list(am, dat, verbose = verbose, suppressErr = suppressErr, recodeErr = recodeErr), SIMPLIFY = T)
+                            MoreArgs = list(am, dat, verbose = verbose, suppressErr = suppressErr, recodeErr = recodeErr), SIMPLIFY = TRUE)
 
  if(!missing(unitsAggregated)){
 	datAggregated <- cbind(datAggregated, unitsAggregated, stringsAsFactors = FALSE)
