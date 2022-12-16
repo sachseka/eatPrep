@@ -349,62 +349,62 @@ test_that("evalPbc allows for user-defined missing codes", {
   expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi")), TRUE)
 })
 
-test_that("evalPbc throws an error if the data frame does not contain freq, recodevalue, and catPbc (with the exact spelling", {
-  set.seed(123)
-  # Items 1-3 with 5 rows
-  item <- rep(c("I1", "I2", "I3"), each = 5)
-  # 5 Categories per item
-  cat <- rep(c(0:2, 8, 9), times = 3)
-  # 200 cases per item
-  n <- rep(200, 15)
-  # Equal non-zero frequencies per item
-  freq <- rep(200 / 5, 15)
-  # Relative frequencies
-  freq.rel <- freq / n
-  # Correlations, for attractor > .05, for distractor and missings < .005
-  catPbc <- rep(c(runif(1, .05, 1), runif(4, -1, .005)), 3)
-  # Codes (for simplicity: 1st category = attractor, 2nd+3rd = distractor, others missing)
-  recodevalue <- rep(c(1, 0, 0, "mir", "mbi"), 3)
-  # For simplicity, only one subunit
-  subunitType <- 1
-
-  # !! Prepare data frame without column recodevalue
-  test_pbc <- data.frame(
-    item, cat, n, freq, freq.rel, catPbc, subunitType
-  )
-
-  expect_error(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")))
-})
-
-test_that("evalPbc throws an error if the data frame contains missing types that are not specified in the mistypes argument", {
-  set.seed(123)
-  # Items 1-3 with 5 rows
-  item <- rep(c("I1", "I2", "I3"), each = 5)
-  # 5 Categories per item
-  cat <- rep(c(0:2, 8, 9), times = 3)
-  # 200 cases per item
-  n <- rep(200, 15)
-  # Equal non-zero frequencies per item
-  freq <- rep(200 / 5, 15)
-  # Relative frequencies
-  freq.rel <- freq / n
-  # Correlations, for attractor > .05, for distractor and missings < .005
-  catPbc <- rep(c(runif(1, .05, 1), runif(4, -1, .005)), 3)
-  # !! Codes (for simplicity: 1st category = attractor, 2nd+3rd = distractor, others missing)
-  # !! new mistypes code that is not found in the mistypes, but is problematic
-  recodevalue <- rep(c(1, 0, 0, "mycode", "mbi"), 3)
-  catPbc[4] <- .08
-  # For simplicity, only one subunit
-  subunitType <- 1
-
-  # !! Prepare data frame without column recodevalue
-  test_pbc <- data.frame(
-    item, cat, n, freq, freq.rel, catPbc, recodevalue, subunitType
-  )
-
-  # does not contain mycode and therefore does not find the problematic correlation
-  expect_error(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")))
-
-  # if not, at least (modification necessary):
-  # expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), FALSE)
-})
+# test_that("evalPbc throws an error if the data frame does not contain freq, recodevalue, and catPbc (with the exact spelling", {
+#   set.seed(123)
+#   # Items 1-3 with 5 rows
+#   item <- rep(c("I1", "I2", "I3"), each = 5)
+#   # 5 Categories per item
+#   cat <- rep(c(0:2, 8, 9), times = 3)
+#   # 200 cases per item
+#   n <- rep(200, 15)
+#   # Equal non-zero frequencies per item
+#   freq <- rep(200 / 5, 15)
+#   # Relative frequencies
+#   freq.rel <- freq / n
+#   # Correlations, for attractor > .05, for distractor and missings < .005
+#   catPbc <- rep(c(runif(1, .05, 1), runif(4, -1, .005)), 3)
+#   # Codes (for simplicity: 1st category = attractor, 2nd+3rd = distractor, others missing)
+#   recodevalue <- rep(c(1, 0, 0, "mir", "mbi"), 3)
+#   # For simplicity, only one subunit
+#   subunitType <- 1
+#
+#   # !! Prepare data frame without column recodevalue
+#   test_pbc <- data.frame(
+#     item, cat, n, freq, freq.rel, catPbc, subunitType
+#   )
+#
+#   expect_error(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")))
+# })
+#
+# test_that("evalPbc throws an error if the data frame contains missing types that are not specified in the mistypes argument", {
+#   set.seed(123)
+#   # Items 1-3 with 5 rows
+#   item <- rep(c("I1", "I2", "I3"), each = 5)
+#   # 5 Categories per item
+#   cat <- rep(c(0:2, 8, 9), times = 3)
+#   # 200 cases per item
+#   n <- rep(200, 15)
+#   # Equal non-zero frequencies per item
+#   freq <- rep(200 / 5, 15)
+#   # Relative frequencies
+#   freq.rel <- freq / n
+#   # Correlations, for attractor > .05, for distractor and missings < .005
+#   catPbc <- rep(c(runif(1, .05, 1), runif(4, -1, .005)), 3)
+#   # !! Codes (for simplicity: 1st category = attractor, 2nd+3rd = distractor, others missing)
+#   # !! new mistypes code that is not found in the mistypes, but is problematic
+#   recodevalue <- rep(c(1, 0, 0, "mycode", "mbi"), 3)
+#   catPbc[4] <- .08
+#   # For simplicity, only one subunit
+#   subunitType <- 1
+#
+#   # !! Prepare data frame without column recodevalue
+#   test_pbc <- data.frame(
+#     item, cat, n, freq, freq.rel, catPbc, recodevalue, subunitType
+#   )
+#
+#   # does not contain mycode and therefore does not find the problematic correlation
+#   expect_error(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")))
+#
+#   # if not, at least (modification necessary):
+#   # expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), FALSE)
+# })
