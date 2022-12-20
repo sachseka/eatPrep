@@ -3,10 +3,12 @@
 
 \title{evaluate discrimination statistics
 }
-\description{This function evaluates discrimination statistics for the categories of categorical variables, i.e. the correlations of each category with the total score on the test..
+\description{This function evaluates discrimination statistics for the categories of categorical variables, i.e. the correlations of each category with the total score on the test.
 }
 \usage{
 evalPbc(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"))
+evalPbc(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
+        minPbcAtt = .05, maxPbcDis = .005, maxPbcMis = .07)
 }
 \arguments{
   \item{pbcs}{
@@ -14,6 +16,15 @@ A data frame with the discrimination values for each category of categorical var
 }
   \item{mistypes}{
 Character vector. It will be checked, whether the missing types in this vector are defined for all items.
+}
+  \item{minPbcAtt}{
+Numeric (Optional). It will be checked, whether the catPbcs for the attractors are higher than this value. Defaults to .05.
+}
+  \item{maxPbcDis}{
+Numeric (Optional). It will be checked, whether the catPbcs for the distractors are lower than this value. Defaults to 0.005.
+}
+  \item{maxPbcMis}{
+Numeric (Optional). It will be checked, whether the catPbcs for the missing types are lower than this value. Defaults to 0.07.
 }
 }
 \value{
