@@ -6,7 +6,6 @@
 \description{This function evaluates discrimination statistics for the categories of categorical variables, i.e. the correlations of each category with the total score on the test.
 }
 \usage{
-evalPbc(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"))
 evalPbc(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
         minPbcAtt = .05, maxPbcDis = .005, maxPbcMis = .07)
 }
