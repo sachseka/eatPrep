@@ -32,5 +32,5 @@ pbcs   <- catPbc(datRaw, datRec, idRaw = "ID", idRec = "ID",
 evalPbc(pbcs)
 }
 \author{
-Karoline Sachse
+Karoline Sachse, Philipp Franikowski
 }

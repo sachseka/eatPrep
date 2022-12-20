@@ -76,7 +76,7 @@ test_that("evalPbc identifies (unproblematic) zero-frequencies for distractors a
                  regexp = "The distractors \\(score 0\\) of the following items were chosen with a frequency of zero:")
 })
 
-test_that("evalPbc identifies low correlations (< .05) for attractors", {
+test_that("evalPbc identifies low correlations (< .05) for attractors per default", {
   test_pbc <- generate_dataset()
 
   # Manipulation: Low correlation for the attractor of item 1
@@ -87,8 +87,39 @@ test_that("evalPbc identifies low correlations (< .05) for attractors", {
   expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), FALSE)
 
   expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
-                 regexp = "catPbcs for attractors \\(score 1\\) of the following items are worrisome low or missing:")
+                 regexp = "catPbcs for attractors \\(score 1\\) of the following items are worrisome low \\(< 0.05\\) or missing:")
 })
+
+test_that("evalPbc accepts user-defined correlation cutoffs for attractors", {
+  test_pbc <- generate_dataset()
+
+  # Manipulation: Low correlation for the attractor of item 1
+  test_pbc <- within(test_pbc, {
+    catPbc[1] <- .02
+  })
+
+  # Manipulation: lower cutoff for minPbcAtt
+  expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                       minPbcAtt = .01), TRUE)
+})
+
+test_that("evalPbc identifies low user-defined correlations for attractors", {
+  test_pbc <- generate_dataset()
+
+  # Manipulation: High correlation for the attractor of item 1
+  test_pbc <- within(test_pbc, {
+    catPbc[1] <- .09
+  })
+
+  # Manipulation: higher cutoff for minPbcAtt
+  expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                       minPbcAtt = .10), FALSE)
+
+  expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                         minPbcAtt = .10),
+                 regexp = "catPbcs for attractors \\(score 1\\) of the following items are worrisome low \\(< 0.1\\) or missing:")
+})
+
 
 test_that("evalPbc identifies missing correlations for attractors", {
   test_pbc <- generate_dataset()
@@ -101,10 +132,10 @@ test_that("evalPbc identifies missing correlations for attractors", {
   expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), FALSE)
 
   expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
-                 regexp = "catPbcs for attractors \\(score 1\\) of the following items are worrisome low or missing:")
+                 regexp = "catPbcs for attractors \\(score 1\\) of the following items are worrisome low \\(< 0.05\\) or missing:")
 })
 
-test_that("evalPbc identifies too high correlations (> .005) for distractors", {
+test_that("evalPbc identifies too high correlations (> .005) for distractors per default", {
   test_pbc <- generate_dataset()
 
   # Manipulation: Too high correlation for the first distractor of item 1
@@ -115,7 +146,37 @@ test_that("evalPbc identifies too high correlations (> .005) for distractors", {
   expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), FALSE)
 
   expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
-                 pattern = "catPbcs for distractors \\(score 0\\) of the following items are unexpectedly high:")
+                 pattern = "catPbcs for distractors \\(score 0\\) of the following items are unexpectedly high \\(> 0.005\\):")
+})
+
+test_that("evalPbc accepts user-defined correlation cutoffs for distractors", {
+  test_pbc <- generate_dataset()
+
+  # Manipulation: Too high correlation for the first distractor of item 1
+  test_pbc <- within(test_pbc, {
+    catPbc[2] <- .09
+  })
+
+  # Manipulation: Lower cutoff for distractor correlation
+  expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                       maxPbcDis = .10), TRUE)
+})
+
+test_that("evalPbc identifies too high user defined correlations for distractors", {
+  test_pbc <- generate_dataset()
+
+  # Manipulation: Too high correlation for the first distractor of item 1
+  test_pbc <- within(test_pbc, {
+    catPbc[2] <- .0005
+  })
+
+  # Manipulation: Lower cutoff for distractor correlation
+  expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                       maxPbcDis = .0001), FALSE)
+
+  expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                         maxPbcDis = .0001),
+                 pattern = "catPbcs for distractors \\(score 0\\) of the following items are unexpectedly high \\(> 0.0001\\):")
 })
 
 test_that("evalPbc ignores missing correlations for distractors", {
@@ -129,7 +190,7 @@ test_that("evalPbc ignores missing correlations for distractors", {
   expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), TRUE)
 })
 
-test_that("evalPbc identifies too high correlations (> .07) for missings", {
+test_that("evalPbc identifies too high correlations (> .07) for missings per default", {
   test_pbc <- generate_dataset()
 
   # Manipulation: Too high correlation for missing (mri) for item 1
@@ -140,7 +201,37 @@ test_that("evalPbc identifies too high correlations (> .07) for missings", {
   expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), FALSE)
 
   expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
-                 pattern = "catPbcs for mistype .* of the following items are relatively high:")
+                 pattern = "catPbcs for mistype .* of the following items are relatively high \\(> 0.07\\):")
+})
+
+test_that("evalPbc accepts user-defined correlation cutoffs for missings", {
+  test_pbc <- generate_dataset()
+
+  # Manipulation: Too high correlation for missing (mri) for item 1
+  test_pbc <- within(test_pbc, {
+    catPbc[4] <- .10
+  })
+
+  # Manipulation: higher cutoff
+  expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                       maxPbcMis = .11), TRUE)
+})
+
+test_that("evalPbc identifies too high user-defined correlations for missings", {
+  test_pbc <- generate_dataset()
+
+  # Manipulation: Sufficiently low correlation for missing (mri) for item 1
+  test_pbc <- within(test_pbc, {
+    catPbc[4] <- .05
+  })
+
+  # Manipulation: lower cutoff
+  expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                       maxPbcMis = .01), FALSE)
+
+  expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                         maxPbcMis = .01),
+                 pattern = "catPbcs for mistype .* of the following items are relatively high \\(> 0.01\\):")
 })
 
 test_that("evalPbc ignores missing correlations for missings", {
@@ -177,7 +268,7 @@ test_that("evalPbc throws an error if the data frame does not contain freq, reco
   expect_error(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")))
 })
 
-test_that("evalPbc throws an error if the data frame contains missing types that are not specified in the mistypes argument", {
+test_that("evalPbc throws a message if the data frame contains missing types that are not specified in the mistypes argument", {
   test_pbc <- generate_dataset()
 
   # Manipulation: New mistypes code that is not found in the mistypes, but is problematic
@@ -187,14 +278,15 @@ test_that("evalPbc throws an error if the data frame contains missing types that
   })
 
   # Does not contain mycode and therefore does not find the problematic correlation
-  expect_error(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
-               regexp = "'catPbc' contains other values than 0, 1 and the specified mistypes:")
+  expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
+                 regexp = "'catPbc' contains other values than 0, 1 and the specified mistypes:")
 })
 
 test_that("evalPbc throws an error if the mistypes specification contains missing types that are not specified in the data frame", {
   test_pbc <- generate_dataset()
 
   # Data frame does not contain mycode and therefore does not find the problematic correlation
-  expect_error(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi")),
-               regexp = "'catPbc' contains other values than 0, 1 and the specified mistypes:")
+  expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi")),
+                 regexp = "'catPbc' contains other values than 0, 1 and the specified mistypes:")
 })
+

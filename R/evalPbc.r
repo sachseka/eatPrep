@@ -1,4 +1,5 @@
-evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi")) {
+evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
+                    minPbcAtt = .05, maxPbcDis = .005, maxPbcMis = .07) {
 
   ret <- TRUE
 
@@ -9,7 +10,7 @@ evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi")) {
   if(length(setdiff(unique(pbcs$recodevalue), c(0, 1, mistypes))) > 0) {
     differing_mistypes <- setdiff(unique(pbcs$recodevalue), c(0, 1, mistypes))
 
-    stop("'catPbc' contains other values than 0, 1 and the specified mistypes:
+    message("'catPbc' contains other values than 0, 1 and the specified mistypes:
        Other value(s): ", paste0(sort(differing_mistypes), collapse = ", "))
   }
 
@@ -27,22 +28,22 @@ evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi")) {
    }
 
 
-  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==1] < 0.05 | is.na(pbcs$catPbc[pbcs$recodevalue==1]), TRUE, FALSE)
+  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==1] < minPbcAtt | is.na(pbcs$catPbc[pbcs$recodevalue==1]), TRUE, FALSE)
     if(sum(ad) > 0) {
-      message("catPbcs for attractors (score 1) of the following items are worrisome low or missing: ", paste(pbcs[pbcs$recodevalue==1,][ad,]$item, round(pbcs[pbcs$recodevalue==1,][ad,]$catPbc, 2), sep=":_", collapse= ", "), "\n")
+      message("catPbcs for attractors (score 1) of the following items are worrisome low ", paste0("(< ", format(minPbcAtt, scientific = FALSE), ")") ," or missing: ", paste(pbcs[pbcs$recodevalue==1,][ad,]$item, round(pbcs[pbcs$recodevalue==1,][ad,]$catPbc, 2), sep=":_", collapse= ", "), "\n")
       ret <- FALSE
   }
 
-  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==0] > 0.005 & !is.na(pbcs$catPbc[pbcs$recodevalue==0]), TRUE, FALSE)
+  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==0] > maxPbcDis & !is.na(pbcs$catPbc[pbcs$recodevalue==0]), TRUE, FALSE)
   if(sum(ad) > 0) {
-    message("catPbcs for distractors (score 0) of the following items are unexpectedly high: ", paste(pbcs[pbcs$recodevalue==0,][ad,]$item, pbcs[pbcs$recodevalue==0,][ad,]$cat, round(pbcs[pbcs$recodevalue==0,][ad,]$catPbc, 2), sep="_", collapse= ", "), "\n")
+    message("catPbcs for distractors (score 0) of the following items are unexpectedly high", paste0(" (> ", format(maxPbcDis, scientific = FALSE), ")"), ": ", paste(pbcs[pbcs$recodevalue==0,][ad,]$item, pbcs[pbcs$recodevalue==0,][ad,]$cat, round(pbcs[pbcs$recodevalue==0,][ad,]$catPbc, 2), sep="_", collapse= ", "), "\n")
     ret <- FALSE
   }
 
   for(mm in mistypes) {
-    ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==mm] > 0.07 & !is.na(pbcs$catPbc[pbcs$recodevalue==mm]), TRUE, FALSE)
+    ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==mm] > maxPbcMis & !is.na(pbcs$catPbc[pbcs$recodevalue==mm]), TRUE, FALSE)
     if(sum(ad) > 0) {
-      message("catPbcs for mistype '", mm, "' of the following items are relatively high: ", paste(pbcs[pbcs$recodevalue==mm,][ad,]$item, pbcs[pbcs$recodevalue==mm,][ad,]$cat, round(pbcs[pbcs$recodevalue==mm,][ad,]$catPbc, 2), sep="_", collapse= ", "), "\n")
+      message("catPbcs for mistype '", mm, "' of the following items are relatively high", paste0(" (> ", format(maxPbcMis, scientific = FALSE), ")"), ": ", paste(pbcs[pbcs$recodevalue==mm,][ad,]$item, pbcs[pbcs$recodevalue==mm,][ad,]$cat, round(pbcs[pbcs$recodevalue==mm,][ad,]$catPbc, 2), sep="_", collapse= ", "), "\n")
       ret <- FALSE
     }
   }
