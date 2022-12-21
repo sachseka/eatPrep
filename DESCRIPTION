@@ -9,7 +9,7 @@ Authors@R: c(
     person("Karoline A.", "Sachse", email = "karoline.sachse@iqb.hu-berlin.de", role = c("aut", "cre")),
     person("Nicole", "Mahler", email = "nicole.mahler@ibbw.kv.bwl.de", role = c("aut")),
     person("Martin", "Hecht", role = c("ctb")),
-    person("Sebastian", "Weirich", role = c("ctb")))
+    person("Sebastian", "Weirich", role = c("ctb")),
     person("Philipp", "Franikowski", role = c("ctb")))
 Maintainer: Karoline A. Sachse <karoline.sachse@iqb.hu-berlin.de>
 Description: Prepare test item data for IRT analyses is facilitated using this package.
