@@ -68,5 +68,5 @@ test_that("merge", {
                                                  recodeData = TRUE, recodeMnr = FALSE,
                                                  aggregateData = FALSE, scoreData = FALSE,
                                                  writeSpss = FALSE, verbose = TRUE),
-                 "Merge has been skipped. Only the first dataset in datList will be considered for the following steps.")
+                 "Merge has been skipped. Only the first dataset in datList has been considered for the following steps.")
 })

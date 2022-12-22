@@ -109,16 +109,15 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		} else {
 		  if(!is.null(newID2) & verbose) message("Argument 'newID' will be ignored, because merge has been skipped.")
 			if(recodeData|recodeMnr|aggregateData|scoreData|writeSpss)  {
-			  warning("Merge has been skipped. Only the first dataset in datList will be considered for the following steps.")
+			  warning("Merge has been skipped. Only the first dataset in datList has been considered for the following steps.")
 			  dat <- datList[[1]]
 			  idname <- oldIDs[1]
 			}
-			if(length(datList) > 1 & !(recodeData|recodeMnr|aggregateData|scoreData|writeSpss) & verbose) {
+			if(length(datList) > 1 & !(recodeData|recodeMnr|aggregateData|scoreData|writeSpss)) {
 			  message("Merge has been skipped, but more than one dataset has been loaded. A list of datasets will be returned." )
 			  dat <- datList
 			  } else {
 			  message("\nMerge has been skipped." )
-			 dat <- datList
 			}
 		}
 
