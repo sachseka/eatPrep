@@ -91,6 +91,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		if(checkData) {
 			if(verbose) message("\nCheck data...")
+		  if(length(oldIDs) != length(datList)) stop("Length of argument 'oldIDs' does not match length of datList.")
 			mapply(checkData, dat=datList, datnam=names(datList), ID=oldIDs, MoreArgs = list(values=inputList$values, subunits=inputList$subunits, units=inputList$units, verbose=verbose))
 		} else {if(verbose) message("\nCheck has been skipped." )}
 
@@ -117,6 +118,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			  dat <- datList
 			  } else {
 			  message("\nMerge has been skipped." )
+			 dat <- datList
 			}
 		}
 
