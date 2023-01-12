@@ -52,7 +52,7 @@ test_that("evalPbc identifies zero-frequencies for attractors and throws message
   expect_equal(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")), FALSE)
 
   expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
-                 regexp = "The attractors \\(score 1\\) of the following items were chosen with a frequency of zero: I1, I2, I3")
+                 regexp = "The attractors \\(score 1\\) of the following items were chosen with a frequency of zero: I1, I2, and I3")
 
   expect_message(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")),
                  pattern = "Excellent, no distractors \\(score 0\\) were chosen with a frequency of zero.")
