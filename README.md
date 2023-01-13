@@ -9,7 +9,7 @@ The goal of eatPrep is to prepare test item data for IRT scaling using meta data
 
 ## Installation
 
-You can install the released version of eatPrep from [Github](https://github.com/sachseka/eatPrep) with:
+You can install the released version of eatPrep from [Github](https://github.com/sachseka/eatPrep) with: 
 
 ``` r
 remotes::install_github("https://github.com/sachseka/eatPrep")
