@@ -11,9 +11,6 @@ importFrom(eatTools, asNumericIfPossible, crop, set.col.type, multiseq,
 importFrom("stats", "aggregate", "cor", "lag", "na.omit", "runif",
                "weighted.mean")
 importFrom("utils", "flush.console", "write.csv2", "write.table")
-importFrom(cli,
-           cli_abort,
-           cli_alert_success, cli_alert_info, cli_alert_warning, cli_alert_danger)
 export(aggregateData)
 export(automateDataPreparation)
 export(catPbc)
