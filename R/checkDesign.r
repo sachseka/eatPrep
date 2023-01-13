@@ -27,8 +27,8 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis="NA", id="ID", s
   if(!setequal(th1,th2))  {
     warning("Booklet names set in 'rotation' does not equal booklet names set in 'booklets'. Please check.")
     if(verbose) {
-      if(length(setdiff(th1,th2)) > 0) message("The following blocks are in 'rotation' but not in 'booklets': ",setdiff(th1,th2))
-      if(length(setdiff(th2,th1)) > 0) message("The following blocks are in 'booklets' but not in 'rotation': ", setdiff(th2,th1))
+      if(length(setdiff(th1,th2)) > 0) message("The following booklets are in 'rotation' but not in 'booklets': ",paste(setdiff(th1,th2),collapse=", "))
+      if(length(setdiff(th2,th1)) > 0) message("The following booklets are in 'booklets' but not in 'rotation': ", paste(setdiff(th2,th1),collapse=", "))
     }
   }
 
