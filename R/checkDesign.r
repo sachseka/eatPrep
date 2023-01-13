@@ -93,7 +93,7 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis="NA", id="ID", s
 
 	resL <- lapply(booklets$booklet, .bookletPatternCheck)
 	names(resL) <- booklets$booklet
-browser()
+
 	if(all(unlist(resL) == FALSE)) {
 		if(verbose) message("No deviations from design detected!")
 	} else {
