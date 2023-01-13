@@ -8,9 +8,9 @@ Date: 2023-01-13
 Authors@R: c(
     person("Karoline A.", "Sachse", email = "karoline.sachse@iqb.hu-berlin.de", role = c("aut", "cre")),
     person("Nicole", "Mahler", email = "nicole.mahler@ibbw.kv.bwl.de", role = c("aut")),
-    person("Philipp", "Franikowski", role = c("ctb"))),
+    person("Philipp", "Franikowski", role = c("ctb")),
     person("Martin", "Hecht", role = c("ctb")),
-    person("Sebastian", "Weirich", role = c("ctb"))
+    person("Sebastian", "Weirich", role = c("ctb")))
 Maintainer: Karoline A. Sachse <karoline.sachse@iqb.hu-berlin.de>
 Description: Prepare test item data for IRT analyses is facilitated using this package.
 License: GPL (>= 2)
