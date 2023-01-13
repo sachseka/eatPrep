@@ -53,6 +53,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			  datList <- list(datList)
 			  names(datList) <- "dat"
 			}
+		  dat <- datList[[1]]
 		}
 
 		### ggf. sav-files einlesen
