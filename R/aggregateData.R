@@ -79,6 +79,10 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
     warning("Standard missing code(s)", paste(setdiff(standard_codes, am_codes), collapse = ", "), "are not specified in  'aggregatemissings'. Please check whether this is desired.")
   }
 
+  if(verbose) {
+     message("All aggregation rules will be defaulted to 'SUM', because no other type is currently supported")
+     }
+
   # make aggregateinfo
   aggregateinfo <- makeInputAggregateData(subunits, units, recodedData = recodedData)
   nSubunitsInDat <- lapply(lapply(aggregateinfo, "[[", "subunits"), function(ll) { sum( ll %in% colnames(dat)) })
@@ -154,12 +158,12 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
 
     unitVars <- aggregateinfo$subunits
 
-
-  if(verbose) {
-    if(defau1) message("Aggregate unit ", unitName, ". Missing aggregation rule was defaulted to 'SUM'.")
-    if(defau2) message("Aggregate unit ", unitName, ". Specified aggregation rule is currently not supported. Changed aggregation rule to 'SUM'.")
-    if(!(defau1 | defau2))  message("Aggregate unit ", unitName, ".")
-  }
+#
+#   if(verbose) {
+#     if(defau1) message("Aggregate unit ", unitName, ". Missing aggregation rule was defaulted to 'SUM'.")
+#     if(defau2) message("Aggregate unit ", unitName, ". Specified aggregation rule is currently not supported. Changed aggregation rule to 'SUM'.")
+#     if(!(defau1 | defau2))  message("Aggregate unit ", unitName, ".")
+#   }
 
 
 
