@@ -116,13 +116,16 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   		colnames(datAggregated)[ match(oneSubunitUnits$subunit, colnames(datAggregated) )] <- oneSubunitUnits$unit
   	}
 
-	  if(verbose){message(paste0("Found ", nrow(oneSubunitUnits), " unit(s) with only one subunit in 'dat'. This/these subunit(s) will not be aggregated and renamed to their respective unit name(s): ",
-                              paste(oneSubunitUnits$unit, collapse = ", ")), ".\n")  }
+	  if(verbose){message(paste0("Found ", nrow(oneSubunitUnits), " unit(s) with only one subunit in 'dat'. This/these subunit(s) will not be aggregated and renamed to their respective unit name(s)." ))  }
+                           #   paste(oneSubunitUnits$unit, collapse = ", ")
+
   }
 
   # aggregate units
   unitsAggregated <- mapply(aggregateData.aggregate, unitsToAggregate, aggregateinfo,
                             MoreArgs = list(am, dat, verbose = verbose, suppressErr = suppressErr, recodeErr = recodeErr), SIMPLIFY = TRUE)
+
+ message("Aggregated units: ", paste(names(data.frame(unitsAggregated)), collapse=", "), ".")
 
  if(!missing(unitsAggregated)){
 	datAggregated <- cbind(datAggregated, unitsAggregated, stringsAsFactors = FALSE)
