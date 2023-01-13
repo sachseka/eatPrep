@@ -18,6 +18,8 @@ scoreData <- function (dat, unitrecodings, units, subunits, verbose = FALSE) {
                                  mode = "score", verbose = verbose), USE.NAMES = TRUE),
   stringsAsFactors = FALSE)
 
+  if(verbose) message(length(unitsToScore), " units were scored: ", paste(unitsToScore, collapse=", "), ".")
+
 #  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)
 
   return(datS)

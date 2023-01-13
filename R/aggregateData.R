@@ -80,7 +80,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   }
 
   if(verbose) {
-     message("All aggregation rules will be defaulted to 'SUM', because no other type is currently supported")
+     message("All aggregation rules will be defaulted to 'SUM', because no other type is currently supported.")
      }
 
   # make aggregateinfo
@@ -125,7 +125,8 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   unitsAggregated <- mapply(aggregateData.aggregate, unitsToAggregate, aggregateinfo,
                             MoreArgs = list(am, dat, verbose = verbose, suppressErr = suppressErr, recodeErr = recodeErr), SIMPLIFY = TRUE)
 
- message("Aggregated units: ", paste(names(data.frame(unitsAggregated)), collapse=", "), ".")
+  nams <- names(data.frame(unitsAggregated))
+ message(length(nams), " units were aggregated: ", paste(nams, collapse=", "), ".")
 
  if(!missing(unitsAggregated)){
 	datAggregated <- cbind(datAggregated, unitsAggregated, stringsAsFactors = FALSE)
