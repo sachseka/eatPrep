@@ -4,7 +4,7 @@ readSpss <- function (file, addLeadingZeros=FALSE, truncateSpaceChar = TRUE) {
     stop("Could not find file.\n")
   }
 
-dat <- data.frame(haven::read_sav(file=file.path(file), user_na = TRUE))
+dat <- eatGADS::import_spss(filePath=file.path(file))$dat
 
 dat <- set.col.type(dat)
 

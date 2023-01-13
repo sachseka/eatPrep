@@ -1,6 +1,6 @@
 importFrom(irrCAC, bp.coeff.raw)
 importFrom(combinat, combn)
-importFrom(haven, read_sav)
+importFrom(eatGADS, import_spss)
 importFrom(irr, agree, kappa2)
 importFrom(readxl, read_excel)
 importFrom(foreign, write.foreign, read.spss)
@@ -8,9 +8,9 @@ importFrom(reshape2, dcast, melt)
 importFrom(eatTools, asNumericIfPossible, crop, set.col.type, multiseq,
            insert.col, existsBackgroundVariables, whereAre, halveString,
            recodeLookup, addLeadingZerosToCharInt)
-importFrom("stats", "aggregate", "cor", "lag", "na.omit", "runif",
-               "weighted.mean")
-importFrom("utils", "flush.console", "write.csv2", "write.table")
+importFrom(stats, aggregate, cor, lag, na.omit, runif,
+               weighted.mean)
+importFrom(utils, flush.console, write.csv2, write.table)
 importFrom(cli,
            cli_abort,
            cli_alert_success, cli_alert_info, cli_alert_warning, cli_alert_danger)
