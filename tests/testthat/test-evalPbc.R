@@ -49,7 +49,7 @@ test_that_cli("evalPbc identifies zero-frequencies for attractors and throws mes
 
   expect_equal(evalPbc(test_pbc,
                        mistypes = c("mnr", "mbd", "mir", "mbi")),
-               list(lowFreqAtt = c("I1", "I2", "I3")))
+               list(zeroFreqAtt = c("I1", "I2", "I3")))
 
   expect_snapshot(evalPbc(test_pbc,
                           mistypes = c("mnr", "mbd", "mir", "mbi")))
@@ -66,7 +66,7 @@ test_that_cli("evalPbc identifies (unproblematic) zero-frequencies for distracto
 
   expect_equal(evalPbc(test_pbc,
                        mistypes = c("mnr", "mbd", "mir", "mbi")),
-               list(highFreqDis = c("I1", "I2", "I3")))
+               list(zeroFreqDis = c("I1", "I2", "I3")))
 
   expect_snapshot(evalPbc(test_pbc,
                           mistypes = c("mnr", "mbd", "mir", "mbi")))

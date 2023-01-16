@@ -40,7 +40,7 @@
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       i For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$lowFreqAtt
+      * output$zeroFreqAtt
 
 # evalPbc identifies zero-frequencies for attractors and throws message [ansi]
 
@@ -52,7 +52,7 @@
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [36mi[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$lowFreqAtt
+      * output$zeroFreqAtt
 
 # evalPbc identifies zero-frequencies for attractors and throws message [unicode]
 
@@ -64,7 +64,7 @@
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ℹ For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$lowFreqAtt
+      • output$zeroFreqAtt
 
 # evalPbc identifies zero-frequencies for attractors and throws message [fancy]
 
@@ -76,7 +76,7 @@
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [36mℹ[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$lowFreqAtt
+      • output$zeroFreqAtt
 
 # evalPbc identifies (unproblematic) zero-frequencies for distractors and throws message [plain]
 
@@ -89,7 +89,7 @@
       is probably not intended.
       i For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$highFreqDis
+      * output$zeroFreqDis
 
 # evalPbc identifies (unproblematic) zero-frequencies for distractors and throws message [ansi]
 
@@ -102,7 +102,7 @@
       is probably not intended.
       [36mi[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$highFreqDis
+      * output$zeroFreqDis
 
 # evalPbc identifies (unproblematic) zero-frequencies for distractors and throws message [unicode]
 
@@ -115,7 +115,7 @@
       is probably not intended.
       ℹ For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$highFreqDis
+      • output$zeroFreqDis
 
 # evalPbc identifies (unproblematic) zero-frequencies for distractors and throws message [fancy]
 
@@ -128,7 +128,7 @@
       is probably not intended.
       [36mℹ[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$highFreqDis
+      • output$zeroFreqDis
 
 # evalPbc identifies low correlations (< .05) for attractors per default [plain]
 
@@ -493,7 +493,7 @@
       0.07): I1_8_0.08
       i For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$highPbcMis$mir
+      * `output$highPbcMis$mir`
 
 # evalPbc identifies too high correlations (> .07) for missings per default [ansi]
 
@@ -506,7 +506,7 @@
       0.07): [32mI1_8_0.08[39m
       [36mi[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$highPbcMis$mir
+      * `output$highPbcMis$mir`
 
 # evalPbc identifies too high correlations (> .07) for missings per default [unicode]
 
@@ -519,7 +519,7 @@
       0.07): I1_8_0.08
       ℹ For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$highPbcMis$mir
+      • `output$highPbcMis$mir`
 
 # evalPbc identifies too high correlations (> .07) for missings per default [fancy]
 
@@ -532,7 +532,7 @@
       0.07): [32mI1_8_0.08[39m
       [36mℹ[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$highPbcMis$mir
+      • `output$highPbcMis$mir`
 
 # evalPbc accepts user-defined correlation cutoffs for missings [plain]
 
@@ -577,7 +577,7 @@
       0.01): I1_8_0.05
       i For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$highPbcMis$mir
+      * `output$highPbcMis$mir`
 
 # evalPbc identifies too high user-defined correlations for missings [ansi]
 
@@ -590,7 +590,7 @@
       0.01): [32mI1_8_0.05[39m
       [36mi[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      * output$highPbcMis$mir
+      * `output$highPbcMis$mir`
 
 # evalPbc identifies too high user-defined correlations for missings [unicode]
 
@@ -603,7 +603,7 @@
       0.01): I1_8_0.05
       ℹ For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$highPbcMis$mir
+      • `output$highPbcMis$mir`
 
 # evalPbc identifies too high user-defined correlations for missings [fancy]
 
@@ -616,7 +616,7 @@
       0.01): [32mI1_8_0.05[39m
       [36mℹ[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
-      • output$highPbcMis$mir
+      • `output$highPbcMis$mir`
 
 # evalPbc ignores missing correlations for missings [plain]
 
@@ -715,7 +715,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
     Message <cliMessage>
-      i 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      i catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mycode
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -725,7 +725,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
     Message <cliMessage>
-      [36mi[39m 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      [36mi[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmycode[39m
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -735,7 +735,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
     Message <cliMessage>
-      ℹ 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      ℹ catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mycode
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -745,7 +745,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
     Message <cliMessage>
-      [36mℹ[39m 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      [36mℹ[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmycode[39m
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -755,7 +755,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
     Message <cliMessage>
-      i 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      i catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mir
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -765,7 +765,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
     Message <cliMessage>
-      [36mi[39m 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      [36mi[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmir[39m
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -775,7 +775,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
     Message <cliMessage>
-      ℹ 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      ℹ catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mir
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -785,7 +785,7 @@
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
     Message <cliMessage>
-      [36mℹ[39m 'catPbc' contains other values than 0, 1 and the specified mistypes: Other
+      [36mℹ[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmir[39m
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.

@@ -11,28 +11,28 @@ evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
   if(length(setdiff(unique(pbcs$recodevalue), c(0, 1, mistypes))) > 0) {
     differingMistypes <- setdiff(unique(pbcs$recodevalue), c(0, 1, mistypes))
 
-    cli_alert_info("'catPbc' contains other values than 0, 1 and the specified mistypes:
+    cli_alert_info("{.pkg catPbc} contains other values than 0, 1 and the specified mistypes:
        Other value(s): {.field {sort(differingMistypes)}}",
        wrap = TRUE)
   }
 
   if(any(pbcs$freq[pbcs$recodevalue==1] == 0)) {
-    ret$lowFreqAtt <- pbcs$item[pbcs$recodevalue==1 & pbcs$freq==0]
-    cli_alert_danger("The attractors (score 1) of the following {length(ret$lowFreqAtt)} item{?s} were chosen with a frequency of zero: {.field {ret$lowFreqAtt}}. This should not happen. Please check.", wrap = TRUE)
+    ret$zeroFreqAtt <- pbcs$item[pbcs$recodevalue==1 & pbcs$freq==0]
+    cli_alert_danger("The attractors (score 1) of the following {length(ret$zeroFreqAtt)} item{?s} were chosen with a frequency of zero: {.field {ret$zeroFreqAtt}}. This should not happen. Please check.", wrap = TRUE)
   } else {
     cli_alert_success("Excellent, no attractors (score 1) were chosen with a frequency of zero.",
                       wrap = TRUE)
   }
 
   if(any(pbcs$freq[pbcs$recodevalue==0] == 0)) {
-    ret$highFreqDis <- unique(pbcs$item[pbcs$recodevalue==0 & pbcs$freq==0])
-    highFreqDis <- paste(
-      ret$highFreqDis,
+    ret$zeroFreqDis <- unique(pbcs$item[pbcs$recodevalue==0 & pbcs$freq==0])
+    zeroFreqDis <- paste(
+      ret$zeroFreqDis,
       pbcs$cat[pbcs$recodevalue==0 & pbcs$freq==0],
       sep = "_"
     )
 
-    cli_alert_warning("The distractors (score 0) of the following {length(ret$highFreqDis)} item{?s} were chosen with a frequency of zero: {.field {highFreqDis}}.
+    cli_alert_warning("The distractors (score 0) of the following {length(ret$zeroFreqDis)} item{?s} were chosen with a frequency of zero: {.field {zeroFreqDis}}.
                       This may happen, but is probably not intended.",
                       wrap = TRUE)
   } else {
@@ -98,10 +98,12 @@ evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
 
       objects <- append(objects, objects_highPbcMis, after = which(objects == "output$highPbcMis"))
       objects <- objects[objects != "output$highPbcMis"]
+
+      objects <- paste0("{.envvar ", objects, "}")
     }
 
     cli_alert_info("For a list of problematic items, save the {.envvar output} of this function and return the item names as a vector:", wrap = TRUE)
-    cli_ul("{objects}")
+    cli_ul(objects)
     invisible(ret)
   }
 }
