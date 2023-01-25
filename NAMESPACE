@@ -12,9 +12,11 @@ importFrom(stats, aggregate, cor, lag, na.omit, runif,
                weighted.mean)
 importFrom(utils, flush.console, write.csv2, write.table)
 importFrom(cli,
+           qty,
+           cli_h1, cli_h2, cli_h3,
            cli_abort, cli_ul,
            test_that_cli,
-           cli_alert_success, cli_alert_info, cli_alert_warning, cli_alert_danger)
+           cli_alert, cli_alert_success, cli_alert_info, cli_alert_warning, cli_alert_danger)
 export(aggregateData)
 export(automateDataPreparation)
 export(catPbc)
