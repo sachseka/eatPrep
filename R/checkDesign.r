@@ -1,7 +1,4 @@
 checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID", subunits = NULL, verbose = TRUE) {
-  # TODO: → The following 1 block is in booklets but not in blocks: `bl1`
-  # bei solch einer Meldung den weiteren Report stoppen!
-
   # ID check
   if (is.na(match(id, colnames(dat)))) {
     cli_abort("ID variable {.envvar {id}} not found in dataset.",
@@ -14,9 +11,6 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
   rotation <- set.col.type(rotation, col.type = list("character" = names(rotation)))
 
   # Check for sub-elements
-  # ??? Should the tests be inverted (a is element of b instead of b is element of a)
-  #   - minimum pattern should be defined on the left (min is element of / %in% max)?
-  # ??? Error messages?
   stopifnot(all(c("subunit", "block", "subunitBlockPosition") %in% names(blocks)))
   stopifnot("booklet" %in% names(booklets))
   stopifnot(all(sapply(names(booklets)[-grep("booklet", names(booklets))], function(jj) grepl("^block",jj))))
