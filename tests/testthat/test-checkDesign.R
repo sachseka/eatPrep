@@ -102,13 +102,39 @@ test_that_cli("returns an error if missing variable names in rotation", {
 })
 
 test_that_cli("throws danger messages when block names in blocks do not equal those in booklets", {
+  # Manipulation: add block in blocks
+  test_block_block <- rbind.data.frame(
+    inputList$blocks,
+    data.frame(
+      subunit = "I99",
+      block = "bl9",
+      subunitBlockPosition = 1
+    )
+  )
+  expect_snapshot(
+    checkDesignTest(blocks = test_block_block)
+  )
+
   # Manipulation: block names in blocks
   test_block_block <- within(inputList$blocks, {
     block <- ifelse(block == "bl1", "bl9", block)
   })
-  # ?? Returns all subject codes (without obvious reason) ??
   expect_snapshot(
     checkDesignTest(blocks = test_block_block)
+  )
+
+  # Manipulation: block names in booklets
+  test_booklet_block <- rbind.data.frame(
+    inputList$booklets,
+    data.frame(
+      booklet = "booklet4",
+      block1 = "bl2",
+      block2 = "bl4",
+      block3 = "bl1"
+    )
+  )
+  expect_snapshot(
+    checkDesignTest(booklets = test_booklet_block)
   )
 
   # Manipulation: block names in booklets
@@ -154,7 +180,32 @@ test_that_cli("throws warning when more variables in dataset available than in b
   )
 })
 
-test_that_cli("identifies sysMis or vc", {
-  # ?? Should return warning?
-  expect_snapshot(checkDesignTest(dat = within(prepDat, I01R <- ifelse(I01R == 0, NA, I01R))))
+test_that_cli("identifies incorrect sysMis codes and allows for user-defined sysMis", {
+  # Change vc to sysMis for item I01R
+  expect_snapshot(
+    checkDesignTest(dat = within(prepDat, I01R <- ifelse(I01R == "mbi", "mbd", I01R)), sysMis = "mbd")
+  )
+
+  # Change vc to user-defined sysMis for I01R
+  userDefinedSysMis <- as.data.frame(lapply(prepDat, FUN = function(x) ifelse(x == "mbd", NA, x)))
+  # Change vc to sysMis for item I01R
+  expect_snapshot(
+    checkDesignTest(dat = within(userDefinedSysMis, I01R <- ifelse(I01R == "mbi", NA, I01R)),
+                    sysMis = "NA")
+  )
+})
+
+test_that_cli("identifies incorrect vc codes", {
+  # Change sysMis to vc for item I22R
+  expect_snapshot(
+    checkDesignTest(dat = within(prepDat, I22R <- ifelse(I22R == "mbd", "mbi", I22R)), sysMis = "mbd")
+  )
+
+  # Change vc to user-defined sysMis for I01R
+  userDefinedSysMis <- as.data.frame(lapply(prepDat, FUN = function(x) ifelse(x == "mbd", NA, x)))
+  # Change sysMis to vc for item I22R
+  expect_snapshot(
+    checkDesignTest(dat = within(userDefinedSysMis, I22R <- ifelse(is.na(I22R), "mbi", I22R)),
+                    sysMis = "NA")
+  )
 })

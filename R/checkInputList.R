@@ -69,7 +69,6 @@ checkInputList <- function(inputList, mistypes = c("mnr", "mbd", "mir", "mbi")) 
   if (! setequal(names(inL), sheetNames)) {
     cli_h3("Checking sheets")
     if (nMissingSheets > 0) {
-      # ???? ADDITION ????
       ret <- FALSE
 
       cli_alert_danger("Did not find {nMissingSheets} sheet{?s}: {.envvar {missingSheets}}")
@@ -85,7 +84,6 @@ checkInputList <- function(inputList, mistypes = c("mnr", "mbd", "mir", "mbi")) 
   checkProblem <- function(sheet) {
     if(! is.null(inL[[sheet]]) &
        ! all(sheetColList[[sheet]] %in% colnames(inL[[sheet]]))) {
-      # ???? ADDITION ????
       ret <<- FALSE
 
       expectedColumns <- sheetColList[[sheet]]

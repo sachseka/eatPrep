@@ -1,4 +1,7 @@
 checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID", subunits = NULL, verbose = TRUE) {
+  # TODO: → The following 1 block is in booklets but not in blocks: `bl1`
+  # bei solch einer Meldung den weiteren Report stoppen!
+
   # ID check
   if (is.na(match(id, colnames(dat)))) {
     cli_abort("ID variable {.envvar {id}} not found in dataset.",
@@ -23,6 +26,14 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
   bl1 <- unique(unlist(booklets[, -match("booklet", names(booklets))]))
   bl2 <- unique(blocks$block)
 
+  # Deviations (needed later, therefore external to if clause)
+  bl1Vs2 <- setdiff(bl1, bl2)
+  bl2Vs1 <- setdiff(bl2, bl1)
+
+  # Quantities of deviations
+  nBl1Vs2 <- length(bl1Vs2)
+  nBl2Vs1 <- length(bl2Vs1)
+
   if (!setequal(bl1,bl2)) {
     # Generic danger message
     cli_h3("{.strong Check:} Block names")
@@ -31,19 +42,13 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
                      {.field booklets}. Please check.",
                      wrap = TRUE)
     if (verbose) {
-      # Deviations
-      bl1Vs2 <- setdiff(bl1, bl2)
-      bl2Vs1 <- setdiff(bl2, bl1)
-
-      # Quantities of deviations
-      nBl1Vs2 <- length(bl1Vs2)
-      nBl2Vs1 <- length(bl2Vs1)
-
       # Messages for deviations
       if(nBl1Vs2 > 0) {
         cli_alert("The following {nBl1Vs2} block{?s} {?is/are} in
                   {.field booklets} but not in {.field blocks}:
                   {.envvar {bl1Vs2}}",
+                  wrap = TRUE)
+        cli_alert("No check for valid and missing codes will be available.",
                   wrap = TRUE)
       }
       if(nBl2Vs1 > 0) {
@@ -131,95 +136,143 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
     dat <- dat[, -match(toOmit, names(dat))]
   }
 
-  # Identify items in a given booklet
-  .subunitsInBooklet <- function(TH) {
-    unname(unlist(sapply(
-      booklets[which(booklets$booklet == TH), grep("block", names(booklets))],
-      function(BL) {
-        subset(blocks, blocks$block == BL)$subunit
-      }
-    )))
-  }
-
-  if (sysMis == "NA") {
-    # sysMis instead of vc (M)
-    .patternCheckM <- function(subunit, TH, cases) {
-      cc <- cases[which(is.na(dat[match(cases, dat[,id]),match(subunit, names(dat))]))]
-      if(length(cc) > 0) {return(cc)} else {return(FALSE)}
-    }
-    # vc instead of sysMis (P)
-    .patternCheckP <- function(subunitN, TH, cases) {
-      dd <- cases[which(!is.na(dat[match(cases, dat[,id]),match(subunitN, names(dat))]))]
-      if(length(dd) > 0) {return(dd)} else {return(FALSE)}
-    }
-  } else {
-    # sysMis instead of vc (M)
-    .patternCheckM <- function(subunit, TH, cases) {
-      cc <- cases[which(dat[match(cases, dat[,id]),match(subunit, names(dat))] == sysMis)]
-      if(length(cc) > 0) {return(cc)} else {return(FALSE)}
-    }
-    # vc instead of sysMis (P)
-    .patternCheckP <- function(subunitN, TH, cases) {
-      dd <- cases[which(dat[match(cases, dat[,id]),match(subunitN, names(dat))] != sysMis)]
-      if(length(dd) > 0) {return(dd)} else {return(FALSE)}
-    }
-  }
-
-  # Check sysMis pattern for every booklet
   .bookletPatternCheck <- function(TH) {
-    subInBooklet <- .subunitsInBooklet(TH)
-    subNotInBooklet <- setdiff(names(dat), c(subInBooklet, id))
+    # Sanity check
     stopifnot(id %in% names(rotation))
+
+    # Cases worked on the given booklet
     cases <- rotation[,id][rotation$booklet == TH]
-    resList <- list()
-    resList[["M"]] <- sapply(subInBooklet, .patternCheckM, TH=TH, cases=cases)
-    resList[["P"]] <- sapply(subNotInBooklet, .patternCheckP, TH=TH, cases=cases)
+
+    # Subunit names in the given booklet (should only contain valid codes)
+    subInBooklet <- unname(unlist(sapply(
+      booklets[which(booklets$booklet == TH), grep("block", names(booklets))],
+      function(BL) subset(blocks, blocks$block == BL)$subunit
+    )))
+
+    # Subunit names not in the given booklet (should only contain system missing codes)
+    subOffBooklet <- setdiff(names(dat), c(subInBooklet, id))
+
+    # Data to match, differs based on subunits in vs. off booklet
+    subPattern <- function(subunit) { dat[match(cases, dat[,id]), match(subunit, names(dat))] }
+
+    # Pattern check based on system missing definition (NA vs. other)
+    if (sysMis == "NA") {
+      subInPattern <- is.na(subPattern(subInBooklet))
+      subOffPattern <- ! is.na(subPattern(subOffBooklet))
+    } else {
+      subInPattern <- subPattern(subInBooklet) == sysMis
+      subOffPattern <- ! subPattern(subOffBooklet) == sysMis
+    }
+
+    # Function to flag cases
+    flagCases <- function(subunits) {
+      lapply(as.data.frame(subunits), function(subunit) {
+        cases[which(subunit)]
+      })
+    }
+
+    # Function to flag subunits
+    flagSubunits <- function(subunits) names(subunits[which(subunits != 0)])
+
+    # List all case and subunit flags as well as the respective counts per scenario
+    generateResList <- function(scenario) {
+      if (scenario == "sysMisInBooklet") {
+        subunit <- subInPattern
+      } else if (scenario == "vcOffBooklet") {
+        subunit <- subOffPattern
+      }
+
+      caseFlag <- flagCases(subunit)
+      caseCount <- sapply(caseFlag, length)
+      subunitFlag <- flagSubunits(caseCount)
+      subunitCount <- length(subunitFlag)
+
+      generatedList <- NULL
+      generatedList[[scenario]] <-
+        list( # Structure of scenario list
+          case =
+            list(
+              flag = caseFlag,
+              count = caseCount
+            ),
+          subunit =
+            list(
+              flag = subunitFlag,
+              count = subunitCount
+            )
+        )
+    }
+
+    # Call for both scenarios - generates two lists (one for each scenario)
+    scenarios <- c("sysMisInBooklet", "vcOffBooklet")
+    resList <- lapply(scenarios, generateResList)
+    names(resList) <- scenarios
+
+    # Number of total problems
+    resList$total <- sum(
+      resList$sysMisInBooklet$subunit$count,
+      resList$vcOffBooklet$subunit$count
+    )
+
     return(resList)
   }
 
-  resL <- lapply(booklets$booklet, .bookletPatternCheck)
-  names(resL) <- booklets$booklet
+  # Loop over booklets with pattern check algorithm
+  checkedBooklets <- lapply(booklets$booklet, .bookletPatternCheck)
+  bookletNames <- booklets$booklet
+  names(checkedBooklets) <- bookletNames
 
-  if (all(unlist(resL) == FALSE)) {
-    if (verbose) cli_alert_success("No deviations from design detected!")
-  } else {
-    if (verbose) cli_alert_info("Deviations from design detected!")
+  scenarios <- c("sysMisInBooklet", "vcOffBooklet")
 
-    ## CUT
-    # sysMis instead of vc
-    if (!all(unlist(resM <- lapply(resL, function (iz) {iz[["M"]]})) == FALSE)) {
-      for(ll in names(resL)) {
-        if (any(tt <- unlist(lapply(resM[[ll]], function(gg) gg[1])) != FALSE)) {
-          nTt <- sum(tt)
-          cli_alert_info("Found for {sum(tt)} variable{?s}
-                         sysMis instead of valid codes for booklet {.envvar {ll}}: ")
-          for(pp in names(resM[[ll]])) {
-            if (resM[[ll]][[pp]][1] != FALSE) {
-              nPp <- length(resM[[ll]][[pp]])
-              if(verbose) cli_alert_info("{pp} ({nPp} case{?s}: {resM[[ll]][[pp]]})")
+  # Check for any problems
+  totalCheck <- sum(sapply(checkedBooklets, function(x) x$total))
+
+  cli_h3("{.strong Check:} Valid and missing codes")
+
+  if(nBl1Vs2 > 0) {
+    cli_alert_danger("Not available as there {qty(nBl1Vs2)}{?is/are} {nBl1Vs2} block{?s} in booklets that {?is/are} not in blocks!")
+  }  else {
+    if (totalCheck == 0) {
+      if (verbose) cli_alert_success("No deviations from design detected!")
+    } else {
+      if (verbose) cli_alert_info("Deviations from design detected!")
+
+      # Function to report (scenario-wise), if any problems arrive
+      .reportProblems <- function(scenario) {
+        # Check for any problems for the scenario
+        nScenarioProblems <- sum(sapply(checkedBooklets, function(x) x[[scenario]]$subunit$count))
+        if (nScenarioProblems != 0) {
+          # Check for booklet-wise problems
+          for (bkl in bookletNames) {
+            currentBooklet <- checkedBooklets[[bkl]][[scenario]]
+            nProblematicSubunits <- currentBooklet$subunit$count
+            # Check for subunit-wise problems (per booklet)
+            if (nProblematicSubunits > 0) {
+
+              problematicSubunits <- currentBooklet$subunit$flag
+              snippet <- ifelse(scenario == "sysMisInBooklet",
+                                "sysMis instead of valid codes",
+                                "valid codes instead of sysMis")
+
+              cli_alert_danger("Found for {nProblematicSubunits} subunit{?s}
+                             {snippet} for booklet {.envvar {bkl}}:
+                             {problematicSubunits}",
+                             wrap = TRUE)
+              if(verbose) {
+                # Check for case-wise scenarios (per subunit)
+                for (sub in problematicSubunits) {
+                  problematicCases <- currentBooklet$case$flag[[sub]]
+                  nProblematicCases <- currentBooklet$case$count[[sub]]
+                  cli_alert_info("{sub} ({nProblematicCases} case{?s}: {problematicCases})")
+                }
+              }
             }
           }
         }
       }
-    }
 
-    # vc instead of sysMis
-    if (!all(unlist(resP <- lapply(resL, function(iz) { iz[["P"]] })) == FALSE)) {
-      for(ll in names(resL)) {
-        if (any(tt <- unlist(lapply(resP[[ll]], function(gg) gg[1])) != FALSE)) {
-          nTt <- sum(tt)
-          if(verbose) cli_alert_info("Found for {sum(tt)} variable{?s}
-                                     valid codes instead of sysMis for booklet {.envvar {ll}}: ")
-          for(pp in names(resP[[ll]])) {
-            if (resP[[ll]][[pp]][1] != FALSE) {
-              nPp <- length(resP[[ll]][[pp]])
-              if(verbose) cli_alert_info("{pp} ({nPp} case{?s}: {resP[[ll]][[pp]]})")
-            }
-          }
-        }
-      }
+      for (s in scenarios) .reportProblems(s)
+
     }
-    ## CUT
   }
 }
-

@@ -21,7 +21,7 @@ This function checks whether a data frame corresponds to a particular rotated bl
 %% tbd
 %% }
 
-\author{Karoline Sachse}
+\author{Karoline Sachse, Philipp Franikowski}
 
 \examples{
 data(inputDat)
