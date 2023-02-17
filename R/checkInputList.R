@@ -1,4 +1,6 @@
 checkInputList <- function(inputList, mistypes = c("mnr", "mbd", "mir", "mbi")) {
+  cli_setting()
+
   # Default return
   ret <- TRUE
 
@@ -188,7 +190,8 @@ checkInputList <- function(inputList, mistypes = c("mnr", "mbd", "mir", "mbi")) 
                             {.envvar {valueRecodeU}}",
                             wrap = TRUE)
         } else {
-          ret <- FALSE
+          # Other use cases are possible; therefore, decided to return TRUE here
+          ret <- TRUE
 
           # List all deviating value codes
           cli_alert_danger("{.field valueRecode} contains other values than

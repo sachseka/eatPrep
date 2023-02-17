@@ -199,7 +199,8 @@ test_that("checks for valueRecodes other than 0, 1, and the mistypes", {
     valueRecode <- ifelse(subunit == "I01" & valueRecode == "mbd", 2, valueRecode)
   })
 
-  expect_equal(checkInputList(prepList), FALSE)
+  # Changed, as the function could be used for other cases than the intended
+  expect_equal(checkInputList(prepList), TRUE)
   expect_snapshot(checkInputList(prepList))
 })
 

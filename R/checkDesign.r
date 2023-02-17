@@ -1,4 +1,6 @@
 checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID", subunits = NULL, verbose = TRUE) {
+  cli_setting()
+
   # ID check
   if (is.na(match(id, colnames(dat)))) {
     cli_abort("ID variable {.envvar {id}} not found in dataset.",

@@ -12,6 +12,7 @@ importFrom(stats, aggregate, cor, lag, na.omit, runif,
                weighted.mean)
 importFrom(utils, flush.console, write.csv2, write.table)
 importFrom(cli,
+           start_app,
            qty,
            cli_h1, cli_h2, cli_h3,
            cli_abort, cli_ul,

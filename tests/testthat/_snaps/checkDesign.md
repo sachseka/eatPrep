@@ -960,7 +960,7 @@
       i Deviations from design detected!
       x Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      i I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, ..., person198, and person199)
+      i I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 
 ---
 
@@ -980,7 +980,7 @@
       i Deviations from design detected!
       x Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      i I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, ..., person198, and person199)
+      i I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 
 # identifies incorrect vc codes [ansi]
 
@@ -1000,7 +1000,7 @@
       [36mi[39m Deviations from design detected!
       [31mx[39m Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      [36mi[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, ..., person198, and person199)
+      [36mi[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 
 ---
 
@@ -1020,7 +1020,7 @@
       [36mi[39m Deviations from design detected!
       [31mx[39m Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      [36mi[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, ..., person198, and person199)
+      [36mi[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 
 # identifies incorrect vc codes [unicode]
 
@@ -1040,7 +1040,7 @@
       ℹ Deviations from design detected!
       ✖ Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      ℹ I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, …, person198, and person199)
+      ℹ I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 
 ---
 
@@ -1060,7 +1060,7 @@
       ℹ Deviations from design detected!
       ✖ Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      ℹ I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, …, person198, and person199)
+      ℹ I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 
 # identifies incorrect vc codes [fancy]
 
@@ -1080,7 +1080,7 @@
       [36mℹ[39m Deviations from design detected!
       [31m✖[39m Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      [36mℹ[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, …, person198, and person199)
+      [36mℹ[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 
 ---
 
@@ -1100,5 +1100,5 @@
       [36mℹ[39m Deviations from design detected!
       [31m✖[39m Found for 1 subunit valid codes instead of sysMis for booklet `booklet1`:
       I22R
-      [36mℹ[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, …, person198, and person199)
+      [36mℹ[39m I22R (100 cases: person100, person101, person102, person103, person104, person105, person106, person107, person108, person109, person110, person111, person112, person113, person114, person115, person116, person117, person118, person119, person120, person121, person122, person123, person124, person125, person126, person127, person128, person129, person130, person131, person132, person133, person134, person135, person136, person137, person138, person139, person140, person141, person142, person143, person144, person145, person146, person147, person148, person149, person150, person151, person152, person153, person154, person155, person156, person157, person158, person159, person160, person161, person162, person163, person164, person165, person166, person167, person168, person169, person170, person171, person172, person173, person174, person175, person176, person177, person178, person179, person180, person181, person182, person183, person184, person185, person186, person187, person188, person189, person190, person191, person192, person193, person194, person195, person196, person197, person198, and person199)
 

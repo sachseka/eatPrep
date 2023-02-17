@@ -1,5 +1,6 @@
 evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
                     minPbcAtt = .05, maxPbcDis = .005, maxPbcMis = .07) {
+  cli_setting()
 
   ret <- NULL
 
