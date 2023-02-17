@@ -53,14 +53,22 @@ evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
     cli_alert_danger("catPbcs for attractors (score 1) of the following {length(ret$lowMisPbcAtt)} item{?s} are worrisome low (< {format(minPbcAtt, scientific = FALSE)}) or missing: {.field {lowMisPbcAtt}}\n")
   }
 
-  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==0] > maxPbcDis & !is.na(pbcs$catPbc[pbcs$recodevalue==0]), TRUE, FALSE)
+  ad <- ifelse(pbcs$catPbc[pbcs$recodevalue==0] > maxPbcDis &
+                 !is.na(pbcs$catPbc[pbcs$recodevalue==0]),
+               TRUE,
+               FALSE)
+
   if(sum(ad) > 0) {
-    ret$highPbcDis <- pbcs[pbcs$recodevalue==0,][ad,]$item
+    # Duplicate item codes included
+    allHighPbcDis <- pbcs[pbcs$recodevalue==0,][ad,]$item
     highPbcDis <- paste(
-      ret$highPbcDis,
+      allHighPbcDis,
       pbcs[pbcs$recodevalue==0,][ad,]$cat,
       round(pbcs[pbcs$recodevalue==0,][ad,]$catPbc, 2),
       sep="_")
+
+    # This has to be made unique after initial flag
+    ret$highPbcDis <- unique(allHighPbcDis)
 
     cli_alert_danger("catPbcs for distractors (score 0) of the following {length(ret$highPbcDis)} item{?s} are unexpectedly high (> {format(maxPbcDis, scientific = FALSE)}): {.field {highPbcDis}}")
   }
@@ -70,7 +78,7 @@ evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
     if(sum(ad) > 0) {
       ret$highPbcMis[[mm]] <- unique(pbcs[pbcs$recodevalue==mm,][ad,]$item)
       highPbcMis <- paste(
-        ret$highPbcMis,
+        ret$highPbcMis[[mm]],
         pbcs[pbcs$recodevalue==mm,][ad,]$cat,
         round(pbcs[pbcs$recodevalue==mm,][ad,]$catPbc, 2),
         sep="_")

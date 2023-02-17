@@ -137,7 +137,7 @@
     Message <cliMessage>
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      x catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: I1:_0.05
+      x catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: I1:_0.05 and I2:_0.05
       i For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       * output$lowMisPbcAtt
@@ -149,7 +149,7 @@
     Message <cliMessage>
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      [31mx[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: [32m[32mI1:_0.05[32m[39m
+      [31mx[39m catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: [32m[32mI1:_0.05[32m[39m and [32m[32mI2:_0.05[32m[39m
       [36mi[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       * output$lowMisPbcAtt
@@ -161,7 +161,7 @@
     Message <cliMessage>
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      ✖ catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: I1:_0.05
+      ✖ catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: I1:_0.05 and I2:_0.05
       ℹ For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       • output$lowMisPbcAtt
@@ -173,7 +173,7 @@
     Message <cliMessage>
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      [31m✖[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: [32m[32mI1:_0.05[32m[39m
+      [31m✖[39m catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: [32m[32mI1:_0.05[32m[39m and [32m[32mI2:_0.05[32m[39m
       [36mℹ[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       • output$lowMisPbcAtt
@@ -329,7 +329,7 @@
     Message <cliMessage>
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      x catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.005): I1_1_0.01
+      x catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): I1_1_0.01, I1_2_0.01, and I2_1_0.01
       i For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       * output$highPbcDis
@@ -341,7 +341,7 @@
     Message <cliMessage>
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      [31mx[39m catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.005): [32m[32mI1_1_0.01[32m[39m
+      [31mx[39m catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): [32m[32mI1_1_0.01[32m[39m, [32m[32mI1_2_0.01[32m[39m, and [32m[32mI2_1_0.01[32m[39m
       [36mi[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       * output$highPbcDis
@@ -353,7 +353,7 @@
     Message <cliMessage>
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      ✖ catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.005): I1_1_0.01
+      ✖ catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): I1_1_0.01, I1_2_0.01, and I2_1_0.01
       ℹ For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       • output$highPbcDis
@@ -365,7 +365,7 @@
     Message <cliMessage>
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      [31m✖[39m catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.005): [32m[32mI1_1_0.01[32m[39m
+      [31m✖[39m catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): [32m[32mI1_1_0.01[32m[39m, [32m[32mI1_2_0.01[32m[39m, and [32m[32mI2_1_0.01[32m[39m
       [36mℹ[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       • output$highPbcDis
@@ -489,11 +489,14 @@
     Message <cliMessage>
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      ! catPbcs for mistype 'mir' of the following 1 item are relatively high (>
-      0.07): I1_8_0.08
+      ! catPbcs for mistype 'mir' of the following 2 items are relatively high (>
+      0.07): I1_8_0.08 and I2_8_0.08
+      ! catPbcs for mistype 'mbi' of the following 1 item are relatively high (>
+      0.07): I1_9_0.08
       i For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       * `output$highPbcMis$mir`
+      * `output$highPbcMis$mbi`
 
 # evalPbc identifies too high correlations (> .07) for missings per default [ansi]
 
@@ -502,11 +505,14 @@
     Message <cliMessage>
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      [33m![39m catPbcs for mistype 'mir' of the following 1 item are relatively high (>
-      0.07): [32mI1_8_0.08[39m
+      [33m![39m catPbcs for mistype 'mir' of the following 2 items are relatively high (>
+      0.07): [32mI1_8_0.08[39m and [32mI2_8_0.08[39m
+      [33m![39m catPbcs for mistype 'mbi' of the following 1 item are relatively high (>
+      0.07): [32mI1_9_0.08[39m
       [36mi[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       * `output$highPbcMis$mir`
+      * `output$highPbcMis$mbi`
 
 # evalPbc identifies too high correlations (> .07) for missings per default [unicode]
 
@@ -515,11 +521,14 @@
     Message <cliMessage>
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      ! catPbcs for mistype 'mir' of the following 1 item are relatively high (>
-      0.07): I1_8_0.08
+      ! catPbcs for mistype 'mir' of the following 2 items are relatively high (>
+      0.07): I1_8_0.08 and I2_8_0.08
+      ! catPbcs for mistype 'mbi' of the following 1 item are relatively high (>
+      0.07): I1_9_0.08
       ℹ For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       • `output$highPbcMis$mir`
+      • `output$highPbcMis$mbi`
 
 # evalPbc identifies too high correlations (> .07) for missings per default [fancy]
 
@@ -528,11 +537,14 @@
     Message <cliMessage>
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
-      [33m![39m catPbcs for mistype 'mir' of the following 1 item are relatively high (>
-      0.07): [32mI1_8_0.08[39m
+      [33m![39m catPbcs for mistype 'mir' of the following 2 items are relatively high (>
+      0.07): [32mI1_8_0.08[39m and [32mI2_8_0.08[39m
+      [33m![39m catPbcs for mistype 'mbi' of the following 1 item are relatively high (>
+      0.07): [32mI1_9_0.08[39m
       [36mℹ[39m For a list of problematic items, save the `output` of this function and
       return the item names as a vector:
       • `output$highPbcMis$mir`
+      • `output$highPbcMis$mbi`
 
 # evalPbc accepts user-defined correlation cutoffs for missings [plain]
 

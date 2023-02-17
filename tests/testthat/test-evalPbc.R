@@ -78,11 +78,12 @@ test_that_cli("evalPbc identifies low correlations (< .05) for attractors per de
   # Manipulation: Low correlation for the attractor of item 1
   test_pbc <- within(test_pbc, {
     catPbc[1] <- .049
+    catPbc[6] <- .049
   })
 
   expect_equal(evalPbc(test_pbc,
                        mistypes = c("mnr", "mbd", "mir", "mbi")),
-               list(lowMisPbcAtt = c("I1")))
+               list(lowMisPbcAtt = c("I1", "I2")))
 
   expect_snapshot(evalPbc(test_pbc,
                           mistypes = c("mnr", "mbd", "mir", "mbi")))
@@ -145,11 +146,14 @@ test_that_cli("evalPbc identifies too high correlations (> .005) for distractors
   # Manipulation: Too high correlation for the first distractor of item 1
   test_pbc <- within(test_pbc, {
     catPbc[2] <- .006
+    catPbc[3] <- .006
+
+    catPbc[7] <- .006
   })
 
   expect_equal(evalPbc(test_pbc,
                        mistypes = c("mnr", "mbd", "mir", "mbi")),
-               list(highPbcDis = c("I1")))
+               list(highPbcDis = c("I1", "I2")))
 
   expect_snapshot(evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi")))
 })
@@ -211,12 +215,15 @@ test_that_cli("evalPbc identifies too high correlations (> .07) for missings per
 
   # Manipulation: Too high correlation for missing (mir) for item 1
   test_pbc <- within(test_pbc, {
-    catPbc[4] <- .08
+    catPbc[4] <- .08 # I1, mir
+    catPbc[5] <- .08 # I2, mbi
+
+    catPbc[9] <- .08 # I2, mir
   })
 
   expect_equal(evalPbc(test_pbc,
                        mistypes = c("mnr", "mbd", "mir", "mbi")),
-               list(highPbcMis = list(mir = c("I1"))))
+               list(highPbcMis = list(mir = c("I1", "I2"), mbi = c("I1"))))
 
   expect_snapshot(evalPbc(test_pbc,
                           mistypes = c("mnr", "mbd", "mir", "mbi")))
