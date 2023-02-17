@@ -6,7 +6,7 @@
 \description{Score datasets with special consideration of missing values.
 }
 \usage{
-scoreData(dat, unitrecodings, units, subunits, verbose = FALSE)
+scoreData(dat, unitrecodings, subunits, verbose = FALSE, ...)
 }
 \arguments{
   \item{dat}{A data frame}
@@ -40,7 +40,7 @@ prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
     aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
 
-datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$units, inputList$subunits,
+datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
     verbose = TRUE)
 str(datSco)
 
