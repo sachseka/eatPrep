@@ -50,8 +50,9 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		} else {
 			stopifnot("data.frame" %in% class(datList) || "list" %in% class(datList))
 			if("data.frame" %in% class(datList)) {
-			  datList <- list(datList)
-			  names(datList) <- "dat"
+			  dat <- datList
+			  datList <- list()
+			  datList[[1]] <- dat
 			}
 		  dat <- datList[[1]]
 		}
