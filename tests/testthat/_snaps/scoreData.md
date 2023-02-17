@@ -91,7 +91,7 @@
     Code
       scoreDataTest(testScore)
     Message <cliMessage>
-      v 2 units were scored: `I02` and `I03`.
+      v 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
       1 person100   0   0   0
@@ -106,7 +106,7 @@
     Code
       scoreDataTest(testScore)
     Message <cliMessage>
-      [32mv[39m 2 units were scored: `I02` and `I03`.
+      [32mv[39m 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
       1 person100   0   0   0
@@ -121,7 +121,7 @@
     Code
       scoreDataTest(testScore)
     Message <cliMessage>
-      ✔ 2 units were scored: `I02` and `I03`.
+      ✔ 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
       1 person100   0   0   0
@@ -136,7 +136,7 @@
     Code
       scoreDataTest(testScore)
     Message <cliMessage>
-      [32m✔[39m 2 units were scored: `I02` and `I03`.
+      [32m✔[39m 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
       1 person100   0   0   0
@@ -205,66 +205,6 @@
       [33m![39m Found no scoring information for 1 variable: `I02`. This variable will not be
       scored.
       [32m✔[39m 1 unit was scored: `I03`.
-    Output
-               ID I01 I02 I03 I04
-      1 person100   0   0   0   0
-      2 person101   1   1   0   1
-      3 person102   1   2   0   0
-      4 person103 mbi   3   1   1
-      5 person104 mir mbd mbd mbi
-      6 person105 mbd mir mbd mbd
-
-# throws an error if there are less items to score in the units [plain]
-
-    Code
-      scoreDataTest(testScore, units = falseUnits)
-    Message <cliMessage>
-      v 2 units were scored: `I02` and `I03`.
-    Output
-               ID I01 I02 I03 I04
-      1 person100   0   0   0   0
-      2 person101   1   1   0   1
-      3 person102   1   2   0   0
-      4 person103 mbi   3   1   1
-      5 person104 mir mbd mbd mbi
-      6 person105 mbd mir mbd mbd
-
-# throws an error if there are less items to score in the units [ansi]
-
-    Code
-      scoreDataTest(testScore, units = falseUnits)
-    Message <cliMessage>
-      [32mv[39m 2 units were scored: `I02` and `I03`.
-    Output
-               ID I01 I02 I03 I04
-      1 person100   0   0   0   0
-      2 person101   1   1   0   1
-      3 person102   1   2   0   0
-      4 person103 mbi   3   1   1
-      5 person104 mir mbd mbd mbi
-      6 person105 mbd mir mbd mbd
-
-# throws an error if there are less items to score in the units [unicode]
-
-    Code
-      scoreDataTest(testScore, units = falseUnits)
-    Message <cliMessage>
-      ✔ 2 units were scored: `I02` and `I03`.
-    Output
-               ID I01 I02 I03 I04
-      1 person100   0   0   0   0
-      2 person101   1   1   0   1
-      3 person102   1   2   0   0
-      4 person103 mbi   3   1   1
-      5 person104 mir mbd mbd mbi
-      6 person105 mbd mir mbd mbd
-
-# throws an error if there are less items to score in the units [fancy]
-
-    Code
-      scoreDataTest(testScore, units = falseUnits)
-    Message <cliMessage>
-      [32m✔[39m 2 units were scored: `I02` and `I03`.
     Output
                ID I01 I02 I03 I04
       1 person100   0   0   0   0

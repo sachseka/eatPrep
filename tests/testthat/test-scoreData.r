@@ -65,11 +65,11 @@ test_that_cli("checks for data.frame", {
   expect_snapshot(scoreDataTest(testScore), error = TRUE)
 })
 
+# TODO: Correct?
 test_that_cli("throws no error if there are less items to score in the data.frame", {
   testScore <- generateData()
   testScore$I02 <- NULL
 
-  # expect_error(scoreDataTest(testScore))
   expect_snapshot(scoreDataTest(testScore))
 })
 
@@ -80,16 +80,17 @@ test_that_cli("throws an error if there are less items to score in the unitrecod
   expect_snapshot(scoreDataTest(testScore, unitrecodings = falseUnitRecodings))
 })
 
+# TODO: Check if this test is necessary?
 # Probably irrelevant test
-test_that_cli("throws an error if there are less items to score in the units", {
-  testScore <- generateData()
-  falseUnits <- subset(unitsDefault, unit != "I02")
-
-  # TODO: units seems to be irrelevant here!
-  # Could the `units` element be eliminated?
-  # TODO: Should return an error?
-  expect_snapshot(scoreDataTest(testScore, units = falseUnits))
-})
+# test_that_cli("throws an error if there are less items to score in the units", {
+#   testScore <- generateData()
+#   falseUnits <- subset(unitsDefault, unit != "I02")
+#
+#   # TODO: units seems to be irrelevant here!
+#   # Could the `units` element be eliminated?
+#   # TODO: Should return an error?
+#   expect_snapshot(scoreDataTest(testScore, units = falseUnits))
+# })
 
 test_that_cli("throws an error if the item codes items to score in the unitrecodings", {
   testScore <- generateData()

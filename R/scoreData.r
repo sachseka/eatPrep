@@ -3,40 +3,47 @@ scoreData <- function(
     unitrecodings,
     # TODO: This column is not necessary for any operation here?
     # It would also be irrelevant to recodeData
-    units,
+    # units,
     subunits,
-    verbose = FALSE
+    verbose = FALSE,
+    ... # for the deprecated units argument
 ) {
   cli_setting()
 
   if (!is.data.frame(dat)) cli_abort("{.field dat} must be a {.envvar data.frame}.")
 
-  scoreinfo <- dplyr::inner_join(units, unitrecodings, by = "unit")
+  # TODO: This should not be necessary
+  # scoreinfo <- dplyr::inner_join(units, unitrecodings, by = "unit")
   dontcheck <- c("mbd","mvi", "mnr", "mci", "mbd", "mir", "mbi")
 
-  unitsToScore <- unique(subunits$unit[duplicated(subunits$unit)])
-  nUnitsToScore <- length(unitsToScore)
+  # Check for columns that actually have to be scored
+  unitsInDat <- unique(names(dat))
+  unitsWithSubunits <- unique(subunits$unit[duplicated(subunits$unit)])
+  unitsToScore <- intersect(unitsInDat, unitsWithSubunits)
 
-  notScored <- setdiff(unitsToScore, unique(unitrecodings$unit))
-  nNotScored <- length(notScored)
+  # Check for units that can be recoded
+  unitRecodes <- unique(unitrecodings$unit)
 
-  finalScored <- setdiff(unitsToScore, notScored)
-  nFinalScored <- length(finalScored)
+  notScorable <- setdiff(unitsToScore, unitRecodes)
+  nNotScorable <- length(notScorable)
 
-  if(nNotScored > 0) {
-    cli_alert_warning("Found no scoring information for {nNotScored} variable{?s}:
-                      {.envvar {notScored}}.
+  scorable <- intersect(unitsToScore, unitRecodes)
+  nScorable <- length(scorable)
+
+  if(nNotScorable > 0) {
+    cli_alert_warning("Found no scoring information for {nNotScorable} variable{?s}:
+                      {.envvar {notScorable}}.
                       {?This/These} variable{?s} will not be scored.",
                       wrap = TRUE)
   }
 
-  # make scored data.frame
+  # Make scored data.frame
   prepScore <-
     mapply(.recodeData.recode,
            dat,
            colnames(dat),
            MoreArgs = list(
-             scoreinfo,
+             unitrecodings, # instead of scoreinfo, as this does not provide any further information
              dontcheck = dontcheck,
              mode = "score",
              verbose = verbose),
@@ -45,7 +52,7 @@ scoreData <- function(
   datS <- data.frame(prepScore,
                      stringsAsFactors = FALSE)
 
-  if(verbose) cli_alert_success("{nFinalScored} unit{?s} {?was/were} scored: {.envvar {finalScored}}.")
+  if(verbose) cli_alert_success("{nScorable} unit{?s} {?was/were} scored: {.envvar {scorable}}.")
   #  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)
   return(datS)
 }
