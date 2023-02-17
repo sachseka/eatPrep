@@ -1,27 +1,51 @@
-scoreData <- function (dat, unitrecodings, units, subunits, verbose = FALSE) {
-  if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
+scoreData <- function(
+    dat,
+    unitrecodings,
+    # TODO: This column is not necessary for any operation here?
+    # It would also be irrelevant to recodeData
+    units,
+    subunits,
+    verbose = FALSE
+) {
+  cli_setting()
+
+  if (!is.data.frame(dat)) cli_abort("{.field dat} must be a {.envvar data.frame}.")
 
   scoreinfo <- dplyr::inner_join(units, unitrecodings, by = "unit")
   dontcheck <- c("mbd","mvi", "mnr", "mci", "mbd", "mir", "mbi")
 
   unitsToScore <- unique(subunits$unit[duplicated(subunits$unit)])
+  nUnitsToScore <- length(unitsToScore)
 
-   if(length(setdiff(unitsToScore, unique(unitrecodings$unit))) > 0) {
-   warning(paste("Found no scoring information for variable(s) ",
-   paste(setdiff(unitsToScore, unique(unitrecodings$unit)), collapse = ", "),
-   		". \nThis/These variable(s) will not be scored.\n", sep =""))
-   }
+  notScored <- setdiff(unitsToScore, unique(unitrecodings$unit))
+  nNotScored <- length(notScored)
+
+  finalScored <- setdiff(unitsToScore, notScored)
+  nFinalScored <- length(finalScored)
+
+  if(nNotScored > 0) {
+    cli_alert_warning("Found no scoring information for {nNotScored} variable{?s}:
+                      {.envvar {notScored}}.
+                      {?This/These} variable{?s} will not be scored.",
+                      wrap = TRUE)
+  }
 
   # make scored data.frame
-  datS <- data.frame(mapply(.recodeData.recode, dat,
-  colnames(dat), MoreArgs = list(scoreinfo, dontcheck = dontcheck,
-                                 mode = "score", verbose = verbose), USE.NAMES = TRUE),
-  stringsAsFactors = FALSE)
+  prepScore <-
+    mapply(.recodeData.recode,
+           dat,
+           colnames(dat),
+           MoreArgs = list(
+             scoreinfo,
+             dontcheck = dontcheck,
+             mode = "score",
+             verbose = verbose),
+           USE.NAMES = TRUE)
 
-  if(verbose) message(length(unitsToScore), " units were scored: ", paste(unitsToScore, collapse=", "), ".")
+  datS <- data.frame(prepScore,
+                     stringsAsFactors = FALSE)
 
-#  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)
-
+  if(verbose) cli_alert_success("{nFinalScored} unit{?s} {?was/were} scored: {.envvar {finalScored}}.")
+  #  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)
   return(datS)
 }
-
