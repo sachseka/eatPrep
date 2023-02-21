@@ -1,27 +1,58 @@
-scoreData <- function (dat, unitrecodings, units, subunits, verbose = FALSE) {
-  if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
+scoreData <- function(
+    dat,
+    unitrecodings,
+    # TODO: This column is not necessary for any operation here?
+    # It would also be irrelevant to recodeData
+    # units,
+    subunits,
+    verbose = FALSE,
+    ... # for the deprecated units argument
+) {
+  cli_setting()
 
-  scoreinfo <- dplyr::inner_join(units, unitrecodings, by = "unit")
+  if (!is.data.frame(dat)) cli_abort("{.field dat} must be a {.envvar data.frame}.")
+
+  # TODO: This should not be necessary
+  # scoreinfo <- dplyr::inner_join(units, unitrecodings, by = "unit")
   dontcheck <- c("mbd","mvi", "mnr", "mci", "mbd", "mir", "mbi")
 
-  unitsToScore <- unique(subunits$unit[duplicated(subunits$unit)])
+  # Check for columns that actually have to be scored
+  unitsInDat <- unique(names(dat))
+  unitsWithSubunits <- unique(subunits$unit[duplicated(subunits$unit)])
+  unitsToScore <- intersect(unitsInDat, unitsWithSubunits)
 
-   if(length(setdiff(unitsToScore, unique(unitrecodings$unit))) > 0) {
-   warning(paste("Found no scoring information for variable(s) ",
-   paste(setdiff(unitsToScore, unique(unitrecodings$unit)), collapse = ", "),
-   		". \nThis/These variable(s) will not be scored.\n", sep =""))
-   }
+  # Check for units that can be recoded
+  unitRecodes <- unique(unitrecodings$unit)
 
-  # make scored data.frame
-  datS <- data.frame(mapply(.recodeData.recode, dat,
-  colnames(dat), MoreArgs = list(scoreinfo, dontcheck = dontcheck,
-                                 mode = "score", verbose = verbose), USE.NAMES = TRUE),
-  stringsAsFactors = FALSE)
+  notScorable <- setdiff(unitsToScore, unitRecodes)
+  nNotScorable <- length(notScorable)
 
-  if(verbose) message(length(unitsToScore), " units were scored: ", paste(unitsToScore, collapse=", "), ".")
+  scorable <- intersect(unitsToScore, unitRecodes)
+  nScorable <- length(scorable)
 
-#  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)
+  if(nNotScorable > 0) {
+    cli_alert_warning("Found no scoring information for {nNotScorable} variable{?s}:
+                      {.envvar {notScorable}}.
+                      {?This/These} variable{?s} will not be scored.",
+                      wrap = TRUE)
+  }
 
+  # Make scored data.frame
+  prepScore <-
+    mapply(.recodeData.recode,
+           dat,
+           colnames(dat),
+           MoreArgs = list(
+             unitrecodings, # instead of scoreinfo, as this does not provide any further information
+             dontcheck = dontcheck,
+             mode = "score",
+             verbose = verbose),
+           USE.NAMES = TRUE)
+
+  datS <- data.frame(prepScore,
+                     stringsAsFactors = FALSE)
+
+  if(verbose) cli_alert_success("{nScorable} unit{?s} {?was/were} scored: {.envvar {scorable}}.")
+  #  colnames(datS) <- sapply(colnames(datS), .recodeData.renameIDs, scoreinfo, USE.NAMES = FALSE)
   return(datS)
 }
-

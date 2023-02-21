@@ -6,14 +6,14 @@
 \description{Score datasets with special consideration of missing values.
 }
 \usage{
-scoreData(dat, unitrecodings, units, subunits, verbose = FALSE)
+scoreData(dat, unitrecodings, subunits, verbose = FALSE, ...)
 }
 \arguments{
   \item{dat}{A data frame}
   \item{unitrecodings}{A data frame with information about the scoring of units. See \sQuote{Details}.}
-  \item{units}{A data frame with unit information. See \sQuote{Details}.}
   \item{subunits}{A data frame with subunit information. See \sQuote{Details}.}
   \item{verbose}{logical. If \code{TRUE} additional information is printed.}
+  \item{...}{Additional arguments.}
 }
 \details{
 This function is very similar to \code{recodeData}, but with a few defaults that are better suited for scoring. \code{scoreData} will give warnings when incomplete scoring informations are found. Values without scoring information will not be scored.
@@ -39,7 +39,7 @@ prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
     aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
 
-datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$units, inputList$subunits,
+datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
     verbose = TRUE)
 str(datSco)
 

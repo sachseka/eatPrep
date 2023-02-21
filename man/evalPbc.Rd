@@ -1,7 +1,7 @@
 \name{evalPbc}
 \alias{evalPbc}
 
-\title{evaluate discrimination statistics
+\title{Evaluate discrimination statistics
 }
 \description{This function evaluates discrimination statistics for the categories of categorical variables, i.e. the correlations of each category with the total score on the test..
 }
@@ -27,7 +27,22 @@ Numeric. Maximum correlation of missing with total test score. If it is higher, 
 }
 }
 \value{
-Logical. \code{TRUE} if everything is OK, \code{FALSE} otherwise.
+List. \code{NULL} (empty list) if everything is OK. Otherwise, returns list of character vectors containing the names of the flagged items:
+\item{zeroFreqAtt}{
+Items with attractor frequency of zero.
+}
+\item{zeroFreqDis}{
+Items with distractor frequencies of zero.
+}
+\item{lowMisPbcAtt}{
+Items with too low (lower than \code{minPbcAtt}) or missing attractor correlations.
+}
+\item{highPbcDis}{
+Items with too high (higher than \code{maxPbcDis}) distractor correlations.
+}
+\item{highPbcMis}{
+Items with too high (higher than \code{maxPbcMis}) missing type correlations.
+}
 }
 \examples{
 data(inputDat)
