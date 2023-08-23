@@ -91,6 +91,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		stopifnot(class(inputList) == "list")
 		if(is.null(oldIDs)) {oldIDs <- inputList$savFiles$case.id}
 		if(is.null(oldIDs)) stop("Please specify oldIDs. Case ID in inputList$savFiles$case.id seems to be empty.")
+		if(any(is.na(oldIDs))) stop("Please specify oldIDs. At least one case ID in inputList$savFiles$case.id seems to be empty.")
 
 		if(checkData) {
 			if(verbose) message("\nCheck data...")
