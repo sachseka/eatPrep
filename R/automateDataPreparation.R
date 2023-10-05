@@ -90,8 +90,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		stopifnot(class(datList) == "list")
 		stopifnot(class(inputList) == "list")
 		if(is.null(oldIDs)) {oldIDs <- inputList$savFiles$case.id}
-		if(is.null(oldIDs)) stop("Please specify oldIDs. Case ID in inputList$savFiles$case.id seems to be empty.")
-		if(any(is.na(oldIDs))) stop("Please specify oldIDs. At least one case ID in inputList$savFiles$case.id seems to be empty.")
+		if(length(datList) == 1 & length(oldIDs) < 1) {oldIDs <- inputList$newID$value}
+		if(is.null(oldIDs) | any(is.na(oldIDs)) | length(oldIDs) < 1) stop("Please use argument 'oldIDs'. Can't take it from inputList$savFiles$case.id, because at least one case-ID seems to be empty.")
 
 		if(checkData) {
 			if(verbose) message("\nCheck data...")

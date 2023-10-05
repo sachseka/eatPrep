@@ -32,7 +32,7 @@ test_that("load sav", {
                                        recodeData = FALSE, recodeMnr = FALSE,
                                        aggregateData = FALSE, scoreData = FALSE,
                                        writeSpss = FALSE, verbose = TRUE),
-               "Please specify oldIDs. Case ID in inputList$savFiles$case.id seems to be empty.", fixed=TRUE)
+               "Please use argument 'oldIDs'. Can't take it from inputList$savFiles$case.id, because at least one case-ID seems to be empty.", fixed=TRUE)
   expect_message(automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),
                                        datList = NULL,	path = path,
                                        readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
