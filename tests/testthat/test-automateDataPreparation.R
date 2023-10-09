@@ -33,6 +33,15 @@ test_that("load sav", {
                                        aggregateData = FALSE, scoreData = FALSE,
                                        writeSpss = FALSE, verbose = TRUE),
                "Please use argument 'oldIDs'. Can't take it from inputList$savFiles$case.id, because at least one case-ID seems to be empty.", fixed=TRUE)
+inputList2 <- inputList
+inputList2$savFiles <- inputList2$savFiles[-c(1:3),] #inputList2$savFiles$case.id is now 'character(0)'
+  expect_error(automateDataPreparation(inputList = inputList2,
+                                       datList = inputDat,	path = path,
+                                       readSpss = FALSE, checkData = FALSE,	mergeData = FALSE,
+                                       recodeData = FALSE, recodeMnr = FALSE,
+                                       aggregateData = FALSE, scoreData = FALSE,
+                                       writeSpss = FALSE, verbose = TRUE),
+               "Please use argument 'oldIDs'. Can't take it from inputList$savFiles$case.id, because at least one case-ID seems to be empty.", fixed=TRUE)
   expect_message(automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),
                                        datList = NULL,	path = path,
                                        readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
