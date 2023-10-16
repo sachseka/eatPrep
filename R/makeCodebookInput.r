@@ -6,7 +6,7 @@ makeCodebookInput <- function (codebook){
   if (missing(codebook)){
     stop("Missing argument: codebook")
   } else {
-    if (class(codebook) != "data.frame"){
+    if (!inherits(codebook, "data.frame")){
       stop("Argument codebook is not a data frame.")
     }
   }

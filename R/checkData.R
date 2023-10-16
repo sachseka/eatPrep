@@ -5,7 +5,7 @@ checkData <- function (dat, datnam, values, subunits, units, ID=NULL, verbose = 
 
 	if(verbose) message("\nChecking dataset ", datnam)
 
-	if (class(dat) != "data.frame") {
+	if (!inherits(dat, "data.frame")) {
 		stop ("dat must be a data.frame.")
 	}
 

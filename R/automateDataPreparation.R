@@ -65,7 +65,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 				warning("If readSpss == TRUE, datList will be ignored.")
 			}
 
-		  if(class(inputList$savFiles) != "data.frame") {
+		  if(!inherits(inputList$savFiles, "data.frame")) {
         # if no savFiles sheet, then take all .sav files in path or getwd
 		    savFiles <- grep(".sav$",dir(folder.e),value=TRUE)
         if(!length(savFiles) > 0) stop("No .sav-files found in ", folder.e)
@@ -90,7 +90,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		stopifnot(class(datList) == "list")
 		stopifnot(class(inputList) == "list")
 		if(is.null(oldIDs)) {oldIDs <- inputList$savFiles$case.id}
-		if(is.null(oldIDs)) stop("Please specify oldIDs. Case ID in inputList$savFiles$case.id seems to be empty.")
+		if(length(datList) == 1 & length(oldIDs) < 1) {oldIDs <- inputList$newID$value}
+		if(is.null(oldIDs) | any(is.na(oldIDs)) | length(oldIDs) < 1) stop("Cannot be inferred from inputList$savFiles$case.id, because at least one case-ID is empty. Please update or use argument 'oldIDs'.")
 
 		if(checkData) {
 			if(verbose) message("\nCheck data...")
@@ -196,7 +197,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		if(writeSpss) {
 			if(verbose) message("\nWriting dataset in last transformation status to disk" )
-			if (class(dat) != "data.frame") {
+			if (!inherits(dat, "data.frame")) {
 				warning ("Data is no data frame (data frames probably need to be merged)." )
 			}
 			if(inherits(try( writeSpss (dat=dat , values=inputList$values, subunits=inputList$subunits, units=inputList$units,
