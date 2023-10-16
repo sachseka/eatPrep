@@ -16,7 +16,7 @@ writeSpss <- function (dat, values, subunits, units, filedat = "mydata.txt", fil
   # reduce varinfo
   varinfo <- varinfo [ match(colnames(dat), names(varinfo)) ]
 
-  if (class(dat) != "data.frame") {
+  if (!inherits(dat, "data.frame")) {
     stop (paste(funVersion, "dat must be a data.frame.", sep = ""))
   }
 

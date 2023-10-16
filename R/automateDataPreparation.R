@@ -65,7 +65,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 				warning("If readSpss == TRUE, datList will be ignored.")
 			}
 
-		  if(class(inputList$savFiles) != "data.frame") {
+		  if(!inherits(inputList$savFiles, "data.frame")) {
         # if no savFiles sheet, then take all .sav files in path or getwd
 		    savFiles <- grep(".sav$",dir(folder.e),value=TRUE)
         if(!length(savFiles) > 0) stop("No .sav-files found in ", folder.e)
@@ -197,7 +197,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		if(writeSpss) {
 			if(verbose) message("\nWriting dataset in last transformation status to disk" )
-			if (class(dat) != "data.frame") {
+			if (!inherits(dat, "data.frame")) {
 				warning ("Data is no data frame (data frames probably need to be merged)." )
 			}
 			if(inherits(try( writeSpss (dat=dat , values=inputList$values, subunits=inputList$subunits, units=inputList$units,

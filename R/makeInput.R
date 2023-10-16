@@ -62,7 +62,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
     if (missing(values)){
       stop("Missing argument: values")
     } else {
-      if (class(values) != "data.frame"){
+      if (!inherits(values, "data.frame")){
         stop("Argument values is not a data frame.")
       }
     }
@@ -79,7 +79,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
       message("Found no subunits input. All subunit labels will be defaulted to subunit name.")
   #    stop("Missing argument: subunits")
     } else {
-      if (class(subunits) != "data.frame"){
+      if (!inherits(subunits, "data.frame")){
         stop("Argument subunits is not a data frame.")
       }
     }
@@ -101,7 +101,7 @@ checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits
       units <- units [ !duplicated(units) , ]
       message("Found no units input. Use unit names from subunit input. Unit labels will be defaulted to unit names.")
     } else {
-      if (class(units) != "data.frame"){
+      if (!inherits(units, "data.frame")){
         stop("Argument units is not a data frame.")
       }
     }

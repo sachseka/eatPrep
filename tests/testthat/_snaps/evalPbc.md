@@ -2,7 +2,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -10,7 +10,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -18,7 +18,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -26,7 +26,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -34,7 +34,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       x The attractors (score 1) of the following 3 items were chosen with a
       frequency of zero: I1, I2, and I3. This should not happen. Please check.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -46,7 +46,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [31mx[39m The attractors (score 1) of the following 3 items were chosen with a
       frequency of zero: [32mI1[39m, [32mI2[39m, and [32mI3[39m. This should not happen. Please check.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -58,7 +58,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✖ The attractors (score 1) of the following 3 items were chosen with a
       frequency of zero: I1, I2, and I3. This should not happen. Please check.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -70,7 +70,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [31m✖[39m The attractors (score 1) of the following 3 items were chosen with a
       frequency of zero: [32mI1[39m, [32mI2[39m, and [32mI3[39m. This should not happen. Please check.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
@@ -82,7 +82,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ! The distractors (score 0) of the following 3 items were chosen with a
       frequency of zero: I1_1, I2_2, I3_1, I1_2, I2_1, and I3_2. This may happen, but
@@ -95,7 +95,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [33m![39m The distractors (score 0) of the following 3 items were chosen with a
       frequency of zero: [32mI1_1[39m, [32mI2_2[39m, [32mI3_1[39m, [32mI1_2[39m, [32mI2_1[39m, and [32mI3_2[39m. This may happen, but
@@ -108,7 +108,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ! The distractors (score 0) of the following 3 items were chosen with a
       frequency of zero: I1_1, I2_2, I3_1, I1_2, I2_1, and I3_2. This may happen, but
@@ -121,7 +121,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [33m![39m The distractors (score 0) of the following 3 items were chosen with a
       frequency of zero: [32mI1_1[39m, [32mI2_2[39m, [32mI3_1[39m, [32mI1_2[39m, [32mI2_1[39m, and [32mI3_2[39m. This may happen, but
@@ -134,7 +134,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       x catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: I1:_0.05 and I2:_0.05
@@ -146,7 +146,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31mx[39m catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: [32m[32mI1:_0.05[32m[39m and [32m[32mI2:_0.05[32m[39m
@@ -158,7 +158,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ✖ catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: I1:_0.05 and I2:_0.05
@@ -170,7 +170,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31m✖[39m catPbcs for attractors (score 1) of the following 2 items are worrisome low (< 0.05) or missing: [32m[32mI1:_0.05[32m[39m and [32m[32mI2:_0.05[32m[39m
@@ -182,7 +182,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       x catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: I1:_0.02
@@ -194,7 +194,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31mx[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: [32m[32mI1:_0.02[32m[39m
@@ -206,7 +206,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ✖ catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: I1:_0.02
@@ -218,7 +218,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31m✖[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: [32m[32mI1:_0.02[32m[39m
@@ -230,7 +230,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), minPbcAtt = 0.1)
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       x catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.1) or missing: I1:_0.09
@@ -242,7 +242,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), minPbcAtt = 0.1)
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31mx[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.1) or missing: [32m[32mI1:_0.09[32m[39m
@@ -254,7 +254,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), minPbcAtt = 0.1)
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ✖ catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.1) or missing: I1:_0.09
@@ -266,7 +266,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), minPbcAtt = 0.1)
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31m✖[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.1) or missing: [32m[32mI1:_0.09[32m[39m
@@ -278,7 +278,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       x catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: I1:_NA
@@ -290,7 +290,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31mx[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: [32m[32mI1:_NA[32m[39m
@@ -302,7 +302,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ✖ catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: I1:_NA
@@ -314,7 +314,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31m✖[39m catPbcs for attractors (score 1) of the following 1 item are worrisome low (< 0.05) or missing: [32m[32mI1:_NA[32m[39m
@@ -326,7 +326,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       x catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): I1_1_0.01, I1_2_0.01, and I2_1_0.01
@@ -338,7 +338,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31mx[39m catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): [32m[32mI1_1_0.01[32m[39m, [32m[32mI1_2_0.01[32m[39m, and [32m[32mI2_1_0.01[32m[39m
@@ -350,7 +350,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ✖ catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): I1_1_0.01, I1_2_0.01, and I2_1_0.01
@@ -362,7 +362,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31m✖[39m catPbcs for distractors (score 0) of the following 2 items are unexpectedly high (> 0.005): [32m[32mI1_1_0.01[32m[39m, [32m[32mI1_2_0.01[32m[39m, and [32m[32mI2_1_0.01[32m[39m
@@ -374,7 +374,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 0.1)
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -382,7 +382,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 0.1)
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -390,7 +390,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 0.1)
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -398,7 +398,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 0.1)
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -406,7 +406,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 1e-04)
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       x catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.0001): I1_1_0
@@ -418,7 +418,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 1e-04)
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31mx[39m catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.0001): [32m[32mI1_1_0[32m[39m
@@ -430,7 +430,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 1e-04)
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ✖ catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.0001): I1_1_0
@@ -442,7 +442,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcDis = 1e-04)
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [31m✖[39m catPbcs for distractors (score 0) of the following 1 item are unexpectedly high (> 0.0001): [32m[32mI1_1_0[32m[39m
@@ -454,7 +454,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -462,7 +462,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -470,7 +470,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -478,7 +478,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -486,7 +486,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ! catPbcs for mistype 'mir' of the following 2 items are relatively high (>
@@ -502,7 +502,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [33m![39m catPbcs for mistype 'mir' of the following 2 items are relatively high (>
@@ -518,7 +518,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ! catPbcs for mistype 'mir' of the following 2 items are relatively high (>
@@ -534,7 +534,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [33m![39m catPbcs for mistype 'mir' of the following 2 items are relatively high (>
@@ -550,7 +550,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.11)
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -558,7 +558,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.11)
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -566,7 +566,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.11)
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -574,7 +574,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.11)
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -582,7 +582,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.01)
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ! catPbcs for mistype 'mir' of the following 1 item are relatively high (>
@@ -595,7 +595,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.01)
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [33m![39m catPbcs for mistype 'mir' of the following 1 item are relatively high (>
@@ -608,7 +608,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.01)
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
       ! catPbcs for mistype 'mir' of the following 1 item are relatively high (>
@@ -621,7 +621,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"), maxPbcMis = 0.01)
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
       [33m![39m catPbcs for mistype 'mir' of the following 1 item are relatively high (>
@@ -634,7 +634,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -642,7 +642,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -650,7 +650,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -658,7 +658,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -666,7 +666,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
       v Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -674,7 +674,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32mv[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -682,7 +682,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
       ✔ Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -690,7 +690,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
       [32m✔[39m Excellent, no distractors (score 0) were chosen with a frequency of zero.
 
@@ -698,35 +698,39 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Error <rlang_error>
-      'pbcs' should be a data.frame as generated by eatPrep::catPbc()
+    Condition
+      Error in `evalPbc()`:
+      ! 'pbcs' should be a data.frame as generated by eatPrep::catPbc()
 
 # evalPbc throws an error if the data frame does not contain freq, recodevalue, and catPbc (with the exact spelling [ansi]
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Error <rlang_error>
-      [1m[22m'pbcs' should be a [34mdata.frame[39m as generated by [34meatPrep::catPbc()[39m
+    Condition
+      [1m[33mError[39m in `evalPbc()`:[22m
+      [1m[22m[33m![39m 'pbcs' should be a [34mdata.frame[39m as generated by [34meatPrep::catPbc()[39m
 
 # evalPbc throws an error if the data frame does not contain freq, recodevalue, and catPbc (with the exact spelling [unicode]
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Error <rlang_error>
-      'pbcs' should be a data.frame as generated by eatPrep::catPbc()
+    Condition
+      Error in `evalPbc()`:
+      ! 'pbcs' should be a data.frame as generated by eatPrep::catPbc()
 
 # evalPbc throws an error if the data frame does not contain freq, recodevalue, and catPbc (with the exact spelling [fancy]
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Error <rlang_error>
-      [1m[22m'pbcs' should be a [34mdata.frame[39m as generated by [34meatPrep::catPbc()[39m
+    Condition
+      [1m[33mError[39m in `evalPbc()`:[22m
+      [1m[22m[33m![39m 'pbcs' should be a [34mdata.frame[39m as generated by [34meatPrep::catPbc()[39m
 
 # evalPbc throws a message if the data frame contains missing types that are not specified in the mistypes argument [plain]
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       i catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mycode
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
@@ -736,7 +740,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [36mi[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmycode[39m
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
@@ -746,7 +750,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       ℹ catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mycode
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
@@ -756,7 +760,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mir", "mbi"))
-    Message <cliMessage>
+    Message
       [36mℹ[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmycode[39m
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
@@ -766,7 +770,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       i catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mir
       v Excellent, no attractors (score 1) were chosen with a frequency of zero.
@@ -776,7 +780,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       [36mi[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmir[39m
       [32mv[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.
@@ -786,7 +790,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       ℹ catPbc contains other values than 0, 1 and the specified mistypes: Other
       value(s): mir
       ✔ Excellent, no attractors (score 1) were chosen with a frequency of zero.
@@ -796,7 +800,7 @@
 
     Code
       evalPbc(test_pbc, mistypes = c("mnr", "mbd", "mycode", "mbi"))
-    Message <cliMessage>
+    Message
       [36mℹ[39m [34mcatPbc[39m contains other values than 0, 1 and the specified mistypes: Other
       value(s): [32mmir[39m
       [32m✔[39m Excellent, no attractors (score 1) were chosen with a frequency of zero.

@@ -2,7 +2,7 @@
 
     Code
       checkDesignTest(verbose = FALSE)
-    Message <cliMessage>
+    Message
       
       -- Check: Valid and missing codes 
 
@@ -10,7 +10,7 @@
 
     Code
       checkDesignTest(verbose = TRUE)
-    Message <cliMessage>
+    Message
       
       -- Check: Subunit recoding 
       i Use names for recoded subunits.
@@ -26,7 +26,7 @@
 
     Code
       checkDesignTest(verbose = FALSE)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Valid and missing codes 
 
@@ -34,7 +34,7 @@
 
     Code
       checkDesignTest(verbose = TRUE)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Subunit recoding 
       [36mi[39m Use names for recoded subunits.
@@ -50,7 +50,7 @@
 
     Code
       checkDesignTest(verbose = FALSE)
-    Message <cliMessage>
+    Message
       
       ── Check: Valid and missing codes 
 
@@ -58,7 +58,7 @@
 
     Code
       checkDesignTest(verbose = TRUE)
-    Message <cliMessage>
+    Message
       
       ── Check: Subunit recoding 
       ℹ Use names for recoded subunits.
@@ -74,7 +74,7 @@
 
     Code
       checkDesignTest(verbose = FALSE)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Valid and missing codes 
 
@@ -82,7 +82,7 @@
 
     Code
       checkDesignTest(verbose = TRUE)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Subunit recoding 
       [36mℹ[39m Use names for recoded subunits.
@@ -98,35 +98,39 @@
 
     Code
       checkDesignTest(id = "FalseID")
-    Error <rlang_error>
-      ID variable `FalseID` not found in dataset.
+    Condition
+      Error in `checkDesign()`:
+      ! ID variable `FalseID` not found in dataset.
 
 # identifies ID variables that cannot be found in the dataset [ansi]
 
     Code
       checkDesignTest(id = "FalseID")
-    Error <rlang_error>
-      [1m[22mID variable `FalseID` not found in dataset.
+    Condition
+      [1m[33mError[39m in `checkDesign()`:[22m
+      [1m[22m[33m![39m ID variable `FalseID` not found in dataset.
 
 # identifies ID variables that cannot be found in the dataset [unicode]
 
     Code
       checkDesignTest(id = "FalseID")
-    Error <rlang_error>
-      ID variable `FalseID` not found in dataset.
+    Condition
+      Error in `checkDesign()`:
+      ! ID variable `FalseID` not found in dataset.
 
 # identifies ID variables that cannot be found in the dataset [fancy]
 
     Code
       checkDesignTest(id = "FalseID")
-    Error <rlang_error>
-      [1m[22mID variable `FalseID` not found in dataset.
+    Condition
+      [1m[33mError[39m in `checkDesign()`:[22m
+      [1m[22m[33m![39m ID variable `FalseID` not found in dataset.
 
 # throws danger messages when block names in blocks do not equal those in booklets [plain]
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       -- Check: Block names 
       x Block names set in blocks does not equal block names set in booklets. Please
@@ -149,7 +153,7 @@
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       -- Check: Block names 
       x Block names set in blocks does not equal block names set in booklets. Please
@@ -172,7 +176,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       -- Check: Booklet names 
       x Booklet names set in rotation does not equal booklet names set in booklets.
@@ -193,7 +197,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       -- Check: Block names 
       x Block names set in blocks does not equal block names set in booklets. Please
@@ -215,7 +219,7 @@
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Block names 
       [31mx[39m Block names set in [32mblocks[39m does not equal block names set in [32mbooklets[39m. Please
@@ -238,7 +242,7 @@
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Block names 
       [31mx[39m Block names set in [32mblocks[39m does not equal block names set in [32mbooklets[39m. Please
@@ -261,7 +265,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Booklet names 
       [31mx[39m Booklet names set in [32mrotation[39m does not equal booklet names set in [32mbooklets[39m.
@@ -282,7 +286,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Block names 
       [31mx[39m Block names set in [32mblocks[39m does not equal block names set in [32mbooklets[39m. Please
@@ -304,7 +308,7 @@
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       ── Check: Block names 
       ✖ Block names set in blocks does not equal block names set in booklets. Please
@@ -327,7 +331,7 @@
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       ── Check: Block names 
       ✖ Block names set in blocks does not equal block names set in booklets. Please
@@ -350,7 +354,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       ── Check: Booklet names 
       ✖ Booklet names set in rotation does not equal booklet names set in booklets.
@@ -371,7 +375,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       ── Check: Block names 
       ✖ Block names set in blocks does not equal block names set in booklets. Please
@@ -393,7 +397,7 @@
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Block names 
       [31m✖[39m Block names set in [32mblocks[39m does not equal block names set in [32mbooklets[39m. Please
@@ -416,7 +420,7 @@
 
     Code
       checkDesignTest(blocks = test_block_block)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Block names 
       [31m✖[39m Block names set in [32mblocks[39m does not equal block names set in [32mbooklets[39m. Please
@@ -439,7 +443,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Booklet names 
       [31m✖[39m Booklet names set in [32mrotation[39m does not equal booklet names set in [32mbooklets[39m.
@@ -460,7 +464,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_block)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Block names 
       [31m✖[39m Block names set in [32mblocks[39m does not equal block names set in [32mbooklets[39m. Please
@@ -482,7 +486,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_booklet)
-    Message <cliMessage>
+    Message
       
       -- Check: Booklet names 
       x Booklet names set in rotation does not equal booklet names set in booklets.
@@ -504,7 +508,7 @@
 
     Code
       checkDesignTest(rotation = test_rotation_booklet)
-    Message <cliMessage>
+    Message
       
       -- Check: Booklet names 
       x Booklet names set in rotation does not equal booklet names set in booklets.
@@ -526,7 +530,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_booklet)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Booklet names 
       [31mx[39m Booklet names set in [32mrotation[39m does not equal booklet names set in [32mbooklets[39m.
@@ -548,7 +552,7 @@
 
     Code
       checkDesignTest(rotation = test_rotation_booklet)
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Booklet names 
       [31mx[39m Booklet names set in [32mrotation[39m does not equal booklet names set in [32mbooklets[39m.
@@ -570,7 +574,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_booklet)
-    Message <cliMessage>
+    Message
       
       ── Check: Booklet names 
       ✖ Booklet names set in rotation does not equal booklet names set in booklets.
@@ -592,7 +596,7 @@
 
     Code
       checkDesignTest(rotation = test_rotation_booklet)
-    Message <cliMessage>
+    Message
       
       ── Check: Booklet names 
       ✖ Booklet names set in rotation does not equal booklet names set in booklets.
@@ -614,7 +618,7 @@
 
     Code
       checkDesignTest(booklets = test_booklet_booklet)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Booklet names 
       [31m✖[39m Booklet names set in [32mrotation[39m does not equal booklet names set in [32mbooklets[39m.
@@ -636,7 +640,7 @@
 
     Code
       checkDesignTest(rotation = test_rotation_booklet)
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Booklet names 
       [31m✖[39m Booklet names set in [32mrotation[39m does not equal booklet names set in [32mbooklets[39m.
@@ -658,7 +662,7 @@
 
     Code
       checkDesignTest(dat = within(prepDat, hisei <- NULL))
-    Message <cliMessage>
+    Message
       
       -- Check: Subunit recoding 
       i Use names for recoded subunits.
@@ -674,7 +678,7 @@
         testB <- 2
         testA <- 1
       }))
-    Message <cliMessage>
+    Message
       
       -- Check: Subunit recoding 
       i Use names for recoded subunits.
@@ -690,7 +694,7 @@
 
     Code
       checkDesignTest(dat = within(prepDat, hisei <- NULL))
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Subunit recoding 
       [36mi[39m Use names for recoded subunits.
@@ -706,7 +710,7 @@
         testB <- 2
         testA <- 1
       }))
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Subunit recoding 
       [36mi[39m Use names for recoded subunits.
@@ -722,7 +726,7 @@
 
     Code
       checkDesignTest(dat = within(prepDat, hisei <- NULL))
-    Message <cliMessage>
+    Message
       
       ── Check: Subunit recoding 
       ℹ Use names for recoded subunits.
@@ -738,7 +742,7 @@
         testB <- 2
         testA <- 1
       }))
-    Message <cliMessage>
+    Message
       
       ── Check: Subunit recoding 
       ℹ Use names for recoded subunits.
@@ -754,7 +758,7 @@
 
     Code
       checkDesignTest(dat = within(prepDat, hisei <- NULL))
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Subunit recoding 
       [36mℹ[39m Use names for recoded subunits.
@@ -770,7 +774,7 @@
         testB <- 2
         testA <- 1
       }))
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Subunit recoding 
       [36mℹ[39m Use names for recoded subunits.
@@ -787,7 +791,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I01R <- ifelse(I01R == "mbi", "mbd", I01R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       -- Check: Subunit recoding 
       i Use names for recoded subunits.
@@ -807,7 +811,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I01R <- ifelse(I01R == "mbi",
       NA, I01R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       -- Check: Subunit recoding 
       i Use names for recoded subunits.
@@ -827,7 +831,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I01R <- ifelse(I01R == "mbi", "mbd", I01R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Subunit recoding 
       [36mi[39m Use names for recoded subunits.
@@ -847,7 +851,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I01R <- ifelse(I01R == "mbi",
       NA, I01R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Subunit recoding 
       [36mi[39m Use names for recoded subunits.
@@ -867,7 +871,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I01R <- ifelse(I01R == "mbi", "mbd", I01R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       ── Check: Subunit recoding 
       ℹ Use names for recoded subunits.
@@ -887,7 +891,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I01R <- ifelse(I01R == "mbi",
       NA, I01R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       ── Check: Subunit recoding 
       ℹ Use names for recoded subunits.
@@ -907,7 +911,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I01R <- ifelse(I01R == "mbi", "mbd", I01R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Subunit recoding 
       [36mℹ[39m Use names for recoded subunits.
@@ -927,7 +931,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I01R <- ifelse(I01R == "mbi",
       NA, I01R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Subunit recoding 
       [36mℹ[39m Use names for recoded subunits.
@@ -947,7 +951,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I22R <- ifelse(I22R == "mbd", "mbi", I22R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       -- Check: Subunit recoding 
       i Use names for recoded subunits.
@@ -967,7 +971,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I22R <- ifelse(is.na(I22R),
       "mbi", I22R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       -- Check: Subunit recoding 
       i Use names for recoded subunits.
@@ -987,7 +991,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I22R <- ifelse(I22R == "mbd", "mbi", I22R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Subunit recoding 
       [36mi[39m Use names for recoded subunits.
@@ -1007,7 +1011,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I22R <- ifelse(is.na(I22R),
       "mbi", I22R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       -- [1m[1mCheck:[1m[22m Subunit recoding 
       [36mi[39m Use names for recoded subunits.
@@ -1027,7 +1031,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I22R <- ifelse(I22R == "mbd", "mbi", I22R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       ── Check: Subunit recoding 
       ℹ Use names for recoded subunits.
@@ -1047,7 +1051,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I22R <- ifelse(is.na(I22R),
       "mbi", I22R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       ── Check: Subunit recoding 
       ℹ Use names for recoded subunits.
@@ -1067,7 +1071,7 @@
     Code
       checkDesignTest(dat = within(prepDat, I22R <- ifelse(I22R == "mbd", "mbi", I22R)),
       sysMis = "mbd")
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Subunit recoding 
       [36mℹ[39m Use names for recoded subunits.
@@ -1087,7 +1091,7 @@
     Code
       checkDesignTest(dat = within(userDefinedSysMis, I22R <- ifelse(is.na(I22R),
       "mbi", I22R)), sysMis = "NA")
-    Message <cliMessage>
+    Message
       
       ── [1m[1mCheck:[1m[22m Subunit recoding 
       [36mℹ[39m Use names for recoded subunits.

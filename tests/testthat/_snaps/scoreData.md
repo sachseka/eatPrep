@@ -2,7 +2,7 @@
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       v 2 units were scored: `I02` and `I03`.
     Output
                ID I01 I02 I03 I04
@@ -17,7 +17,7 @@
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       [32mv[39m 2 units were scored: `I02` and `I03`.
     Output
                ID I01 I02 I03 I04
@@ -32,7 +32,7 @@
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       ✔ 2 units were scored: `I02` and `I03`.
     Output
                ID I01 I02 I03 I04
@@ -47,7 +47,7 @@
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       [32m✔[39m 2 units were scored: `I02` and `I03`.
     Output
                ID I01 I02 I03 I04
@@ -62,35 +62,39 @@
 
     Code
       scoreDataTest(testScore)
-    Error <rlang_error>
-      dat must be a `data.frame`.
+    Condition
+      Error in `scoreData()`:
+      ! dat must be a `data.frame`.
 
 # checks for data.frame [ansi]
 
     Code
       scoreDataTest(testScore)
-    Error <rlang_error>
-      [1m[22m[32mdat[39m must be a `data.frame`.
+    Condition
+      [1m[33mError[39m in `scoreData()`:[22m
+      [1m[22m[33m![39m [32mdat[39m must be a `data.frame`.
 
 # checks for data.frame [unicode]
 
     Code
       scoreDataTest(testScore)
-    Error <rlang_error>
-      dat must be a `data.frame`.
+    Condition
+      Error in `scoreData()`:
+      ! dat must be a `data.frame`.
 
 # checks for data.frame [fancy]
 
     Code
       scoreDataTest(testScore)
-    Error <rlang_error>
-      [1m[22m[32mdat[39m must be a `data.frame`.
+    Condition
+      [1m[33mError[39m in `scoreData()`:[22m
+      [1m[22m[33m![39m [32mdat[39m must be a `data.frame`.
 
 # throws no error if there are less items to score in the data.frame [plain]
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       v 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
@@ -105,7 +109,7 @@
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       [32mv[39m 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
@@ -120,7 +124,7 @@
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       ✔ 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
@@ -135,7 +139,7 @@
 
     Code
       scoreDataTest(testScore)
-    Message <cliMessage>
+    Message
       [32m✔[39m 1 unit was scored: `I03`.
     Output
                ID I01 I03 I04
@@ -150,7 +154,7 @@
 
     Code
       scoreDataTest(testScore, unitrecodings = falseUnitRecodings)
-    Message <cliMessage>
+    Message
       ! Found no scoring information for 1 variable: `I02`. This variable will not be
       scored.
       v 1 unit was scored: `I03`.
@@ -167,7 +171,7 @@
 
     Code
       scoreDataTest(testScore, unitrecodings = falseUnitRecodings)
-    Message <cliMessage>
+    Message
       [33m![39m Found no scoring information for 1 variable: `I02`. This variable will not be
       scored.
       [32mv[39m 1 unit was scored: `I03`.
@@ -184,7 +188,7 @@
 
     Code
       scoreDataTest(testScore, unitrecodings = falseUnitRecodings)
-    Message <cliMessage>
+    Message
       ! Found no scoring information for 1 variable: `I02`. This variable will not be
       scored.
       ✔ 1 unit was scored: `I03`.
@@ -201,7 +205,7 @@
 
     Code
       scoreDataTest(testScore, unitrecodings = falseUnitRecodings)
-    Message <cliMessage>
+    Message
       [33m![39m Found no scoring information for 1 variable: `I02`. This variable will not be
       scored.
       [32m✔[39m 1 unit was scored: `I03`.
@@ -218,7 +222,7 @@
 
     Code
       scoreDataTest(testScore, subunits = falseSubunits)
-    Message <cliMessage>
+    Message
       v 1 unit was scored: `I03`.
     Output
                ID I01 I02 I03 I04
@@ -233,7 +237,7 @@
 
     Code
       scoreDataTest(testScore, subunits = falseSubunits)
-    Message <cliMessage>
+    Message
       [32mv[39m 1 unit was scored: `I03`.
     Output
                ID I01 I02 I03 I04
@@ -248,7 +252,7 @@
 
     Code
       scoreDataTest(testScore, subunits = falseSubunits)
-    Message <cliMessage>
+    Message
       ✔ 1 unit was scored: `I03`.
     Output
                ID I01 I02 I03 I04
@@ -263,7 +267,7 @@
 
     Code
       scoreDataTest(testScore, subunits = falseSubunits)
-    Message <cliMessage>
+    Message
       [32m✔[39m 1 unit was scored: `I03`.
     Output
                ID I01 I02 I03 I04
