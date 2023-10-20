@@ -132,6 +132,22 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
     dat <- dat[, -match(toOmit, names(dat))]
   }
 
+  # Check for variables in the info (`blocks$subunit`) that are not in `dat`
+  toOmit2 <- setdiff(c(id, blocks$subunit), names(dat))
+  nToOmit2 <- length(toOmit2)
+  if (nToOmit2 > 0) {
+    if(verbose) {
+      cli_h3("{.strong Check:} Variables in Info")
+      cli_alert_info("The following {nToOmit2} variable{?s}
+                     {?is/are} not in dataset but in info ({.envvar subunit}
+                     in {.field blocks}).
+                     {?It/They} will be ignored during check:
+                     {.envvar {toOmit2}}",
+                     wrap = TRUE)
+    }
+    blocks <- blocks[-match(toOmit2, blocks$subunit),]
+  }
+
   .bookletPatternCheck <- function(TH) {
     # Sanity check
     stopifnot(id %in% names(rotation))

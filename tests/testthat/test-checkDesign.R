@@ -180,6 +180,20 @@ test_that_cli("throws warning when more variables in dataset available than in b
   )
 })
 
+
+test_that_cli("throws warning when more variables in blocks$subunit than in dataset", {
+  # Manipulation: delete hisei (default in dataset)
+  expect_snapshot(
+    checkDesignTest(dat = within(prepDat, hisei <- NULL))
+  )
+
+  # Manipulation: add two other variables (hisei is available per default)
+  expect_snapshot(
+    checkDesignTest(dat = prepDat[,-c(2,7)])
+  )
+})
+
+
 test_that_cli("identifies incorrect sysMis codes and allows for user-defined sysMis", {
   # Change vc to sysMis for item I01R
   expect_snapshot(

@@ -786,6 +786,118 @@
       ── [1m[1mCheck:[1m[22m Valid and missing codes 
       [32m✔[39m No deviations from design detected!
 
+# throws warning when more variables in blocks$subunit than in dataset [plain]
+
+    Code
+      checkDesignTest(dat = within(prepDat, hisei <- NULL))
+    Message
+      
+      -- Check: Subunit recoding 
+      i Use names for recoded subunits.
+      
+      -- Check: Valid and missing codes 
+      v No deviations from design detected!
+
+---
+
+    Code
+      checkDesignTest(dat = prepDat[, -c(2, 7)])
+    Message
+      
+      -- Check: Subunit recoding 
+      i Use names for recoded subunits.
+      
+      -- Check: Variables in Info 
+      i The following 1 variable is not in dataset but in info (`subunit` in blocks).
+      It will be ignored during check: `I05R`
+      
+      -- Check: Valid and missing codes 
+      v No deviations from design detected!
+
+# throws warning when more variables in blocks$subunit than in dataset [ansi]
+
+    Code
+      checkDesignTest(dat = within(prepDat, hisei <- NULL))
+    Message
+      
+      -- [1m[1mCheck:[1m[22m Subunit recoding 
+      [36mi[39m Use names for recoded subunits.
+      
+      -- [1m[1mCheck:[1m[22m Valid and missing codes 
+      [32mv[39m No deviations from design detected!
+
+---
+
+    Code
+      checkDesignTest(dat = prepDat[, -c(2, 7)])
+    Message
+      
+      -- [1m[1mCheck:[1m[22m Subunit recoding 
+      [36mi[39m Use names for recoded subunits.
+      
+      -- [1m[1mCheck:[1m[22m Variables in Info 
+      [36mi[39m The following 1 variable is not in dataset but in info (`subunit` in [32mblocks[39m).
+      It will be ignored during check: `I05R`
+      
+      -- [1m[1mCheck:[1m[22m Valid and missing codes 
+      [32mv[39m No deviations from design detected!
+
+# throws warning when more variables in blocks$subunit than in dataset [unicode]
+
+    Code
+      checkDesignTest(dat = within(prepDat, hisei <- NULL))
+    Message
+      
+      ── Check: Subunit recoding 
+      ℹ Use names for recoded subunits.
+      
+      ── Check: Valid and missing codes 
+      ✔ No deviations from design detected!
+
+---
+
+    Code
+      checkDesignTest(dat = prepDat[, -c(2, 7)])
+    Message
+      
+      ── Check: Subunit recoding 
+      ℹ Use names for recoded subunits.
+      
+      ── Check: Variables in Info 
+      ℹ The following 1 variable is not in dataset but in info (`subunit` in blocks).
+      It will be ignored during check: `I05R`
+      
+      ── Check: Valid and missing codes 
+      ✔ No deviations from design detected!
+
+# throws warning when more variables in blocks$subunit than in dataset [fancy]
+
+    Code
+      checkDesignTest(dat = within(prepDat, hisei <- NULL))
+    Message
+      
+      ── [1m[1mCheck:[1m[22m Subunit recoding 
+      [36mℹ[39m Use names for recoded subunits.
+      
+      ── [1m[1mCheck:[1m[22m Valid and missing codes 
+      [32m✔[39m No deviations from design detected!
+
+---
+
+    Code
+      checkDesignTest(dat = prepDat[, -c(2, 7)])
+    Message
+      
+      ── [1m[1mCheck:[1m[22m Subunit recoding 
+      [36mℹ[39m Use names for recoded subunits.
+      
+      ── [1m[1mCheck:[1m[22m Variables in Info 
+      [36mℹ[39m The following 1 variable is not in dataset but in info (`subunit` in [32mblocks[39m).
+      It will be ignored during check: `I05R`
+      
+      ── [1m[1mCheck:[1m[22m Valid and missing codes 
+      [32m✔[39m No deviations from design detected!
+
 # identifies incorrect sysMis codes and allows for user-defined sysMis [plain]
 
     Code
