@@ -129,7 +129,7 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
                      {.envvar {toOmit}}",
                      wrap = TRUE)
     }
-    dat <- dat[, -match(toOmit, names(dat))]
+    dat <- dat[,-c(which( names(dat) %in% toOmit))]
   }
 
   # Check for variables in the info (`blocks$subunit`) that are not in `dat`
@@ -145,7 +145,7 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
                      {.envvar {toOmit2}}",
                      wrap = TRUE)
     }
-    blocks <- blocks[-match(toOmit2, blocks$subunit),]
+    blocks <- blocks[-c(which(blocks$subunit %in% toOmit2)),]
   }
 
   .bookletPatternCheck <- function(TH) {
