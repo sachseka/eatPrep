@@ -117,35 +117,35 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
   }
 
   # Check for variables in `dat` that are not in the info (`blocks$subunit`)
-  toOmit <- setdiff(names(dat), c(id, blocks$subunit))
-  nToOmit <- length(toOmit)
-  if (nToOmit > 0) {
+  toOmitDat <- setdiff(names(dat), c(id, blocks$subunit))
+  ntoOmitDat <- length(toOmitDat)
+  if (ntoOmitDat > 0) {
     if(verbose) {
       cli_h3("{.strong Check:} Variables in the dataset")
-      cli_alert_info("The following {nToOmit} variable{?s}
+      cli_alert_info("The following {ntoOmitDat} variable{?s}
                      {?is/are} not in info ({.envvar subunit}
                      in {.field blocks}) but in dataset.
                      {?It/They} will be ignored during check:
-                     {.envvar {toOmit}}",
+                     {.envvar {toOmitDat}}",
                      wrap = TRUE)
     }
-    dat <- dat[,-c(which( names(dat) %in% toOmit))]
+    dat <- dat[,-c(which( names(dat) %in% toOmitDat))]
   }
 
   # Check for variables in the info (`blocks$subunit`) that are not in `dat`
-  toOmit2 <- setdiff(c(id, blocks$subunit), names(dat))
-  nToOmit2 <- length(toOmit2)
-  if (nToOmit2 > 0) {
+  toOmitBlocks <- setdiff(c(id, blocks$subunit), names(dat))
+  ntoOmitBlocks <- length(toOmitBlocks)
+  if (ntoOmitBlocks > 0) {
     if(verbose) {
       cli_h3("{.strong Check:} Variables in Info")
-      cli_alert_info("The following {nToOmit2} variable{?s}
+      cli_alert_info("The following {ntoOmitBlocks} variable{?s}
                      {?is/are} not in dataset but in info ({.envvar subunit}
                      in {.field blocks}).
                      {?It/They} will be ignored during check:
-                     {.envvar {toOmit2}}",
+                     {.envvar {toOmitBlocks}}",
                      wrap = TRUE)
     }
-    blocks <- blocks[-c(which(blocks$subunit %in% toOmit2)),]
+    blocks <- blocks[-c(which(blocks$subunit %in% toOmitBlocks)),]
   }
 
   .bookletPatternCheck <- function(TH) {
