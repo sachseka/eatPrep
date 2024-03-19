@@ -6,11 +6,14 @@
 \description{This function converts a data.frame with data that has been prepared for IRT analyses with eatPrep to an eatGADS object.
 }
 \usage{
-prep2gads(dat, inputList, scored = TRUE, verbose = TRUE)
+prep2gads(dat, inputList, misTypes = list(mvi = -95, mnr = -96, mci = -97, mbd = -94, mir = -98, mbi = -99), scored = TRUE, verbose = TRUE)
 }
 \arguments{
   \item{dat}{A data frame, typically one in the last transformation status after eatPrep-based transformations (after 'scoring'). However, recoded and aggregated, but not scored data can also be handled, as long as this data.frames' colnames correspond to the unit-names \code{'units'} in the \code{inputList}.}
   \item{inputList}{A list following the typical structure of an eatPrep inputList. Only the first three data frames are needed to use this function's functionality. See \sQuote{Details}.}
+    \item{misTypes}{
+A named list with definitions how to recode the different types of missings.
+}
     \item{scored}{logical. If \code{TRUE} transformation status of eatPrep-dataset is assumed to be scored.}
   \item{verbose}{logical. If \code{TRUE} additional information is printed.}
 }
