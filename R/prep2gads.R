@@ -1,4 +1,4 @@
-prep2gads <- function (dat, inputList, scored = TRUE, misTypes = list(mvi = -95, mnr = -96, mci = -97,
+prep2gads <- function (dat, inputList, trafoType = c("scored", "raw"), misTypes = list(mvi = -95, mnr = -96, mci = -97,
                                                                       mbd = -94, mir = -98, mbi = -99), verbose = TRUE) {
 
   checkmate::assert_data_frame(dat)
@@ -7,8 +7,10 @@ prep2gads <- function (dat, inputList, scored = TRUE, misTypes = list(mvi = -95,
   checkmate::assert_data_frame(inputList$subunits)
   checkmate::assert_data_frame(inputList$values)
   checkmate::assert_list(misTypes, min.len = 1)
-  checkmate::assert_logical(scored, len=1)
+  checkmate::assert_character(trafoType, pattern ="^(scored|raw)$", len=1)
   checkmate::assert_logical(verbose, len=1)
+
+  trafoType <- match.arg(trafoType)
 
   # if(any(sapply(dat, is.factor))) stop("At least one of the variables in df is a factor. This is unusual in eatPrep and therefore handling is not implemented.")
   units <- inputList$units
@@ -22,9 +24,9 @@ prep2gads <- function (dat, inputList, scored = TRUE, misTypes = list(mvi = -95,
       toOmitDat <- setdiff(names(dat), units$unit)
       cli_h3("{.strong Check:} Variables without info")
       cli_alert_info("The following {ntoOmitDat} variable{?s}
-                     {?is/are} not in units ({.envvar units}
-                     in {.field unit}) but in dataset.
-                     {?Its/Their} meta data will be set to NA:
+                     {?is/are} not
+                     in inputList ({.field $units$unit}) but in dataset,
+                     {?its/their} meta data will be set to NA:
                      {.envvar {toOmitDat}}",
                      wrap = TRUE)
     }
@@ -38,7 +40,7 @@ prep2gads <- function (dat, inputList, scored = TRUE, misTypes = list(mvi = -95,
   # reduce values info
   # values2$valLabel[values2$value=="0"] <- "other"
   # values2$valLabel[values2$value=="1" & values2$varName %in% subs] <- "right answer"
-  if(scored) {
+  if(trafoType == "scored") {
     for(uu in unique(values$unit)) {
       if(nrow(values[values$unit==uu & values$valueRecode == 0,])>1) {
         if(!all(values$subunit[values$unit==uu] == uu)) {
@@ -61,7 +63,7 @@ prep2gads <- function (dat, inputList, scored = TRUE, misTypes = list(mvi = -95,
   }
 
   # restructure
-  if(scored) {
+  if(trafoType == "scored") {
      values3 <- data.frame(varName=values2$unit, value=values2$valueRecode, valLabel=values2$valueLabel, missings=ifelse(grepl("^m",values2$valueType, ignore.case=TRUE),"miss","valid"))
   } else {
     values3 <- data.frame(varName=values2$unit, value=values2$value, valLabel=values2$valueLabel, missings=ifelse(grepl("^m",values2$valueType, ignore.case=TRUE),"miss","valid"))
@@ -75,6 +77,8 @@ prep2gads <- function (dat, inputList, scored = TRUE, misTypes = list(mvi = -95,
 
   dat2 <- collapseMissings(dat, missing.rule = misTypes, standard=FALSE)
   suppressWarnings(dat2 <- eatTools::asNumericIfPossible(dat2, force.string=FALSE))
+
+  labels2 <- labels2[labels2$varName %in% names(dat2),]
 
   prepGADS <-list(dat = dat2, labels = labels2)
 
