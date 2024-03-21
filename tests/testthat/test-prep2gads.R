@@ -1,4 +1,3 @@
-# devtools::load_all()
 
 data(inputList)
 data(inputDat)
@@ -11,14 +10,16 @@ preparedData <- automateDataPreparation(inputList = inputList,
                                         aggregateData = TRUE, scoreData = TRUE,
                                         writeSpss = FALSE, verbose = TRUE)
 
-#o2 <- prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
-#          misTypes = list(mvi = -95, mnr = -96, mci = -97, mbd = -94, mir = -98, mbi = -99), verbose = TRUE)
 
-#o3 <- eatGADS::import_raw2(o2$dat, o2$labels)
+test_that_cli("checks for normal output and missing meta data info when scored", {
 
-test_that_cli("checks for missing correct and false codes per unit", {
-
-  prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
-            verbose=TRUE)
-  expect_snapshot(prep2gads(prepList))
+  expect_snapshot(prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
+                                verbose=TRUE))
 })
+
+test_that("check for stop when raw", {
+
+ expect_error(prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
+                            verbose=TRUE), "Sorry, raw data export isn't implemented yet")
+})
+

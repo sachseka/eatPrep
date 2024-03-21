@@ -1,5 +1,6 @@
-prep2gads <- function (dat, inputList, trafoType = c("scored", "raw"), misTypes = list(mvi = -95, mnr = -96, mci = -97,
-                                                                      mbd = -94, mir = -98, mbi = -99), verbose = TRUE) {
+prep2gads <- function (dat, inputList, trafoType = c("scored", "raw"),
+                       misTypes = list(mvi = -95, mnr = -96, mci = -97,
+                       mbd = -94, mir = -98, mbi = -99), verbose = TRUE) {
 
   checkmate::assert_data_frame(dat)
   checkmate::assert_list(inputList, min.len = 3)
@@ -11,6 +12,7 @@ prep2gads <- function (dat, inputList, trafoType = c("scored", "raw"), misTypes 
   checkmate::assert_logical(verbose, len=1)
 
   trafoType <- match.arg(trafoType)
+  if(trafoType == "raw") stop("Sorry, raw data export isn't implemented yet")
 
   # if(any(sapply(dat, is.factor))) stop("At least one of the variables in df is a factor. This is unusual in eatPrep and therefore handling is not implemented.")
   units <- inputList$units
