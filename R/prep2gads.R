@@ -69,7 +69,6 @@ prep2gads <- function (dat, inputList, trafoType = c("scored", "raw"),
      values3 <- data.frame(varName=values2$unit, value=values2$valueRecode, valLabel=values2$valueLabel, missings=ifelse(grepl("^m",values2$valueType, ignore.case=TRUE),"miss","valid"))
   } else {
     values3 <- data.frame(varName=values2$unit, value=values2$value, valLabel=values2$valueLabel, missings=ifelse(grepl("^m",values2$valueType, ignore.case=TRUE),"miss","valid"))
-    ### BAUSTELLE MISSING RECODING WON'T WORK
   }
 
   labels2 <- dplyr::full_join(values3, labels1, by="varName")
