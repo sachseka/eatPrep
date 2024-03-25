@@ -22,6 +22,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
                         recodedData = TRUE, suppressErr = FALSE, recodeErr = "mci", verbose = FALSE) {
 
   if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.")
+  lapply(c(rename, recodedData, suppressErr, verbose), checkmate::assert_logical, len = 1)
 
   if(suppressErr == TRUE){
     if(length(recodeErr) != 1){
@@ -141,6 +142,7 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
 aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, dat,
                                     verbose = FALSE, suppressErr = suppressErr, recodeErr = recodeErr){
 
+  checkmate::assert_character(unitName)
   aggRule <- toupper(aggregateinfo$arule)
   defau1 <- defau2 <- FALSE
   if( !exists ("aggRule") | is.na(aggRule) | nchar(aggRule) == 0) {
