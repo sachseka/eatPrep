@@ -6,6 +6,11 @@
 ### randomize.order: soll die Reihenfolge der Pseudocodes nach Zufall bestimmt werden?
 make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE, verbose = FALSE)   {
       datLong     <- eatTools::makeDataFrame(datLong)
+      lapply(c(idCol, varCol, codCol), checkmate::assert_scalar)
+      checkmate::assert_vector(valueCol)
+      checkmate::assert_numeric(n.pseudo, len = 1)
+      lapply(c(randomize.order, verbose), checkmate::assert_logical, len = 1)
+
       allVars     <- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
       all.Names   <- lapply(allVars, FUN=function(ii) {existsBackgroundVariables(dat = datLong, variable=ii)})
       if(length(all.Names) != length(unique(all.Names)) ) {stop("'idCol', 'varCol', 'codCol' and 'valueCol' overlap.\n")}
