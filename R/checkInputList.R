@@ -1,4 +1,8 @@
 checkInputList <- function(inputList, mistypes = c("mnr", "mbd", "mir", "mbi")) {
+  checkmate::assert_list(inputList, types = "data.frame")
+  checkmate::assert_character(mistypes)
+  #checkmate::assert_subset(mistypes, choices = c("mnr", "mbd", "mir", "mbi"))
+
   cli_setting()
 
   # Default return
