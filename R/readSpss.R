@@ -1,4 +1,5 @@
 readSpss <- function (file, addLeadingZeros=FALSE, truncateSpaceChar = TRUE) {
+  lapply(c(addLeadingZeros, truncateSpaceChar), checkmate::assert_logical, len = 1)
 
   if(file.exists(file) != TRUE) {
     stop("Could not find file.\n")
