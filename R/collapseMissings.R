@@ -4,6 +4,7 @@ collapseMissings <- function(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA
 
   if(!is.list(missing.rule)) stop("missing.rule must be a list.\n")
   if(!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
+  checkmate::assert_character(items, null.ok = TRUE)
 
   if(! all(unlist(missing.rule) %in% c(0, NA))){
     unexp_rec <- which( ! unlist(missing.rule) %in% c(0, NA))
