@@ -48,6 +48,9 @@ meanAgree <- function( dat , tolerance = 0 , weight.mean = TRUE ){
   # weight.mean ... = T, if agreement is weighted by number of rater subjects,
   #            = F, if it is averaged among all rater pairs
   dat  <- eatTools::makeDataFrame(dat)
+  checkmate::assert_numeric(tolerance, len = 1)
+  checkmate::assert_logical(weight.mean, len = 1)
+
   pairs<- combn(1:ncol(dat),2, simplify=FALSE)
   dfr  <- do.call("rbind", lapply(pairs, FUN = function (comb) {
           dat.ij <- na.omit(dat[,comb])
