@@ -1,4 +1,5 @@
 readMerkmalXlsx <- function(filename, tolcl = FALSE, alleM = TRUE) {
+  lapply(c(tolcl, alleM), checkmate::assert_logical, len = 1)
 
   meL <- list()
 
