@@ -22,7 +22,7 @@ A named list with definitions how to recode the different types of missings in t
 A character vector containing the column names of the data frame for the which character missings should be recoded.
 }
   \item{standard}{
-Logical. Whether it is used in the eatPRep standard case (recoding to 0 or NA) or not.
+Logical. Whether it is used in the eatPrep standard case (recoding to 0 or NA) or not.
 }
 }
 \details{

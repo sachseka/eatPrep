@@ -1,7 +1,7 @@
 # checks for normal output and missing meta data info when scored [plain]
 
     Code
-      prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
       verbose = TRUE)
     Message
       
@@ -232,7 +232,7 @@
 # checks for normal output and missing meta data info when scored [ansi]
 
     Code
-      prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
       verbose = TRUE)
     Message
       
@@ -463,7 +463,7 @@
 # checks for normal output and missing meta data info when scored [unicode]
 
     Code
-      prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
       verbose = TRUE)
     Message
       
@@ -694,7 +694,7 @@
 # checks for normal output and missing meta data info when scored [fancy]
 
     Code
-      prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
       verbose = TRUE)
     Message
       
@@ -921,4 +921,40 @@
       168     <NA>
       169     <NA>
       
+
+# check for stop when raw [plain]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Condition
+      Error in `prep2GADS()`:
+      ! Sorry, raw data export isn't implemented yet
+
+# check for stop when raw [ansi]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Condition
+      [1m[33mError[39m in `prep2GADS()`:[22m
+      [1m[22m[33m![39m Sorry, raw data export isn't implemented yet
+
+# check for stop when raw [unicode]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Condition
+      Error in `prep2GADS()`:
+      ! Sorry, raw data export isn't implemented yet
+
+# check for stop when raw [fancy]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Condition
+      [1m[33mError[39m in `prep2GADS()`:[22m
+      [1m[22m[33m![39m Sorry, raw data export isn't implemented yet
 

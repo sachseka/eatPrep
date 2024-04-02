@@ -13,13 +13,18 @@ preparedData <- automateDataPreparation(inputList = inputList,
 
 test_that_cli("checks for normal output and missing meta data info when scored", {
 
-  expect_snapshot(prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
+  expect_snapshot(prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "scored",
                                 verbose=TRUE))
 })
 
-test_that("check for stop when raw", {
+# test_that("check for stop when raw", {
+#
+#  expect_error(prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
+#                             verbose=TRUE), "Sorry, raw data export isn't implemented yet")
+# })
 
- expect_error(prep2gads(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
-                            verbose=TRUE), "Sorry, raw data export isn't implemented yet")
+test_that_cli("check for stop when raw", {
+
+  expect_snapshot(prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
+                            verbose=TRUE), error=TRUE)
 })
-
