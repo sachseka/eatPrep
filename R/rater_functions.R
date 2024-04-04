@@ -6,8 +6,7 @@
 ### randomize.order: soll die Reihenfolge der Pseudocodes nach Zufall bestimmt werden?
 make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE, verbose = FALSE)   {
       datLong     <- eatTools::makeDataFrame(datLong)
-      lapply(c(idCol, varCol, codCol), checkmate::assert_scalar)
-      checkmate::assert_vector(valueCol)
+      lapply(c(idCol, varCol, codCol, valueCol), checkmate::assert_scalar)
       checkmate::assert_numeric(n.pseudo, len = 1)
       lapply(c(randomize.order, verbose), checkmate::assert_logical, len = 1)
 
@@ -71,7 +70,7 @@ meanKappa <- function( dat , type = c("Cohen", "BrennanPrediger"), weight = "unw
   dat  <- eatTools::makeDataFrame(dat)
   checkmate::assert_character(weight, len = 1)
   checkmate::assert_logical(weight.mean, len = 1)
-  type <- match.arg(type)
+  checkmate::assert_choice(type, choices = c("Cohen", "BrennanPrediger"))
 
   pairs<- combn(1:ncol(dat),2, simplify=FALSE)
   dfr  <- do.call("rbind", lapply(pairs, FUN = function (comb) {
