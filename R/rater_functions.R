@@ -70,8 +70,8 @@ meanKappa <- function( dat , type = c("Cohen", "BrennanPrediger"), weight = "unw
   dat  <- eatTools::makeDataFrame(dat)
   checkmate::assert_character(weight, len = 1)
   checkmate::assert_logical(weight.mean, len = 1)
-  type <- match.arg(type)
-  #checkmate::assert_choice(type, choices = c("Cohen", "BrennanPrediger"))
+  #type <- match.arg(type)
+  checkmate::assert_subset(type, choices = c("Cohen", "BrennanPrediger"))
 
   pairs<- combn(1:ncol(dat),2, simplify=FALSE)
   dfr  <- do.call("rbind", lapply(pairs, FUN = function (comb) {
