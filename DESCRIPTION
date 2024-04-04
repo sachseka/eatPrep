@@ -3,14 +3,15 @@ Type: Package
 Title: Prepare Data for IRT Analyses
 Version: 0.5.1
 Depends: R (>= 3.5.0), readxl
-Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), irrCAC, combinat, cli (>= 3.6.1), eatGADS
+Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), irrCAC, combinat, cli (>= 3.6.1), eatGADS, checkmate
 Date: 2023-10-09
 Authors@R: c(
     person("Karoline A.", "Sachse", email = "karoline.sachse@iqb.hu-berlin.de", role = c("aut", "cre")),
     person("Nicole", "Mahler", email = "nicole.mahler@ibbw.kv.bwl.de", role = c("aut")),
     person("Philipp", "Franikowski", role = c("ctb")),
     person("Martin", "Hecht", role = c("ctb")),
-    person("Sebastian", "Weirich", role = c("ctb")))
+    person("Sebastian", "Weirich", role = c("ctb")),
+    person("Edna", "Grewers", role = c("ctb")))
 Maintainer: Karoline A. Sachse <karoline.sachse@iqb.hu-berlin.de>
 Description: Prepare test item data for IRT analyses is facilitated using this package.
 License: GPL (>= 2)
