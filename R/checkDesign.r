@@ -2,7 +2,7 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
   checkmate::assert_data_frame(dat)
   lapply(c(booklet, blocks, rotation), assert_list, types = "data.frame")
   lapply(c(sysMis, id), checkmate::assert_character, len = 1)
-  checkmate::assert_list(subunits, types = "data.frame", null.ok = TRUE)
+  checkmate::assert_data_frame(subunits, null.ok = TRUE)
   checkmate::assert_logical(verbose, len = 1)
 
   cli_setting()
