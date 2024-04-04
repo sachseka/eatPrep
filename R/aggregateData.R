@@ -21,8 +21,7 @@ makeInputAggregateData <- function (subunits, units, recodedData = TRUE) {
 aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, rename = FALSE,
                         recodedData = TRUE, suppressErr = FALSE, recodeErr = "mci", verbose = FALSE) {
 
-  checkmate::assert_data_frame(dat)
-  lapply(c(subunits, units), checkmate::assert_list, types = "data.frame")
+  lapply(c(dat, subunits, units), checkmate::assert_data_frame)
   lapply(c(rename, recodedData, suppressErr, verbose), checkmate::assert_logical, len = 1)
 
   if(suppressErr == TRUE){
