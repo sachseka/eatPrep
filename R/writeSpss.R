@@ -9,6 +9,12 @@ writeSpss <- function (dat, values, subunits, units, filedat = "mydata.txt", fil
   missing.rule = list ( mvi = 0 , mnr = 0 , mci = NA , mbd = NA , mir = 0 , mbi = 0 ),
   path = getwd(), sep = "\t", dec = ",", verbose = FALSE) {
 
+  lapply(c(dat, values, subunits, units), checkmate::assert_data_frame)
+  lapply(c(filedat, filesps, sep, dec), checkmate::assert_character, len = 1)
+  checkmate::assert_list(missing.rule)
+  checkmate::assert_character(path, len = 1, null.ok = TRUE)
+  checkmate::assert_logical(verbose, len = 1)
+
   funVersion <- "writeSpss: "
 
   varinfo <- makeInputCheckData (values, subunits, units)
