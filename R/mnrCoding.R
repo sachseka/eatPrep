@@ -1,4 +1,16 @@
 mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , subunits = NULL , nMbi = 2 , mbiCode = "mbi" , mnrCode = "mnr" , invalidCodes = c ( "mbd", "mir", "mci" ) , verbose = FALSE ) {
+  checkmate::assert_data_frame(dat)
+  checkmate::assert_scalar(pid)
+  checkmate::assert_character(rotation.id, len = 1)
+  lapply(c(blocks, booklets), checkmate::assert_data_frame)
+  checkmate::assert_subset(colnames(blocks), choices = c("subunit", "block", "subunitBlockPosition"), .var.name = "column names of 'blocks' data frame (long format)")
+
+  checkmate::assert_numeric(breaks)
+  checkmate::assert_data_frame(subunits, null.ok = TRUE)
+  checkmate::assert_numeric(nMbi, lower = 1)
+  lapply(c(mbiCode, mnrCode), checkmate::assert_character, len = 1)
+  checkmate::assert_character(invalidCodes)
+  checkmate::assert_logical(verbose, len = 1)
 
 		# Startzeit
 		st <- Sys.time()
