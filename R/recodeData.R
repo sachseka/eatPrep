@@ -1,6 +1,8 @@
 recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
+  lapply(c(dat, values), checkmate::assert_data_frame)
+  checkmate::assert_data_frame(subunits, null.ok = TRUE)
+  checkmate::assert_logical(verbose, len = 1)
 
-  if (!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
   if(!is.null(subunits)) {
     inp <- checkValuesSubunits(values, subunits)
     recodeinfo <- dplyr::inner_join(inp$subunits, inp$values, by = "subunit")
