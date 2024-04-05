@@ -12,13 +12,16 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
   checkmate::assert_character(path, len = 1, null.ok = TRUE)
   lapply(c(filedat, filesps), checkmate::assert_character, len = 1)
   lapply(c(readSpss, checkData, mergeData, recodeData, recodeMnr,
-           aggregateData, scoreData, writeSpss, collapseMissings, suppressErr), checkmate::assert_logical, len = 1)
+           aggregateData, scoreData, writeSpss, collapseMissings, suppressErr,
+           rename, recodedData, addLeadingZeros, truncateSpaceChar, verbose), checkmate::assert_logical, len = 1)
   checkmate::assert_numeric(breaks, null.ok = TRUE)
   checkmate::assert_numeric(nMbi, len = 1, lower = 1)
   checkmate::assert_scalar(rotation.id, null.ok = TRUE)
   checkmate::assert_character(recodeErr, len = 1)
 
-  #missing.rule
+  checkmate::assert_character(newID, len = 1)
+  checkmate::assert_character(oldIDs, null.ok = TRUE)
+  checkmate::assert_list(missing.rule, names = "named")
 
 		###folder erstellen
 		if(is.null(path)) {
