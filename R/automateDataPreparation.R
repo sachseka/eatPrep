@@ -19,7 +19,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
   checkmate::assert_scalar(rotation.id, null.ok = TRUE)
   checkmate::assert_character(recodeErr, len = 1)
 
-  checkmate::assert_character(newID, len = 1)
+  checkmate::assert_character(newID, len = 1, null.ok = TRUE)
   checkmate::assert_character(oldIDs, null.ok = TRUE)
   checkmate::assert_list(missing.rule, names = "named")
 
