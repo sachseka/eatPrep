@@ -8,7 +8,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
             missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0), verbose=FALSE) {
 
   checkmate::assert_list(datList, types = "data.frame", null.ok = TRUE)
-  checkmate::assert_list(inputList, types = "data.frame")
+  checkmate::assert_list(inputList, types = "data.frame", null.ok = TRUE)
   checkmate::assert_character(path, len = 1, null.ok = TRUE)
   lapply(c(filedat, filesps), checkmate::assert_character, len = 1)
   lapply(c(readSpss, checkData, mergeData, recodeData, recodeMnr,

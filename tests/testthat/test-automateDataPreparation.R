@@ -18,13 +18,13 @@ test_that("load sav", {
                                        aggregateData = FALSE, scoreData = FALSE,
                                        writeSpss = FALSE, verbose = TRUE),
                "All file(s) not found in:  : booklet1.sav, booklet2.sav, booklet3.sav", fixed=TRUE)
-#  expect_error(automateDataPreparation(inputList = NULL,
-#                                       datList = NULL,	path = "none",
-#                                       readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
-#                                       recodeData = FALSE, recodeMnr = FALSE,
-#                                       aggregateData = FALSE, scoreData = FALSE,
-#                                       writeSpss = FALSE, verbose = TRUE),
-#               "No .sav-files found in none", fixed=TRUE)
+  expect_error(automateDataPreparation(inputList = NULL,
+                                       datList = NULL,	path = "none",
+                                       readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
+                                       recodeData = FALSE, recodeMnr = FALSE,
+                                       aggregateData = FALSE, scoreData = FALSE,
+                                       writeSpss = FALSE, verbose = TRUE),
+               "No .sav-files found in none", fixed=TRUE)
   path <- gsub("forcedChoice.sav", "", system.file("extdata", "forcedChoice.sav", package = "eatPrep"))
   expect_error(automateDataPreparation(inputList = inputList[1:3],
                                        datList = NULL,	path = path,
