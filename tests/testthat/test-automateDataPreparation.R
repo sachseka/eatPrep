@@ -78,4 +78,11 @@ test_that("merge", {
                                                  aggregateData = FALSE, scoreData = FALSE,
                                                  writeSpss = FALSE, verbose = TRUE),
                  "Merge has been skipped. Only the first dataset in datList has been considered for the following steps.")
+  singleDat <- inputDat[[1]]
+  expect_snapshot(ati4 <- automateDataPreparation(inputList = inputList,
+                                                 datList = singleDat,
+                                                 readSpss = FALSE, checkData = FALSE,	mergeData = FALSE,
+                                                 recodeData = TRUE, recodeMnr = FALSE,
+                                                 aggregateData = FALSE, scoreData = FALSE,
+                                                 writeSpss = FALSE, verbose = FALSE))
 })
