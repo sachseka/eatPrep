@@ -12,14 +12,41 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
   checkmate::assert_logical(verbose, len=1)
 
   trafoType <- match.arg(trafoType)
-  if(trafoType == "raw") {
-    cli_abort("Sorry, raw data export isn't implemented yet")
-    }
 
   # if(any(sapply(dat, is.factor))) stop("At least one of the variables in df is a factor. This is unusual in eatPrep and therefore handling is not implemented.")
   units <- inputList$units
   subunits <- inputList$subunits
   values <- inputList$values
+
+  if(trafoType == "raw") {
+    #cli_abort("Sorry, raw data export isn't implemented yet")
+    # first, search for probably unintended mbd (that was added by mergeData when merging several booklets via automateDataPreparation) and which raw code this was supposed to be
+
+    # Dringend überdenken:
+    if(any(dat == "mbd")) {
+      mbdRec <- "mbd"
+      if(!any(unique(values$value) %in% "mbd")) { # if values$value contains 'mbd' occurence is not judged as unintended
+        if(any(names(misTypes) == "mbd")) {
+          mbdRec <- misTypes[["mbd"]]
+        } else {
+          if(any(values$valueRecode == "mbd")) {
+            if(length(unique(values$value[values$valueRecode == "mbd"])) ==1) {
+              mbdRec <- unique(values$value[values$valueRecode == "mbd"])
+            } else {
+              cli_alert_info("Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.")
+            }
+          } else {
+            cli_alert_info("Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.")
+          }
+        }
+      }
+    dat[dat == "mbd"] <- mbdRec
+    }
+
+
+
+
+  }
 
   labels1 <- data.frame(varName= names(dat), varLabel= units$unitLabel[match(names(dat), units$unit)], format=NA, display_width=NA, labeled=NA)
 
