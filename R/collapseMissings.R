@@ -1,11 +1,12 @@
 collapseMissings <- function(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA,
                                                       mbd = NA, mir = 0, mbi = 0),
-                             items = NULL){
+                             items = NULL, standard = TRUE){
 
   checkmate::assert_list(missing.rule)
   checkmate::assert_data_frame(dat)
   checkmate::assert_character(items, null.ok = TRUE)
 
+  if(standard) {
   if(! all(unlist(missing.rule) %in% c(0, NA))){
     unexp_rec <- which( ! unlist(missing.rule) %in% c(0, NA))
     warning(paste0("Found unexpected recode value(s): ",
@@ -24,6 +25,7 @@ collapseMissings <- function(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA
     warning(paste("Found no recode information for missing type(s) ",
                   paste(c("mbd", "mbi", "mci", "mir", "mnr", "mvi")[!missruleCheck2], collapse = ", "),
                   " in missing.rule. Please check if this is intended.\n", sep =""))
+  }
   }
 
 	if (is.null(items)) {items <- colnames(dat)}
