@@ -14,7 +14,7 @@ evalPbc(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
 A data frame with the discrimination values for each category of categorical variables: output of \code{\link{catPbc}}. The data frame contains the following columns: item, cat, n, freq, freq.rel, catPbc, recodevalue, subunitType.
 }
   \item{mistypes}{
-Character vector. It will be checked, whether the missing types in this vector are defined for all items.
+Character or numeric vector. It will be checked, whether the missing types in this vector are defined for all items.
 }
   \item{minPbcAtt}{
 Numeric. Minimum correlation of attractors with total test score. If it is lower, the attractor will be flagged.
