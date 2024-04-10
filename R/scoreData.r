@@ -8,7 +8,7 @@ scoreData <- function(
     verbose = FALSE,
     ... # for the deprecated units argument
 ) {
-  lapply(c(unitrecodings, subunits), checkmate::assert_data_frame)
+  lapply(list(unitrecodings, subunits), checkmate::assert_data_frame)
   checkmate::assert_logical(verbose, len = 1)
 
   cli_setting()
