@@ -20,10 +20,9 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
            rename, recodedData, addLeadingZeros, truncateSpaceChar, verbose), checkmate::assert_logical, len = 1)
   checkmate::assert_numeric(breaks, null.ok = TRUE)
   checkmate::assert_numeric(nMbi, len = 1, lower = 1)
-  checkmate::assert_scalar(rotation.id, null.ok = TRUE)
   checkmate::assert_character(recodeErr, len = 1)
 
-  checkmate::assert_character(newID, len = 1, null.ok = TRUE)
+  lapply(c(rotation.id, newID), checkmate::assert_character, len = 1, null.ok = TRUE)
   checkmate::assert_character(oldIDs, null.ok = TRUE)
   checkmate::assert_list(missing.rule, names = "named")
 
