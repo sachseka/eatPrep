@@ -1,7 +1,7 @@
 checkData <- function (dat, datnam, values, subunits, units, ID=NULL, verbose = TRUE) {
 
   checkmate::assert_character(datnam, len = 1)
-  lapply(list(values, subunits, units), checkmate::assert_list, types = "data.frame")
+  lapply(list(values, subunits, units), checkmate::assert_data_frame)
   checkmate::assert_character(ID, len = 1, null.ok = TRUE)
   checkmate::assert_logical(verbose, len = 1)
 
