@@ -26,7 +26,7 @@ Examples of data frames \code{subunits}, \code{values} and \code{units} can be f
 
 }
 \value{
-A \code{prepGADS} object that can be imported to eatGADS using \code{eatGADS::import_raw2(prepGADS$dat, prepGADS$labels)}
+A \code{GADSdat} object.
 }
 \author{
 Karoline Sachse
@@ -39,9 +39,8 @@ prepDat <- automateDataPreparation(inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
     aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
 
-prepGADS <- prep2GADS(dat = prepDat, inputList = inputList[1:3], trafoType = "scored",
+GADSobj <- prep2GADS(dat = prepDat, inputList = inputList[1:3], trafoType = "scored",
                                 verbose=TRUE)
 
-# eatGADS::import_raw2(prepGADS$dat, prepGADS$labels)
 
 }

@@ -84,8 +84,8 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
 
   labels2 <- labels2[labels2$varName %in% names(dat2),]
 
-  prepGADS <-list(dat = dat2, labels = labels2)
+  GADSobj <- eatGADS::import_raw2(dat = dat2, labels = labels2)
 
-  return(prepGADS)
+  return(GADSobj)
 }
 

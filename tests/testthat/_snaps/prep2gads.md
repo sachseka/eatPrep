@@ -120,9 +120,9 @@
       86    -94
       87    -98
       88    -99
-      167  <NA>
-      168  <NA>
-      169  <NA>
+      167    NA
+      168    NA
+      169    NA
                                                                                         valLabel
       1                                  Response option 1 marked', or 'Response option 2 marked
       2                                                                 Response option 3 marked
@@ -228,6 +228,8 @@
       168     <NA>
       169     <NA>
       
+      attr(,"class")
+      [1] "GADSdat" "list"   
 
 # checks for normal output and missing meta data info when scored [ansi]
 
@@ -351,9 +353,9 @@
       86    -94
       87    -98
       88    -99
-      167  <NA>
-      168  <NA>
-      169  <NA>
+      167    NA
+      168    NA
+      169    NA
                                                                                         valLabel
       1                                  Response option 1 marked', or 'Response option 2 marked
       2                                                                 Response option 3 marked
@@ -459,6 +461,8 @@
       168     <NA>
       169     <NA>
       
+      attr(,"class")
+      [1] "GADSdat" "list"   
 
 # checks for normal output and missing meta data info when scored [unicode]
 
@@ -582,9 +586,9 @@
       86    -94
       87    -98
       88    -99
-      167  <NA>
-      168  <NA>
-      169  <NA>
+      167    NA
+      168    NA
+      169    NA
                                                                                         valLabel
       1                                  Response option 1 marked', or 'Response option 2 marked
       2                                                                 Response option 3 marked
@@ -690,6 +694,8 @@
       168     <NA>
       169     <NA>
       
+      attr(,"class")
+      [1] "GADSdat" "list"   
 
 # checks for normal output and missing meta data info when scored [fancy]
 
@@ -813,9 +819,9 @@
       86    -94
       87    -98
       88    -99
-      167  <NA>
-      168  <NA>
-      169  <NA>
+      167    NA
+      168    NA
+      169    NA
                                                                                         valLabel
       1                                  Response option 1 marked', or 'Response option 2 marked
       2                                                                 Response option 3 marked
@@ -921,6 +927,8 @@
       168     <NA>
       169     <NA>
       
+      attr(,"class")
+      [1] "GADSdat" "list"   
 
 # check for stop when raw [plain]
 
