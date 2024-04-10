@@ -3,7 +3,7 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL,
   lapply(list(datRaw, datRec), checkmate::assert_data_frame)
   lapply(c(idRaw, idRec), checkmate::assert_scalar)
   checkmate::assert_vector(context.vars, null.ok = TRUE)
-  lapply(list(values, subunits), checkmate::assert_list, types = "data.frame")
+  lapply(list(values, subunits), checkmate::assert_data_frame)
   checkmate::assert_logical(verbose, len = 1)
 
 	# Pruefen, ob IDs in beiden Datensaetzen uebereinstimmen
