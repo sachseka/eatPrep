@@ -8,7 +8,7 @@ using the \code{eatPrep} package to 0 or \code{NA}. Additionally, all variables 
 }
 \usage{
 collapseMissings(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA,
-mbd = NA, mir = 0, mbi = 0), items = NULL)
+mbd = NA, mir = 0, mbi = 0), items = NULL, standard = TRUE)
 }
 
 \arguments{
@@ -20,6 +20,9 @@ A named list with definitions how to recode the different types of missings in t
 }
   \item{items}{
 A character vector containing the column names of the data frame for the which character missings should be recoded.
+}
+  \item{standard}{
+Logical. Whether it is used in the eatPrep standard case (recoding to 0 or NA) or not.
 }
 }
 \details{
