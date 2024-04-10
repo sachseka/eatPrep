@@ -1,6 +1,6 @@
 
 makeInputLists <- function (values, subunits, units, recodedData = TRUE) {
-  lapply(c(values, subunits, units), checkmate::assert_data_frame)
+  lapply(list(values, subunits, units), checkmate::assert_data_frame)
   checkmate::assert_logical(recodedData, len = 1)
 
   checkedInput  <- checkInput(values, subunits, units)
@@ -22,7 +22,7 @@ makeInputLists <- function (values, subunits, units, recodedData = TRUE) {
 ## doppelte Eintraege fliegen raus
 
 makeInputCheckData <- function (values, subunits, units) {
-  lapply(c(values, subunits, units), checkmate::assert_data_frame)
+  lapply(list(values, subunits, units), checkmate::assert_data_frame)
 
   checkedInput  <- checkInput(values = values, subunits = subunits, units = units)
 
@@ -43,7 +43,7 @@ makeInputCheckData <- function (values, subunits, units) {
 ## fuer recodeData benoetigte Inputs erstellen
 
 makeInputRecodeData <- function (values, subunits) {
-  lapply(c(values, subunits), checkmate::assert_data_frame)
+  lapply(list(values, subunits), checkmate::assert_data_frame)
   checkedInput  <- checkValuesSubunits(values, subunits)
   recodeinfoValues <- mapply(.makeRecodeinfoValues, checkedInput$subunits$subunit,
                              MoreArgs = list(checkedInput$values), SIMPLIFY=FALSE)
