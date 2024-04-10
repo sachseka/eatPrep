@@ -2,8 +2,9 @@ collapseMissings <- function(dat, missing.rule = list(mvi = 0, mnr = 0, mci = NA
                                                       mbd = NA, mir = 0, mbi = 0),
                              items = NULL, standard = TRUE){
 
-  if(!is.list(missing.rule)) stop("missing.rule must be a list.\n")
-  if(!is.data.frame(dat)) stop ("'dat' must be a data.frame.\n")
+  checkmate::assert_list(missing.rule)
+  checkmate::assert_data_frame(dat)
+  checkmate::assert_character(items, null.ok = TRUE)
 
   if(standard) {
   if(! all(unlist(missing.rule) %in% c(0, NA))){

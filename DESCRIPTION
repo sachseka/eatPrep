@@ -11,7 +11,8 @@ Authors@R: c(
     person("Philipp", "Franikowski", role = c("aut")),
     person("Martin", "Hecht", role = c("ctb")),
     person("Sebastian", "Weirich", role = c("ctb")),
-    person("Schumann", "Kristoph", role = c("ctb")))
+    person("Schumann", "Kristoph", role = c("ctb")),
+    person("Edna", "Grewers", role = c("ctb")))
 Maintainer: Karoline A. Sachse <karoline.sachse@iqb.hu-berlin.de>
 Description: Prepare test item data for IRT analyses is facilitated using this package.
 License: GPL (>= 2)
