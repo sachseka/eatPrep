@@ -60,6 +60,13 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
                      wrap = TRUE)
     }
 
+    # create values2, 3 and valueRecode
+
+    values2 <- values[!duplicated(paste0(values$subunit,values$value)),]
+
+    values3 <- data.frame(varName = values2$subunit, value = values2$value, valLabel = values2$valueLabel, missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
+# bis hier, läuft noch nicht
+
     } else {
 
       labels1 <- data.frame(varName= names(dat), varLabel= units$unitLabel[match(names(dat), units$unit)], format=NA, display_width=NA, labeled=NA)
@@ -74,50 +81,32 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
                      {.envvar {toOmitDat}}",
                      wrap = TRUE)
       }
-    }
 
+      values$unit <- sapply(seq(along=values$subunit), function(i) unique(subunits$unit[subunits$subunit == values$subunit[i]]))
 
-# bis hier
-
-
-  # add unit names to values-df
-  values$unit <- sapply(seq(along=values$subunit), function(i) unique(subunits$unit[subunits$subunit == values$subunit[i]]))
-
-  # units with subunits
-  # subs <- unique(subunits$unit[which(subunits$unit != subunits$subunit)])
-
-  # reduce values info
-  # values2$valLabel[values2$value=="0"] <- "other"
-  # values2$valLabel[values2$value=="1" & values2$varName %in% subs] <- "right answer"
-  if(trafoType == "scored") {
-    for(uu in unique(values$unit)) {
-      unitsFilter <- values$unit == uu
-      unitsRecodeFilterFun <- function(x) unitsFilter & values$valueRecode == x
-      unitsRelabelFun <- function(x) if(x == 0) "wrong answer (aggregated)" else "right answer (aggregated)"
-      for(i in 0:1) {
-        if(nrow(values[unitsRecodeFilterFun(i), ]) > 1) {
-          unitsRecodeFilter <- unitsRecodeFilterFun(i)
-          unitsRelabel <- unitsRelabelFun(i)
-          if(!all(values$subunit[unitsFilter] == uu)) {
-            values$valueLabel[unitsRecodeFilter] <- unitsRelabel
-          } else {
-            values$valueLabel[unitsRecodeFilter] <- paste(values$valueLabel[unitsRecodeFilter], collapse= "', or '")
+      for(uu in unique(values$unit)) {
+        unitsFilter <- values$unit == uu
+        unitsRecodeFilterFun <- function(x) unitsFilter & values$valueRecode == x
+        unitsRelabelFun <- function(x) if(x == 0) "wrong answer (aggregated)" else "right answer (aggregated)"
+        for(i in 0:1) {
+          if(nrow(values[unitsRecodeFilterFun(i), ]) > 1) {
+            unitsRecodeFilter <- unitsRecodeFilterFun(i)
+            unitsRelabel <- unitsRelabelFun(i)
+            if(!all(values$subunit[unitsFilter] == uu)) {
+              values$valueLabel[unitsRecodeFilter] <- unitsRelabel
+            } else {
+              values$valueLabel[unitsRecodeFilter] <- paste(values$valueLabel[unitsRecodeFilter], collapse= "', or '")
+            }
           }
         }
       }
-    }
-    values2 <- values[!duplicated(paste0(values$unit,values$valueRecode)),]
-  } else {
-    values2 <- values[!duplicated(paste0(values$unit,values$value)),]
-  }
 
-  # restructure
-  if(trafoType == "scored") {
-    valueRecode <- values2$valueRecode
-  } else {
-    valueRecode <- values2$value
-  }
-  values3 <- data.frame(varName = values2$unit, value = valueRecode, valLabel = values2$valueLabel, missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
+      values2 <- values[!duplicated(paste0(values$unit,values$valueRecode)),]
+
+      values3 <- data.frame(varName = values2$unit, value = values2$valueRecode, valLabel = values2$valueLabel, missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
+
+    }
+
 
   labels2 <- dplyr::full_join(values3, labels1, by="varName")
   labels2 <- labels2[,c("varName", "varLabel", "format", "display_width", "labeled", "value", "valLabel", "missings")]
