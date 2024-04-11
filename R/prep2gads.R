@@ -66,6 +66,7 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
 
     values3 <- data.frame(varName = values2$subunit, value = values2$value, valLabel = values2$valueLabel, missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
 # bis hier, läuft noch nicht
+    dat2 <- dat
 
     } else {
 
@@ -111,9 +112,13 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
   labels2 <- dplyr::full_join(values3, labels1, by="varName")
   labels2 <- labels2[,c("varName", "varLabel", "format", "display_width", "labeled", "value", "valLabel", "missings")]
   labels2$labeled <- ifelse(!is.na(labels2$varLabel) | !is.na(labels2$valLabel), "yes", "no")
-  suppressWarnings(labels2 <- collapseMissings(labels2, missing.rule = misTypes, standard=FALSE))
 
-  dat2 <- collapseMissings(dat, missing.rule = misTypes, standard=FALSE)
+  if(trafoType=="scored") {
+    suppressWarnings(labels2 <- collapseMissings(labels2, missing.rule = misTypes, standard=FALSE))
+    dat2 <- collapseMissings(dat, missing.rule = misTypes, standard=FALSE)
+  }
+
+
   suppressWarnings(dat2 <- eatTools::asNumericIfPossible(dat2, force.string=FALSE))
 
   labels2 <- labels2[labels2$varName %in% names(dat2),]

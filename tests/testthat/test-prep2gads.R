@@ -9,6 +9,12 @@ preparedData <- automateDataPreparation(inputList = inputList,
                                         recodeData = TRUE, recodeMnr = TRUE, breaks = 1,
                                         aggregateData = TRUE, scoreData = TRUE,
                                         writeSpss = FALSE, verbose = TRUE)
+preparedData2 <- automateDataPreparation(inputList = inputList,
+                                        datList = dat,	path = getwd(),
+                                        readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
+                                        recodeData = FALSE, recodeMnr = FALSE, breaks = 1,
+                                        aggregateData = FALSE, scoreData = FALSE,
+                                        writeSpss = FALSE, verbose = TRUE)
 
 
 test_that_cli("checks for normal output and missing meta data info when scored", {
@@ -23,8 +29,8 @@ test_that_cli("checks for normal output and missing meta data info when scored",
 #                             verbose=TRUE), "Sorry, raw data export isn't implemented yet")
 # })
 
-test_that_cli("check for stop when raw", {
+test_that_cli("checks for normal output and missing meta data info when raw", {
 
-  expect_snapshot(prep2GADS(dat = preparedData, inputList = inputList[1:3], trafoType = "raw",
-                            verbose=TRUE), error=TRUE)
+  expect_snapshot(prep2GADS(dat = preparedData2, inputList = inputList[1:3], trafoType = "raw",
+                            verbose=TRUE))
 })
