@@ -65,7 +65,7 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
     values2 <- values[!duplicated(paste0(values$subunit,values$value)),]
 
     values3 <- data.frame(varName = values2$subunit, value = values2$value, valLabel = values2$valueLabel, missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
-# bis hier, läuft noch nicht
+
     dat2 <- dat
 
     } else {
