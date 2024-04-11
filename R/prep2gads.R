@@ -22,45 +22,63 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
     #cli_abort("Sorry, raw data export isn't implemented yet")
     # first, search for probably unintended mbd (that was added by mergeData when merging several booklets via automateDataPreparation) and which raw code this was supposed to be
 
-    # Dringend überdenken:
     if(any(dat == "mbd")) {
       mbdRec <- "mbd"
       if(!any(unique(values$value) %in% "mbd")) { # if values$value contains 'mbd' occurence is not judged as unintended
-        if(any(names(misTypes) == "mbd")) {
-          mbdRec <- misTypes[["mbd"]]
+        if(any(values$valueRecode == "mbd")) { #specification in values-sheet is prioritized over setting in misTypes
+          if(length(unique(values$value[values$valueRecode == "mbd"])) ==1) {
+            mbdRec <- unique(values$value[values$valueRecode == "mbd"])
+            dat[dat == "mbd"] <- mbdRec
+          }
         } else {
-          if(any(values$valueRecode == "mbd")) {
-            if(length(unique(values$value[values$valueRecode == "mbd"])) ==1) {
-              mbdRec <- unique(values$value[values$valueRecode == "mbd"])
-            } else {
-              cli_alert_info("Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.")
-            }
+          if(any(names(misTypes) == "mbd")) {
+            mbdRec <- misTypes[["mbd"]]
+            dat[dat == "mbd"] <- mbdRec
           } else {
             cli_alert_info("Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.")
           }
         }
+       }
       }
-    dat[dat == "mbd"] <- mbdRec
+
+    labels1 <- data.frame(varName= names(dat), varLabel= subunits$subunitLabel[match(names(dat), subunits$subunit)], format=NA, display_width=NA, labeled=NA)
+    if(any(!is.na(varInfoInUnit <- match(setdiff(units$unit, subunits$subunit), names(dat))))) {
+      for(i in na.omit(varInfoInUnit)) {
+         labels1[labels1$varName==names(dat)[i],] <- c(names(dat)[i], varLabel= units$unitLabel[match(names(dat)[i], units$unit)], format=NA, display_width=NA, labeled=NA)
+      }
     }
 
-
-
-
-  }
-
-  labels1 <- data.frame(varName= names(dat), varLabel= units$unitLabel[match(names(dat), units$unit)], format=NA, display_width=NA, labeled=NA)
-
-  if(!all(names(dat) %in%  units$unit) & verbose) {
-      ntoOmitDat <- length(setdiff(names(dat), units$unit))
-      toOmitDat <- setdiff(names(dat), units$unit)
+    if(!all(names(dat) %in%  c(subunits$subunit, units$unit)) & verbose) {
+      ntoOmitDat <- length(setdiff(names(dat), c(subunits$subunit, units$unit)))
+      toOmitDat <- setdiff(names(dat), c(subunits$subunit, units$unit))
       cli_h3("{.strong Check:} Variables without info")
       cli_alert_info("The following {ntoOmitDat} variable{?s}
+                     {?is/are} not
+                     in inputList ({.field $subunits$subunit} or {.field $units$unit}) but in dataset,
+                     {?its/their} meta data will be set to NA:
+                     {.envvar {toOmitDat}}",
+                     wrap = TRUE)
+    }
+
+    } else {
+
+      labels1 <- data.frame(varName= names(dat), varLabel= units$unitLabel[match(names(dat), units$unit)], format=NA, display_width=NA, labeled=NA)
+      if(!all(names(dat) %in%  units$unit) & verbose) {
+        ntoOmitDat <- length(setdiff(names(dat), units$unit))
+        toOmitDat <- setdiff(names(dat), units$unit)
+        cli_h3("{.strong Check:} Variables without info")
+        cli_alert_info("The following {ntoOmitDat} variable{?s}
                      {?is/are} not
                      in inputList ({.field $units$unit}) but in dataset,
                      {?its/their} meta data will be set to NA:
                      {.envvar {toOmitDat}}",
                      wrap = TRUE)
+      }
     }
+
+
+# bis hier
+
 
   # add unit names to values-df
   values$unit <- sapply(seq(along=values$subunit), function(i) unique(subunits$unit[subunits$subunit == values$subunit[i]]))
