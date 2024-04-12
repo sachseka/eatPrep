@@ -15,8 +15,6 @@ readDaemonXlsx <- function(filename) {
   #fileS <- system.file("tests", "test_import.xlsx", package = "xlsx")
   #res <- read.xlsx(fileS, 1)
 
-
-
   if(!is.null(inL$units) & !all(c("unit", "unitType", "unitAggregateRule") %in% colnames(inL$units))) {
     message("Something seems to be wrong with your 'units' sheet. Please check columns!")
   }
