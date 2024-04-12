@@ -3,13 +3,7 @@
 makeCodebookInput <- function (codebook){
 
  # check arguments
-  if (missing(codebook)){
-    stop("Missing argument: codebook")
-  } else {
-    if (!inherits(codebook, "data.frame")){
-      stop("Argument codebook is not a data frame.")
-    }
-  }
+  checkmate::assert_data_frame(codebook)
 
   # trim spaces
   codebook <- data.frame ( apply(codebook, 2, crop), stringsAsFactors = FALSE)
