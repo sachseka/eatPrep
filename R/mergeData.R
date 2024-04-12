@@ -7,9 +7,6 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
   checkmate::assert_vector(oldIDs, null.ok = TRUE, len = length(datList))
   lapply(c(addMbd, verbose), checkmate::assert_logical, len = 1)
 
-  #stopifnot(is.list(datList))
-  #stopifnot(is.character(newID))
-
   if(is.null(oldIDs)) {oldIDs <- rep(newID, length(datList))}
   stopifnot(is.numeric(oldIDs) | is.character(oldIDs))
 
