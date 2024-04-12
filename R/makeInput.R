@@ -1,5 +1,7 @@
 
 makeInputLists <- function (values, subunits, units, recodedData = TRUE) {
+  lapply(list(values, subunits, units), checkmate::assert_data_frame)
+  checkmate::assert_logical(recodedData, len = 1)
 
   checkedInput  <- checkInput(values, subunits, units)
 
@@ -20,6 +22,7 @@ makeInputLists <- function (values, subunits, units, recodedData = TRUE) {
 ## doppelte Eintraege fliegen raus
 
 makeInputCheckData <- function (values, subunits, units) {
+  lapply(list(values, subunits, units), checkmate::assert_data_frame)
 
   checkedInput  <- checkInput(values = values, subunits = subunits, units = units)
 
@@ -40,6 +43,7 @@ makeInputCheckData <- function (values, subunits, units) {
 ## fuer recodeData benoetigte Inputs erstellen
 
 makeInputRecodeData <- function (values, subunits) {
+  lapply(list(values, subunits), checkmate::assert_data_frame)
   checkedInput  <- checkValuesSubunits(values, subunits)
   recodeinfoValues <- mapply(.makeRecodeinfoValues, checkedInput$subunits$subunit,
                              MoreArgs = list(checkedInput$values), SIMPLIFY=FALSE)
@@ -52,6 +56,7 @@ makeInputRecodeData <- function (values, subunits) {
 }
 #-----------------------------------------------------------------------------------------
 checkInput <- function ( values, subunits, units, checkValues = TRUE, checkUnits = TRUE ) {
+  lapply(c(checkValues, checkUnits), checkmate::assert_logical, len = 1)
 
   if (checkValues == FALSE & checkUnits == FALSE) {
     stop("Please specify whether values, units or both should be checked.")
