@@ -12,8 +12,7 @@
 #'
 
 checkValuesSubunits <- function(values, subunits) {
-  if (!inherits(values, "data.frame"))  stop("values must be a data frame.")
-  if (!inherits(subunits, "data.frame")) stop("subunits must be a data frame.")
+  lapply(list(values, subunits), checkmate::assert_data_frame)
 
   # make unitrecodings and units adhere to naming conventions
   nSubunits <- length(grep("subunit", colnames(subunits)))
@@ -62,10 +61,8 @@ checkValuesSubunits <- function(values, subunits) {
 
 checkSubunitsUnits <- function(subunits, units) {
 
-  if (!inherits(subunits, "data.frame")) stop("subunits must be a data frame.")
+  lapply(list(subunits, units), checkmate::assert_data_frame)
   if (any( ! c("unit", "subunit") %in% colnames(subunits))) stop("subunits needs to respect naming conventions. See help(inputList) for details.")
-  if (!inherits(units, "data.frame")) stop("units must be a data frame.")
-
 
     # check consistency of unit names in units & subunits
   unitsWithoutSubunits <- setdiff(units$unit, subunits$unit)
