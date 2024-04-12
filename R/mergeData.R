@@ -1,6 +1,9 @@
 mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE) {
   checkmate::assert_character(newID, len = 1)
-  checkmate::assert_list(datList, types = "data.frame")
+  if (checkmate::test_list(datList)){
+    checkmate::assert_list(datList, types = "data.frame", null.ok = TRUE)
+  } else {
+    checkmate::assert_data_frame(datList, null.ok = TRUE)}
   checkmate::assert_vector(oldIDs, null.ok = TRUE, len = length(datList))
   lapply(c(addMbd, verbose), checkmate::assert_logical, len = 1)
 
