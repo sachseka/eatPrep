@@ -22,7 +22,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
   lapply(c(rotation.id, newID), checkmate::assert_character, len = 1, null.ok = TRUE)
   checkmate::assert_character(oldIDs, null.ok = TRUE)
-  checkmate::assert_list(missing.rule, names = "named")
+  ?checkmate::assert_list(missing.rule, names = "unique")
 
 		###folder erstellen
 		if(is.null(path)) {
@@ -40,18 +40,6 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			stopifnot(is.character(newID))
 			stopifnot(length(newID) == 1)
 			}
-		stopifnot(is.logical(readSpss))
-		stopifnot(is.logical(checkData))
-		stopifnot(is.logical(mergeData))
-		stopifnot(is.logical(recodeData))
-		stopifnot(is.logical(recodeMnr))
-		stopifnot(is.logical(aggregateData))
-		stopifnot(is.logical(scoreData))
-		stopifnot(is.logical(writeSpss))
-		stopifnot(is.logical(collapseMissings))
-		stopifnot(is.logical(addLeadingZeros))
-		stopifnot(is.logical(truncateSpaceChar))
-		stopifnot(is.logical(verbose))
 
 		if(is.null(datList)) {
 			stopifnot(readSpss)
