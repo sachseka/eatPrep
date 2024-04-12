@@ -2,6 +2,10 @@ evalPbc <- function(pbcs, mistypes = c("mnr", "mbd", "mir", "mbi"),
                     minPbcAtt = .05, maxPbcDis = .005, maxPbcMis = .07) {
   cli_setting()
 
+  checkmate::assert_data_frame(pbcs)
+  checkmate::assert_vector(mistypes)
+  lapply(c(minPbcAtt, maxPbcDis, maxPbcMis), checkmate::assert_numeric, len = 1)
+
   ret <- NULL
 
   if(!all(c("item", "cat", "freq", "catPbc", "recodevalue") %in% names(pbcs))) {
