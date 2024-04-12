@@ -74,7 +74,7 @@ Logical passed on to function \code{\link{aggregateData}} indicating whether agg
 }
  \item{recodeErr}{Character vector of length 1 passed on to function \code{\link{aggregateData}} indicating to which \code{err} should be recoded. This argument is only evaluated when \code{suppressErr = TRUE} }.
 \item{missing.rule}{
-A named list with definitions how to recode the different types of missings in the dataset. If \code{writeSPSS = TRUE}, missing values will be recoded to 0 or \code{NA} prior to writing the SPSS dataset. See \code{\link{collapseMissings}} for supported missng values.}
+A named list with definitions how to recode the different types of missings in the dataset. If \code{writeSPSS = TRUE}, missing values will be recoded to 0 or \code{NA} prior to writing the SPSS dataset. See \code{\link{collapseMissings}} for supported missing values.}
 
   \item{aggregatemissings}{
 A symmetrical \emph{n x n} matrix or a data frame from \code{inputList$aggrMiss} passed on to function \code{\link{aggregateData}} with information on how missing values should be aggregated. If no matrix is given, the default will be used. See 'Details' in \code{\link{aggregateData}}.

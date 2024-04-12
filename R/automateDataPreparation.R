@@ -7,6 +7,23 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 						addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
             missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0), verbose=FALSE) {
 
+  if (checkmate::test_list(datList)){
+    checkmate::assert_list(datList, types = "data.frame", null.ok = TRUE)
+  } else {
+    checkmate::assert_data_frame(datList, null.ok = TRUE)}
+  checkmate::assert_character(path, len = 1, null.ok = TRUE)
+  lapply(c(filedat, filesps), checkmate::assert_character, len = 1)
+  lapply(c(readSpss, checkData, mergeData, recodeData, recodeMnr,
+           aggregateData, scoreData, writeSpss, collapseMissings, suppressErr,
+           rename, recodedData, addLeadingZeros, truncateSpaceChar, verbose), checkmate::assert_logical, len = 1)
+  checkmate::assert_numeric(breaks, null.ok = TRUE)
+  checkmate::assert_numeric(nMbi, len = 1, lower = 1)
+  checkmate::assert_character(recodeErr, len = 1)
+
+  lapply(c(rotation.id, newID), checkmate::assert_character, len = 1, null.ok = TRUE)
+  checkmate::assert_character(oldIDs, null.ok = TRUE)
+  ?checkmate::assert_list(missing.rule, names = "unique")
+
 		###folder erstellen
 		if(is.null(path)) {
 		  folder.e <- getwd()
@@ -23,18 +40,6 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			stopifnot(is.character(newID))
 			stopifnot(length(newID) == 1)
 			}
-		stopifnot(is.logical(readSpss))
-		stopifnot(is.logical(checkData))
-		stopifnot(is.logical(mergeData))
-		stopifnot(is.logical(recodeData))
-		stopifnot(is.logical(recodeMnr))
-		stopifnot(is.logical(aggregateData))
-		stopifnot(is.logical(scoreData))
-		stopifnot(is.logical(writeSpss))
-		stopifnot(is.logical(collapseMissings))
-		stopifnot(is.logical(addLeadingZeros))
-		stopifnot(is.logical(truncateSpaceChar))
-		stopifnot(is.logical(verbose))
 
 		if(is.null(datList)) {
 			stopifnot(readSpss)
