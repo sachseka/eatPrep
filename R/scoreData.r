@@ -8,6 +8,9 @@ scoreData <- function(
     verbose = FALSE,
     ... # for the deprecated units argument
 ) {
+  lapply(list(unitrecodings, subunits), checkmate::assert_data_frame)
+  checkmate::assert_logical(verbose, len = 1)
+
   cli_setting()
 
   if (!is.data.frame(dat)) cli_abort("{.field dat} must be a {.envvar data.frame}.")
