@@ -174,10 +174,9 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 		  if(verbose) message("\nRecodeMnr has been skipped.")
 		  }
 
-
 		if(aggregateData) {
 			if(verbose) message("\nStart aggregating" )
-			if ( length(aggregatemissings) > 0 && aggregatemissings == "seeInputList" ) {
+			if(length(aggregatemissings) > 0 && all(aggregatemissings == "seeInputList")) {
 				stopifnot(!is.null(inputList$aggrMiss))
 				aMiss <- unname(inputList$aggrMiss[,-1])
 				aMiss[,8] <- rep("err", 7)
