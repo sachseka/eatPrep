@@ -84,7 +84,7 @@ The values sheet contains all possible values for each subitem and scoring infor
 --> talk more about values in the data for different item types (mc, cr) and about missing values in the data. missing values do not need to be the same for each variable in the data.
 
 
-The subunits sheet contains information about the relationship between subitems and items. Zhis information is used to aggregate subitems to items. If recoded subitems should be named differently than the unrecoded variables in the original data, this can be specified via `subunitRecoded`. The only type of aggregation currently supported by `eatPrep` is to count the number of correct subitems per item.
+The subunits sheet contains information about the relationship between subitems and items. This information is used to aggregate subitems to items. If recoded subitems should be named differently than the unrecoded variables in the original data, this can be specified via `subunitRecoded`. The only type of aggregation currently supported by `eatPrep` is to count the number of correct subitems per item.
 
 unitrecodings contains the same information as the values sheet, but for aggregated items. Here, the value on an item is the aggregated number of correct subitems and the recode value gives a threshold of how many subitems need to be solved to obtain a credit for the item. In the example, I12 has 3 subitems, and one receives a credit if all subitems are solved correctly.
 
