@@ -12,11 +12,11 @@
       $dat
                ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
       1 person100 booklet1    49   0   0   0   0   0 -94 -94 -94
-      2 person101 booklet1   -94 -99   0 -99   0   1 -94 -94 -94
+      2 person101 booklet1    NA -99   0 -99   0   1 -94 -94 -94
       3 person200 booklet2    69 -94 -94 -94 -94   0   0 -94   1
       4 person201 booklet2    76 -94 -94 -94 -94   0   1 -94   0
       5 person300 booklet3    49   0   0 -99 -98 -94 -94   0 -94
-      6 person301 booklet3   -94   1   1   1   0 -94 -94 -99 -94
+      6 person301 booklet3    NA   1   1   1   0 -94 -94 -99 -94
       
       $labels
           varName                               varLabel format display_width labeled
@@ -245,11 +245,11 @@
       $dat
                ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
       1 person100 booklet1    49   0   0   0   0   0 -94 -94 -94
-      2 person101 booklet1   -94 -99   0 -99   0   1 -94 -94 -94
+      2 person101 booklet1    NA -99   0 -99   0   1 -94 -94 -94
       3 person200 booklet2    69 -94 -94 -94 -94   0   0 -94   1
       4 person201 booklet2    76 -94 -94 -94 -94   0   1 -94   0
       5 person300 booklet3    49   0   0 -99 -98 -94 -94   0 -94
-      6 person301 booklet3   -94   1   1   1   0 -94 -94 -99 -94
+      6 person301 booklet3    NA   1   1   1   0 -94 -94 -99 -94
       
       $labels
           varName                               varLabel format display_width labeled
@@ -478,11 +478,11 @@
       $dat
                ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
       1 person100 booklet1    49   0   0   0   0   0 -94 -94 -94
-      2 person101 booklet1   -94 -99   0 -99   0   1 -94 -94 -94
+      2 person101 booklet1    NA -99   0 -99   0   1 -94 -94 -94
       3 person200 booklet2    69 -94 -94 -94 -94   0   0 -94   1
       4 person201 booklet2    76 -94 -94 -94 -94   0   1 -94   0
       5 person300 booklet3    49   0   0 -99 -98 -94 -94   0 -94
-      6 person301 booklet3   -94   1   1   1   0 -94 -94 -99 -94
+      6 person301 booklet3    NA   1   1   1   0 -94 -94 -99 -94
       
       $labels
           varName                               varLabel format display_width labeled
@@ -711,11 +711,11 @@
       $dat
                ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
       1 person100 booklet1    49   0   0   0   0   0 -94 -94 -94
-      2 person101 booklet1   -94 -99   0 -99   0   1 -94 -94 -94
+      2 person101 booklet1    NA -99   0 -99   0   1 -94 -94 -94
       3 person200 booklet2    69 -94 -94 -94 -94   0   0 -94   1
       4 person201 booklet2    76 -94 -94 -94 -94   0   1 -94   0
       5 person300 booklet3    49   0   0 -99 -98 -94 -94   0 -94
-      6 person301 booklet3   -94   1   1   1   0 -94 -94 -99 -94
+      6 person301 booklet3    NA   1   1   1   0 -94 -94 -99 -94
       
       $labels
           varName                               varLabel format display_width labeled
@@ -943,12 +943,12 @@
     Output
       $dat
                ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
-      1 person100    49   1   0   0   2   0    7    7    7   7   7
-      2 person101     7   9   0   9   2   1    7    7    7   7   7
-      3 person200    69   7   7   7   7   0    1    1    4   4   7
-      4 person201    76   7   7   7   7   0    0    0    3   2   7
-      5 person300    49   2   0   9   8   7    7    7    7   7   3
-      6 person301     7   3   1   1   2   7    7    7    7   7   9
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
       
       $labels
           varName                               varLabel format display_width labeled
@@ -1112,12 +1112,12 @@
     Output
       $dat
                ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
-      1 person100    49   1   0   0   2   0    7    7    7   7   7
-      2 person101     7   9   0   9   2   1    7    7    7   7   7
-      3 person200    69   7   7   7   7   0    1    1    4   4   7
-      4 person201    76   7   7   7   7   0    0    0    3   2   7
-      5 person300    49   2   0   9   8   7    7    7    7   7   3
-      6 person301     7   3   1   1   2   7    7    7    7   7   9
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
       
       $labels
           varName                               varLabel format display_width labeled
@@ -1281,12 +1281,12 @@
     Output
       $dat
                ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
-      1 person100    49   1   0   0   2   0    7    7    7   7   7
-      2 person101     7   9   0   9   2   1    7    7    7   7   7
-      3 person200    69   7   7   7   7   0    1    1    4   4   7
-      4 person201    76   7   7   7   7   0    0    0    3   2   7
-      5 person300    49   2   0   9   8   7    7    7    7   7   3
-      6 person301     7   3   1   1   2   7    7    7    7   7   9
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
       
       $labels
           varName                               varLabel format display_width labeled
@@ -1450,12 +1450,12 @@
     Output
       $dat
                ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
-      1 person100    49   1   0   0   2   0    7    7    7   7   7
-      2 person101     7   9   0   9   2   1    7    7    7   7   7
-      3 person200    69   7   7   7   7   0    1    1    4   4   7
-      4 person201    76   7   7   7   7   0    0    0    3   2   7
-      5 person300    49   2   0   9   8   7    7    7    7   7   3
-      6 person301     7   3   1   1   2   7    7    7    7   7   9
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
       
       $labels
           varName                               varLabel format display_width labeled
@@ -1602,6 +1602,1086 @@
       124     9                           missing by intention     miss
       221    NA                                           <NA>     <NA>
       222    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether mbd-specification via misTypes works (when no info in in values-sheet) [plain]
+
+    Code
+      prep2GADS(dat = preparedData2, inputList = inputList1[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Message
+      
+      -- Check: Variables without info 
+      i The following 1 variable is not in inputList ($subunits$subunit or
+      $units$unit) but in dataset, its meta data will be set to NA: `hisei`
+    Output
+      $dat
+               ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      69     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      70     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      71     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      72     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      73     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      74     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      75     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      76     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      77     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      78     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      79     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      80     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      81     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      82     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      83     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      84     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      85     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193   hisei                                   <NA>   <NA>          <NA>      no
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      69      0                                          other    valid
+      70      1   Shape B, supported with plausible reasoning.    valid
+      71      6                            missing not reached     miss
+      72      8                       missing invalid response     miss
+      73      9                           missing by intention     miss
+      74      0                                          other    valid
+      75      1               22.9 metres (units not required)    valid
+      76      6                            missing not reached     miss
+      77      8                       missing invalid response     miss
+      78      9                           missing by intention     miss
+      79      1                       Response option 1 marked    valid
+      80      2                       Response option 2 marked    valid
+      81      3                       Response option 3 marked    valid
+      82      4                       Response option 4 marked    valid
+      83      6                            missing not reached     miss
+      84      8                       missing invalid response     miss
+      85      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether mbd-specification via misTypes works (when no info in in values-sheet) [ansi]
+
+    Code
+      prep2GADS(dat = preparedData2, inputList = inputList1[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Message
+      
+      -- [1m[1mCheck:[1m[22m Variables without info 
+      [36mi[39m The following 1 variable is not in inputList ([32m$subunits$subunit[39m or
+      [32m$units$unit[39m) but in dataset, its meta data will be set to NA: `hisei`
+    Output
+      $dat
+               ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      69     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      70     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      71     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      72     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      73     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      74     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      75     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      76     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      77     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      78     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      79     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      80     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      81     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      82     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      83     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      84     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      85     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193   hisei                                   <NA>   <NA>          <NA>      no
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      69      0                                          other    valid
+      70      1   Shape B, supported with plausible reasoning.    valid
+      71      6                            missing not reached     miss
+      72      8                       missing invalid response     miss
+      73      9                           missing by intention     miss
+      74      0                                          other    valid
+      75      1               22.9 metres (units not required)    valid
+      76      6                            missing not reached     miss
+      77      8                       missing invalid response     miss
+      78      9                           missing by intention     miss
+      79      1                       Response option 1 marked    valid
+      80      2                       Response option 2 marked    valid
+      81      3                       Response option 3 marked    valid
+      82      4                       Response option 4 marked    valid
+      83      6                            missing not reached     miss
+      84      8                       missing invalid response     miss
+      85      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether mbd-specification via misTypes works (when no info in in values-sheet) [unicode]
+
+    Code
+      prep2GADS(dat = preparedData2, inputList = inputList1[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Message
+      
+      ── Check: Variables without info 
+      ℹ The following 1 variable is not in inputList ($subunits$subunit or
+      $units$unit) but in dataset, its meta data will be set to NA: `hisei`
+    Output
+      $dat
+               ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      69     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      70     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      71     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      72     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      73     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      74     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      75     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      76     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      77     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      78     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      79     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      80     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      81     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      82     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      83     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      84     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      85     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193   hisei                                   <NA>   <NA>          <NA>      no
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      69      0                                          other    valid
+      70      1   Shape B, supported with plausible reasoning.    valid
+      71      6                            missing not reached     miss
+      72      8                       missing invalid response     miss
+      73      9                           missing by intention     miss
+      74      0                                          other    valid
+      75      1               22.9 metres (units not required)    valid
+      76      6                            missing not reached     miss
+      77      8                       missing invalid response     miss
+      78      9                           missing by intention     miss
+      79      1                       Response option 1 marked    valid
+      80      2                       Response option 2 marked    valid
+      81      3                       Response option 3 marked    valid
+      82      4                       Response option 4 marked    valid
+      83      6                            missing not reached     miss
+      84      8                       missing invalid response     miss
+      85      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether mbd-specification via misTypes works (when no info in in values-sheet) [fancy]
+
+    Code
+      prep2GADS(dat = preparedData2, inputList = inputList1[1:3], trafoType = "raw",
+      verbose = TRUE)
+    Message
+      
+      ── [1m[1mCheck:[1m[22m Variables without info 
+      [36mℹ[39m The following 1 variable is not in inputList ([32m$subunits$subunit[39m or
+      [32m$units$unit[39m) but in dataset, its meta data will be set to NA: `hisei`
+    Output
+      $dat
+               ID hisei I01 I05 I06 I07 I08 I12a I12b I12c I13 I15
+      1 person100    49   1   0   0   2   0   NA   NA   NA  NA  NA
+      2 person101    NA   9   0   9   2   1   NA   NA   NA  NA  NA
+      3 person200    69  NA  NA  NA  NA   0    1    1    4   4  NA
+      4 person201    76  NA  NA  NA  NA   0    0    0    3   2  NA
+      5 person300    49   2   0   9   8  NA   NA   NA   NA  NA   3
+      6 person301    NA   3   1   1   2  NA   NA   NA   NA  NA   9
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      69     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      70     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      71     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      72     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      73     I12a                  Shapes: Biggest shape   <NA>          <NA>     yes
+      74     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      75     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      76     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      77     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      78     I12b                  Shapes: Circumference   <NA>          <NA>     yes
+      79     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      80     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      81     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      82     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      83     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      84     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      85     I12c               Shapes: Size calculation   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193   hisei                                   <NA>   <NA>          <NA>      no
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      69      0                                          other    valid
+      70      1   Shape B, supported with plausible reasoning.    valid
+      71      6                            missing not reached     miss
+      72      8                       missing invalid response     miss
+      73      9                           missing by intention     miss
+      74      0                                          other    valid
+      75      1               22.9 metres (units not required)    valid
+      76      6                            missing not reached     miss
+      77      8                       missing invalid response     miss
+      78      9                           missing by intention     miss
+      79      1                       Response option 1 marked    valid
+      80      2                       Response option 2 marked    valid
+      81      3                       Response option 3 marked    valid
+      82      4                       Response option 4 marked    valid
+      83      6                            missing not reached     miss
+      84      8                       missing invalid response     miss
+      85      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether no mbd-specification gives message [plain]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
+      misTypes = list(mci = -97), verbose = TRUE)
+    Message
+      i Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      
+      -- Check: Variables without info 
+      i The following 2 variables are not in inputList ($subunits$subunit or
+      $units$unit) but in dataset, their meta data will be set to NA: `booklet` and
+      `hisei`
+    Output
+      $dat
+               ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
+      1 person100 booklet1    49   0   0   0   0   0 mbd mbd mbd
+      2 person101 booklet1    NA mbi   0 mbi   0   1 mbd mbd mbd
+      3 person200 booklet2    69 mbd mbd mbd mbd   0   0 mbd   1
+      4 person201 booklet2    76 mbd mbd mbd mbd   0   1 mbd   0
+      5 person300 booklet3    49   0   0 mbi mir mbd mbd   0 mbd
+      6 person301 booklet3    NA   1   1   1   0 mbd mbd mbi mbd
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193 booklet                                   <NA>   <NA>          <NA>      no
+      194   hisei                                   <NA>   <NA>          <NA>      no
+      195     I12                                 Shapes   <NA>          <NA>     yes
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      194    NA                                           <NA>     <NA>
+      195    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether no mbd-specification gives message [ansi]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
+      misTypes = list(mci = -97), verbose = TRUE)
+    Message
+      [36mi[39m Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      
+      -- [1m[1mCheck:[1m[22m Variables without info 
+      [36mi[39m The following 2 variables are not in inputList ([32m$subunits$subunit[39m or
+      [32m$units$unit[39m) but in dataset, their meta data will be set to NA: `booklet` and
+      `hisei`
+    Output
+      $dat
+               ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
+      1 person100 booklet1    49   0   0   0   0   0 mbd mbd mbd
+      2 person101 booklet1    NA mbi   0 mbi   0   1 mbd mbd mbd
+      3 person200 booklet2    69 mbd mbd mbd mbd   0   0 mbd   1
+      4 person201 booklet2    76 mbd mbd mbd mbd   0   1 mbd   0
+      5 person300 booklet3    49   0   0 mbi mir mbd mbd   0 mbd
+      6 person301 booklet3    NA   1   1   1   0 mbd mbd mbi mbd
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193 booklet                                   <NA>   <NA>          <NA>      no
+      194   hisei                                   <NA>   <NA>          <NA>      no
+      195     I12                                 Shapes   <NA>          <NA>     yes
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      194    NA                                           <NA>     <NA>
+      195    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether no mbd-specification gives message [unicode]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
+      misTypes = list(mci = -97), verbose = TRUE)
+    Message
+      ℹ Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      
+      ── Check: Variables without info 
+      ℹ The following 2 variables are not in inputList ($subunits$subunit or
+      $units$unit) but in dataset, their meta data will be set to NA: `booklet` and
+      `hisei`
+    Output
+      $dat
+               ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
+      1 person100 booklet1    49   0   0   0   0   0 mbd mbd mbd
+      2 person101 booklet1    NA mbi   0 mbi   0   1 mbd mbd mbd
+      3 person200 booklet2    69 mbd mbd mbd mbd   0   0 mbd   1
+      4 person201 booklet2    76 mbd mbd mbd mbd   0   1 mbd   0
+      5 person300 booklet3    49   0   0 mbi mir mbd mbd   0 mbd
+      6 person301 booklet3    NA   1   1   1   0 mbd mbd mbi mbd
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193 booklet                                   <NA>   <NA>          <NA>      no
+      194   hisei                                   <NA>   <NA>          <NA>      no
+      195     I12                                 Shapes   <NA>          <NA>     yes
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      194    NA                                           <NA>     <NA>
+      195    NA                                           <NA>     <NA>
+      
+      attr(,"class")
+      [1] "GADSdat" "list"   
+
+# check whether no mbd-specification gives message [fancy]
+
+    Code
+      prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
+      misTypes = list(mci = -97), verbose = TRUE)
+    Message
+      [36mℹ[39m Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      
+      ── [1m[1mCheck:[1m[22m Variables without info 
+      [36mℹ[39m The following 2 variables are not in inputList ([32m$subunits$subunit[39m or
+      [32m$units$unit[39m) but in dataset, their meta data will be set to NA: `booklet` and
+      `hisei`
+    Output
+      $dat
+               ID  booklet hisei I01 I05 I06 I07 I08 I13 I15 I12
+      1 person100 booklet1    49   0   0   0   0   0 mbd mbd mbd
+      2 person101 booklet1    NA mbi   0 mbi   0   1 mbd mbd mbd
+      3 person200 booklet2    69 mbd mbd mbd mbd   0   0 mbd   1
+      4 person201 booklet2    76 mbd mbd mbd mbd   0   1 mbd   0
+      5 person300 booklet3    49   0   0 mbi mir mbd mbd   0 mbd
+      6 person301 booklet3    NA   1   1   1   0 mbd mbd mbi mbd
+      
+      $labels
+          varName                               varLabel format display_width labeled
+      1       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      2       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      3       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      4       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      5       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      6       I01              Animals: Weight of a duck   <NA>          <NA>     yes
+      26      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      27      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      28      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      29      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      30      I05                    Conversion: 0.14 cm   <NA>          <NA>     yes
+      31      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      32      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      33      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      34      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      35      I06        MissingNumber: 13 - 26 - x - 52   <NA>          <NA>     yes
+      36      I07                          Pizza: Choice   <NA>          <NA>     yes
+      37      I07                          Pizza: Choice   <NA>          <NA>     yes
+      38      I07                          Pizza: Choice   <NA>          <NA>     yes
+      39      I07                          Pizza: Choice   <NA>          <NA>     yes
+      40      I07                          Pizza: Choice   <NA>          <NA>     yes
+      41      I07                          Pizza: Choice   <NA>          <NA>     yes
+      42      I07                          Pizza: Choice   <NA>          <NA>     yes
+      43      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      44      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      45      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      46      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      47      I08            Pizza: Reasoning for choice   <NA>          <NA>     yes
+      86      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      87      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      88      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      89      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      90      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      91      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      92      I13 Sweets: How many possibilities to hide   <NA>          <NA>     yes
+      102     I15                Shopping: Number prices   <NA>          <NA>     yes
+      103     I15                Shopping: Number prices   <NA>          <NA>     yes
+      104     I15                Shopping: Number prices   <NA>          <NA>     yes
+      105     I15                Shopping: Number prices   <NA>          <NA>     yes
+      106     I15                Shopping: Number prices   <NA>          <NA>     yes
+      107     I15                Shopping: Number prices   <NA>          <NA>     yes
+      108     I15                Shopping: Number prices   <NA>          <NA>     yes
+      192      ID                             Student ID   <NA>          <NA>     yes
+      193 booklet                                   <NA>   <NA>          <NA>      no
+      194   hisei                                   <NA>   <NA>          <NA>      no
+      195     I12                                 Shapes   <NA>          <NA>     yes
+          value                                       valLabel missings
+      1       1                       Response option 1 marked    valid
+      2       2                       Response option 2 marked    valid
+      3       3                       Response option 3 marked    valid
+      4       6                            missing not reached     miss
+      5       8                       missing invalid response     miss
+      6       9                           missing by intention     miss
+      26      0                                          other    valid
+      27      1                     14 mm (units not required)    valid
+      28      6                            missing not reached     miss
+      29      8                       missing invalid response     miss
+      30      9                           missing by intention     miss
+      31      0                                          other    valid
+      32      1                                             39    valid
+      33      6                            missing not reached     miss
+      34      8                       missing invalid response     miss
+      35      9                           missing by intention     miss
+      36      1                       Response option 1 marked    valid
+      37      2                       Response option 2 marked    valid
+      38      3                       Response option 3 marked    valid
+      39      4                       Response option 4 marked    valid
+      40      6                            missing not reached     miss
+      41      8                       missing invalid response     miss
+      42      9                           missing by intention     miss
+      43      0                                          other    valid
+      44      1 Surface area increases more rapidly than price    valid
+      45      6                            missing not reached     miss
+      46      8                       missing invalid response     miss
+      47      9                           missing by intention     miss
+      86      1                       Response option 1 marked    valid
+      87      2                       Response option 2 marked    valid
+      88      3                       Response option 3 marked    valid
+      89      4                       Response option 4 marked    valid
+      90      6                            missing not reached     miss
+      91      8                       missing invalid response     miss
+      92      9                           missing by intention     miss
+      102     1                       Response option 1 marked    valid
+      103     2                       Response option 2 marked    valid
+      104     3                       Response option 3 marked    valid
+      105     4                       Response option 4 marked    valid
+      106     6                            missing not reached     miss
+      107     8                       missing invalid response     miss
+      108     9                           missing by intention     miss
+      192    NA                                           <NA>     <NA>
+      193    NA                                           <NA>     <NA>
+      194    NA                                           <NA>     <NA>
+      195    NA                                           <NA>     <NA>
       
       attr(,"class")
       [1] "GADSdat" "list"   

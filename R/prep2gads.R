@@ -19,10 +19,8 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
   values <- inputList$values
 
   if(trafoType == "raw") {
-    #cli_abort("Sorry, raw data export isn't implemented yet")
-    # first, search for probably unintended mbd (that was added by mergeData when merging several booklets via automateDataPreparation) and which raw code this was supposed to be
 
-    if(any(dat == "mbd")) {
+    if(any(dat[!is.na(dat)] == "mbd")) {
       mbdRec <- "mbd"
       if(!any(unique(values$value) %in% "mbd")) { # if values$value contains 'mbd' occurence is not judged as unintended
         if(any(values$valueRecode == "mbd")) { #specification in values-sheet is prioritized over setting in misTypes

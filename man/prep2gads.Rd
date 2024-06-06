@@ -1,7 +1,7 @@
 \name{prep2GADS}
 \alias{prep2GADS}
 
-\title{Convert eatPrep Data and Meta Info to eatGADS Object, i.e., \code{GADSdat} object
+\title{Convert eatPrep Data and Meta Info to \code{GADSdat} object as used in package \code{eatGADS}
 }
 \description{This function converts a data.frame with data that have been prepared for IRT analyses with eatPrep to an eatGADS object.
 }
