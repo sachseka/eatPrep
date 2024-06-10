@@ -4,7 +4,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 						filedat = "mydata.txt", filesps = "readmydata.sps", breaks=NULL, nMbi = 2,
 						rotation.id = NULL, suppressErr = FALSE, recodeErr = "mci",
 						aggregatemissings = NULL, rename = TRUE, recodedData = TRUE,
-						addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
+						addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL, addMbd = TRUE,
             missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0), verbose=FALSE) {
 
   if (checkmate::test_list(datList)){
@@ -113,7 +113,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 			    newID <- inputList$newID$value
 			  }
 			}
-			dat <- mergeData(newID = newID, datList = datList, oldIDs = oldIDs, addMbd=TRUE, verbose=verbose)
+			dat <- mergeData(newID = newID, datList = datList, oldIDs = oldIDs, addMbd=addMbd, verbose=verbose)
 			idname <- newID
 		} else {
 		  if(!is.null(newID2) & verbose) message("Argument 'newID' will be ignored, because merge has been skipped.")

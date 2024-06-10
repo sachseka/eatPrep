@@ -67,8 +67,8 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					dat2 <- dplyr::full_join(mergedData, datList[[i]], by=newID)
 					srtn <- unique(gsub("\\.[x|y]$","",names(dat2)))
 					compar <- gsub("\\.[x|y]$","",names(dat2)[which(duplicated(gsub("\\.[x|y]$", "", names(dat2))))])
+					ncompar <- setdiff(gsub("\\.[x|y]$","",names(dat2)),compar)
 					if(length(compar) > 0) {
-					  ncompar <- setdiff(gsub("\\.[x|y]$","",names(dat2)),compar)
 					  bb <- data.frame(lapply(compar, function(gg)   {
 					    x <- dat2[,paste0(gg, ".x")]
 					    y <- dat2[,paste0(gg, ".y")]
@@ -92,6 +92,9 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					  partialdata <- dat2
 					}
 					mergedData  <- partialdata[,srtn]
+					if(isTRUE(addMbd) & length(ncompar) > 0) {
+					    mergedData[,ncompar][is.na(mergedData[,ncompar])] <- "mbd"
+					  }
 
 				} else {
 				  stop("Did not find ID variable in dataset ", i)
@@ -100,8 +103,6 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
      }
 
 		  mReturn <- mergedData
-
-		  if(addMbd == TRUE) {mReturn[is.na(mReturn)] <- "mbd"}
 
 		} else {
 	  	stop("Found no datasets.")
