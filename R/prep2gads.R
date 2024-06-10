@@ -29,26 +29,31 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
             dat[dat == "mbd"] <- mbdRec
           }
         } else {
-          if(any(names(misTypes) == "mbd")) {
+          if("mbd" %in% names(misTypes)) {
             mbdRec <- misTypes[["mbd"]]
             dat[dat == "mbd"] <- mbdRec
           } else {
-            cli_alert_info("Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.")
+            cli_alert_info("Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.", wrap = TRUE)
           }
         }
        }
       }
 
-    labels1 <- data.frame(varName= names(dat), varLabel= subunits$subunitLabel[match(names(dat), subunits$subunit)], format=NA, display_width=NA, labeled=NA)
-    if(any(!is.na(varInfoInUnit <- match(setdiff(units$unit, subunits$subunit), names(dat))))) {
+    labels1 <- data.frame(varName = names(dat),
+                          varLabel = subunits$subunitLabel[match(names(dat), subunits$subunit)],
+                          format = NA, display_width = NA, labeled = NA)
+    varInfoInUnit <- match(setdiff(units$unit, subunits$subunit), names(dat))
+    if(any(!is.na(varInfoInUnit))) {
       for(i in na.omit(varInfoInUnit)) {
-         labels1[labels1$varName==names(dat)[i],] <- c(names(dat)[i], varLabel= units$unitLabel[match(names(dat)[i], units$unit)], format=NA, display_width=NA, labeled=NA)
+         labels1[labels1$varName==names(dat)[i],] <- c(names(dat)[i],
+                                                       varLabel = units$unitLabel[match(names(dat)[i], units$unit)],
+                                                       format = NA, display_width = NA, labeled = NA)
       }
     }
 
     if(!all(names(dat) %in%  c(subunits$subunit, units$unit)) & verbose) {
-      ntoOmitDat <- length(setdiff(names(dat), c(subunits$subunit, units$unit)))
       toOmitDat <- setdiff(names(dat), c(subunits$subunit, units$unit))
+      ntoOmitDat <- length(toOmitDat)
       cli_h3("{.strong Check:} Variables without info")
       cli_alert_info("The following {ntoOmitDat} variable{?s}
                      {?is/are} not
@@ -62,16 +67,21 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
 
     values2 <- values[!duplicated(paste0(values$subunit,values$value)),]
 
-    values3 <- data.frame(varName = values2$subunit, value = values2$value, valLabel = values2$valueLabel, missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
+    values3 <- data.frame(varName = values2$subunit,
+                          value = values2$value,
+                          valLabel = values2$valueLabel,
+                          missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
 
     dat2 <- dat
 
     } else {
 
-      labels1 <- data.frame(varName= names(dat), varLabel= units$unitLabel[match(names(dat), units$unit)], format=NA, display_width=NA, labeled=NA)
+      labels1 <- data.frame(varName= names(dat),
+                            varLabel= units$unitLabel[match(names(dat), units$unit)],
+                            format=NA, display_width=NA, labeled=NA)
       if(!all(names(dat) %in%  units$unit) & verbose) {
-        ntoOmitDat <- length(setdiff(names(dat), units$unit))
         toOmitDat <- setdiff(names(dat), units$unit)
+        ntoOmitDat <- length(toOmitDat)
         cli_h3("{.strong Check:} Variables without info")
         cli_alert_info("The following {ntoOmitDat} variable{?s}
                      {?is/are} not
@@ -102,7 +112,12 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
 
       values2 <- values[!duplicated(paste0(values$unit,values$valueRecode)),]
 
-      values3 <- data.frame(varName = values2$unit, value = values2$valueRecode, valLabel = values2$valueLabel, missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
+      values3 <- data.frame(varName = values2$unit,
+                            value = values2$valueRecode,
+                            valLabel = values2$valueLabel,
+                            missings = ifelse(grepl("^m",values2$valueType, ignore.case=TRUE), "miss", "valid"))
+
+      dat2 <- collapseMissings(dat, missing.rule = misTypes, standard=FALSE)
 
     }
 
@@ -113,9 +128,7 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
 
   if(trafoType=="scored") {
     suppressWarnings(labels2 <- collapseMissings(labels2, missing.rule = misTypes, standard=FALSE))
-    dat2 <- collapseMissings(dat, missing.rule = misTypes, standard=FALSE)
   }
-
 
   suppressWarnings(dat2 <- eatTools::asNumericIfPossible(dat2, force.string=FALSE))
 

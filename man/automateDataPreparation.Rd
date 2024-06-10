@@ -98,7 +98,7 @@ A vector of character strings containing the IDs names in the original SPSS data
 Default is as specified in \code{inputList$savFiles}.
 }
   \item{addMbd}{
-Logical. Whether \code{mbd} should be added when merging, see \code{\link{mergeData}}.
+Logical. Whether \code{mbd} should be added when merging, see \code{\link{mergeData}}. Also used in \code{\link{prep2GADS}}.
 }
  \item{verbose}{
 Logical: If \code{TRUE}, progress and additional information is printed.

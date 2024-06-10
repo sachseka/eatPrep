@@ -2208,7 +2208,8 @@
       prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
       misTypes = list(mci = -97), verbose = TRUE)
     Message
-      i Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      i Data contains 'mbd' but no clear backtransformation raw value could be
+      identified (please specify via misTypes). Thus 'mbd' will be kept as string.
       
       -- Check: Variables without info 
       i The following 2 variables are not in inputList ($subunits$subunit or
@@ -2329,7 +2330,8 @@
       prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
       misTypes = list(mci = -97), verbose = TRUE)
     Message
-      [36mi[39m Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      [36mi[39m Data contains 'mbd' but no clear backtransformation raw value could be
+      identified (please specify via misTypes). Thus 'mbd' will be kept as string.
       
       -- [1m[1mCheck:[1m[22m Variables without info 
       [36mi[39m The following 2 variables are not in inputList ([32m$subunits$subunit[39m or
@@ -2450,7 +2452,8 @@
       prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
       misTypes = list(mci = -97), verbose = TRUE)
     Message
-      ℹ Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      ℹ Data contains 'mbd' but no clear backtransformation raw value could be
+      identified (please specify via misTypes). Thus 'mbd' will be kept as string.
       
       ── Check: Variables without info 
       ℹ The following 2 variables are not in inputList ($subunits$subunit or
@@ -2571,7 +2574,8 @@
       prep2GADS(dat = preparedData, inputList = inputList1[1:3], trafoType = "raw",
       misTypes = list(mci = -97), verbose = TRUE)
     Message
-      [36mℹ[39m Data contains 'mbd' but no clear backtransformation raw value could be identified (please specify via misTypes). Thus 'mbd' will be kept as string.
+      [36mℹ[39m Data contains 'mbd' but no clear backtransformation raw value could be
+      identified (please specify via misTypes). Thus 'mbd' will be kept as string.
       
       ── [1m[1mCheck:[1m[22m Variables without info 
       [36mℹ[39m The following 2 variables are not in inputList ([32m$subunits$subunit[39m or

@@ -88,7 +88,9 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					  partialdata <- dat2
 					}
 					mergedData  <- partialdata[,srtn]
-					if(isTRUE(addMbd) & length(ncompar) > 0) {mergedData[,ncompar][is.na(mergedData[,ncompar])] <- "mbd"}
+					if(isTRUE(addMbd) & length(ncompar) > 0) {
+					    mergedData[,ncompar][is.na(mergedData[,ncompar])] <- "mbd"
+					  }
 
 				} else {
 				  stop("Did not find ID variable in dataset ", i)

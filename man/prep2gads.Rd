@@ -11,9 +11,9 @@ misTypes = list(mvi = -95, mnr = -96, mci = -97, mbd = -94, mir = -98, mbi = -99
 verbose = TRUE)
 }
 \arguments{
-  \item{dat}{A data.frame, typically one in the last transformation status after eatPrep-based transformations (after 'scoring'). However, recoded and aggregated, but not scored data can also be handled, as long as this data.frames' colnames correspond to the unit-names \code{'units'} in the \code{inputList} (that is \code{trafoType=="scored")}. Merged but not recoded, not aggregated and not scored data can also be converted to a \code{GADSdat} object (that is \code{trafoType=="raw")}.}
+  \item{dat}{A data.frame, typically one in the last transformation status after eatPrep-based transformations (after 'scoring'). However, merged, recoded and aggregated, but not scored data can also be handled, as long as this data.frames' colnames correspond to the unit-names \code{'units'} in the \code{inputList} (that is \code{trafoType=="scored")}. Merged but not recoded, not aggregated and not scored data can also be converted to a \code{GADSdat} object (using \code{trafoType=="raw")}.}
   \item{inputList}{A list following the typical structure of an eatPrep inputList. Only the first three data frames are needed to utilize this function. See \sQuote{Details}.}
-      \item{trafoType}{Character string. Whether raw data (including original values and subunits) or scored data (usually 0/1 and mistypes like mbi et al. and everything aggregated to units) shall be exported.}
+      \item{trafoType}{Character string. Whether raw data (including original values and subunits) or scored data (usually, 0/1 and mistypes like mbi/mbo et al. and everything aggregated to units) shall be exported.}
     \item{misTypes}{
 A named list with definitions how to recode the different types of missings (mainly used when \code{trafoType=="scored")}.}
   \item{verbose}{logical. If \code{TRUE}, additional information is printed.}
