@@ -11,7 +11,8 @@ This function facilitates automated data preparation and wraps most functions fr
     filedat = "mydata.txt", filesps = "readmydata.sps", breaks=NULL,
     nMbi = 2, rotation.id = NULL, suppressErr = FALSE, recodeErr = "mci",
     aggregatemissings = NULL, rename = TRUE, recodedData = TRUE,
-    addLeadingZeros=FALSE, truncateSpaceChar = TRUE, newID = NULL, oldIDs = NULL,
+    addLeadingZeros=FALSE, truncateSpaceChar = TRUE,
+    newID = NULL, oldIDs = NULL, addMbd = TRUE,
     missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0),
     verbose=FALSE)}
 \arguments{
@@ -95,6 +96,9 @@ is \code{ID} or a character string specified in \code{inputList$newID}.
   \item{oldIDs}{
 A vector of character strings containing the IDs names in the original SPSS datasets.
 Default is as specified in \code{inputList$savFiles}.
+}
+  \item{addMbd}{
+Logical. Whether \code{mbd} should be added when merging, see \code{\link{mergeData}}. Also used in \code{\link{prep2GADS}}.
 }
  \item{verbose}{
 Logical: If \code{TRUE}, progress and additional information is printed.

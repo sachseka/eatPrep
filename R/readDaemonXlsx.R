@@ -1,4 +1,5 @@
 readDaemonXlsx <- function(filename) {
+  checkmate::assert_character(filename, len = 1)
 
   inL <- list()
 
