@@ -86,3 +86,44 @@ test_that("merge", {
                                                  aggregateData = FALSE, scoreData = FALSE,
                                                  writeSpss = FALSE, verbose = FALSE))
 })
+
+
+
+
+test_that("almost all steps mbi", {
+  expect_snapshot(ati5 <- automateDataPreparation(inputList = inputList,
+                                                 datList = inputDat,
+                                                 readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
+                                                 recodeData = TRUE, recodeMnr = FALSE,
+                                                 aggregateData = TRUE, scoreData = TRUE,
+                                                 writeSpss = FALSE, verbose = FALSE))
+})
+
+
+
+# Challenge MBO
+iL2 <- inputList
+
+iL2$values$valueRecode <- gsub("mbi", "mbo", inputList$values$valueRecode)
+iL2$values$valueType <- gsub("mbi", "mbo", inputList$values$valueType)
+iL2$values$valueLabel <- gsub("missing by intention", "missing by omission", inputList$values$valueLabel)
+iL2$values$valueDescription <- gsub("missing by intention", "missing by omission", inputList$values$valueDescription)
+iL2$values$valueLabelRecoded <- gsub("mbi", "mbo", inputList$values$valueLabelRecoded)
+
+iL2$unitRecodings$value <- gsub("mbi", "mbo", inputList$unitRecodings$value)
+iL2$unitRecodings$valueRecode <- gsub("mbi", "mbo", inputList$unitRecodings$valueRecode)
+iL2$unitRecodings$valueType <- gsub("mbi", "mbo", inputList$unitRecodings$valueType)
+
+iL2$aggrMiss <- data.frame(lapply(inputList$aggrMiss, function(hh) gsub("mbi", "mbo", hh)))
+names(iL2$aggrMiss) <- gsub("mbi", "mbo", names(inputList$aggrMiss))
+
+test_that("almost all steps mbo", {
+  expect_snapshot(ati6 <- automateDataPreparation(inputList = iL2,
+                                                  datList = inputDat,
+                                                  readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
+                                                  recodeData = TRUE, recodeMnr = FALSE,
+                                                  aggregateData = TRUE, scoreData = TRUE,
+                                                  writeSpss = FALSE, verbose = FALSE))
+})
+
+

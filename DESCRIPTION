@@ -1,7 +1,7 @@
 Package: eatPrep
 Type: Package
 Title: Prepare Data for IRT Analyses
-Version: 0.5.2
+Version: 1.0.0
 Depends: R (>= 3.5.0), readxl
 Imports: dplyr, foreign, reshape2, irr, eatTools (>= 0.2.10), irrCAC, combinat, cli (>= 3.6.1), eatGADS, checkmate
 Date: 2024-03-21

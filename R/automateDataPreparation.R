@@ -10,7 +10,8 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
   if (checkmate::test_list(datList)){
     checkmate::assert_list(datList, types = "data.frame", null.ok = TRUE)
   } else {
-    checkmate::assert_data_frame(datList, null.ok = TRUE)}
+  checkmate::assert_data_frame(datList, null.ok = TRUE)}
+  checkmate::assert_data_frame(aggregatemissings, null.ok = TRUE)
   checkmate::assert_character(path, len = 1, null.ok = TRUE)
   lapply(c(filedat, filesps), checkmate::assert_character, len = 1)
   lapply(c(readSpss, checkData, mergeData, recodeData, recodeMnr,
@@ -22,7 +23,7 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
   lapply(c(rotation.id, newID), checkmate::assert_character, len = 1, null.ok = TRUE)
   checkmate::assert_character(oldIDs, null.ok = TRUE)
-  ?checkmate::assert_list(missing.rule, names = "unique")
+  checkmate::assert_list(missing.rule, names = "unique")
 
 		###folder erstellen
 		if(is.null(path)) {
@@ -177,16 +178,19 @@ automateDataPreparation <- function(datList = NULL, inputList, path = NULL,
 
 		if(aggregateData) {
 			if(verbose) message("\nStart aggregating" )
-			if ( length(aggregatemissings) > 0 && aggregatemissings == "seeInputList" ) {
-				stopifnot(!is.null(inputList$aggrMiss))
-				aMiss <- unname(inputList$aggrMiss[,-1])
-				aMiss[,8] <- rep("err", 7)
-				aMiss[8,] <- rep("err", 8)
-				aggregatemissings <- unname(as.matrix(aMiss, nrow=8, ncol=8))
-				dimnames(aggregatemissings) <-
-                list(c(names(inputList$aggrMiss)[-1], "err"),
-										c(names(inputList$aggrMiss)[-1], "err"))
-			}
+
+		#	if ( length(aggregatemissings) > 0 && aggregatemissings == "seeInputList" ) {
+			if (!is.null(inputList$aggrMiss)) {
+				if(isTRUE(verbose)) message("Since inputList$aggrMiss exists, this will be used instead of default.")
+# 				aMiss <- unname(inputList$aggrMiss[,-1])
+# 				aMiss[,8] <- rep("err", 7)
+# 				aMiss[8,] <- rep("err", 8)
+# 				aggregatemissings <- unname(as.matrix(aMiss, nrow=8, ncol=8))
+# 				dimnames(aggregatemissings) <-
+#                 list(c(names(inputList$aggrMiss)[-1], "err"),
+# 										c(names(inputList$aggrMiss)[-1], "err"))
+			  aggregatemissings <- inputList$aggrMiss
+  		}
 			dat <- aggregateData (dat=dat, subunits=inputList$subunits, units=inputList$units,
             aggregatemissings = aggregatemissings, rename = rename, recodedData = recodedData, verbose = verbose, suppressErr = suppressErr, recodeErr = recodeErr)
 		} else {

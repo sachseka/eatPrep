@@ -291,3 +291,31 @@ test_that("identifies problems with unit recodings", {
   expect_equal(checkInputList(prepList), FALSE)
   expect_snapshot(checkInputList(prepList))
 })
+
+# Challenge MBO
+iL2 <- inputList
+
+iL2$values$valueRecode <- gsub("mbi", "mbo", inputList$values$valueRecode)
+iL2$values$valueType <- gsub("mbi", "mbo", inputList$values$valueType)
+iL2$values$valueLabel <- gsub("missing by intention", "missing by omission", inputList$values$valueLabel)
+iL2$values$valueDescription <- gsub("missing by intention", "missing by omission", inputList$values$valueDescription)
+iL2$values$valueLabelRecoded <- gsub("mbi", "mbo", inputList$values$valueLabelRecoded)
+
+iL2$unitRecodings$value <- gsub("mbi", "mbo", inputList$unitRecodings$value)
+iL2$unitRecodings$valueRecode <- gsub("mbi", "mbo", inputList$unitRecodings$valueRecode)
+iL2$unitRecodings$valueType <- gsub("mbi", "mbo", inputList$unitRecodings$valueType)
+
+iL2$aggrMiss <- data.frame(lapply(inputList$aggrMiss, function(hh) gsub("mbi", "mbo", hh)))
+names(iL2$aggrMiss) <- gsub("mbi", "mbo", names(inputList$aggrMiss))
+
+
+
+test_that("check mbo compatibility when correctly specifying mistypes", {
+  expect_equal(checkInputList(iL2, mistypes=c("mnr", "mbd", "mir", "mbo")), FALSE)
+  expect_snapshot(checkInputList(iL2))
+})
+
+test_that("check mbo compatibility when not correctly specifying mistypes", {
+  expect_equal(checkInputList(iL2), FALSE)
+  expect_snapshot(checkInputList(iL2))
+})
