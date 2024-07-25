@@ -34,7 +34,6 @@ export(recodeData)
 export(mnrCoding)
 export(scoreData)
 export(writeSpss)
-# removed from eatTools to eatPrep
 export(make.pseudo)
 export(meanAgree)
 export(meanKappa)

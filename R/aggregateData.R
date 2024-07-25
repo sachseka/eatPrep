@@ -69,7 +69,9 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   }
 
   # add recode values for err: always recode combinations with err to err
-  if(!all(c(am[nrow(am),],am[,ncol(am)]) %in% "err")) {
+  b1 <- !(any(apply(am, 1, function(uu) all(uu %in% "err"))))
+  b2 <- !(any(apply(am, 2, function(uu) all(uu %in% "err"))))
+  if(b1 | b2) {
     am <- cbind(am, err = "err") ;  am <- rbind(am, err = "err")
     }
 
