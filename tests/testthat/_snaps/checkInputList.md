@@ -2487,3 +2487,77 @@
     Output
       [1] FALSE
 
+# check mbo compatibility when correctly specifying mistypes
+
+    Code
+      checkInputList(iL2)
+    Message
+      
+      -- Checking sheets 
+      
+      -- Check: Value Recoding 
+      v Missing types `mir` is defined for all items in valueRecode.
+      x Missing type `mnr` is not defined as valueRecode for items: `I14`.
+      x Missing type `mbd` is not defined as valueRecode for items: `I14`.
+      x Missing type `mbi` is not defined as valueRecode for items: `I01`, `I02`,
+      `I03`, `I04`, `I05`, `I06`, `I07`, `I08`, `I09`, `I10`, `I11`, `I12a`, `I12b`,
+      `I12c`, `I13`, `I14`, `I15`, `I16`, `I17`, `I18`, `I19`, `I20`, `I21`, `I22`,
+      `I23`, `I24`, `I25`, `I26`, `I27`, and `I28`.
+      i value contains the following values over all items: `0`, `1`, `2`, `3`, `4`,
+      `5`, `6`, `7`, `8`, and `9`
+      x valueRecode contains other values than 0, 1, and the mistypes.
+      > It contains 1 other value: `mbo`
+      
+      -- Check: Value Types 
+      x Unexpected value other than `vc` and the mistypes in valueType: `mbo`
+      
+      -- Check: Unit Equivalence 
+      v All 28 units in units sheet are also defined in subunits.
+      
+      -- Check: Subunit Equivalence 
+      v All 30 subunits in subunits sheet are also defined in values.
+      
+      -- Check: Unit Recoding 
+      i Units with only one subunit: 27
+      i Units with more than one subunit: 1 (`I12`)
+      v All units with more than one subunit are defined in unitRecodings sheet.
+    Output
+      [1] FALSE
+
+# check mbo compatibility when not correctly specifying mistypes
+
+    Code
+      checkInputList(iL2)
+    Message
+      
+      -- Checking sheets 
+      
+      -- Check: Value Recoding 
+      v Missing types `mir` is defined for all items in valueRecode.
+      x Missing type `mnr` is not defined as valueRecode for items: `I14`.
+      x Missing type `mbd` is not defined as valueRecode for items: `I14`.
+      x Missing type `mbi` is not defined as valueRecode for items: `I01`, `I02`,
+      `I03`, `I04`, `I05`, `I06`, `I07`, `I08`, `I09`, `I10`, `I11`, `I12a`, `I12b`,
+      `I12c`, `I13`, `I14`, `I15`, `I16`, `I17`, `I18`, `I19`, `I20`, `I21`, `I22`,
+      `I23`, `I24`, `I25`, `I26`, `I27`, and `I28`.
+      i value contains the following values over all items: `0`, `1`, `2`, `3`, `4`,
+      `5`, `6`, `7`, `8`, and `9`
+      x valueRecode contains other values than 0, 1, and the mistypes.
+      > It contains 1 other value: `mbo`
+      
+      -- Check: Value Types 
+      x Unexpected value other than `vc` and the mistypes in valueType: `mbo`
+      
+      -- Check: Unit Equivalence 
+      v All 28 units in units sheet are also defined in subunits.
+      
+      -- Check: Subunit Equivalence 
+      v All 30 subunits in subunits sheet are also defined in values.
+      
+      -- Check: Unit Recoding 
+      i Units with only one subunit: 27
+      i Units with more than one subunit: 1 (`I12`)
+      v All units with more than one subunit are defined in unitRecodings sheet.
+    Output
+      [1] FALSE
+

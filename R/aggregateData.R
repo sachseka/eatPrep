@@ -54,6 +54,8 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   }
 
   if(is.data.frame(aggregatemissings)) {
+    stopifnot(setequal(aggregatemissings[,1],colnames(aggregatemissings)[-1]))
+    aggregatemissings <- aggregatemissings[match(colnames(aggregatemissings)[-1], aggregatemissings[,1]),]
     am <- as.matrix(aggregatemissings[-1])
     dimnames(am) <- list(aggregatemissings[, 1], colnames(aggregatemissings)[-1])
   }
@@ -67,18 +69,12 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   }
 
   # add recode values for err: always recode combinations with err to err
-  am <- cbind(am, err = "err") ;  am <- rbind(am, err = "err")
+  b1 <- !(any(apply(am, 1, function(uu) all(uu %in% "err"))))
+  b2 <- !(any(apply(am, 2, function(uu) all(uu %in% "err"))))
+  if(b1 | b2) {
+    am <- cbind(am, err = "err") ;  am <- rbind(am, err = "err")
+    }
 
-  # check aggregatemissings against standard codes
-  standard_codes <- c("vc", "mvi", "mnr", "mci", "mbd", "mir", "mbi", "err")
-  am_codes <- unique(c(unlist(dimnames(am)), unlist(am)))
-
-  if (any(am_codes %in% standard_codes == FALSE)) {
-    stop("Found nonstandard missing value code(s) in 'aggregatemissings':", paste(setdiff(am_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes, collapse = ", "))
-  }
-  if (any(standard_codes %in% am_codes == FALSE)) {
-    warning("Standard missing code(s)", paste(setdiff(standard_codes, am_codes), collapse = ", "), "are not specified in  'aggregatemissings'. Please check whether this is desired.")
-  }
 
   if(verbose) {
      message("All aggregation rules will be defaulted to 'SUM', because no other type is currently supported.")
@@ -99,11 +95,12 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   # initialize aggregated dataset with subunits to keep
   datAggregated <- dat[ , subunitsToKeep ]
 
-  # check data against standard codes
+  # check aggregatemissings against data
+  am_codes <- unique(c(unlist(dimnames(am))))
   data_codes <- unique(gsub("[[:digit:]]", "vc", unlist(dat[ , subunitsToAggregate])))
 
-  if (any(data_codes %in% standard_codes == FALSE)) {
-    stop("Found nonstandard missing value code(s) in 'dat':", paste(setdiff(data_codes, standard_codes), collapse = ", "), ". Only the following codes are supported:", paste(standard_codes[-length(standard_codes)], collapse = ", "))
+  if (any(data_codes %in% am_codes == FALSE)) {
+    stop("Found the following code(s) in the data but not in 'aggregatemissings': ", paste(setdiff(data_codes, am_codes), collapse = ", "))
   }
 
   if (rename == TRUE) {
@@ -220,6 +217,7 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
 # aggregates missings and valid codes of multiple columns in a dataset according to argument aggregatemissings
 
 .makeMissingind <- function ( dat, aggregatemissings ) {
+
   dat <- data.frame(apply(dat, 2, function (ll) {gsub("[[:digit:]]", "vc", ll)}), stringsAsFactors = FALSE)
   agg <- dat [ , 1]
 
@@ -233,6 +231,7 @@ aggregateData.aggregate <- function(unitName, aggregateinfo, aggregatemissings, 
 # aggregates a column with a previously aggregated column according to argument aggregatemissings
 
 .aggmiss <- function ( variable, aggregatedVariable, aggregatemissings) {
+
   aggregatedVariable <- mapply( function (variable, aggregatedVariable){
     x <- aggregatemissings[ match(aggregatedVariable, rownames(aggregatemissings)) , match(variable, colnames(aggregatemissings))]
     return(x)
