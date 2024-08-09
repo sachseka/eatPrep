@@ -35,16 +35,40 @@ Most of this can be done with a single function call to `automateDataPreparation
 In a prototypical scenario, we are constructing a test at the IQB, e.g. for educational purposes. For our pilot study, we have created several overlapping booklets and a variety of items with different item formats (constructed response, multiple choice).  
 Thereby, the data consists of several layers:
 
-* booklets, containing blocks,
-* blocks, containing units (= items), 
-* units, containing subunits/subitems,
-* subunits, having values and
-* values, including missings and recode values
+|||
+|-|-|
+|**booklets** |containing blocks|
+|**blocks**| containing units (= items)| 
+| **units**| containing subunits/subitems|
+| **subunits**| having values and|
+| **values**| including missings and recode values|
+
 
 Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that.
 
-<!-- we also want to include additional information about the items (merkmalstabelle) -> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR! -->
+As a reminder, here is an overview over the different **missing types** the IQB uses and their standard values: 
 
+```{r missing types, echo=FALSE}
+code <- c(-95, -96, -97, "sysmis or -94", -98, -99)
+label <- c("text voume insufficient", "missings not reached", "coding impossible", "missing by design",
+           "invalid response", "omission (missing by intention)")
+kurz <- c("mvi", "mnr", "mci", "mbd", "mir", "mbi")
+beschreibung <- c("Amount of anwser text not sufficient enough for evaluation (writing exercise). ",
+                  "Testperson stopped editing the test booklet and didn't get to this item. Give label Coding all variables, something M9 (block boarders)",
+                  "No Coding possible due to technical reasons, like Druckfehler, scan errors or loss of Codingvalues.",
+                  "Item wasn't given to the testperson.",
+                  "Answer given has no existing Code. Includes nonsense answers, and inadmissible multiple crossings at MC.",
+                  "no editing visible. Strictly abiding this convention is important for using mbi to calculate mnr.")
+recode_value <- c(0, "missing or 0", "in Multi-Matrix design = missing", "missing", 0, "usually 0")
+
+types <- data.frame(Code = code, Label = label, Abbr = kurz, Explanation = beschreibung, "Standard Recode Values" = recode_value)
+names(types)[5] <- "Standard Recode Values"
+kable(types)
+```
+
+
+<!-- we also want to include additional information about the items (merkmalstabelle) -> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR! -->
+<!-- And here is some additional information about the **items**: -->
 
 ## Input
 
