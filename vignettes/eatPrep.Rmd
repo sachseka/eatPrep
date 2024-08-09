@@ -14,22 +14,17 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, warning=FALSE}
-library(eatPrep)
+```{r setup, include=FALSE}
 library(knitr)
 ```
 
-```{r tempsetup}
-inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", "unitAggregateRule")],
-                     subunits = inputList$subunits[, c("unit", "subunit","subunitRecoded")],
-                     values = inputList$values[ , c("subunit", "value", "valueRecode", "valueType")],
-                     unitRecodings = inputList$unitRecodings[ , c("unit", "value", "valueRecode", "valueType")],
-                     blocks = inputList$blocks,
-                     booklets = inputList$booklets,
-                     rotation = inputList$rotation)
+## Introduction
+
+```{r installing and loading, warning=FALSE}
+#remotes::install_github("https://github.com/sachseka/eatPrep")
+library(eatPrep)
 ```
 
-## Introduction
 
 The goal of `eatPrep`, short for `Educational Assesment Tools: Preparation`, is to automate the preparation of item response test data; especially but not exclusively for typical use cases at the *Institute for Educational Quality Improvement* (IQB).
 Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDeamon`.
@@ -57,9 +52,19 @@ Information/metadata about items is stored in many different ways, e.g., databas
 
 Sheets have specific names, also the columns in those sheets have specific names.
 
+`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content).
+
 Example: inputList, inputMinimal
 
-`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content).
+```{r tempsetup}
+inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", "unitAggregateRule")],
+                     subunits = inputList$subunits[, c("unit", "subunit","subunitRecoded")],
+                     values = inputList$values[ , c("subunit", "value", "valueRecode", "valueType")],
+                     unitRecodings = inputList$unitRecodings[ , c("unit", "value", "valueRecode", "valueType")],
+                     blocks = inputList$blocks,
+                     booklets = inputList$booklets,
+                     rotation = inputList$rotation)
+```
 
 ### Input tables
 Let's look at the tables from bottom to top, starting with items and their values. In the values sheet, we define values and recode values for each subitem.
