@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, warning=FALSE}
 library(eatPrep)
 library(knitr)
 ```
@@ -66,7 +66,7 @@ Let's look at the tables from bottom to top, starting with items and their value
 
 
 Here we see 3 items (called units) from `inputList` bzw. `inputMinimal`.
-One mc (item 1), one short response (item 2), one item with 3 subitems short response (item 12)
+One mc (item 1), one short response (item 5), one item with 3 subitems short response (item 12)
 
 ```{r inputList}
 items <- c("I01", "I05", "I12")
