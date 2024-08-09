@@ -46,7 +46,7 @@ Thereby, the data consists of several layers:
 
 Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that.
 
-As a reminder, here is an overview over the different **missing types** the IQB uses and their standard values: 
+As a reminder, here is an overview for different value types the IQB uses: 
 
 ```{r missing types, echo=FALSE}
 code <- c(-95, -96, -97, "sysmis or -94", -98, -99)
@@ -61,14 +61,23 @@ beschreibung <- c("Amount of anwser text not sufficient enough for evaluation (w
                   "no editing visible. Strictly abiding this convention is important for using mbi to calculate mnr.")
 recode_value <- c(0, "missing or 0", "in Multi-Matrix design = missing", "missing", 0, "usually 0")
 
-types <- data.frame(Code = code, Label = label, Abbr = kurz, Explanation = beschreibung, "Standard Recode Values" = recode_value)
-names(types)[5] <- "Standard Recode Values"
-kable(types)
+Mtypes <- data.frame(Code = code, Label = label, Abbr = kurz, Explanation = beschreibung, "Standard Recode Values" = recode_value)
+names(Mtypes)[5] <- "Standard Recode Values"
+kable(Mtypes, caption = "**missing types**")
 ```
 
 
 <!-- we also want to include additional information about the items (merkmalstabelle) -> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR! -->
 <!-- And here is some additional information about the **items**: -->
+
+```{r item types, echo=FALSE}
+code <- c()
+label <- c()
+kurz <- c()
+recode_value <- c()
+#kable(Itypes <- data.frame(Code = code, Label = label, Abbr = kurz), caption = "**items types**")
+```
+
 
 ## Input
 
@@ -78,7 +87,9 @@ Sheets have specific names, also the columns in those sheets have specific names
 
 `inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content).
 
-Example: inputList, inputMinimal
+<!--Example: inputList ? -->
+
+Example: inputMinimal
 
 ```{r tempsetup}
 inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", "unitAggregateRule")],
@@ -93,7 +104,6 @@ inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", 
 ### Input tables
 Let's look at the tables from bottom to top, starting with items and their values. In the values sheet, we define values and recode values for each subitem.
 
-
 Here we see 3 items (called units) from `inputList` bzw. `inputMinimal`.
 One mc (item 1), one short response (item 5), one item with 3 subitems short response (item 12)
 
@@ -102,22 +112,33 @@ items <- c("I01", "I05", "I12")
 subitems <- c("I01", "I05", "I12a", "I12b", "I12c")
 
 kable(inputMinimal$units[which(inputMinimal$units$unit %in% items), ])
-kable(inputMinimal$subunits[which(inputMinimal$subunits$subunit %in% subitems), ])
-kable(inputMinimal$values[which(inputMinimal$values$subunit %in% subitems), ])
-kable(inputMinimal$unitRecodings)
 
 ```
 
-The values sheet contains all possible values for each subitem and scoring information for each value (e.g., whether it is true, false, or missing). There are several types of missing values.
-
---> talk more about values in the data for different item types (mc, cr) and about missing values in the data. missing values do not need to be the same for each variable in the data.
 
 
-The subunits sheet contains information about the relationship between subitems and items. This information is used to aggregate subitems to items. If recoded subitems should be named differently than the unrecoded variables in the original data, this can be specified via `subunitRecoded`. The only type of aggregation currently supported by `eatPrep` is to count the number of correct subitems per item.
+The **values sheet** contains all possible values for each subitem and scoring information for each value (e.g., whether it is true, false, or missing). There are several types of missing values.
 
-unitrecodings contains the same information as the values sheet, but for aggregated items. Here, the value on an item is the aggregated number of correct subitems and the recode value gives a threshold of how many subitems need to be solved to obtain a credit for the item. In the example, I12 has 3 subitems, and one receives a credit if all subitems are solved correctly.
+```{r values sheet}
+kable(inputMinimal$values[which(inputMinimal$values$subunit %in% subitems), ])
+```
 
-The minimal use case is that each subitem corresponds to an item. In this case, the value sheet contains all information needed for recoding the items (apart from possibly renaming the recoded items).
+<!-- talk more about values in the data for different item types (mc, cr) and about missing values in the data. missing values do not need to be the same for each variable in the data.-->
+
+The **subunits sheet** contains information about the relationship between subitems and items. This information is used to aggregate subitems to items. If recoded subitems should be named differently than the unrecoded variables in the original data, this can be specified via `subunitRecoded`. The only type of aggregation currently supported by `eatPrep` is to count the number of correct subitems per item.
+
+```{r subunits sheet}
+kable(inputMinimal$subunits[which(inputMinimal$subunits$subunit %in% subitems), ])
+```
+
+**unitrecodings** contains the same information as the values sheet, but for aggregated items. Here, the value on an item is the aggregated number of correct subitems and the recode value gives a threshold of how many subitems need to be solved to obtain a credit for the item. In the example, I12 has 3 subitems, and one receives a credit if all subitems are solved correctly.
+
+```{r unitRecodings}
+kable(inputMinimal$unitRecodings)
+```
+
+The **minimal use case** is that each subitem corresponds to an item. In this case, the value sheet contains all information needed for recoding the items (apart from possibly renaming the recoded items).
+
 
 ## input data
 
