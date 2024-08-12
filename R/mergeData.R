@@ -144,8 +144,10 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
         d4ind <- data.frame(which(d4==0, arr.ind=TRUE))
         d4ind$rowID <- d4[d4ind$row,1]
         d4ind$colNam <- names(d4)[d4ind$col]
-        for(i in 1:nrow(d4ind)) {
-          mergedData[mergedData[,newID] %in% d4ind$rowID[i],d4ind$colNam[i]] <- "mbd"
+        if(verbose) message("Start adding mbd according to data pattern.")
+        for(pp in unique(d4ind$colNam)) {
+          ids <- d4ind$rowID[d4ind$colNam == pp]
+          mergedData[mergedData[,newID] %in% ids,pp] <- "mbd"
         }
       }
     }
