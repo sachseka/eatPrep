@@ -12,7 +12,7 @@ This function facilitates automated data preparation and wraps most functions fr
     nMbi = 2, rotation.id = NULL, suppressErr = FALSE, recodeErr = "mci",
     aggregatemissings = NULL, rename = TRUE, recodedData = TRUE,
     addLeadingZeros=FALSE, truncateSpaceChar = TRUE,
-    newID = NULL, oldIDs = NULL, addMbd = TRUE,
+    newID = NULL, oldIDs = NULL, addMbd = TRUE, overwriteMbdSilently=TRUE,
     missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0),
     verbose=FALSE)}
 \arguments{
@@ -99,6 +99,9 @@ Default is as specified in \code{inputList$savFiles}.
 }
   \item{addMbd}{
 Logical. Whether \code{mbd} should be added when merging, see \code{\link{mergeData}}. Also used in \code{\link{prep2GADS}}.
+}
+\item{overwriteMbdSilently}{
+Logical. Whether \code{mbd} will overwritten silently when other non-empty values are available when merging, see \code{\link{mergeData}}.
 }
  \item{verbose}{
 Logical: If \code{TRUE}, progress and additional information is printed.

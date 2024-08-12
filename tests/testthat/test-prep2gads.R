@@ -15,7 +15,12 @@ preparedData2 <- automateDataPreparation(inputList = inputList,
                                         recodeData = FALSE, recodeMnr = FALSE, breaks = 1,
                                         aggregateData = FALSE, scoreData = FALSE, addMbd = FALSE,
                                         writeSpss = FALSE, verbose = TRUE)
-
+preparedData3 <- automateDataPreparation(inputList = inputList,
+                                         datList = dat,	path = getwd(),
+                                         readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
+                                         recodeData = FALSE, recodeMnr = FALSE, breaks = 1,
+                                         aggregateData = FALSE, scoreData = FALSE, addMbd = TRUE,
+                                         writeSpss = FALSE, verbose = TRUE)
 
 test_that_cli("checks for normal output and missing meta data info when scored", {
 
@@ -35,6 +40,12 @@ test_that_cli("checks for normal output and missing meta data info when scored",
 test_that_cli("checks for normal output and missing meta data info when raw", {
 
   expect_snapshot(prep2GADS(dat = preparedData2, inputList = inputList[1:3], trafoType = "raw",
+                            verbose=TRUE))
+})
+
+test_that_cli("checks for normal output and missing meta data info when raw 2", {
+
+  expect_snapshot(prep2GADS(dat = preparedData3, inputList = inputList[1:3], trafoType = "raw",
                             verbose=TRUE))
 })
 
