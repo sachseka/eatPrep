@@ -4,7 +4,8 @@
 \description{This function merges a list of data frames. Further, it provides detailed diagnostics about value mismatches. If two identically named columns in two datasets do not have identical values, NAs are replaced by valid codes stemming from the other dataset(s) and if two different valid values are found, the first value will be kept and the other dropped, and the user will be informed about the mismatch. Additionally, \code{NA} resulting from the merge (e.g., in repeated block designs) can be replaced with a customed character missing to facilitate future data preparation of the merged dataset. See \code{\link{collapseMissings}} for details on supported character missings for other functions in the \code{eatPrep} package.
 }
 \usage{
-mergeData(newID, datList, oldIDs = NULL, addMbd = FALSE, verbose = TRUE)
+mergeData(newID, datList, oldIDs = NULL, addMbd = FALSE,
+                  overwriteMbdSilently=TRUE, verbose = TRUE)
 }
 
 \arguments{
@@ -18,6 +19,9 @@ A character vector or a numeric vector containing either the names of the identi
 }
   \item{addMbd}{
 logical. If \code{TRUE}, \code{NA} is replaced by "mbd" (missing by design) in the merged dataset.
+}
+\item{overwriteMbdSilently}{
+Logical. Whether \code{mbd} will overwritten silently when other non-empty values are available.
 }
   \item{verbose}{
 logical. If \code{TRUE}, progress is printed.

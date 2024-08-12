@@ -1,4 +1,6 @@
-mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE) {
+mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
+                      overwriteMbdSilently=TRUE, verbose=TRUE) {
+
   checkmate::assert_character(newID, len = 1)
   if (checkmate::test_list(datList)){
     checkmate::assert_list(datList, types = "data.frame", null.ok = TRUE)
@@ -76,19 +78,30 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					  bb <- data.frame(lapply(compar, function(gg)   {
 					    x <- dat2[,paste0(gg, ".x")]
 					    y <- dat2[,paste0(gg, ".y")]
-					    z <- ifelse(is.na(x),y,x)
+					    if(isTRUE(overwriteMbdSilently)) {
+					      z <- ifelse(is.na(x) | x == "mbd" & !is.na(y),y,x)
+					    } else {
+					      z <- ifelse(is.na(x),y,x)
+					    }
 					    b <- which(x[!is.na(x) & !is.na(y)] != y[!is.na(x) & !is.na(y)])
 					    a <- cbind(x[!is.na(x) & !is.na(y)],y[!is.na(x) & !is.na(y)])[b,]
-					    b <- which(x!=y)
-					    if(verbose & length(a) > 0) {
-					      if(dim(data.frame(a))[2] == 1) {
-					        ab <- paste(a,collapse="&")
-					      } else {
-					        ab <- paste(apply(data.frame(a),1, function(vv) paste(vv, collapse=("&"))),collapse=", ")
-					      }
-					      message("Multiple different valid codes in variable: '",gg,"' in 'dataset ",i,"': \n The first value has been kept. \n IDs: ", paste(dat2[,newID][b],collapse=", "),"\n Values: ", ab)
+					    if(any(grepl("mbd", a)) & isTRUE(overwriteMbdSilently)){
+					      return(z)
+					    } else {
+  					    b <- which(x!=y)
+  					    if(verbose & length(a) > 0) {
+  					      if(dim(data.frame(a))[2] == 1) {
+  					        ab <- paste(a,collapse="&")
+  					      } else {
+  					        ab <- paste(apply(data.frame(a),1, function(vv) paste(vv, collapse=("&"))),
+  					                    collapse=", ")
+  					      }
+  					      message("Multiple different valid codes in variable: '",gg,
+  					              "' in 'dataset ",i,"': \n The first value has been kept. \n IDs: ",
+  					              paste(dat2[,newID][b],collapse=", "),"\n Values: ", ab)
+  					    }
+  					    return(z)
 					    }
-					    return(z)
 					  }))
 					  names(bb) <- compar
 
@@ -96,29 +109,46 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					} else {
 					  partialdata <- dat2
 					}
-					partialDataSorted  <- partialdata[,srtn]
 
-					if(isTRUE(addMbd) && length(ncompar) > 0) {
-					  for(ll in setdiff(ncompar, newID)) {
-					    cases1 <- cases2 <- NULL
-					    if(ll %in% names(mergedData)) {
-					      cases1 <- mergedData[,newID][is.na(mergedData[,ll])]
-					    }
-					    if(ll %in% names(datList[[i]])) {
-					      cases2 <- datList[[i]][,newID][is.na(datList[[i]][,ll])]
-					    }
-					    cases <- which(partialDataSorted[,newID] %in% setdiff(partialDataSorted[,newID],unique(c(cases1, cases2))))
-					    partialDataSorted[cases,ll][is.na(partialDataSorted[cases,ll])] <- "mbd"
-					  }
-					}
-
-          mergedData <- partialDataSorted
+					mergedData  <- partialdata[,srtn]
+# 					partialDataSorted  <- partialdata[,srtn]
+#
+# 					if(isTRUE(addMbd) && length(ncompar) > 0) {
+# 					  for(ll in setdiff(ncompar, newID)) {
+# 					    cases1 <- cases2 <- NULL
+# 					    if(ll %in% names(mergedData)) {
+# 					      cases1 <- mergedData[,newID][is.na(mergedData[,ll])]
+# 					    }
+# 					    if(ll %in% names(datList[[i]])) {
+# 					      cases2 <- datList[[i]][,newID][is.na(datList[[i]][,ll])]
+# 					    }
+# 					    cases <- which(partialDataSorted[,newID] %in% setdiff(partialDataSorted[,newID],unique(c(cases1, cases2))))
+# 					    partialDataSorted[cases,ll][is.na(partialDataSorted[cases,ll])] <- "mbd"
+# 					  }
+# 					}
+#
+#           mergedData <- partialDataSorted
 
 				} else {
 				  stop("Did not find ID variable in dataset ", i)
 				}
 			}
-     }
+    }
+
+    if(isTRUE(addMbd)) {
+      dL1 <- lapply(datList, function(xx) reshape2::melt(xx, id.vars = newID, na.rm = FALSE))
+      dL2 <- lapply(dL1, function(xx) {xx$variable <- as.character(xx$variable); return(xx)})
+      d3 <- do.call("rbind", dL2)
+      d4 <- reshape2::dcast(d3, d3[,newID] ~ variable, fun.aggregate=length, drop=FALSE)
+      if(any(d4==0)) {
+        d4ind <- data.frame(which(d4==0, arr.ind=TRUE))
+        d4ind$rowID <- d4[d4ind$row,1]
+        d4ind$colNam <- names(d4)[d4ind$col]
+        for(i in 1:nrow(d4ind)) {
+          mergedData[mergedData[,newID] %in% d4ind$rowID[i],d4ind$colNam[i]] <- "mbd"
+        }
+      }
+    }
 
 		  mReturn <- mergedData
 
