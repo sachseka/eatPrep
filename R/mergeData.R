@@ -12,6 +12,9 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 
   stopifnot(length(datList) == length(oldIDs))
 
+  if(any(unlist(lapply(datList, function(uu)  grepl("\\.[x|y]$",names(uu)))))) {
+    stop("One or more datasets contain variable names ending with .x or .y. Please rename these variables to avoid issues during merging.")
+  }
 
   if(length(datList) > 0) {
 
@@ -68,6 +71,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					srtn <- unique(gsub("\\.[x|y]$","",names(dat2)))
 					compar <- gsub("\\.[x|y]$","",names(dat2)[which(duplicated(gsub("\\.[x|y]$", "", names(dat2))))])
 					ncompar <- setdiff(gsub("\\.[x|y]$","",names(dat2)),compar)
+
 					if(length(compar) > 0) {
 					  bb <- data.frame(lapply(compar, function(gg)   {
 					    x <- dat2[,paste0(gg, ".x")]
@@ -87,14 +91,28 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE, verbose=TRUE)
 					    return(z)
 					  }))
 					  names(bb) <- compar
+
 					  partialdata <- cbind(dat2[,ncompar, drop=FALSE], bb)
 					} else {
 					  partialdata <- dat2
 					}
-					mergedData  <- partialdata[,srtn]
-					if(isTRUE(addMbd) & length(ncompar) > 0) {
-					    mergedData[,ncompar][is.na(mergedData[,ncompar])] <- "mbd"
+					partialDataSorted  <- partialdata[,srtn]
+
+					if(isTRUE(addMbd) && length(ncompar) > 0) {
+					  for(ll in setdiff(ncompar, newID)) {
+					    cases1 <- cases2 <- NULL
+					    if(ll %in% names(mergedData)) {
+					      cases1 <- mergedData[,newID][is.na(mergedData[,ll])]
+					    }
+					    if(ll %in% names(datList[[i]])) {
+					      cases2 <- datList[[i]][,newID][is.na(datList[[i]][,ll])]
+					    }
+					    cases <- which(partialDataSorted[,newID] %in% setdiff(partialDataSorted[,newID],unique(c(cases1, cases2))))
+					    partialDataSorted[cases,ll][is.na(partialDataSorted[cases,ll])] <- "mbd"
 					  }
+					}
+
+          mergedData <- partialDataSorted
 
 				} else {
 				  stop("Did not find ID variable in dataset ", i)

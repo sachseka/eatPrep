@@ -33,8 +33,8 @@ test_that("load sav", {
                                        aggregateData = FALSE, scoreData = FALSE,
                                        writeSpss = FALSE, verbose = TRUE),
                "Cannot be inferred from inputList$savFiles$case.id, because at least one case-ID is empty. Please update or use argument 'oldIDs'.", fixed=TRUE)
-inputList2 <- inputList
-inputList2$savFiles <- inputList2$savFiles[-c(1:3),] #inputList2$savFiles$case.id is now 'character(0)'
+  inputList2 <- inputList
+  inputList2$savFiles <- inputList2$savFiles[-c(1:3),] #inputList2$savFiles$case.id is now 'character(0)'
   expect_error(automateDataPreparation(inputList = inputList2,
                                        datList = inputDat,	path = path,
                                        readSpss = FALSE, checkData = FALSE,	mergeData = FALSE,
@@ -43,12 +43,12 @@ inputList2$savFiles <- inputList2$savFiles[-c(1:3),] #inputList2$savFiles$case.i
                                        writeSpss = FALSE, verbose = TRUE),
                "Cannot be inferred from inputList$savFiles$case.id, because at least one case-ID is empty. Please update or use argument 'oldIDs'.", fixed=TRUE)
   expect_message(automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),
-                                       datList = NULL,	path = path,
-                                       readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
-                                       recodeData = FALSE, recodeMnr = FALSE,
-                                       aggregateData = FALSE, scoreData = FALSE,
-                                       writeSpss = FALSE, verbose = TRUE),
-               "Successfully read in: forcedChoice.sav, forcedChoice_missings.sav")
+                                         datList = NULL,	path = path,
+                                         readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
+                                         recodeData = FALSE, recodeMnr = FALSE,
+                                         aggregateData = FALSE, scoreData = FALSE,
+                                         writeSpss = FALSE, verbose = TRUE),
+                 "Successfully read in: forcedChoice.sav, forcedChoice_missings.sav")
 })
 
 
@@ -56,20 +56,20 @@ inputList2$savFiles <- inputList2$savFiles[-c(1:3),] #inputList2$savFiles$case.i
 test_that("merge", {
   path <- gsub("forcedChoice.sav", "", system.file("extdata", "forcedChoice.sav", package = "eatPrep"))
   expect_message(ati <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),newID="idstud",
-                                         datList = NULL,	path = path,
-                                         readSpss = TRUE, checkData = FALSE,	mergeData = TRUE,
-                                         recodeData = FALSE, recodeMnr = FALSE,
-                                         aggregateData = FALSE, scoreData = FALSE,
-                                         writeSpss = FALSE, verbose = TRUE),
+                                                datList = NULL,	path = path,
+                                                readSpss = TRUE, checkData = FALSE,	mergeData = TRUE,
+                                                recodeData = FALSE, recodeMnr = FALSE,
+                                                aggregateData = FALSE, scoreData = FALSE,
+                                                writeSpss = FALSE, verbose = TRUE),
                  "Start merging.")
   expect_equal(ati[1,], data.frame(idstud="1", mcvar="3", stringvar="", mc="2", string="new valid", stringsAsFactors=FALSE))
   expect_equal(dim(ati), c(12, 5))
   expect_message(ati2 <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),newID="idstud",
-                                                datList = NULL,	path = path,
-                                                readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
-                                                recodeData = FALSE, recodeMnr = FALSE,
-                                                aggregateData = FALSE, scoreData = FALSE,
-                                                writeSpss = FALSE, verbose = TRUE),
+                                                 datList = NULL,	path = path,
+                                                 readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
+                                                 recodeData = FALSE, recodeMnr = FALSE,
+                                                 aggregateData = FALSE, scoreData = FALSE,
+                                                 writeSpss = FALSE, verbose = TRUE),
                  "Merge has been skipped, but more than one dataset has been loaded. A list of datasets will be returned.")
   expect_warning(ati3 <- automateDataPreparation(inputList = inputList,
                                                  datList = inputDat,
@@ -80,11 +80,11 @@ test_that("merge", {
                  "Merge has been skipped. Only the first dataset in datList has been considered for the following steps.")
   singleDat <- inputDat[[1]]
   expect_snapshot(ati4 <- automateDataPreparation(inputList = inputList,
-                                                 datList = singleDat,
-                                                 readSpss = FALSE, checkData = FALSE,	mergeData = FALSE,
-                                                 recodeData = TRUE, recodeMnr = FALSE,
-                                                 aggregateData = FALSE, scoreData = FALSE,
-                                                 writeSpss = FALSE, verbose = FALSE))
+                                                  datList = singleDat,
+                                                  readSpss = FALSE, checkData = FALSE,	mergeData = FALSE,
+                                                  recodeData = TRUE, recodeMnr = FALSE,
+                                                  aggregateData = FALSE, scoreData = FALSE,
+                                                  writeSpss = FALSE, verbose = FALSE))
 })
 
 
@@ -92,11 +92,11 @@ test_that("merge", {
 
 test_that("almost all steps mbi", {
   expect_snapshot(ati5 <- automateDataPreparation(inputList = inputList,
-                                                 datList = inputDat,
-                                                 readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
-                                                 recodeData = TRUE, recodeMnr = FALSE,
-                                                 aggregateData = TRUE, scoreData = TRUE,
-                                                 writeSpss = FALSE, verbose = FALSE))
+                                                  datList = inputDat,
+                                                  readSpss = FALSE, checkData = TRUE,	mergeData = TRUE,
+                                                  recodeData = TRUE, recodeMnr = FALSE,
+                                                  aggregateData = TRUE, scoreData = TRUE,
+                                                  writeSpss = FALSE, verbose = FALSE))
 })
 
 
@@ -125,5 +125,4 @@ test_that("almost all steps mbo", {
                                                   aggregateData = TRUE, scoreData = TRUE,
                                                   writeSpss = FALSE, verbose = FALSE))
 })
-
 
