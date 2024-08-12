@@ -46,7 +46,7 @@ Thereby, the data consists of several layers:
 | **values**| including missings and recode values|
 
 
-Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that.
+Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that. 
 
 As a reminder, here is an overview for different value types the IQB uses: 
 
@@ -83,17 +83,16 @@ recode_value <- c()
 
 ## Input
 
-Information/metadata about items is stored in many different ways, e.g., databases, Excel sheets, sometimes even in item names. `eatPrep` requires this metadata to have a specific form, namely a series of relational tables. For `eatPrep` it is most convenient to store these tables in a list.
+Information/metadata about items is stored in many different ways, e.g., databases, Excel sheets, sometimes even in item names. `eatPrep` requires this metadata to have a specific form, namely a series of relational tables. For `eatPrep` it is most convenient to store these tables in a list. When downloading the `eatPrep` package, you can find files with some example tables in the `data` folder. 
 
 Sheets have specific names, also the columns in those sheets have specific names.
 
-`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content).
+`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content). 
 
 <!--Example: inputList ? -->
 
-Example: inputMinimal
-
 ```{r tempsetup}
+# Example: inputMinimal
 inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", "unitAggregateRule")],
                      subunits = inputList$subunits[, c("unit", "subunit","subunitRecoded")],
                      values = inputList$values[ , c("subunit", "value", "valueRecode", "valueType")],
@@ -116,8 +115,6 @@ subitems <- c("I01", "I05", "I12a", "I12b", "I12c")
 kable(inputMinimal$units[which(inputMinimal$units$unit %in% items), ])
 
 ```
-
-
 
 The **values sheet** contains all possible values for each subitem and scoring information for each value (e.g., whether it is true, false, or missing). There are several types of missing values.
 
