@@ -144,12 +144,21 @@ The **minimal use case** is that each subitem corresponds to an item. In this ca
 We have several overlapping booklets with several blocks in each booklet. Moreover, there is a unique identifier for each person and some additional information about each student like their gender or their socioeconomic status. There is one data set per booklet. In order to prepare the data, we need to construct one large data set.
 
 ```{r inputDat}
+# looking at the data
 str(inputDat)
 ```
 
+<!-- what about showing the functions readDeamonXlsx(), readMerkmalXlsx() and readSpss? their example .xlsx files are in inst/extdata. but there already is `inputDat`.
+What kind of large data set should I construct? is inputDat the one? how do I construct that from scratch/where do I get that from? 
+
+usual workflow: reading in .xlsx (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
+-->
 
 
+### Checking data
 
+<!-- by using checkData() for missings, duplicated entries, invalid codes. 
+and checkDesign() for rotated block design of the df -->
 
 
 
