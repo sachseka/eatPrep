@@ -1,10 +1,12 @@
 ---
-title: "eatPrep"
+title: "Getting Started"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{eatPrep}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, include = FALSE}
@@ -147,6 +149,11 @@ We have several overlapping booklets with several blocks in each booklet. Moreov
 ```{r inputDat}
 str(inputDat)
 ```
+
+
+
+
+
 
 
 ## Recode
