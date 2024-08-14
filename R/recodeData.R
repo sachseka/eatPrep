@@ -61,7 +61,7 @@ recodeData <- function (dat, values, subunits = NULL, verbose = FALSE) {
   if (nrow(recinfoVar) == 0) {
     variableRecoded <- variable
   } else {
-    lookupVar <- recinfoVar[ , c("value", "valueRecode") ]
+    lookupVar <- unique(recinfoVar[ , c("value", "valueRecode") ])
     variableRecoded <- eatTools::recodeLookup(variable, lookupVar)
   }
   return(variableRecoded)
