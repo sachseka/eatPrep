@@ -36,7 +36,7 @@ checkDesign(dat = prepDat, booklets = inputList$booklets, blocks = inputList$blo
     subunits = inputList$subunits, verbose = TRUE)
 
 prepDat[1:7,"I22R"] <- "1"
-prepDat[1,c("I01R","I02R","I03R")] <- "mbd"
+prepDat[1:4,c("I01R","I02R","I03R")] <- "mbd"
 
 checkDesign(dat = prepDat, booklets = inputList$booklets, blocks = inputList$blocks,
     rotation = inputList$rotation, sysMis = "mbd", id="ID",

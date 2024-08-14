@@ -277,11 +277,20 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
                              {problematicSubunits}",
                              wrap = TRUE)
               if(verbose) {
-                # Check for case-wise scenarios (per subunit)
-                for (sub in problematicSubunits) {
-                  problematicCases <- currentBooklet$case$flag[[sub]]
-                  nProblematicCases <- currentBooklet$case$count[[sub]]
-                  cli_alert_info("{sub} ({nProblematicCases} case{?s}: {problematicCases})")
+                # Check for case-wise scenarios (per subunit) but summarise cases if identical across subunits
+                summarizeFlag <- function(lst) {
+                  flag <- lst[sapply(lst, length) > 0]
+                  uniqueCmbn <- unique(flag)
+                  result <- sapply(uniqueCmbn, function(values) {
+                    keys <- names(flag)[sapply(flag, function(x) identical(x, values))]
+                    num_cases <- length(values)
+                    paste0(paste(keys, collapse = ", "), " (", num_cases, " cases): ", paste(values, collapse = ", "))
+                  })
+                  return(result)
+                }
+                summaryRes <- summarizeFlag(currentBooklet$case$flag)
+                for(i in seq(along=summaryRes)) {
+                  cli_alert_info(summaryRes[i])
                 }
               }
             }
