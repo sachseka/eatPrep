@@ -23,18 +23,18 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
 
   i <- 1
   if(is.null(useGroups)) {
-    ll <- unique(subsetInfo$ID)[i]
-    nn <- length(unique(subsetInfo$ID))
+    ll <- unique(subsetInfo[,ID])[i]
+    nn <- length(unique(subsetInfo[,ID]))
   } else {
-    pp <- unique(subsetInfo$IDgroup)[i]
-    ll <- unique(subsetInfo$ID[subsetInfo$IDgroup %in% pp])
-    nn <- length(unique(subsetInfo$IDgroup))
+    pp <- unique(subsetInfo[,useGroups])[i]
+    ll <- unique(subsetInfo[,ID][subsetInfo[,useGroups] %in% pp])
+    nn <- length(unique(subsetInfo[,useGroups]))
   }
   res1 <- 0
 
   while(i <= nn+1) {
 
-    vars <- unique(subsetInfo$datCols[subsetInfo$ID %in% ll])
+    vars <- unique(subsetInfo$datCols[subsetInfo[,ID] %in% ll])
     sdat <- datM[datM[,ID] %in% ll, vars]
     cli::cli_inform("Display subset: {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
     print(sdat)
@@ -70,10 +70,10 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
       } else {
         i <- i-1
         if(is.null(useGroups)) {
-          ll <- unique(subsetInfo$ID)[i]
+          ll <- unique(subsetInfo[,ID])[i]
         } else {
-          pp <- unique(subsetInfo$IDgroup)[i]
-          ll <- unique(subsetInfo$ID[subsetInfo$IDgroup %in% pp])
+          pp <- unique(subsetInfo[,useGroups])[i]
+          ll <- unique(subsetInfo[,ID][subsetInfo[,useGroups] %in% pp])
         }
       }
     } else {
@@ -90,10 +90,10 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
       }
     }
     if(is.null(useGroups)) {
-      ll <- unique(subsetInfo$ID)[i]
+      ll <- unique(subsetInfo[,ID])[i]
     } else {
-      pp <- unique(subsetInfo$IDgroup)[i]
-      ll <- unique(subsetInfo$ID[subsetInfo$IDgroup %in% pp])
+      pp <- unique(subsetInfo[,useGroups])[i]
+      ll <- unique(subsetInfo[,ID][subsetInfo[,useGroups] %in% pp])
     }
     }
   }

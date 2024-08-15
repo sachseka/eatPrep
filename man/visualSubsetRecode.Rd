@@ -6,7 +6,7 @@ This function allows manual inspection and manual recoding of subsets of the dat
 \usage{visualSubsetRecode(dat, subsetInfo, ID, toRecodeVal="mci", useGroups=NULL)}
 \arguments{
   \item{dat}{A data frame}
-  \item{subsetInfo}{A data frame. Colnames have to be: "ID", "datCols" and additionally, if desired, "IDgroup".}
+  \item{subsetInfo}{A data frame. Colnames have to be: "datCols" and whatever is specified in ID and useGroups.}
   \item{ID}{A character vector of length 1 indicating the name of the case identifier variable in \code{dat}. Default is \code{ID}.}
   	\item{toRecodeVal}{Optional: A scalar indicating recode string. }
   	\item{useGroups}{Optional: A character string indicating the name of the group identifier column in subsetInfo. Used for group level subsetting. }
