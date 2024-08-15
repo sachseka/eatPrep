@@ -1,26 +1,110 @@
-visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci") {
+visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useGroups=NULL) {
 
   lapply(list(dat, subsetInfo), checkmate::assert_data_frame, min.rows = 1)
   checkmate::assert_scalar(ID)
+  stopifnot(ID %in% names(dat))
+  stopifnot(ID %in% names(subsetInfo))
+  checkmate::assert_character(toRecodeVal, len=1)
+  checkmate::assert_character(useGroups, len=1, null.ok=TRUE)
+  if(!is.null(useGroups)) stopifnot(useGroups %in% names(subsetInfo))
+
+  if(any(is.na(subsetInfo))) cli::cli_alert_danger("subsetInfo contains NA values.
+                                              Every subsetInfo row
+                                              containing only a single NA will be
+                                              omitted.", wrap = TRUE)
+  cli::cli_text("")
+  cli::cli_text(paste("--- Begin visual Inspection", Sys.time(), "---"))
+  cli::cli_text("")
 
   subsetInfo <- unique(na.omit(subsetInfo))
   datM <- dat
 
   captureInteraction <- NULL
-  for(ll in unique(subsetInfo$ID)) {
-    res1 <- 0
-    vars <- subsetInfo$datCols[subsetInfo$ID %in% ll]
+
+  i <- 1
+  if(is.null(useGroups)) {
+    ll <- unique(subsetInfo$ID)[i]
+    nn <- length(unique(subsetInfo$ID))
+  } else {
+    pp <- unique(subsetInfo$IDgroup)[i]
+    ll <- unique(subsetInfo$ID[subsetInfo$IDgroup %in% pp])
+    nn <- length(unique(subsetInfo$IDgroup))
+  }
+  res1 <- 0
+
+  while(i <= nn) {
+
+    vars <- unique(subsetInfo$datCols[subsetInfo$ID %in% ll])
     sdat <- datM[datM[,ID] %in% ll, vars]
     cli::cli_inform("Display subset: {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
     print(sdat)
-    res1 <- menu(c("yes", "no", "flag, maybe later"),
-                title = paste0("\nDo you want to recode this subset to '", toRecodeVal, "'?"))
+   # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
+   res1 <- menu(c("yes", "no", "flag, maybe later", "go back", "reset to original values"),
+                 title = paste0("\nDo you want to recode this subset to '", toRecodeVal, "'?"))
     if(res1==1) {
-      datM[datM[,ID] %in% ll, subsetInfo$datCols[subsetInfo$ID %in% ll]] <- "mci"
+      datM[datM[,ID] %in% ll, vars] <- "mci"
+      cli::cli_alert_success(paste0("Subset successfully recoded to '", toRecodeVal,"'!"))
+      cli::cli_text("")
+    } else {
+      if(res1==5) {
+        datM[datM[,ID] %in% ll, vars] <- dat[dat[,ID] %in% ll, vars]
+        cli::cli_alert_success("Subset successfully recoded to original values!")
+        cli::cli_text("")
+      } else {
+        cli::cli_alert_info(paste0("No recoding action was undertaken this time."))
+        cli::cli_text("")
+      }
     }
-    captureInteraction <- rbind(captureInteraction, data.frame(ID=ll, choice = res1))
+
+    if(is.null(useGroups)) {
+      captureInteraction <- rbind(captureInteraction, data.frame(ID=ll, choice = res1, timeStamp=Sys.time()))
+    } else {
+      captureInteraction <- rbind(captureInteraction, data.frame(IDgroup=pp, choice = res1, timeStamp=Sys.time()))
+    }
+
+    if(res1==4) {
+      if(i == 1) {
+        #return(list(datM, captureInteraction))
+        cli::cli_alert_danger("--- No previous subset to go back to. ---", wrap = TRUE)
+        cli::cli_text("")
+      } else {
+        i <- i-1
+        if(is.null(useGroups)) {
+          ll <- unique(subsetInfo$ID)[i]
+        } else {
+          pp <- unique(subsetInfo$IDgroup)[i]
+          ll <- unique(subsetInfo$ID[subsetInfo$IDgroup %in% pp])
+        }
+      }
+    } else {
+    i <- i+1
+    if(is.null(useGroups)) {
+      ll <- unique(subsetInfo$ID)[i]
+    } else {
+      pp <- unique(subsetInfo$IDgroup)[i]
+      ll <- unique(subsetInfo$ID[subsetInfo$IDgroup %in% pp])
+    }
+    }
   }
 
-  res <- list(datM, captureInteraction)
+  subsetInfoM <- merge(subsetInfo, captureInteraction, all=TRUE)
+  # if(any(subsetInfoM$choice==4)) subsetInfoM <- subsetInfoM[subsetInfoM$choice != 4,]
+
+  res <- list(datM, subsetInfoM)
   return(res)
 }
+
+# old snippet without the pssobility to go back
+# for(ll in unique(subsetInfo$ID)) {
+#   res1 <- 0
+#   vars <- subsetInfo$datCols[subsetInfo$ID %in% ll]
+#   sdat <- datM[datM[,ID] %in% ll, vars]
+#   cli::cli_inform("Display subset: {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+#   print(sdat)
+#   res1 <- menu(c("yes", "no", "flag, maybe later", "go back"),
+#                title = paste0("\nDo you want to recode this subset to '", toRecodeVal, "'?"))
+#   if(res1==1) {
+#     datM[datM[,ID] %in% ll, subsetInfo$datCols[subsetInfo$ID %in% ll]] <- "mci"
+#   }
+#   captureInteraction <- rbind(captureInteraction, data.frame(ID=ll, choice = res1))
+# }
