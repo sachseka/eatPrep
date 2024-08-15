@@ -32,7 +32,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
   }
   res1 <- 0
 
-  while(i <= nn) {
+  while(i <= nn+1) {
 
     vars <- unique(subsetInfo$datCols[subsetInfo$ID %in% ll])
     sdat <- datM[datM[,ID] %in% ll, vars]
@@ -78,6 +78,17 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
       }
     } else {
     i <- i+1
+    if(i==nn+1) {
+      cli::cli_alert_danger("--- This was the last subset. ---", wrap = TRUE)
+      cli::cli_text("")
+      res2 <- menu(c("yes", "go back"),
+                   title = paste0("\nDo you want to end visualRecoding now?"))
+      if(res2==1) {
+       i <- nn+2
+      } else {
+        i <- nn
+      }
+    }
     if(is.null(useGroups)) {
       ll <- unique(subsetInfo$ID)[i]
     } else {
