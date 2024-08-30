@@ -36,7 +36,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
 
     vars <- unique(subsetInfo$datCols[subsetInfo[,ID] %in% ll])
     sdat <- datM[datM[,ID] %in% ll, vars]
-    cli::cli_inform("Display subset: {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+    cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
     print(sdat)
    # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
    res1 <- menu(c("yes", "no", "flag, maybe later", "go back", "reset to original values"),
@@ -98,14 +98,14 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
     }
   }
 
-  subsetInfoM <- merge(subsetInfo, captureInteraction, all=TRUE)
+  subsetInfoM <- merge(subsetInfo, captureInteraction, by.x=ID, by.y="ID", all=TRUE)
   # if(any(subsetInfoM$choice==4)) subsetInfoM <- subsetInfoM[subsetInfoM$choice != 4,]
 
   res <- list(datM, subsetInfoM)
   return(res)
 }
 
-# old snippet without the pssobility to go back
+# old snippet without the possibility to go back
 # for(ll in unique(subsetInfo$ID)) {
 #   res1 <- 0
 #   vars <- subsetInfo$datCols[subsetInfo$ID %in% ll]
