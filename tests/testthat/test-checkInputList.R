@@ -200,7 +200,8 @@ test_that("checks for valueRecodes other than 0, 1, and the mistypes", {
   })
 
   # Changed, as the function could be used for other cases than the intended
-  expect_equal(checkInputList(prepList), TRUE)
+  # back-changed due to issue of KKS -- maybe consider checking for user-customized valid codes instead.
+  expect_equal(checkInputList(prepList), FALSE)
   expect_snapshot(checkInputList(prepList))
 })
 

@@ -194,7 +194,7 @@ checkInputList <- function(inputList, mistypes = c("mnr", "mbd", "mir", "mbi")) 
                             wrap = TRUE)
         } else {
           # Other use cases are possible; therefore, decided to not return FALSE here
-
+          # ret <- TRUE
           # List all deviating value codes
           cli_alert_danger("{.field valueRecode} contains other values than
                            0, 1, and the mistypes.",
