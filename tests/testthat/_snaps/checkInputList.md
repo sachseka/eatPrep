@@ -2239,7 +2239,7 @@
       i Units with more than one subunit: 1 (`I03`)
       v All units with more than one subunit are defined in unitRecodings sheet.
     Output
-      [1] TRUE
+      [1] FALSE
 
 # identifies other value types than vc and mistypes
 
