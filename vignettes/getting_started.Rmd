@@ -146,17 +146,38 @@ We have several overlapping booklets with several blocks in each booklet. Moreov
 str(inputDat)
 ```
 
+### Getting the Data
+
+To do this, we first need to get the information from our IQB data bank via ZKDeamon, or alternatively via SPSS. 
+
+#### readDeamonXlsx
+
+#### readMerkmalXlsx
+
+#### readSpss
+
+
 <!-- what about showing the functions readDeamonXlsx(), readMerkmalXlsx() and readSpss? their example .xlsx files are in inst/extdata. but there already is `inputDat`.
-What kind of large data set should I construct? is inputDat the one? how do I construct that from scratch/where do I get that from? 
 
 usual workflow: reading in .xlsx (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
+
+1 readDeamonXlsx/MerkmalXlsx
+2 readSpss
+
 -->
 
 
-### Checking data
+### Checking Data
 
 <!-- by using checkData() for missings, duplicated entries, invalid codes. 
-and checkDesign() for rotated block design of the df -->
+and checkDesign() for rotated block design of the df 
+
+3 checkData, checkDesign
+-->
+
+### Merging Data
+<!-- 4 mergeData -->
+
 
 
 
