@@ -51,20 +51,19 @@ Now we would like to prepare the data collected in this way for scaling. In doin
 As a reminder, here is an overview for different value types the IQB uses: 
 
 ```{r missing types, echo=FALSE}
-code <- c(-95, -96, -97, "sysmis or -94", -98, -99)
-label <- c("text voume insufficient", "missings not reached", "coding impossible", "missing by design",
-           "invalid response", "omission (missing by intention)")
-kurz <- c("mvi", "mnr", "mci", "mbd", "mir", "mbi")
-beschreibung <- c("Amount of anwser text not sufficient enough for evaluation (writing exercise). ",
-                  "Testperson stopped editing the test booklet and didn't get to this item. Give label Coding all variables, something M9 (block boarders)",
-                  "No Coding possible due to technical reasons, like Druckfehler, scan errors or loss of Codingvalues.",
-                  "Item wasn't given to the testperson.",
-                  "Answer given has no existing Code. Includes nonsense answers, and inadmissible multiple crossings at MC.",
-                  "no editing visible. Strictly abiding this convention is important for using mbi to calculate mnr.")
-recode_value <- c(0, "missing or 0", "in Multi-Matrix design = missing", "missing", 0, "usually 0")
+mir98 <- c(-98, "mir", "missing invalid response",
+           "(1) Item was edited, and (2a) empty answer or (2b) invalid (joke) answer.")
+mbo99 <- c(-99, "mbo", "missing by omission",
+           "Item wasn't edited but seen, or wasn't seen, but there are seen or edited subsequent Items.")
+mnr96 <- c(-96, "mnr", "missing not reached",
+           "(1) Item wasn't seen, and (2) all subsequent Items weren't seen, either.")
+mci97 <- c(-97, "mci", "missing coding impossible",
+           "(1) Item should/could have been edited, and (2) answer can't be analysed due to technical problems.")
+mbd94 <- c(-94, "mbd", "missing by design",
+           "no answer, because Item wasn't shown to the testperson by design.")
+Mtypes <- rbind.data.frame(mir98, mbo99, mnr96, mci97, mbd94)
+names(Mtypes) <- c("Code", "Label", "Abbr", "Explanation")
 
-Mtypes <- data.frame(Code = code, Label = label, Abbr = kurz, Explanation = beschreibung, "Standard Recode Values" = recode_value)
-names(Mtypes)[5] <- "Standard Recode Values"
 kable(Mtypes, caption = "**missing types**")
 ```
 
