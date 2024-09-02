@@ -96,12 +96,18 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
       ll <- unique(subsetInfo[,ID][subsetInfo[,useGroups] %in% pp])
     }
     }
+
   }
 
-  subsetInfoM <- merge(subsetInfo, captureInteraction, by.x=ID, by.y="ID", all=TRUE)
+  if(is.null(useGroups)) {
+    subsetInfoM <- merge(subsetInfo, captureInteraction, by.x=ID, by.y="ID", all=TRUE)
+  } else {
+    subsetInfoM <- merge(subsetInfo, captureInteraction, by.x=useGroups, by.y="IDgroup", all=TRUE)
+  }
   # if(any(subsetInfoM$choice==4)) subsetInfoM <- subsetInfoM[subsetInfoM$choice != 4,]
 
   res <- list(datM, subsetInfoM)
+  names(res) <- c("modifiedDat", "modifiedSubsetInfo")
   return(res)
 }
 
