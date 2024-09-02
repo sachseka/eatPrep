@@ -10,7 +10,7 @@ importFrom(eatTools, asNumericIfPossible, crop, set.col.type, multiseq,
            recodeLookup, addLeadingZerosToCharInt)
 importFrom(stats, aggregate, cor, lag, na.omit, runif,
                weighted.mean)
-importFrom(utils, flush.console, write.csv2, write.table)
+importFrom(utils, menu, flush.console, write.csv2, write.table)
 importFrom(cli,
            start_app,
            qty,
@@ -38,6 +38,7 @@ export(make.pseudo)
 export(meanAgree)
 export(meanKappa)
 export(prep2GADS)
+export(visualSubsetRecode)
 # export(checkInput)
 # export(loadSav)
 # export(makeCodebookInput)
