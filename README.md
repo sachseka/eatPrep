@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# pkgdown <a href="https://sachseka.github.io/eatPrep/"><img src="man/figures/logo.png" align="right"  align="right" height="139" alt="eatPrep logo" /></a>
+# eatPrep <a href="https://sachseka.github.io/eatPrep/"><img src="man/figures/logo.png" align="right" height="139" alt="eatPrep logo" /></a>
 
 <!-- badges: start -->
 
