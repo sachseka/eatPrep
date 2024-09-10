@@ -15,7 +15,7 @@ checks.
 ## Installation
 
 You can install the released version of eatPrep from
-[Github](https://github.com/sachseka/eatPrep) with:
+[Github](sachseka/eatPrep) with:
 
 ``` r
 remotes::install_github("https://github.com/sachseka/eatPrep")
