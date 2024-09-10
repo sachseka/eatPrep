@@ -26,7 +26,7 @@ data(inputDat)
 prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
                                     readSpss = FALSE, checkData = FALSE, mergeData = TRUE,
                                     recodeData = TRUE, aggregateData = TRUE,
-                                    scoreData = TRUE, writeSpss = FALSE, verbose = TRUE)
+                                    scoreData = TRUE, writeSpss = FALSE, verbose = FALSE)
 
 subsetInfoMin <- data.frame(ID=c("person100", "person101", "person102", "person103", "person101",
                                  "person100", "person101", "person102", "person103", "person101",
