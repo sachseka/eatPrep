@@ -26,3 +26,4 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
+URL: https://sachseka.github.io/eatPrep/
