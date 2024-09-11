@@ -25,8 +25,6 @@ This data set contains fictional ratings of achievement test items of 1287 exami
 
 \source{Simulated data}
 
-%\references{
-%}
 
 \keyword{datasets}
 

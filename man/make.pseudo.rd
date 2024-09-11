@@ -1,6 +1,6 @@
 \name{make.pseudo}
 \alias{make.pseudo}
-%- Also NEED an '\alias' for EACH other topic documented here.
+
 \title{Transform ratings from real raters into pseudo ratings}
 \description{Data from large-scale assessments often are rated by
 multiple raters. This function reduces the number of raters by the use

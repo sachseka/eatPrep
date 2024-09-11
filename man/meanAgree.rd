@@ -1,6 +1,5 @@
 \name{meanAgree}
 \alias{meanAgree}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{mean agreement among several raters}
 \description{This is a wrapper for the \code{agree} function from the \code{irr}
 package. Function computes mean agreement among several raters (at least 2) for
