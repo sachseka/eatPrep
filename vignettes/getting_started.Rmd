@@ -150,7 +150,7 @@ str(inputDat)
 
 To do this, we first need to get the information from our IQB data bank via ZKDeamon, or alternatively via SPSS. 
 
-#### ZKDeamon
+#### Items via ZKDeamon
 
 ZKDeamon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file via ZKDeamon. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
 
@@ -180,22 +180,22 @@ readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
 ```
 
 
-#### readSpss
+#### SPSS data
 
+To get SPSS data files `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
 
-<!-- what about showing the functions readDeamonXlsx(), readMerkmalXlsx() and readSpss? their example .xlsx files are in inst/extdata. but there already is `inputDat`.
-
-usual workflow: reading in .xlsx (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
-
-1 readDeamonXlsx/MerkmalXlsx
-2 readSpss
-
--->
+```{r readSpss, eval=FALSE}
+readSpss(file)
+```
 
 
 ### Checking Data
 
-<!-- by using checkData() for missings, duplicated entries, invalid codes. 
+
+<!-- 
+usual workflow: reading in data (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
+
+by using checkData() for missings, duplicated entries, invalid codes. 
 and checkDesign() for rotated block design of the df 
 
 3 checkData, checkDesign
