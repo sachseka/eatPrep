@@ -199,7 +199,7 @@ After reading in all the data, we need to check, whether it is in the right form
 
 `checkData()` checks data frames for missing or duplicated entries in the ID variable, persons and/or variables without valid codes, and generally invalid codes. The results of that check will be written in the console. 
 
-The function needs a data frame to be checked (dat) and its name (datnam), especially if there are multpile data frames (e.g. a list of data frames). Furthermore it needs data frames with code, subunit and unit information (values, subunits and units), and a string for an ID column name (ID). You can turn of printing information to the console with `verbose`. 
+The function needs a data frame to be checked (`dat`) and its name (`datnam`), especially if there are multpile data frames (e.g. a list of data frames). Furthermore it needs data frames with code, subunit and unit information (`values`, `subunits` and `units`), and a string for an ID column name (ID). You can turn of printing information to the console with `verbose`. 
 
 ```{r checkData, eval=FALSE}
 checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
@@ -209,13 +209,23 @@ Examples of data frames for `values`, `subunits` and `units` can be found via `d
 
 #### checkDesign
 
+`checkDesign()` checks whether a data frame corresponds to a particular rotated block design, i.e. whether all persons have valid codes on all items they were presented with and one consistent missing code for all items they were not presented with.
 
+The function also needs a data frame to be checked (`dat`), as well as data frames containing information on the number and column names of blocks in each booklet (`booklets`), on the names of subunits and their order within each block (`blocks`) and about which participant worked on which booklet (`rotation`). `sysMis` specifies the missing code for items that were not administered to a participant and `id` indicates the name of the participant identifier variable in `dat`. 
 
-<!-- 
-and checkDesign() for rotated block design of the df 
+`subunits` is an optional argument to identify the names of recoded subunits. And you can turn off printing information with `verbose`. 
 
-3 checkData, checkDesign
--->
+```{r checkDesign, eval=FALSE}
+checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID", subunits = NULL, verbose = TRUE)
+```
+
+`inputDat` and `inputList` are an examples on how these data frames are supposed to look like.
+
+```{r checkDesign examples, eval=FALSE}
+inputDat
+inputList
+```
+
 
 ### Merging Data
 
