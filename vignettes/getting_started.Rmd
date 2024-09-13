@@ -161,7 +161,8 @@ The function returns a list of data frames containing information that is requir
 
 ```{r readDeamonXlsx}
 filename <- system.file("extdata", "inputList.xlsx", package = "eatPrep")
-readDaemonXlsx(filename)
+inpustList <- readDaemonXlsx(filename)
+str(inpustList)
 ```
 
 
