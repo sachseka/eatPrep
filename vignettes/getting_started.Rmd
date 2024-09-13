@@ -152,18 +152,31 @@ To do this, we first need to get the information from our IQB data bank via ZKDe
 
 #### ZKDeamon
 
-ZKDeamon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file to read into ZKDeamon. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
+ZKDeamon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file via ZKDeamon. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
 
-The function `readDaemonXlsx()` reads the Excel file into R and will produce a warning if any sheets are missing. It needs one character string containing path, name and extension of the Excel file (.xlsx) produced by ZKDeamon. It returns a list of data frames containing information that is required by the data preparation functions. `inputList` shows an example of this list.
+The function `readDaemonXlsx()` reads the Excel file into R and will produce a warning if any sheets are missing. It needs one character string (filename) containing path, name and extension of the Excel file (.xlsx) produced by ZKDeamon. 
+
+The function returns a list of data frames containing information that is required by the data preparation functions. `inputList` shows an example of this list.
 
 
-```{r readDeamonXlsx, }
-readDaemonXlsx(system.file("extdata", "inputList.xlsx", package = "eatPrep"))
+```{r readDeamonXlsx}
+filename <- system.file("extdata", "inputList.xlsx", package = "eatPrep")
+readDaemonXlsx(filename)
 ```
 
 
-#### readMerkmalXlsx
+#### Merkmalsauszug
 
+The software IQB Item-DB produces Excel files named "Merkmalsauszug" using information stored in the IQB Databases. The file is expected to have the sheets: “Itemmerkmale”, “Aufgabenmerkmale”. The order doesn't matter. The file contains information about the attributes of the items and exercises. 
+
+The function `readMerkmalXlsx()` read the Excel file into R and will produce a warning if any sheets are missing or wrongly specified. It needs one character string (filename) containing path, name and extension of the Excel file (.xlsx) produced by IQB Item-DB. Per default the Item-ID is created without converting numbers to lowercase letters (`tolcl`) and a merged data frame contaning both "Itemmerkmale" and "Aufgabenmerkmale" will be created (`alleM`).
+
+The function returns a list of data frames containing Itemmerkmale, Aufgabenmerkmale and AlleMerkmale (optional).
+
+```{r readMerkmalXlsx}
+filename <- system.file("extdata", "itemmerkmale.xlsx", package = "eatPrep")
+readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
+```
 
 
 #### readSpss
