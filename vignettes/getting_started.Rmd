@@ -182,7 +182,7 @@ readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
 
 #### SPSS data
 
-To get SPSS data files `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
+To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
 
 ```{r readSpss, eval=FALSE}
 readSpss(file)
@@ -190,6 +190,22 @@ readSpss(file)
 
 
 ### Checking Data
+
+After reading in all the data, we need to check, whether it is in the right format and all missing codes were assigned correctly. 
+
+#### checkData
+
+`checkData()` checks data frames for missing or duplicated entries in the ID variable, persons and/or variables without valid codes, and generally invalid codes. The results of that check will be written in the console. 
+
+The function needs a data frame to be checked (dat) and its name (datnam), especially if there are multpile data frames (e.g. a list of data frames). Furthermore it needs data frames with code, subunit and unit information (values, subunits and units), and a string for an ID column name (ID). You can turn of printing information to the console with `verbose`. 
+
+```{r checkData, eval=FALSE}
+checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
+```
+
+
+#### checkDesign
+
 
 
 <!-- 
