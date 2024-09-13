@@ -141,6 +141,8 @@ The **minimal use case** is that each subitem corresponds to an item. In this ca
 
 We have several overlapping booklets with several blocks in each booklet. Moreover, there is a unique identifier for each person and some additional information about each student like their gender or their socioeconomic status. There is one data set per booklet. In order to prepare the data, we need to construct one large data set.
 
+In order to do that we first need to read the data into R, check the data for invalid or or incorrect codes and then merge the data into one data set. In the following the different functions to do that are described. `inputDat` gives us a first idea on how the data is supposed to look like. 
+
 ```{r inputDat}
 # looking at the data
 str(inputDat)
@@ -148,7 +150,7 @@ str(inputDat)
 
 ### Getting the Data
 
-To do this, we first need to get the information from our IQB data bank via ZKDeamon, or alternatively via SPSS. 
+First, we need to get the information from our IQB data bank via ZKDeamon, or alternatively via SPSS. 
 
 #### Items via ZKDeamon
 
@@ -203,22 +205,25 @@ The function needs a data frame to be checked (dat) and its name (datnam), espec
 checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
 ```
 
+Examples of data frames for `values`, `subunits` and `units` can be found via `data(inputList)`.
 
 #### checkDesign
 
 
 
 <!-- 
-usual workflow: reading in data (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
-
-by using checkData() for missings, duplicated entries, invalid codes. 
 and checkDesign() for rotated block design of the df 
 
 3 checkData, checkDesign
 -->
 
 ### Merging Data
-<!-- 4 mergeData -->
+
+
+<!-- 
+usual workflow: reading in data (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
+
+4 mergeData -->
 
 
 
