@@ -152,7 +152,7 @@ To do this, we first need to get the information from our IQB data bank via ZKDe
 
 #### ZKDeamon
 
-ZKDeamon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file (see below). You can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
+ZKDeamon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file to read into ZKDeamon. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
 
 The function `readDaemonXlsx()` reads the Excel file into R and will produce a warning if any sheets are missing. It needs one character string containing path, name and extension of the Excel file (.xlsx) produced by ZKDeamon. It returns a list of data frames containing information that is required by the data preparation functions. `inputList` shows an example of this list.
 
@@ -162,9 +162,9 @@ readDaemonXlsx(system.file("extdata", "inputList.xlsx", package = "eatPrep"))
 ```
 
 
-
-
 #### readMerkmalXlsx
+
+
 
 #### readSpss
 
