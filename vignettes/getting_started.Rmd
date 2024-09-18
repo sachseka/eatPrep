@@ -235,25 +235,17 @@ Now that we checked that the data frames meet our requirements, we can merge a l
 
 When merging data frames with this function you need to specify at least two arguments: `newID` and `datList`. `newID` has to be a character vector length one indicating the name of the identifier variable (ID) in the merged data set and/or the name of the ID in every data frame in `datList`, if not specified differently in `oldIDs`. `datList` is the list of data frames to be merged, e.g. `inputDat`. 
 
-```{r mergeData}
+```{r mergeData1}
 mergedDataset <- mergeData(newID = "ID", datList = inputDat)
-
+str(mergedDataset)
 ```
 
+Furthermore, you can specify some more arguments, but they have default options, so you don't need to. Here is an example where the IDs are changed via `oldIDs` and where NAs are replaced by "mbd" (missing by design). For more information see the help page from `mergeData()`.
 
-Furthermore, you can specify some more arguments, but they have default options, so you don't need to. For more info see the help page from `mergeData()`.
-
-
-...
-
-
-
-<!-- 
-usual workflow: reading in data (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
-
-4 mergeData -->
-
-
+```{r mergeData2}
+mergedDataset2 <- mergeData(newID = "idstud", datList = inputDat, oldIDs = c("ID", "ID", "ID"), addMbd = TRUE)
+str(mergedDataset2)
+```
 
 
 ## Recode
