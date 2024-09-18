@@ -100,7 +100,7 @@ inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", 
                      rotation = inputList$rotation)
 ```
 
-### Input tables
+### Input Tables
 Let's look at the tables from bottom to top, starting with items and their values. In the values sheet, we define values and recode values for each subitem.
 
 Here we see 3 items (called units) from `inputList` bzw. `inputMinimal`.
@@ -137,7 +137,7 @@ kable(inputMinimal$unitRecodings)
 The **minimal use case** is that each subitem corresponds to an item. In this case, the value sheet contains all information needed for recoding the items (apart from possibly renaming the recoded items).
 
 
-## input data
+## Input Data
 
 We have several overlapping booklets with several blocks in each booklet. Moreover, there is a unique identifier for each person and some additional information about each student like their gender or their socioeconomic status. There is one data set per booklet. In order to prepare the data, we need to construct one large data set.
 
@@ -182,7 +182,7 @@ readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
 ```
 
 
-#### SPSS data
+#### SPSS Data
 
 To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
 
@@ -221,9 +221,9 @@ checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID", subunits = NU
 
 `inputDat` and `inputList` are an examples on how these data frames are supposed to look like.
 
-```{r checkDesign examples, eval=FALSE}
-inputDat
-inputList
+```{r checkDesign examples}
+str(inputDat)
+str(inputList)
 ```
 
 
