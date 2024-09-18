@@ -205,7 +205,7 @@ The function needs a data frame to be checked (`dat`) and its name (`datnam`), e
 checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
 ```
 
-Examples of data frames for `values`, `subunits` and `units` can be found via `data(inputList)`.
+Examples of data frames for `values`, `subunits` and `units` can be found by typing `inputList` in the console.
 
 #### checkDesign
 
@@ -219,11 +219,11 @@ The function also needs a data frame to be checked (`dat`), as well as data fram
 checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID", subunits = NULL, verbose = TRUE)
 ```
 
-`inputDat` and `inputList` are an examples on how these data frames are supposed to look like.
+`inputDat` and `inputList` are examples on how these data frames are supposed to look like. When you copy and paste the following code in your console, you can look at the data frames. 
 
-```{r checkDesign examples}
-str(inputDat)
-str(inputList)
+```{r checkDesign examples, eval=FALSE}
+inputDat
+inputList
 ```
 
 
@@ -240,7 +240,7 @@ mergedDataset <- mergeData(newID = "ID", datList = inputDat)
 str(mergedDataset)
 ```
 
-Furthermore, you can specify some more arguments, but they have default options, so you don't need to. Here is an example where the IDs are changed via `oldIDs` and where NAs are replaced by "mbd" (missing by design). For more information see the help page from `mergeData()`.
+Furthermore, you can specify some more arguments, but they have default options, so you don't need to. Here is an example where the IDs are changed via `oldIDs` and where NAs are replaced by "mbd" (missing by design). For more information use the help function `?mergeData`.
 
 ```{r mergeData2}
 mergedDataset2 <- mergeData(newID = "idstud", datList = inputDat, oldIDs = c("ID", "ID", "ID"), addMbd = TRUE)
@@ -249,6 +249,22 @@ str(mergedDataset2)
 
 
 ## Recode
+
+After importing the data and making sure it has the right format, the data needs to be recoded. For that, you need recode data sets with special consideration of missing values. See `collapseMissings()` for supported types of issing values. `recodeData()` recodes those data frames and will give warnings, if missing or incomplete recode information is found. Values without recode information will not be recoded. 
+
+Examples of data frames `values` and `subunits` can be found when copy-pasting the following code in you console: 
+
+```{r exmaple recode data frames, eval=FALSE}
+inputList$values
+inputList$subunits
+```
+
+`recodeData()` uses the recode information from those two data frames and recodes the variables on `dat` accordingly. The columns will be named according to the specifications in `subunits$subunitRecoded`, if `subunits` is not provided, item names will not be changed for recoded items. 
+
+```{r recodeData}
+datRec <- recodeData(dat = inputDat[[1]], values = inputList$values, subunits = inputList$subunits)
+```
+
 
 
 
