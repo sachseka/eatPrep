@@ -195,7 +195,7 @@ readSpss(file)
 
 After reading in all the data, we need to check, whether it is in the right format and all missing codes were assigned correctly. 
 
-#### checkData
+#### checkData()
 
 `checkData()` checks data frames for missing or duplicated entries in the ID variable, persons and/or variables without valid codes, and generally invalid codes. The results of that check will be written in the console. 
 
@@ -207,7 +207,7 @@ checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
 
 Examples of data frames for `values`, `subunits` and `units` can be found by typing `inputList` in the console.
 
-#### checkDesign
+#### checkDesign()
 
 `checkDesign()` checks whether a data frame corresponds to a particular rotated block design, i.e. whether all persons have valid codes on all items they were presented with and one consistent missing code for all items they were not presented with.
 
@@ -250,7 +250,11 @@ str(mergedDataset2)
 
 ## Recode
 
-After importing the data and making sure it has the right format, the data needs to be recoded. For that, you need recode data sets with special consideration of missing values. See `collapseMissings()` for supported types of issing values. `recodeData()` recodes those data frames and will give warnings, if missing or incomplete recode information is found. Values without recode information will not be recoded. 
+After importing the data and making sure it has the right format, the next step is to adjust the missing values. 
+
+#### recodeData()
+
+First, you recode data sets with several kinds of missings values. For that, you need recode data sets with special consideration of missing values. See `collapseMissings()` for supported types of missing values. `recodeData()` recodes the specified data frames and will give warnings, if missing or incomplete recode information is found. Values without recode information will not be recoded. 
 
 Examples of data frames `values` and `subunits` can be found when copy-pasting the following code in you console: 
 
@@ -262,11 +266,50 @@ inputList$subunits
 `recodeData()` uses the recode information from those two data frames and recodes the variables on `dat` accordingly. The columns will be named according to the specifications in `subunits$subunitRecoded`, if `subunits` is not provided, item names will not be changed for recoded items. 
 
 ```{r recodeData}
-datRec <- recodeData(dat = inputDat[[1]], values = inputList$values, subunits = inputList$subunits)
+datRec <- recodeData(dat = inputDat[[1]], values = inputList$values, subunits = inputList$subunits, verbose = TRUE)
+str(datRec)
 ```
 
+#### mnrCoding()
 
+Then you can convert missing responses coded as "missing by intention" (`mbi`) at the end of a block of items to "missing not reached" (`mnr`) via `mnrCoding()`. The function returns a data frame with "missing not reached" coded as `mnr`. For each person with at least one `mnr` in the returned data set the names of recoded variables are given as an attribute to `dat`.  
 
+For that to work you need to specify the following arguments, as they don't have any default settings:
+
+|Argument|Explanation|
+|-|-|
+|**dat** |A data set. Missing by intention needs to be coded `mbi`|
+|**pid**| Name or column number of the identifier (ID) variable in `dat`| 
+| **rotation.id**| A character vector of length 1 indicating the column name of the test booklet identifier in `dat`|
+| **blocks**| A data frame containing the sequence of subunits in each block in long format. The column names need to be `subunit`, `block`, `subunitBlockPosition`|
+| **booklets**| A data frame containing the sequence of blocks in each booklet in wide format. The column names need to be `booklet`, `block1`, `block2`, `block3`, ...|
+| **breaks**| Number of blocks after which `mbi` shall be recoded to `mnr`, e.g., `c(1,2)` to specify breaks after the first and second block|
+
+There are more arguments with default values which to you don't have to, but you can specify. 
+
+`nMbi`, for instance, specifies the number of subunits at the end of a block that need to be coded `mbi`. The default is 2, i.e. if the last and second to last subitem in a block are coded `mbi`, both subunits, as well as the preceding subunits coded `mbi`, will be recoded to `mnr`. If `nMbi` is larger than the number of subunits in a given block, no subitem in this block will be recoded. If all subunits in a block are coded `mbi`, none of them will be recoded to `mnr`. ``nMbi` needs to be > 0. 
+
+`subunits` has the default `NULL`, but when you specify a data frame, `recodeMbiToMnr` expects to find the recoded subunits in `dat`.
+
+Examples for the data frames `booklets`, `blocks`, `rotation` and `subunits` can be found via `inputList`. For more infomation type `?mnrCoding` into your console to learn more. 
+
+```{r mnrCoding setup, eval=FALSE}
+# Setup for mnrCoding()
+prepDat <- automateDataPreparation(inputList = inputList, 
+    datList = inputDat, readSpss = FALSE, checkData=FALSE, 
+    mergeData = TRUE, recodeData=TRUE, aggregateData=FALSE, 
+    scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
+prepDat2 <- mergeData("ID", list(prepDat, inputList$rotation))
+```
+
+```{r mnrCoding example}
+mnrDat <- mnrCoding(dat = prepDat2, pid = "ID", 
+    booklets = inputList$booklets, blocks = inputList$blocks, 
+    rotation.id = "booklet", breaks = c(1, 2), 
+    subunits = inputList$subunits, nMbi = 2, mbiCode = "mbi", 
+    mnrCode = "mnr", invalidCodes = c("mbd", "mir", "mci"), 
+    verbose = TRUE)
+```
 
 
 ## Aggregate
