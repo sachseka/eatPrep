@@ -293,7 +293,7 @@ There are more arguments with default values which to you don't have to, but you
 
 Examples for the data frames `booklets`, `blocks`, `rotation` and `subunits` can be found via `inputList`. Here is an example use case of `mnrCoding()`. The first two functions (`automateDataPretatration()` and `mergeData()`) create the data frame `dat` for `mnrCoding()`. 
 
-```{r mnrCoding setup, eval=FALSE}
+```{r mnrCoding setup, message=FALSE}
 prepDat <- automateDataPreparation(inputList = inputList, 
     datList = inputDat, readSpss = FALSE, checkData=FALSE, 
     mergeData = TRUE, recodeData=TRUE, aggregateData=FALSE, 
