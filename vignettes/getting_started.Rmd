@@ -248,7 +248,7 @@ str(mergedDataset2)
 ```
 
 
-## Recode
+## Recoding the Data
 
 After importing the data and making sure it has the right format, the next step is to adjust the missing values. 
 
@@ -291,10 +291,9 @@ There are more arguments with default values which to you don't have to, but you
 
 `subunits` has the default `NULL`, but when you specify a data frame, `recodeMbiToMnr` expects to find the recoded subunits in `dat`.
 
-Examples for the data frames `booklets`, `blocks`, `rotation` and `subunits` can be found via `inputList`. For more infomation type `?mnrCoding` into your console to learn more. 
+Examples for the data frames `booklets`, `blocks`, `rotation` and `subunits` can be found via `inputList`. Here is an example use case of `mnrCoding()`. The first two functions (`automateDataPretatration()` and `mergeData()`) create the data frame `dat` for `mnrCoding()`. 
 
 ```{r mnrCoding setup, eval=FALSE}
-# Setup for mnrCoding()
 prepDat <- automateDataPreparation(inputList = inputList, 
     datList = inputDat, readSpss = FALSE, checkData=FALSE, 
     mergeData = TRUE, recodeData=TRUE, aggregateData=FALSE, 
@@ -311,9 +310,13 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
     verbose = TRUE)
 ```
 
+Type `?mnrCoding` into your console to learn more. 
 
-## Aggregate
+## Aggregating the Data
 
-## Score
+After recoding missing values, the subunits are combined one by one via `aggregateData()`. 
 
-## Collapse
+
+## Scoring the Data
+
+## Collapsings the Data
