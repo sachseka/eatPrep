@@ -58,7 +58,8 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL,
     if(any(colMeans(is.na(datRaw)) == 1)){
       raus <- colnames(datRaw)[colMeans(is.na(datRaw)) == 1]
       datRaw <- datRaw[ , -which(colnames(datRaw) %in% raus)]
-      datRec <- datRec[ , -which(colnames(datRec) %in% paste0(raus, "R"))]
+     # datRec <- datRec[ , -which(colnames(datRec) %in% paste0(raus, "R"))] # das ist ja eigentlich nicht okay? wozu muss man names in Rec angeben, wenn hier nur pauschal R angehängt wird? Hotfix, der beides tut, wie oben bei den Kontextvariablen
+      datRec <- datRec[ , -which(colnames(datRec) %in% c(raus, paste0(raus, "R")))]
     }
 
     vars <- setdiff(colnames(datRaw), idRec)
@@ -71,9 +72,8 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL,
 
 		# Kategorientrennschaerfen berechnen
 		dfr1 <- NULL
-
 		for (vv in seq( along = vars ) ){
-		#    vv <- 35
+		#    vv <- 251
 			var.vv <- vars [vv]
 			dat.vv <- datRaw[ , which( colnames(datRaw) == var.vv  ) ]
 			valueTypes <- lapply ( varinfo[[vars[vv]]]$values, "[[", "type")
@@ -111,12 +111,13 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL,
 				  cor( 1 * ( dat.vv == kat.vv[bb] ) , rel.score , use = "complete.obs" ) ,
 				  recodeinfo[[ var.vv ]]$values [[kat.vv[bb]]]
 				  )
-				dfr1 <- rbind( dfr1 , l.bb )
+				dfr1 <- data.frame(rbind( dfr1 , l.bb ))
 			}
 		}
 		dfr1 <- data.frame(dfr1, stringsAsFactors = FALSE)
 		colnames(dfr1) <- c( "item" , "cat" , "n" , "freq" , "freq.rel" , "catPbc" , "recodevalue" )
-		dfr1 [ , 3:6 ] <- apply(dfr1 [ , 3:6 ], 2, as.numeric )
+	#	dfr1 [ , 3:6 ] <- apply(dfr1 [ , 3:6 ], 2, as.numeric )
+		dfr1[, 3:6] <- eatTools::asNumericIfPossible(dfr1[, 3:6])
 		dfr2 <- merge(dfr1, subunits[ , c("subunit", "subunitType")], by.x = "item", by.y = "subunit",  all.x = T)
 
 	}
