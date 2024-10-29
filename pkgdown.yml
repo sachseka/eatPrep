@@ -1,9 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   getting_started: getting_started.html
-last_built: 2024-09-11T08:53Z
+last_built: 2024-10-29T10:56Z
 urls:
   reference: https://sachseka.github.io/eatPrep/reference
   article: https://sachseka.github.io/eatPrep/articles
