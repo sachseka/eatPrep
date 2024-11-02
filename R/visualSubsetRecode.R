@@ -12,6 +12,12 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
                                               Every subsetInfo row
                                               containing only a single NA will be
                                               omitted.", wrap = TRUE)
+  a <- setdiff(subsetInfo[,ID], dat[,ID])
+  if(length(a) > 0) cli::cli_alert_danger(paste0("subsetInfo contains more IDs
+          than dat. The following IDs will not be displayed: ", paste0(a, collapse=", "
+                                                 )), wrap = TRUE)
+  subsetInfo <- subsetInfo[-which(subsetInfo[,ID] %in% a),]
+
   cli::cli_text("")
   cli::cli_text(paste("--- Begin visual Inspection", Sys.time(), "---"))
   cli::cli_text("")
@@ -35,9 +41,19 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
   while(i <= nn+1) {
 
     vars <- unique(subsetInfo$datCols[subsetInfo[,ID] %in% ll])
-    sdat <- datM[datM[,ID] %in% ll, vars]
-    cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
-    print(sdat)
+    sdat <- datM[datM[,ID] %in% ll, c(ID, vars)]
+
+    if (is.null(useGroups)) {
+      cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+    } else {
+      cli::cli_inform("Display subset ({i} of {nn}): group {pp} = {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+    }
+
+    # cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+    #print(sdat)
+
+    print_non_na_chunks(sdat, ID=ID)
+
    # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
    res1 <- menu(c("yes", "no", "flag, maybe later", "go back", "reset to original values"),
                  title = paste0("\nDo you want to recode this subset to '", toRecodeVal, "'?"))
@@ -119,3 +135,23 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
 #   }
 #   captureInteraction <- rbind(captureInteraction, data.frame(ID=ll, choice = res1))
 # }
+
+print_non_na_chunks <- function(df, ID="ID") {
+  if(dim(df)[1]==1) {
+    print(df)
+  } else {
+    non_na_matrix <- !is.na(df[,!(names(df) %in% ID)])
+    row_patterns <- apply(non_na_matrix, 1, paste, collapse = "-")
+    unique_patterns <- unique(row_patterns)
+    for(i in seq(along=unique_patterns)) {
+      pattern <- unique_patterns[i]
+      matching_rows <- which(row_patterns == pattern)
+      non_na_cols <- which(non_na_matrix[matching_rows[1], ])
+      if (length(non_na_cols) > 0) {
+        cat("\nsubgroup", i, ":\n")
+        print(df[matching_rows, which(names(df) %in% c(ID, names(non_na_cols))), drop = FALSE])
+     }
+    }
+  }
+}
+
