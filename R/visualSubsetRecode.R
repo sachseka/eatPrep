@@ -13,10 +13,12 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
                                               containing only a single NA will be
                                               omitted.", wrap = TRUE)
   a <- setdiff(subsetInfo[,ID], dat[,ID])
-  if(length(a) > 0) cli::cli_alert_danger(paste0("subsetInfo contains more IDs
+  if(length(a) > 0) {
+    cli::cli_alert_danger(paste0("subsetInfo contains more IDs
           than dat. The following IDs will not be displayed: ", paste0(a, collapse=", "
                                                  )), wrap = TRUE)
-  subsetInfo <- subsetInfo[-which(subsetInfo[,ID] %in% a),]
+    subsetInfo <- subsetInfo[-which(subsetInfo[,ID] %in% a),]
+  }
 
   cli::cli_text("")
   cli::cli_text(paste("--- Begin visual Inspection", Sys.time(), "---"))
@@ -114,7 +116,15 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
     }
   }
 
-  subsetInfoM <- merge(subsetInfo, captureInteraction, by.x=ID, by.y="ID", all=TRUE)
+  if(is.null(useGroups)) {
+      subsetInfoM <- merge(subsetInfo, captureInteraction,
+                           by=ID, all=TRUE)
+  } else {
+    subsetInfoM <- merge(subsetInfo, captureInteraction,
+                         by=useGroups, all=TRUE)
+  }
+
+
   # if(any(subsetInfoM$choice==4)) subsetInfoM <- subsetInfoM[subsetInfoM$choice != 4,]
 
   res <- list(datM, subsetInfoM)
@@ -136,6 +146,8 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
 #   captureInteraction <- rbind(captureInteraction, data.frame(ID=ll, choice = res1))
 # }
 
+
+#maybe add later functionality that NA can be represented by any missing-by-design-code which then should be user-specified via an argument
 print_non_na_chunks <- function(df, ID="ID") {
   if(dim(df)[1]==1) {
     print(df)
