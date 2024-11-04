@@ -318,7 +318,24 @@ After recoding missing values, the subunits are combined one by one via `aggrega
 
 This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
 
-Optionally, you can specify how missing values should be aggregated (`aggregatemissings`), or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
+Optionally, you can specify how missing values should be aggregated (`aggregatemissings`) like in the example, or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
+
+```{r aggregateData prep aggregatemissings example}
+am <- matrix(c(
+  "vc" , "mvi", "vc" , "mci", "err", "vc" , "mbi", "err",
+  "mvi", "mvi", "err", "mci", "err", "err", "err", "err",
+  "vc" , "err", "mnr", "mci", "err", "mir", "mnr", "err",
+  "mci", "mci", "mci", "mci", "err", "mci", "mci", "err",
+  "err", "err", "err", "err", "mbd", "err", "err", "err",
+  "vc" , "err", "mir", "mci", "err", "mir", "mir", "err",
+  "mbi", "err", "mnr", "mci", "err", "mir", "mbi", "err",
+  "err", "err", "err", "err", "err", "err", "err", "err" ),
+  nrow = 8, ncol = 8, byrow = TRUE)
+
+dimnames(am) <-
+  list(c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"),
+       c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"))
+```
 
 ```{r aggregateData example}
 # using datRec from the chapter "recodeData()"
