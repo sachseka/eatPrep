@@ -344,6 +344,16 @@ datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
     verbose = TRUE)
 ```
 
+## Collapsing the Data
 
+The last step is to recode character missings to numerical types like 0 or NA with `collapseMissings()`. All variables need to be converted to `numeric`, as well, so you can pass the data set to `eatModel` afterwards. 
 
-## Collapsings the Data
+You need the data frame that is returned by `recodeData`, which we called `datRec` earlier (`dat`). 
+
+`missing.rule` is a list containing information which character missings should be converted to `0`or `NA`. It has default settings, but you can adapt them if needed. Type `?collapseMissings` into your console to learn more. 
+
+```{r collapseMissings example}
+datColMis <- collapseMissings(datRec)
+```
+
+After doing that you should have a data frame that you can now use for further processing with the `eatModel` package.
