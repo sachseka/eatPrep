@@ -285,7 +285,7 @@ For that to work you need to specify the following arguments, as they don't have
 | **booklets**| A data frame containing the sequence of blocks in each booklet in wide format. The column names need to be `booklet`, `block1`, `block2`, `block3`, ...|
 | **breaks**| Number of blocks after which `mbi` shall be recoded to `mnr`, e.g., `c(1,2)` to specify breaks after the first and second block|
 
-There are more arguments with default values which to you don't have to, but you can specify. 
+There are more arguments with default values which to you can specify, but don't have to. 
 
 `nMbi`, for instance, specifies the number of subunits at the end of a block that need to be coded `mbi`. The default is 2, i.e. if the last and second to last subitem in a block are coded `mbi`, both subunits, as well as the preceding subunits coded `mbi`, will be recoded to `mnr`. If `nMbi` is larger than the number of subunits in a given block, no subitem in this block will be recoded. If all subunits in a block are coded `mbi`, none of them will be recoded to `mnr`. ``nMbi` needs to be > 0. 
 
@@ -314,7 +314,14 @@ Type `?mnrCoding` into your console to learn more.
 
 ## Aggregating the Data
 
-After recoding missing values, the subunits are combined one by one via `aggregateData()`. 
+After recoding missing values, the subunits are combined one by one via `aggregateData()`.
+
+This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
+
+Optionally, you can specify how missing values should be aggregated (`aggregatemissings`), or which column names the returned data frame should have (`recodedData`). Type `?aggregateData` into your console to learn more. 
+
+
+
 
 
 ## Scoring the Data
