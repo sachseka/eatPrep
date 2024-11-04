@@ -318,12 +318,32 @@ After recoding missing values, the subunits are combined one by one via `aggrega
 
 This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
 
-Optionally, you can specify how missing values should be aggregated (`aggregatemissings`), or which column names the returned data frame should have (`recodedData`). Type `?aggregateData` into your console to learn more. 
+Optionally, you can specify how missing values should be aggregated (`aggregatemissings`), or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
 
-
-
-
+```{r aggregateData example}
+# using datRec from the chapter "recodeData()"
+datAggr <- aggregateData(datRec, inputList$subunits, inputList$units,
+    aggregatemissings = am, rename = TRUE, recodedData = TRUE,
+    suppressErr = TRUE, recodeErr = "mci", verbose = TRUE)
+```
 
 ## Scoring the Data
+
+The next step is to score data set with special consideration of missing values. The function `scoreData()` is very similar to `recodeData()`, but with a few defaults that are better suited for scoring. `scoreData()` will give warnings when incomplete scoring information is found. Values without scoring information will not be scored.
+
+Again, you need to specify three data frames. One data frame that you get after completing the steps you did so far or by using `automateDataPrepatation` (`dat`), one with information about the scoring of units (`unitrecodings`), and one with subunit information (`subunits`). Examples for the last two data frames can be found via `inputList`.
+
+```{r automateDataPreparation for scoreData, message=FALSE}
+prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
+    readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
+    aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
+```
+
+```{r scoreData example}
+datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
+    verbose = TRUE)
+```
+
+
 
 ## Collapsings the Data
