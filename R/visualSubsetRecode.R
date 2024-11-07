@@ -123,6 +123,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
       captureInteraction <- rbind(captureInteraction, data.frame(ID=ll, choice = res1, timeStamp=Sys.time()))
     } else {
       captureInteraction <- rbind(captureInteraction, data.frame(IDgroup=pp, choice = res1, timeStamp=Sys.time()))
+      names(captureInteraction)[1] <- useGroups
     }
 
     if(res1==5) {
@@ -166,7 +167,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
   }
 
   # if(any(subsetInfoM$choice==4)) subsetInfoM <- subsetInfoM[subsetInfoM$choice != 4,]
-
+  subsetInfoM <- subsetInfoM[!is.na(subsetInfoM$choice),]
   res <- list(datM, subsetInfoM)
   return(res)
 }
