@@ -4,7 +4,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
   checkmate::assert_scalar(ID)
   stopifnot(ID %in% names(dat))
   stopifnot(ID %in% names(subsetInfo))
-  checkmate::assert_character(toRecodeVal, len=1)
+  checkmate::assert_scalar(toRecodeVal)
   checkmate::assert_character(useGroups, len=1, null.ok=TRUE)
   if(!is.null(useGroups)) stopifnot(useGroups %in% names(subsetInfo))
 
@@ -44,11 +44,18 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
 
     vars <- unique(subsetInfo$datCols[subsetInfo[,ID] %in% ll])
     sdat <- datM[datM[,ID] %in% ll, c(ID, vars)]
+    if("comment" %in% names(subsetInfo)) {
+      commt <- unique(subsetInfo$comment[subsetInfo[,ID] %in% ll])
+    }
 
     if (is.null(useGroups)) {
       cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
     } else {
       cli::cli_inform("Display subset ({i} of {nn}): group {pp} = {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+    }
+
+    if("comment" %in% names(subsetInfo)) {
+      cli::cli_inform(commt, wrap = TRUE)
     }
 
     # cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
@@ -57,20 +64,58 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
     print_non_na_chunks(sdat, ID=ID)
 
    # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
-   res1 <- menu(c("yes", "no", "flag, maybe later", "go back", "reset to original values"),
+   res1 <- menu(c("yes, all values", "yes, all non-valid values (-99, -98, -97, -96)","no", "flag, maybe later", "go back", "reset to original values", "exit visualSubsetRecode"),
                  title = paste0("\nDo you want to recode this subset to '", toRecodeVal, "'?"))
+
+   if(res1==7) {
+     res2 <- menu(c("yes", "go back"),
+                  title = paste0("\nAre you sure to abort visualSubsetRecode now?"))
+     if(res2==1) {
+       i <- nn+2
+     } else {
+       if (is.null(useGroups)) {
+         cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+       } else {
+         cli::cli_inform("Display subset ({i} of {nn}): group {pp} = {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+       }
+
+       if("comment" %in% names(subsetInfo)) {
+         cli::cli_inform(commt, wrap = TRUE)
+       }
+
+       # cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
+       #print(sdat)
+
+       print_non_na_chunks(sdat, ID=ID)
+
+       # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
+       res1 <- menu(c("yes, all values", "yes, all non-valid values (-99, -98, -97, -96)","no", "flag, maybe later", "go back", "reset to original values", "exit visualSubsetRecode"),
+                    title = paste0("\nDo you want to recode this subset to '", toRecodeVal, "'?"))
+
+
+     }
+   }
+
     if(res1==1) {
-      datM[datM[,ID] %in% ll, vars] <- "mci"
+      datM[datM[,ID] %in% ll, vars][!is.na(datM[datM[,ID] %in% ll, vars])] <- toRecodeVal
       cli::cli_alert_success(paste0("Subset successfully recoded to '", toRecodeVal,"'!"))
       cli::cli_text("")
     } else {
-      if(res1==5) {
+      if(res1==6) {
         datM[datM[,ID] %in% ll, vars] <- dat[dat[,ID] %in% ll, vars]
         cli::cli_alert_success("Subset successfully recoded to original values!")
         cli::cli_text("")
       } else {
-        cli::cli_alert_info(paste0("No recoding action was undertaken this time."))
-        cli::cli_text("")
+        if(res1==2) {
+          datM[datM[,ID] %in% ll, vars][(!is.na(datM[datM[,ID] %in% ll, vars])) & ((datM[datM[,ID] %in% ll, vars]=="-99")| (datM[datM[,ID] %in% ll, vars]=="-98")| (datM[datM[,ID] %in% ll, vars]=="-97") | (datM[datM[,ID] %in% ll, vars]=="-96") )] <- toRecodeVal
+          cli::cli_alert_success(paste0("Subsets' non-valid values successfully recoded to '", toRecodeVal,"'!"))
+          cli::cli_text("")
+        } else {
+          if(res1!=7) {
+            cli::cli_alert_info(paste0("No recoding action was undertaken this time."))
+            cli::cli_text("")
+          }
+        }
       }
     }
 
@@ -80,7 +125,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
       captureInteraction <- rbind(captureInteraction, data.frame(IDgroup=pp, choice = res1, timeStamp=Sys.time()))
     }
 
-    if(res1==4) {
+    if(res1==5) {
       if(i == 1) {
         #return(list(datM, captureInteraction))
         cli::cli_alert_danger("--- No previous subset to go back to. ---", wrap = TRUE)
@@ -100,7 +145,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
       cli::cli_alert_danger("--- This was the last subset. ---", wrap = TRUE)
       cli::cli_text("")
       res2 <- menu(c("yes", "go back"),
-                   title = paste0("\nDo you want to end visualRecoding now?"))
+                   title = paste0("\nDo you want to end visualSubsetRecode now?"))
       if(res2==1) {
        i <- nn+2
       } else {
@@ -109,21 +154,16 @@ visualSubsetRecode <- function(dat, subsetInfo, ID="ID", toRecodeVal="mci", useG
     }
     if(is.null(useGroups)) {
       ll <- unique(subsetInfo[,ID])[i]
+      subsetInfoM <- merge(subsetInfo, captureInteraction,
+                           by=ID, all=TRUE)
     } else {
       pp <- unique(subsetInfo[,useGroups])[i]
       ll <- unique(subsetInfo[,ID][subsetInfo[,useGroups] %in% pp])
-    }
-    }
-  }
-
-  if(is.null(useGroups)) {
       subsetInfoM <- merge(subsetInfo, captureInteraction,
-                           by=ID, all=TRUE)
-  } else {
-    subsetInfoM <- merge(subsetInfo, captureInteraction,
-                         by=useGroups, all=TRUE)
+                           by=useGroups, all=TRUE)
+    }
+    }
   }
-
 
   # if(any(subsetInfoM$choice==4)) subsetInfoM <- subsetInfoM[subsetInfoM$choice != 4,]
 
