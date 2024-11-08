@@ -71,7 +71,8 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
       cli::cli_alert("Issues:")
       cli::cli_ul(id = "comments")
       if("comment" %in% names(subsetInfo)) {
-        cli::cli_alert("{.comment {commt}}", wrap = TRUE)
+        #cli::cli_alert("{.comment {commt}}", wrap = TRUE)
+        cli::cli_li(commt, class = "comment")
       }
       cli::cli_end(id = "comments")
 
@@ -127,7 +128,8 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
         cli::cli_alert("{length(vars)} variable{?s}: {.unit-key {vars}}", wrap = TRUE)
 
         if("comment" %in% names(subsetInfo)) {
-          cli::cli_alert("{.comment {commt}}", wrap = TRUE)
+          #cli::cli_alert("{.comment {commt}}", wrap = TRUE)
+          cli::cli_li(commt, class = "comment")
         }
 
         # cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
