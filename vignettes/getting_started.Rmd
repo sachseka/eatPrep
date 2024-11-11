@@ -29,7 +29,7 @@ library(eatPrep)
 
 
 The goal of `eatPrep`, short for `Educational Assesment Tools: Preparation`, is to automate the preparation of item response test data; especially but not exclusively for typical use cases at the *Institute for Educational Quality Improvement* (IQB).
-Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDeamon`.
+Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDaemon`.
 
 The main purpose of `eatPrep` is to read, score, aggregate and merge data from a regular `SPSS` (`.sav`) data file (via the function `readSpss()`) and metadata from databases (`readDaemonXlsx()`) and Excel spreadsheets (`readMerkmalXlsx()`). Additional functions include checking the data (`checkData()`), meta data (`checkInputList()`), and the design (`checkDesign()`), recoding of (missing) values (`recodeData()`, `mnrCoding()`, `aggregateData()`, `scoreData()`,`collapseMissings()`), working with rater data (`meanAgree()`, `meanKappa()`), evaluating item categories (`catPbc()`, `evalPbc()`) and exporting prepared or raw item data sets to different formats (`writeSpss()`, `prep2GADS()`). Most of this can be done with a single function call to `automateDataPreparation()`.
 
@@ -150,13 +150,13 @@ str(inputDat)
 
 ### Getting the Data
 
-First, we need to get the information from our IQB data bank via ZKDeamon, or alternatively via SPSS. 
+First, we need to get the information from our IQB data bank via ZKDaemon, or alternatively via SPSS. 
 
-#### Items via ZKDeamon
+#### Items via ZKDaemon
 
-ZKDeamon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file via ZKDeamon. Within the program you can set missing types and import a test design. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
+ZKDaemon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file via ZKDaemon. Within the program you can set missing types and import a test design. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
 
-The function `readDaemonXlsx()` reads the Excel file into R and will produce a warning if any sheets are missing. It needs one character string (filename) containing path, name and extension of the Excel file (.xlsx) produced by ZKDeamon. 
+The function `readDaemonXlsx()` reads the Excel file into R and will produce a warning if any sheets are missing. It needs one character string (filename) containing path, name and extension of the Excel file (.xlsx) produced by ZKDaemon. 
 
 The function returns a list of data frames containing information that is required by the data preparation functions. `inputList` shows an example of this list.
 
