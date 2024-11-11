@@ -81,7 +81,7 @@ the preparation of item response test data; especially but not
 exclusively for typical use cases at the <em>Institute for Educational
 Quality Improvement</em> (IQB). Therefore it works together with
 IQB-specific applications such as the <code>ItemDB</code> or
-<code>ZKDeamon</code>.</p>
+<code>ZKDaemon</code>.</p>
 <p>The main purpose of <code>eatPrep</code> is to read, score, aggregate
 and merge data from a regular <code>SPSS</code> (<code>.sav</code>) data
 file (via the function <code><a href="../reference/readSpss.html">readSpss()</a></code>) and metadata from
@@ -711,15 +711,15 @@ is supposed to look like.</p>
 <h3 id="getting-the-data">Getting the Data<a class="anchor" aria-label="anchor" href="#getting-the-data"></a>
 </h3>
 <p>First, we need to get the information from our IQB data bank via
-ZKDeamon, or alternatively via SPSS.</p>
+ZKDaemon, or alternatively via SPSS.</p>
 <div class="section level4">
-<h4 id="items-via-zkdeamon">Items via ZKDeamon<a class="anchor" aria-label="anchor" href="#items-via-zkdeamon"></a>
+<h4 id="items-via-zkdaemon">Items via ZKDaemon<a class="anchor" aria-label="anchor" href="#items-via-zkdaemon"></a>
 </h4>
-<p>ZKDeamon is a program used by IQB that can be found in the IQB
+<p>ZKDaemon is a program used by IQB that can be found in the IQB
 internal folders (i:). After installing you can get the meta data and
 the items from your specific study using information stored in the IQB
 Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an
-SPSS file via ZKDeamon. Within the program you can set missing types and
+SPSS file via ZKDaemon. Within the program you can set missing types and
 import a test design. Then you can produce Excel files, which are
 expected to have the following sheets: “units”, “subunits”, “values”,
 “unitrecoding”, “sav-files”, “params”, “aggregate-missings”,
@@ -727,7 +727,7 @@ expected to have the following sheets: “units”, “subunits”, “values”
 <p>The function <code><a href="../reference/readDaemonXlsx.html">readDaemonXlsx()</a></code> reads the Excel file into
 R and will produce a warning if any sheets are missing. It needs one
 character string (filename) containing path, name and extension of the
-Excel file (.xlsx) produced by ZKDeamon.</p>
+Excel file (.xlsx) produced by ZKDaemon.</p>
 <p>The function returns a list of data frames containing information
 that is required by the data preparation functions.
 <code>inputList</code> shows an example of this list.</p>
