@@ -48,22 +48,22 @@ test_that("load sav", {
                                          recodeData = FALSE, recodeMnr = FALSE,
                                          aggregateData = FALSE, scoreData = FALSE,
                                          writeSpss = FALSE, verbose = TRUE),
-                 "Successfully read in: forcedChoice.sav, forcedChoice_missings.sav")
+                 "Successfully read in: booklet1.sav, booklet2.sav, booklet3.sav, forcedChoice.sav, forcedChoice_missings.sav")
 })
 
 
 
 test_that("merge", {
   path <- gsub("forcedChoice.sav", "", system.file("extdata", "forcedChoice.sav", package = "eatPrep"))
-  expect_message(ati <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),newID="idstud",
+  expect_message(ati <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("idstud", "idstud", "idstud", "ID", "ID"),newID="idstud",
                                                 datList = NULL,	path = path,
                                                 readSpss = TRUE, checkData = FALSE,	mergeData = TRUE,
                                                 recodeData = FALSE, recodeMnr = FALSE,
                                                 aggregateData = FALSE, scoreData = FALSE,
                                                 writeSpss = FALSE, verbose = TRUE),
                  "Start merging.")
-  expect_equal(ati[1,], data.frame(idstud="1", mcvar="3", stringvar="", mc="2", string="new valid", stringsAsFactors=FALSE))
-  expect_equal(dim(ati), c(12, 5))
+  expect_equal(ati[1,1:4], data.frame(idstud="person_002", Hisei="57", item_8="1", item_9="3", stringsAsFactors=FALSE))
+  expect_equal(dim(ati), c(212, 36))
   expect_message(ati2 <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),newID="idstud",
                                                  datList = NULL,	path = path,
                                                  readSpss = TRUE, checkData = FALSE,	mergeData = FALSE,
