@@ -55,7 +55,7 @@ test_that("load sav", {
 
 test_that("merge", {
   path <- gsub("forcedChoice.sav", "", system.file("extdata", "forcedChoice.sav", package = "eatPrep"))
-  expect_message(ati <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("idstud", "idstud", "idstud", "ID", "ID"),newID="idstud",
+  expect_message(ati <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID", "ID", "ID", "ID"),newID="idstud",
                                                 datList = NULL,	path = path,
                                                 readSpss = TRUE, checkData = FALSE,	mergeData = TRUE,
                                                 recodeData = FALSE, recodeMnr = FALSE,
