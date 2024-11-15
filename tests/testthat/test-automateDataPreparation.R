@@ -62,7 +62,7 @@ test_that("merge", {
                                                 aggregateData = FALSE, scoreData = FALSE,
                                                 writeSpss = FALSE, verbose = TRUE),
                  "Start merging.")
-  expect_equal(ati[1,1:4], data.frame(idstud="person002", hisei="57", I1="3", I2="4", stringsAsFactors=FALSE))
+  expect_equal(ati[1,1:4], data.frame(idstud="person002", hisei="57", I01="3", I02="4", stringsAsFactors=FALSE))
   expect_equal(dim(ati), c(212, 36))
   expect_message(ati2 <- automateDataPreparation(inputList = inputList[1:3], oldIDs = c("ID", "ID"),newID="idstud",
                                                  datList = NULL,	path = path,
