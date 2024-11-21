@@ -35,12 +35,6 @@ library(eatPrep)
 
 In this vignette we explain how to use the following functions. You can click on the specific function to jump to its explanation.
 
-|||
-|-|-|
-|**reading in (meta) data**| [readDaemonXlsx()](#items-via-zkdaemon)|
-
-
-
 ```{r ouline functions, echo=FALSE}
 head1 <- c("**Reading in (Meta) Data**", "")
 head2 <- c("**Checken**", "")
@@ -49,36 +43,33 @@ head4 <- c("**Wrapper**", "")
 head5 <- c("**Export**", "")
 # 1
 read1 <- c("[readDaemonXlsx()](#items-via-zkdaemon)", "read in the inputlist that was created using the EDV-tool 'ZKDaemon'.")
-read2 <- c("[readSpss()]()", "read in SPSS files.")
-read3 <- c("[readmerkmalXlsx()]()", "read in additional item and exercise attributes like processing time, formats, content categories, ...")
+read2 <- c("[readSpss()](#spss-data)", "read in SPSS files.")
+read3 <- c("[readmerkmalXlsx()](#merkmalsauszug)", "read in additional item and exercise attributes like processing time, formats, content categories, ...")
 # 2
-check1 <- c("[checkInputList()]()", "check the inputList for internal consistency.")
-check2 <- c("[checkData()]()", "check data sets according to item meta information and other plausibility checks of the data.")
-check3 <- c("[checkDesign()]()", "check data sets according to test design meta information.")
+check1 <- c("[checkInputList()](#checking-data)", "check the inputList for internal consistency.")
+check2 <- c("[checkData()](#checkdata())", "check data sets according to item meta information and other plausibility checks of the data.")
+check3 <- c("[checkDesign()](#checkdesign())", "check data sets according to test design meta information.")
 # 3
-merge1 <- c("[mergeData()]()", "merging the data sets and diagnostics to ensure a fit.")
-recode1 <- c("[recodeData()]()", "recode the subitems according to meta information from the inputList.")
-aggregate1 <- c("[aggregateData()]()", "aggregate subitems into items.")
-score1 <- c("[scoreData()]()", "recode items that previously consisted out of subitems.")
-score2 <- c("[mnrCoding()]()", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
+merge1 <- c("[mergeData()](#merging-data)", "merging the data sets and diagnostics to ensure a fit.")
+recode1 <- c("[recodeData()](#recoding-the-data)", "recode the subitems according to meta information from the inputList.")
+aggregate1 <- c("[aggregateData()](#aggregating-the-data)", "aggregate subitems into items.")
+score1 <- c("[scoreData()](#scoring-the-data)", "recode items that previously consisted out of subitems.")
+score2 <- c("[mnrCoding()](#mnrcoding())", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
 # 4
-wrap1 <- c("[automateDataPreparation()]()", "wraps most of the other features into one big function.")
+wrap1 <- c("[automateDataPreparation()](#wrapper)", "wraps most of the other features into one big function.")
 # 5
-export1 <- c("[collapseMissings()]()", "recodes the missing types into predefined scores (usually 0.1, NA). Such a “collapster” R-data.frame can be passed directly to eatModel for scaling.")
+export1 <- c("[collapseMissings()](#collapsing-the-data)", "recodes the missing types into predefined scores (usually 0.1, NA). Such a “collapster” R-data.frame can be passed directly to eatModel for scaling.")
 export2 <- c("[writeSpss()]()", "produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data.")
 export3 <- c("[prep2GADS()]()", "both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS.")
 
-outline <- rbind.data.frame(head1, head2, head3, head4, head5,
-                            read1, read2, read3,
-                            check1, check2, check3,
-                            merge1, recode1, aggregate1, score1, score2,
-                            wrap1, 
-                            export1, export2, export3)
-
+outline <- rbind.data.frame(head1, read1, read2, read3,
+                            head2, check1, check2, check3,
+                            head3, merge1, recode1, aggregate1, score1, score2,
+                            head4, wrap1,
+                            head5, export1, export2, export3)
 names(outline) <- c("Function", "Explanation")
 kable(outline, caption = "**Functions Overview**")
 ```
-
 
 
 #### Data Structure
@@ -111,7 +102,7 @@ mbd94 <- c(-94, "mbd", "missing by design",
 Mtypes <- rbind.data.frame(mir98, mbo99, mnr96, mci97, mbd94)
 names(Mtypes) <- c("Code", "Label", "Abbr", "Explanation")
 
-kable(Mtypes, caption = "**missing types**")
+kable(Mtypes, caption = "**Missing Types**")
 ```
 
 
