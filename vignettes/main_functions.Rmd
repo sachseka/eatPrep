@@ -51,16 +51,16 @@ check2 <- c("[checkData()](#checkdata())", "check data sets according to item me
 check3 <- c("[checkDesign()](#checkdesign())", "check data sets according to test design meta information.")
 # 3
 merge1 <- c("[mergeData()](#merging-data)", "merging the data sets and diagnostics to ensure a fit.")
-recode1 <- c("[recodeData()](#recoding-the-data)", "recode the subitems according to meta information from the inputList.")
-aggregate1 <- c("[aggregateData()](#aggregating-the-data)", "aggregate subitems into items.")
-score1 <- c("[scoreData()](#scoring-the-data)", "recode items that previously consisted out of subitems.")
+recode1 <- c("[recodeData()](#recoding-data)", "recode the subitems according to meta information from the inputList.")
+aggregate1 <- c("[aggregateData()](#aggregating-data)", "aggregate subitems into items.")
+score1 <- c("[scoreData()](#scoring-data)", "recode items that previously consisted out of subitems.")
 score2 <- c("[mnrCoding()](#mnrcoding())", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
 # 4
 wrap1 <- c("[automateDataPreparation()](#wrapper)", "wraps most of the other features into one big function.")
 # 5
-export1 <- c("[collapseMissings()](#collapsing-the-data)", "recodes the missing types into predefined scores (usually 0.1, NA). Such a “collapster” R-data.frame can be passed directly to eatModel for scaling.")
-export2 <- c("[writeSpss()]()", "produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data.")
-export3 <- c("[prep2GADS()]()", "both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS.")
+export1 <- c("[collapseMissings()](#collapsing-data)", "recodes the missing types into predefined scores (usually 0.1, NA). Such a “collapster” R-data.frame can be passed directly to eatModel for scaling.")
+export2 <- c("[writeSpss()](#export-spss)", "produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data.")
+export3 <- c("[prep2GADS()](#prepare-for-eatgads)", "both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS.")
 
 outline <- rbind.data.frame(head1, read1, read2, read3,
                             head2, check1, check2, check3,
@@ -136,7 +136,6 @@ str(inputDat)
 ### Getting the Data
 
 First, we need to get the information from our IQB data bank via ZKDaemon, or alternatively via SPSS. 
-
 #### Items via ZKDaemon
 
 ZKDaemon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file via ZKDaemon. Within the program you can set missing types and import a test design. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
@@ -148,8 +147,16 @@ The function returns a list of data frames containing information that is requir
 
 ```{r readDeamonXlsx}
 filename <- system.file("extdata", "inputList.xlsx", package = "eatPrep")
-inpustList <- readDaemonXlsx(filename)
-str(inpustList)
+readDaemon <- readDaemonXlsx(filename)
+str(readDaemon)
+```
+
+#### SPSS Data
+
+To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
+
+```{r readSpss, eval=FALSE}
+readSpss(file)
 ```
 
 
@@ -167,18 +174,20 @@ readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
 ```
 
 
-#### SPSS Data
-
-To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
-
-```{r readSpss, eval=FALSE}
-readSpss(file)
-```
-
-
-### Checking Data
+## Checking Data
 
 After reading in all the data, we need to check, whether it is in the right format and all missing codes were assigned correctly. 
+
+#### checkInputList()
+
+`checkInputList` checks whether the object `inputList` has the required form. It has two arguments: the `inputList` and `mistypes`, for which it will be checked, whether the missing types in this vector are defined for all items.
+
+```{r checkInput List, eval=FALSE}
+data(inputList)
+checkInputList(inputList)
+```
+
+The xlsx-file produced by 'ZKDaemon' is expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. `readDaemonXlsx` will produce a warning if any sheets are missing or wrongly specified.
 
 #### checkData()
 
@@ -212,7 +221,7 @@ inputList
 ```
 
 
-### Merging Data
+## Merging Data
 
 Now that we checked that the data frames meet our requirements, we can merge a list of data frames into a single data frame by using `mergeData()`. For that we need a list of data frames, like `inputDat` which contains data of three booklets. The function returns a data frame containing unique cases and unique variables. All cases and all variables from the original data sets will be kept and matched.
 
@@ -233,7 +242,7 @@ str(mergedDataset2)
 ```
 
 
-## Recoding the Data
+## Recoding Data
 
 After importing the data and making sure it has the right format, the next step is to adjust the missing values. 
 
@@ -253,6 +262,56 @@ inputList$subunits
 ```{r recodeData}
 datRec <- recodeData(dat = inputDat[[1]], values = inputList$values, subunits = inputList$subunits, verbose = TRUE)
 str(datRec)
+```
+
+
+## Aggregating Data
+
+After recoding missing values, the subunits are combined one by one via `aggregateData()`.
+
+This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
+
+Optionally, you can specify how missing values should be aggregated (`aggregatemissings`) like in the example, or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
+
+```{r aggregateData prep aggregatemissings example}
+am <- matrix(c(
+  "vc" , "mvi", "vc" , "mci", "err", "vc" , "mbi", "err",
+  "mvi", "mvi", "err", "mci", "err", "err", "err", "err",
+  "vc" , "err", "mnr", "mci", "err", "mir", "mnr", "err",
+  "mci", "mci", "mci", "mci", "err", "mci", "mci", "err",
+  "err", "err", "err", "err", "mbd", "err", "err", "err",
+  "vc" , "err", "mir", "mci", "err", "mir", "mir", "err",
+  "mbi", "err", "mnr", "mci", "err", "mir", "mbi", "err",
+  "err", "err", "err", "err", "err", "err", "err", "err" ),
+  nrow = 8, ncol = 8, byrow = TRUE)
+
+dimnames(am) <-
+  list(c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"),
+       c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"))
+```
+
+```{r aggregateData example}
+# using datRec from the chapter "recodeData()"
+datAggr <- aggregateData(datRec, inputList$subunits, inputList$units,
+    aggregatemissings = am, rename = TRUE, recodedData = TRUE,
+    suppressErr = TRUE, recodeErr = "mci", verbose = TRUE)
+```
+
+## Scoring Data
+
+The next step is to score data set with special consideration of missing values. The function `scoreData()` is very similar to `recodeData()`, but with a few defaults that are better suited for scoring. `scoreData()` will give warnings when incomplete scoring information is found. Values without scoring information will not be scored.
+
+Again, you need to specify three data frames. One data frame that you get after completing the steps you did so far or by using `automateDataPrepatation` (`dat`), one with information about the scoring of units (`unitrecodings`), and one with subunit information (`subunits`). Examples for the last two data frames can be found via `inputList`.
+
+```{r automateDataPreparation for scoreData, message=FALSE}
+prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
+    readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
+    aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
+```
+
+```{r scoreData example}
+datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
+    verbose = TRUE)
 ```
 
 #### mnrCoding()
@@ -297,56 +356,14 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 
 Type `?mnrCoding` into your console to learn more. 
 
-## Aggregating the Data
+## Wrapper
 
-After recoding missing values, the subunits are combined one by one via `aggregateData()`.
+<!-- automateDataPreparation() -->
 
-This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
 
-Optionally, you can specify how missing values should be aggregated (`aggregatemissings`) like in the example, or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
+## Exporting Data
 
-```{r aggregateData prep aggregatemissings example}
-am <- matrix(c(
-  "vc" , "mvi", "vc" , "mci", "err", "vc" , "mbi", "err",
-  "mvi", "mvi", "err", "mci", "err", "err", "err", "err",
-  "vc" , "err", "mnr", "mci", "err", "mir", "mnr", "err",
-  "mci", "mci", "mci", "mci", "err", "mci", "mci", "err",
-  "err", "err", "err", "err", "mbd", "err", "err", "err",
-  "vc" , "err", "mir", "mci", "err", "mir", "mir", "err",
-  "mbi", "err", "mnr", "mci", "err", "mir", "mbi", "err",
-  "err", "err", "err", "err", "err", "err", "err", "err" ),
-  nrow = 8, ncol = 8, byrow = TRUE)
-
-dimnames(am) <-
-  list(c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"),
-       c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"))
-```
-
-```{r aggregateData example}
-# using datRec from the chapter "recodeData()"
-datAggr <- aggregateData(datRec, inputList$subunits, inputList$units,
-    aggregatemissings = am, rename = TRUE, recodedData = TRUE,
-    suppressErr = TRUE, recodeErr = "mci", verbose = TRUE)
-```
-
-## Scoring the Data
-
-The next step is to score data set with special consideration of missing values. The function `scoreData()` is very similar to `recodeData()`, but with a few defaults that are better suited for scoring. `scoreData()` will give warnings when incomplete scoring information is found. Values without scoring information will not be scored.
-
-Again, you need to specify three data frames. One data frame that you get after completing the steps you did so far or by using `automateDataPrepatation` (`dat`), one with information about the scoring of units (`unitrecodings`), and one with subunit information (`subunits`). Examples for the last two data frames can be found via `inputList`.
-
-```{r automateDataPreparation for scoreData, message=FALSE}
-prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
-    readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
-    aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
-```
-
-```{r scoreData example}
-datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
-    verbose = TRUE)
-```
-
-## Collapsing the Data
+### Collapsing Data
 
 The last step is to recode character missings to numerical types like 0 or NA with `collapseMissings()`. All variables need to be converted to `numeric`, as well, so you can pass the data set to `eatModel` afterwards. 
 
@@ -360,7 +377,6 @@ datColMis <- collapseMissings(datRec)
 
 After doing that you should have a data frame that you can now use for further processing with the `eatModel` package.
 
+### Export SPSS
 
-## Wrapper
-
-<!-- automateDataPrep() -->
+### Prepare for eatGADS
