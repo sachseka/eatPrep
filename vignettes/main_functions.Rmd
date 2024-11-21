@@ -396,6 +396,8 @@ preparedData <- automateDataPreparation(inputList = inputList,
 
 ## Exporting Data
 
+After the data preparation is done, you can prepare the data sets for exporting to then use them in the packages `eatModel` and `eatGADS`.
+
 ### Collapsing Data
 
 The last step is to recode character missings to numerical types like 0 or NA with `collapseMissings()`. All variables need to be converted to `numeric`, as well, so you can pass the data set to `eatModel` afterwards. 
@@ -412,4 +414,47 @@ After doing that you should have a data frame that you can now use for further p
 
 ### Export SPSS
 
+With `writeSpss` you can create a .txt file and a SPSS syntax file, which can then be used in SPSS. You need the four data frames `dat`, `values`, `subunits` and `units`, the last three are usually part of the `inputList`. You also need to specify the file's names and where to save those new files to.
+
+The functions creates and saves those file, but the actual return values for this function is `NULL`.
+
+```{r writeSpss example, eval=FALSE}
+writeSpss(dat, values, subunits, units,
+    filedat = "mydata.txt", filesps = "readmydata.sps",
+    missing.rule = list(mvi = 0, mnr = 0, mci = NA, mbd = NA, mir = 0, mbi = 0),
+    path = getwd(), sep = "\t", dec = ",", verbose = FALSE)
+```
+
+
 ### Prepare for eatGADS
+
+`prep2GADS` converts the data frame that we prepared to an eatGADS object for further use in the packages `eatGADS`. It uses the meta data stored in `inputList`, so it needs the `inputList` as an argument, as well as our data frame `dat`, that we have been preparing.
+
+Here you can see two examples for creating eatGADS objects. The first example exports scored data (`trafoType` = "scored"), which usually has 0/1 values and mistypes like mbi/mbo etc. The second example exports the raw data (`trafoType` = "raw"), including the original values and subunits. 
+
+```{r prep2GADS prep, message=FALSE}
+data(inputDat)
+data(inputList)
+
+# for GADSobj1
+prepDatScored <- automateDataPreparation(inputList = inputList, datList = inputDat,
+    readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
+    aggregateData=TRUE, scoreData=TRUE, writeSpss=FALSE, verbose = TRUE)
+
+# for GADSobj2
+prepDatRaw <- automateDataPreparation(inputList = inputList, datList = inputDat,
+                                      readSpss = FALSE, checkData=FALSE, mergeData = TRUE, 
+                                      recodeData=FALSE, aggregateData=FALSE, scoreData=FALSE, 
+                                      writeSpss=FALSE, verbose = TRUE)
+```
+
+
+```{r prep2GADS example}
+GADSobj1 <- prep2GADS(dat = prepDatScored, inputList = inputList[1:3], trafoType = "scored",
+                      verbose=TRUE)
+
+GADSobj2 <- prep2GADS(dat = prepDatRaw, inputList = inputList[1:3], trafoType = "raw", 
+                      verbose=TRUE)
+```
+
+
