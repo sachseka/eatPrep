@@ -44,17 +44,17 @@ head5 <- c("**Export**", "")
 # 1
 read1 <- c("[readDaemonXlsx()](#items-via-zkdaemon)", "read in the inputlist that was created using the EDV-tool 'ZKDaemon'.")
 read2 <- c("[readSpss()](#spss-data)", "read in SPSS files.")
-read3 <- c("[readmerkmalXlsx()](#merkmalsauszug)", "read in additional item and exercise attributes like processing time, formats, content categories, ...")
+read3 <- c("[readMerkmalXlsx()](#merkmalsauszug)", "read in additional item and exercise attributes like processing time, formats, content categories, ...")
 # 2
 check1 <- c("[checkInputList()](#checking-data)", "check the inputList for internal consistency.")
-check2 <- c("[checkData()](#checkdata())", "check data sets according to item meta information and other plausibility checks of the data.")
-check3 <- c("[checkDesign()](#checkdesign())", "check data sets according to test design meta information.")
+check2 <- c("[checkData()](#checkdata)", "check data sets according to item meta information and other plausibility checks of the data.")
+check3 <- c("[checkDesign()](#checkdesign)", "check data sets according to test design meta information.")
 # 3
 merge1 <- c("[mergeData()](#merging-data)", "merging the data sets and diagnostics to ensure a fit.")
 recode1 <- c("[recodeData()](#recoding-data)", "recode the subitems according to meta information from the inputList.")
 aggregate1 <- c("[aggregateData()](#aggregating-data)", "aggregate subitems into items.")
 score1 <- c("[scoreData()](#scoring-data)", "recode items that previously consisted out of subitems.")
-score2 <- c("[mnrCoding()](#mnrcoding())", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
+score2 <- c("[mnrCoding()](#mnrcoding)", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
 # 4
 wrap1 <- c("[automateDataPreparation()](#wrapper)", "wraps most of the other features into one big function.")
 # 5
@@ -136,6 +136,7 @@ str(inputDat)
 ### Getting the Data
 
 First, we need to get the information from our IQB data bank via ZKDaemon, or alternatively via SPSS. 
+
 #### Items via ZKDaemon
 
 ZKDaemon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file via ZKDaemon. Within the program you can set missing types and import a test design. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
@@ -178,7 +179,7 @@ readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
 
 After reading in all the data, we need to check, whether it is in the right format and all missing codes were assigned correctly. 
 
-#### checkInputList()
+#### checkInputList
 
 `checkInputList` checks whether the object `inputList` has the required form. It has two arguments: the `inputList` and `mistypes`, for which it will be checked, whether the missing types in this vector are defined for all items.
 
@@ -189,7 +190,7 @@ checkInputList(inputList)
 
 The xlsx-file produced by 'ZKDaemon' is expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. `readDaemonXlsx` will produce a warning if any sheets are missing or wrongly specified.
 
-#### checkData()
+#### checkData
 
 `checkData()` checks data frames for missing or duplicated entries in the ID variable, persons and/or variables without valid codes, and generally invalid codes. The results of that check will be written in the console. 
 
@@ -201,7 +202,7 @@ checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
 
 Examples of data frames for `values`, `subunits` and `units` can be found by typing `inputList` in the console.
 
-#### checkDesign()
+#### checkDesign
 
 `checkDesign()` checks whether a data frame corresponds to a particular rotated block design, i.e. whether all persons have valid codes on all items they were presented with and one consistent missing code for all items they were not presented with.
 
@@ -216,8 +217,8 @@ checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID", subunits = NU
 `inputDat` and `inputList` are examples on how these data frames are supposed to look like. When you copy and paste the following code in your console, you can look at the data frames. 
 
 ```{r checkDesign examples, eval=FALSE}
-inputDat
-inputList
+data(inputDat)
+data(inputList)
 ```
 
 
@@ -314,7 +315,7 @@ datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
     verbose = TRUE)
 ```
 
-#### mnrCoding()
+#### mnrCoding
 
 Then you can convert missing responses coded as "missing by intention" (`mbi`) at the end of a block of items to "missing not reached" (`mnr`) via `mnrCoding()`. The function returns a data frame with "missing not reached" coded as `mnr`. For each person with at least one `mnr` in the returned data set the names of recoded variables are given as an attribute to `dat`.  
 
@@ -358,7 +359,39 @@ Type `?mnrCoding` into your console to learn more.
 
 ## Wrapper
 
-<!-- automateDataPreparation() -->
+Instead of using all the individual functions as described above, you can also use the wrapper function `automateDataPreparation`, which contains most of the described functions. Here is an overview over the arguments that call the corresponding function.
+
+```{r wrapper overview, echo=FALSE}
+readspss <- c("`readSpss`", "readSpss()")
+checkdata <- c("`checkData`", "checkData()")
+mergedata <- c("`mergeData`", "mergeData()")
+recodedata <- c("`recodeData`", "recodeData()")
+recodemnr <- c("`recodemnr`", "mnrCoding()")
+aggregatedata <- c("`aggregateData`", "aggregateData()")
+scoredata <- c("`scoreData`", "scoreData()")
+collapsemissings <- c("`collapseMissings`", "collapseMissings()")
+writespss <- c("`writeSpss`", "writeSpss()")
+
+wrap <- rbind.data.frame(readspss, checkdata, mergedata, recodedata, recodemnr,
+                         aggregatedata, scoredata, collapsemissings, writespss)
+names(wrap) <- c("Argument", "Corresponding Function")
+kable(wrap)
+```
+
+But there are many more arguments that may need to consider. For more information see `?automateDataPreraration`. 
+
+Here is an example use case and its output. `automateDataPreparation` returns a data frame resulting from the final data preparation step.
+
+```{r wrapper example}
+data(inputList)
+data(inputDat)
+preparedData <- automateDataPreparation(inputList = inputList,
+    datList = inputDat,  path = getwd(),
+    readSpss = FALSE, checkData = TRUE,  mergeData = TRUE,
+    recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
+    aggregateData = TRUE, scoreData = TRUE,
+    writeSpss = FALSE, verbose = TRUE)
+```
 
 
 ## Exporting Data
