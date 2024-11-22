@@ -158,9 +158,9 @@ str(readDaemon)
 To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name of the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
 
 ```{r readSpss example}
-#readSpss("./inst/extdata/booklet1.sav")
-#readSpss("./inst/extdata/booklet1.sav")
-#readSpss("./inst/extdata/booklet1.sav")
+readSpss(system.file("extdata", "booklet1.sav", package = "eatPrep"))
+readSpss(system.file("extdata", "booklet2.sav", package = "eatPrep"))
+readSpss(system.file("extdata", "booklet3.sav", package = "eatPrep"))
 ```
 
 #### Merkmalsauszug
