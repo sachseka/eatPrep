@@ -158,9 +158,9 @@ str(readDaemon)
 To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name of the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
 
 ```{r readSpss example}
-readSpss(system.file("extdata", "booklet1.sav", package = "eatPrep"))
-readSpss(system.file("extdata", "booklet2.sav", package = "eatPrep"))
-readSpss(system.file("extdata", "booklet3.sav", package = "eatPrep"))
+#readSpss(system.file("extdata", "booklet1.sav", package = "eatPrep"))
+#readSpss(system.file("extdata", "booklet2.sav", package = "eatPrep"))
+#readSpss(system.file("extdata", "booklet3.sav", package = "eatPrep"))
 ```
 
 #### Merkmalsauszug
@@ -270,7 +270,15 @@ str(datRec)
 
 After recoding missing values, the subunits are combined one by one via `aggregateData()`.
 
+![tbd: what are items and what are subitems ad what is going to be aggregated](cyclehire1.jpg)
+
 This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
+
+|||
+|-|-|
+|**vc** |valid code|
+|**colnames**| missing types to be aggregated| 
+| **rownames**| missing types to be aggregated|
 
 Optionally, you can specify how missing values should be aggregated (`aggregatemissings`) like in the example, or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
 
