@@ -33,12 +33,14 @@ library(eatPrep)
 
 #### Outline
 
-In this vignette we explain how to use the following functions. You can click on the specific function to jump to its explanation.
+In this vignette we explain how to use the package's main functions. Main functions are functions that are part of the minimal workflow of data preparation for IRT analyses using item meta data, that is, performing checks, merging, recoding, aggregating and scoring variables. For explanation of further important functions and diagnostic tools for data preparation and plausibility checks, there will be another vignette. 
+
+You can click on the specific function to jump to its explanation.
 
 ```{r ouline functions, echo=FALSE}
 head1 <- c("**Reading in (Meta) Data**", "")
-head2 <- c("**Checken**", "")
-head3 <- c("**Mergen, Recoding, Aggregating, Scoring**", "")
+head2 <- c("**Checks**", "")
+head3 <- c("**Merging, Recoding, Aggregating, Scoring**", "")
 head4 <- c("**Wrapper**", "")
 head5 <- c("**Export**", "")
 # 1
@@ -133,7 +135,7 @@ In order to do that we first need to read the data into R, check the data for in
 str(inputDat)
 ```
 
-### Getting the Data
+### Reading in (Meta) Data
 
 First, we need to get the information from our IQB data bank via ZKDaemon, or alternatively via SPSS. 
 
@@ -175,7 +177,7 @@ readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
 ```
 
 
-## Checking Data
+## Checks
 
 After reading in all the data, we need to check, whether it is in the right format and all missing codes were assigned correctly. 
 
@@ -221,8 +223,9 @@ data(inputDat)
 data(inputList)
 ```
 
+## Merging, Recoding, Aggregating, Scoring
 
-## Merging Data
+### Merging Data
 
 Now that we checked that the data frames meet our requirements, we can merge a list of data frames into a single data frame by using `mergeData()`. For that we need a list of data frames, like `inputDat` which contains data of three booklets. The function returns a data frame containing unique cases and unique variables. All cases and all variables from the original data sets will be kept and matched.
 
@@ -243,11 +246,9 @@ str(mergedDataset2)
 ```
 
 
-## Recoding Data
+### Recoding Data
 
 After importing the data and making sure it has the right format, the next step is to adjust the missing values. 
-
-#### recodeData()
 
 First, you recode data sets with several kinds of missings values. For that, you need recode data sets with special consideration of missing values. See `collapseMissings()` for supported types of missing values. `recodeData()` recodes the specified data frames and will give warnings, if missing or incomplete recode information is found. Values without recode information will not be recoded. 
 
@@ -266,7 +267,7 @@ str(datRec)
 ```
 
 
-## Aggregating Data
+### Aggregating Data
 
 After recoding missing values, the subunits are combined one by one via `aggregateData()`.
 
@@ -298,7 +299,7 @@ datAggr <- aggregateData(datRec, inputList$subunits, inputList$units,
     suppressErr = TRUE, recodeErr = "mci", verbose = TRUE)
 ```
 
-## Scoring Data
+### Scoring Data
 
 The next step is to score data set with special consideration of missing values. The function `scoreData()` is very similar to `recodeData()`, but with a few defaults that are better suited for scoring. `scoreData()` will give warnings when incomplete scoring information is found. Values without scoring information will not be scored.
 
@@ -394,7 +395,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 ```
 
 
-## Exporting Data
+## Export
 
 After the data preparation is done, you can prepare the data sets for exporting to then use them in the packages `eatModel` and `eatGADS`.
 
