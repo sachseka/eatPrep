@@ -147,7 +147,6 @@ The function `readDaemonXlsx()` reads the Excel file into R and will produce a w
 
 The function returns a list of data frames containing information that is required by the data preparation functions. `inputList` shows an example of this list.
 
-
 ```{r readDeamonXlsx}
 filename <- system.file("extdata", "inputList.xlsx", package = "eatPrep")
 readDaemon <- readDaemonXlsx(filename)
@@ -156,13 +155,13 @@ str(readDaemon)
 
 #### SPSS Data
 
-To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
+To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name of the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
 
-```{r readSpss, eval=FALSE}
-readSpss(file)
-
+```{r readSpss example}
+#readSpss("./inst/extdata/booklet1.sav")
+#readSpss("./inst/extdata/booklet1.sav")
+#readSpss("./inst/extdata/booklet1.sav")
 ```
-
 
 #### Merkmalsauszug
 
@@ -186,12 +185,12 @@ After reading in all the data, we need to check, whether it is in the right form
 
 `checkInputList` checks whether the object `inputList` has the required form. It has two arguments: the `inputList` and `mistypes`, for which it will be checked, whether the missing types in this vector are defined for all items.
 
-```{r checkInput List, eval=FALSE}
+```{r checkInputList, eval=FALSE}
 data(inputList)
 checkInputList(inputList)
 ```
 
-The xlsx-file produced by 'ZKDaemon' is expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. `readDaemonXlsx` will produce a warning if any sheets are missing or wrongly specified.
+The xlsx-file produced by 'ZKDaemon' is expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. `readDaemonXlsx` will produce a warning if any sheets are missing or wrongly specified. `checkInputList` performs many additional checks to this.
 
 #### checkData
 
@@ -267,14 +266,11 @@ datRec <- recodeData(dat = inputDat[[1]], values = inputList$values, subunits = 
 str(datRec)
 ```
 
-
 ### Aggregating Data
 
 After recoding missing values, the subunits are combined one by one via `aggregateData()`.
 
 This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
-
-
 
 Optionally, you can specify how missing values should be aggregated (`aggregatemissings`) like in the example, or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
 
