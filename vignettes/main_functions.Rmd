@@ -8,6 +8,17 @@ vignette: >
 editor_options: 
   chunk_output_type: console
 ---
+```{r setup, include=FALSE}
+library(knitr)
+```
+
+<style>
+pre {
+  white-space: pre !important;
+  overflow-y: scroll !important;
+  max-height: 50vh !important;
+}
+</style>
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -16,9 +27,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, include=FALSE}
-library(knitr)
-```
 
 ## Introduction
 
