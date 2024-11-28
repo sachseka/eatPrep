@@ -98,7 +98,7 @@ As a reminder, an `eatPrep` data set contains the following layers:
 
 And here is an overview for different value types the IQB uses: 
 
-```{r missing-types, echo=FALSE}
+```{r missing-types, echo=FALSE, fig.cap = "Missing Types"}
 mir98 <- c(-98, "mir", "missing invalid response",
            "(1) Item was edited, and (2a) empty answer or (2b) invalid (joke) answer.")
 mbo99 <- c(-99, "mbo", "missing by omission",
@@ -237,7 +237,7 @@ data(inputList)
 
 Now that we checked that the data frames meet our requirements, we can merge a list of data frames into a single data frame by using `mergeData()`. For that we need a list of data frames, like `inputDat` which contains data of three booklets. The function returns a data frame containing unique cases and unique variables. All cases and all variables from the original data sets will be kept and matched.
 
-`mergeData()` provides detailed diagnostics about value mismatches. If two identically named columns in two data sets do not have identical values, NAs are replaced by valid codes stemming from the other data set(s) and if two different valid values are found, the first value will be kept and the other dropped, and the user will be informed about the mismatch. Additionally, `NA` resulting from the merge (e.g., in repeated block designs) can be replaced with a customed character missing to facilitate future data preparation of the merged data set. See Table "Missing Types" for standard missing types for other functions in the `eatPrep` package.
+`mergeData()` provides detailed diagnostics about value mismatches. If two identically named columns in two data sets do not have identical values, NAs are replaced by valid codes stemming from the other data set(s) and if two different valid values are found, the first value will be kept and the other dropped, and the user will be informed about the mismatch. Additionally, `NA` resulting from the merge (e.g., in repeated block designs) can be replaced with a customed character missing to facilitate future data preparation of the merged data set. See Table [Missing Types](#data-structure) for standard missing types for other functions in the `eatPrep` package.
 
 When merging data frames with this function you need to specify at least two arguments: `newID` and `datList`. `newID` has to be a character vector length one indicating the name of the identifier variable (ID) in the merged data set and/or the name of the ID in every data frame in `datList`, if not specified differently in `oldIDs`. `datList` is the list of data frames to be merged, e.g. `inputDat`. 
 
