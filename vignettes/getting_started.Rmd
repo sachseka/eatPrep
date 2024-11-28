@@ -20,18 +20,32 @@ knitr::opts_chunk$set(
 library(knitr)
 ```
 
-## Introduction
+## Installation
+
+`eatPrep` is on GitHub. You can install R packages from GitHub via the `remotes` package. With the following code you can download both packages `remotes` and `eatPrep`. 
 
 ```{r installing and loading, warning=FALSE}
+#install.packages("remotes")
 #remotes::install_github("https://github.com/sachseka/eatPrep")
 library(eatPrep)
 ```
 
+## Introduction
 
 The goal of `eatPrep`, short for `Educational Assesment Tools: Preparation`, is to automate the preparation of item response test data; especially but not exclusively for typical use cases at the *Institute for Educational Quality Improvement* (IQB).
 Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDaemon`.
 
+#### Paper Competence Data Preparation
+
+We usually give students paper tests or questionnaires that they fill out by hand, while being supervised. The results are later collected centrally. These tests are then scanned. For multiple choice questions or tick questions an optic scanning system is used that recognizes marked fields automatically and transmits them to a digital data bank. Trained coders evaluate the (partially) open questions. This data is usually in a SPSS (.sav) format.
+
+We use `eatPrep` for the standardization and automation of the handling of such data. 
+
+#### Features
+
 The main purpose of `eatPrep` is to read, score, aggregate and merge data from a regular `SPSS` (`.sav`) data file (via the function `readSpss()`) and metadata from databases (`readDaemonXlsx()`) and Excel spreadsheets (`readMerkmalXlsx()`). Additional functions include checking the data (`checkData()`), meta data (`checkInputList()`), and the design (`checkDesign()`), recoding of (missing) values (`recodeData()`, `mnrCoding()`, `aggregateData()`, `scoreData()`,`collapseMissings()`), working with rater data (`meanAgree()`, `meanKappa()`), evaluating item categories (`catPbc()`, `evalPbc()`) and exporting prepared or raw item data sets to different formats (`writeSpss()`, `prep2GADS()`). Most of this can be done with a single function call to `automateDataPreparation()`.
+
+## Data Structures of Paper Competency Data at the IQB
 
 In a prototypical scenario, we are constructing a test at the IQB, e.g. for educational purposes. For our pilot study, we have created several overlapping booklets and a variety of items with different item formats (constructed response, multiple choice).  
 Thereby, the data consists of several layers:
@@ -39,15 +53,21 @@ Thereby, the data consists of several layers:
 |||
 |-|-|
 |**booklets** |containing blocks|
-|**blocks**| containing units (= items)| 
+|**blocks/cluster**| containing tasks|
+|**tasks**| contain units (=items) (usually for a common stimulus/testlet)
 | **units**| containing subunits/subitems|
-| **subunits**| having values and|
+| **subunits**| having values |
 | **values**| including missings and recode values|
+|**valueRecodes**| also "Scores": A mapping of the original values to a smaller number of categories (usually at least True/False/Missing, i.e. 1/0/NA) that are better suited for IRT scaling|
 
+
+#### Data Structure
+
+#### Missing Values
 
 Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that. 
 
-As a reminder, here is an overview for different value types the IQB uses: 
+Here is an overview for different value types the IQB uses: 
 
 ```{r missing types, echo=FALSE}
 mir98 <- c(-98, "mir", "missing invalid response",
@@ -63,8 +83,16 @@ mbd94 <- c(-94, "mbd", "missing by design",
 Mtypes <- rbind.data.frame(mir98, mbo99, mnr96, mci97, mbd94)
 names(Mtypes) <- c("Code", "Label", "Abbr", "Explanation")
 
-kable(Mtypes, caption = "**missing types**")
+kable(Mtypes, caption = "**Missing Types**")
 ```
+
+#### Representation of the Data Structure in eatPrep
+
+
+
+--------------------------------------------------------------------------------
+                      old vignette
+--------------------------------------------------------------------------------
 
 
 <!-- we also want to include additional information about the items (merkmalstabelle) -> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR! -->
@@ -148,229 +176,3 @@ In order to do that we first need to read the data into R, check the data for in
 str(inputDat)
 ```
 
-### Getting the Data
-
-First, we need to get the information from our IQB data bank via ZKDaemon, or alternatively via SPSS. 
-
-#### Items via ZKDaemon
-
-ZKDaemon is a program used by IQB that can be found in the IQB internal folders (i:). After installing you can get the meta data and the items from your specific study using information stored in the IQB Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an SPSS file via ZKDaemon. Within the program you can set missing types and import a test design. Then you can produce Excel files, which are expected to have the following sheets: “units”, “subunits”, “values”, “unitrecoding”, “sav-files”, “params”, “aggregate-missings”, “itemproperties”, “propertylabels”, “booklets”, and “blocks”. 
-
-The function `readDaemonXlsx()` reads the Excel file into R and will produce a warning if any sheets are missing. It needs one character string (filename) containing path, name and extension of the Excel file (.xlsx) produced by ZKDaemon. 
-
-The function returns a list of data frames containing information that is required by the data preparation functions. `inputList` shows an example of this list.
-
-
-```{r readDeamonXlsx}
-filename <- system.file("extdata", "inputList.xlsx", package = "eatPrep")
-inpustList <- readDaemonXlsx(filename)
-str(inpustList)
-```
-
-
-#### Merkmalsauszug
-
-The software IQB Item-DB produces Excel files named "Merkmalsauszug" using information stored in the IQB Databases. The file is expected to have the sheets: “Itemmerkmale”, “Aufgabenmerkmale”. The order doesn't matter. The file contains information about the attributes of the items and exercises. 
-
-The function `readMerkmalXlsx()` read the Excel file into R and will produce a warning if any sheets are missing or wrongly specified. It needs one character string (filename) containing path, name and extension of the Excel file (.xlsx) produced by IQB Item-DB. Per default the Item-ID is created without converting numbers to lowercase letters (`tolcl`) and a merged data frame contaning both "Itemmerkmale" and "Aufgabenmerkmale" will be created (`alleM`).
-
-The function returns a list of data frames containing Itemmerkmale, Aufgabenmerkmale and AlleMerkmale (optional).
-
-```{r readMerkmalXlsx}
-filename <- system.file("extdata", "itemmerkmale.xlsx", package = "eatPrep")
-readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
-```
-
-
-#### SPSS Data
-
-To get the input from SPSS data files, `readSpss()` reads the data into R and converts all variables to the class `character`. The function needs the name fo the SPSS data file and has the option to specify some more attributes. For more information use the help function `?readSpss`. 
-
-```{r readSpss, eval=FALSE}
-readSpss(file)
-```
-
-
-### Checking Data
-
-After reading in all the data, we need to check, whether it is in the right format and all missing codes were assigned correctly. 
-
-#### checkData()
-
-`checkData()` checks data frames for missing or duplicated entries in the ID variable, persons and/or variables without valid codes, and generally invalid codes. The results of that check will be written in the console. 
-
-The function needs a data frame to be checked (`dat`) and its name (`datnam`), especially if there are multpile data frames (e.g. a list of data frames). Furthermore it needs data frames with code, subunit and unit information (`values`, `subunits` and `units`), and a string for an ID column name (ID). You can turn of printing information to the console with `verbose`. 
-
-```{r checkData, eval=FALSE}
-checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
-```
-
-Examples of data frames for `values`, `subunits` and `units` can be found by typing `inputList` in the console.
-
-#### checkDesign()
-
-`checkDesign()` checks whether a data frame corresponds to a particular rotated block design, i.e. whether all persons have valid codes on all items they were presented with and one consistent missing code for all items they were not presented with.
-
-The function also needs a data frame to be checked (`dat`), as well as data frames containing information on the number and column names of blocks in each booklet (`booklets`), on the names of subunits and their order within each block (`blocks`) and about which participant worked on which booklet (`rotation`). `sysMis` specifies the missing code for items that were not administered to a participant and `id` indicates the name of the participant identifier variable in `dat`. 
-
-`subunits` is an optional argument to identify the names of recoded subunits. And you can turn off printing information with `verbose`. 
-
-```{r checkDesign, eval=FALSE}
-checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID", subunits = NULL, verbose = TRUE)
-```
-
-`inputDat` and `inputList` are examples on how these data frames are supposed to look like. When you copy and paste the following code in your console, you can look at the data frames. 
-
-```{r checkDesign examples, eval=FALSE}
-inputDat
-inputList
-```
-
-
-### Merging Data
-
-Now that we checked that the data frames meet our requirements, we can merge a list of data frames into a single data frame by using `mergeData()`. For that we need a list of data frames, like `inputDat` which contains data of three booklets. The function returns a data frame containing unique cases and unique variables. All cases and all variables from the original data sets will be kept and matched.
-
-`mergeData()` provides detailed diagnostics about value mismatches. If two identically named columns in two data sets do not have identical values, NAs are replaced by valid codes stemming from the other data set(s) and if two different valid values are found, the first value will be kept and the other dropped, and the user will be informed about the mismatch. Additionally, `NA` resulting from the merge (e.g., in repeated block designs) can be replaced with a customed character missing to facilitate future data preparation of the merged data set. See `collapseMissings()` for details on supported character missings for other functions in the `eatPrep` package.
-
-When merging data frames with this function you need to specify at least two arguments: `newID` and `datList`. `newID` has to be a character vector length one indicating the name of the identifier variable (ID) in the merged data set and/or the name of the ID in every data frame in `datList`, if not specified differently in `oldIDs`. `datList` is the list of data frames to be merged, e.g. `inputDat`. 
-
-```{r mergeData1}
-mergedDataset <- mergeData(newID = "ID", datList = inputDat)
-str(mergedDataset)
-```
-
-Furthermore, you can specify some more arguments, but they have default options, so you don't need to. Here is an example where the IDs are changed via `oldIDs` and where NAs are replaced by "mbd" (missing by design). For more information use the help function `?mergeData`.
-
-```{r mergeData2}
-mergedDataset2 <- mergeData(newID = "idstud", datList = inputDat, oldIDs = c("ID", "ID", "ID"), addMbd = TRUE)
-str(mergedDataset2)
-```
-
-
-## Recoding the Data
-
-After importing the data and making sure it has the right format, the next step is to adjust the missing values. 
-
-#### recodeData()
-
-First, you recode data sets with several kinds of missings values. For that, you need recode data sets with special consideration of missing values. See `collapseMissings()` for supported types of missing values. `recodeData()` recodes the specified data frames and will give warnings, if missing or incomplete recode information is found. Values without recode information will not be recoded. 
-
-Examples of data frames `values` and `subunits` can be found when copy-pasting the following code in you console: 
-
-```{r exmaple recode data frames, eval=FALSE}
-inputList$values
-inputList$subunits
-```
-
-`recodeData()` uses the recode information from those two data frames and recodes the variables on `dat` accordingly. The columns will be named according to the specifications in `subunits$subunitRecoded`, if `subunits` is not provided, item names will not be changed for recoded items. 
-
-```{r recodeData}
-datRec <- recodeData(dat = inputDat[[1]], values = inputList$values, subunits = inputList$subunits, verbose = TRUE)
-str(datRec)
-```
-
-#### mnrCoding()
-
-Then you can convert missing responses coded as "missing by intention" (`mbi`) at the end of a block of items to "missing not reached" (`mnr`) via `mnrCoding()`. The function returns a data frame with "missing not reached" coded as `mnr`. For each person with at least one `mnr` in the returned data set the names of recoded variables are given as an attribute to `dat`.  
-
-For that to work you need to specify the following arguments, as they don't have any default settings:
-
-|Argument|Explanation|
-|-|-|
-|**dat** |A data set. Missing by intention needs to be coded `mbi`|
-|**pid**| Name or column number of the identifier (ID) variable in `dat`| 
-| **rotation.id**| A character vector of length 1 indicating the column name of the test booklet identifier in `dat`|
-| **blocks**| A data frame containing the sequence of subunits in each block in long format. The column names need to be `subunit`, `block`, `subunitBlockPosition`|
-| **booklets**| A data frame containing the sequence of blocks in each booklet in wide format. The column names need to be `booklet`, `block1`, `block2`, `block3`, ...|
-| **breaks**| Number of blocks after which `mbi` shall be recoded to `mnr`, e.g., `c(1,2)` to specify breaks after the first and second block|
-
-There are more arguments with default values which to you can specify, but don't have to. 
-
-`nMbi`, for instance, specifies the number of subunits at the end of a block that need to be coded `mbi`. The default is 2, i.e. if the last and second to last subitem in a block are coded `mbi`, both subunits, as well as the preceding subunits coded `mbi`, will be recoded to `mnr`. If `nMbi` is larger than the number of subunits in a given block, no subitem in this block will be recoded. If all subunits in a block are coded `mbi`, none of them will be recoded to `mnr`. ``nMbi` needs to be > 0. 
-
-`subunits` has the default `NULL`, but when you specify a data frame, `recodeMbiToMnr` expects to find the recoded subunits in `dat`.
-
-Examples for the data frames `booklets`, `blocks`, `rotation` and `subunits` can be found via `inputList`. Here is an example use case of `mnrCoding()`. The first two functions (`automateDataPretatration()` and `mergeData()`) create the data frame `dat` for `mnrCoding()`. 
-
-```{r mnrCoding setup, message=FALSE}
-prepDat <- automateDataPreparation(inputList = inputList, 
-    datList = inputDat, readSpss = FALSE, checkData=FALSE, 
-    mergeData = TRUE, recodeData=TRUE, aggregateData=FALSE, 
-    scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
-prepDat2 <- mergeData("ID", list(prepDat, inputList$rotation))
-```
-
-```{r mnrCoding example}
-mnrDat <- mnrCoding(dat = prepDat2, pid = "ID", 
-    booklets = inputList$booklets, blocks = inputList$blocks, 
-    rotation.id = "booklet", breaks = c(1, 2), 
-    subunits = inputList$subunits, nMbi = 2, mbiCode = "mbi", 
-    mnrCode = "mnr", invalidCodes = c("mbd", "mir", "mci"), 
-    verbose = TRUE)
-```
-
-Type `?mnrCoding` into your console to learn more. 
-
-## Aggregating the Data
-
-After recoding missing values, the subunits are combined one by one via `aggregateData()`.
-
-This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
-
-Optionally, you can specify how missing values should be aggregated (`aggregatemissings`) like in the example, or which column names the returned data frame should have (`recodedData`), for instance. Type `?aggregateData` into your console to learn more. 
-
-```{r aggregateData prep aggregatemissings example}
-am <- matrix(c(
-  "vc" , "mvi", "vc" , "mci", "err", "vc" , "mbi", "err",
-  "mvi", "mvi", "err", "mci", "err", "err", "err", "err",
-  "vc" , "err", "mnr", "mci", "err", "mir", "mnr", "err",
-  "mci", "mci", "mci", "mci", "err", "mci", "mci", "err",
-  "err", "err", "err", "err", "mbd", "err", "err", "err",
-  "vc" , "err", "mir", "mci", "err", "mir", "mir", "err",
-  "mbi", "err", "mnr", "mci", "err", "mir", "mbi", "err",
-  "err", "err", "err", "err", "err", "err", "err", "err" ),
-  nrow = 8, ncol = 8, byrow = TRUE)
-
-dimnames(am) <-
-  list(c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"),
-       c("vc" ,"mvi", "mnr", "mci",  "mbd", "mir", "mbi", "err"))
-```
-
-```{r aggregateData example}
-# using datRec from the chapter "recodeData()"
-datAggr <- aggregateData(datRec, inputList$subunits, inputList$units,
-    aggregatemissings = am, rename = TRUE, recodedData = TRUE,
-    suppressErr = TRUE, recodeErr = "mci", verbose = TRUE)
-```
-
-## Scoring the Data
-
-The next step is to score data set with special consideration of missing values. The function `scoreData()` is very similar to `recodeData()`, but with a few defaults that are better suited for scoring. `scoreData()` will give warnings when incomplete scoring information is found. Values without scoring information will not be scored.
-
-Again, you need to specify three data frames. One data frame that you get after completing the steps you did so far or by using `automateDataPrepatation` (`dat`), one with information about the scoring of units (`unitrecodings`), and one with subunit information (`subunits`). Examples for the last two data frames can be found via `inputList`.
-
-```{r automateDataPreparation for scoreData, message=FALSE}
-prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
-    readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
-    aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
-```
-
-```{r scoreData example}
-datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
-    verbose = TRUE)
-```
-
-## Collapsing the Data
-
-The last step is to recode character missings to numerical types like 0 or NA with `collapseMissings()`. All variables need to be converted to `numeric`, as well, so you can pass the data set to `eatModel` afterwards. 
-
-You need the data frame that is returned by `recodeData`, which we called `datRec` earlier (`dat`). 
-
-`missing.rule` is a list containing information which character missings should be converted to `0`or `NA`. It has default settings, but you can adapt them if needed. Type `?collapseMissings` into your console to learn more. 
-
-```{r collapseMissings example}
-datColMis <- collapseMissings(datRec)
-```
-
-After doing that you should have a data frame that you can now use for further processing with the `eatModel` package.
