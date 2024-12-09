@@ -5,6 +5,7 @@ importFrom(irr, agree, kappa2)
 importFrom(readxl, read_excel)
 importFrom(foreign, write.foreign, read.spss)
 importFrom(reshape2, dcast, melt)
+importFrom(tidyr, pivot_longer, pivot_wider)
 importFrom(eatTools, asNumericIfPossible, crop, set.col.type, multiseq,
            insert.col, existsBackgroundVariables, whereAre, halveString,
            recodeLookup, addLeadingZerosToCharInt)

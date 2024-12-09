@@ -1,5 +1,5 @@
 visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
-                               useGroups = NULL) {
+                               useGroups = NULL, positions = FALSE) {
   cli_setting()
 
   lapply(list(dat, subsetInfo), checkmate::assert_data_frame, min.rows = 1)
@@ -7,12 +7,18 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
   checkmate::assert_scalar(ID)
   stopifnot(ID %in% names(dat))
   stopifnot(ID %in% names(subsetInfo))
+  stopifnot("datCols" %in% names(subsetInfo))
 
   checkmate::assert_scalar(toRecodeVal)
   checkmate::assert_character(useGroups, len = 1, null.ok = TRUE)
+  checkmate::assert_logical(positions, len = 1)
 
   if(!is.null(useGroups)) {
     stopifnot(useGroups %in% names(subsetInfo))
+  }
+
+  if(isTRUE(positions)) {
+
   }
 
   if(any(is.na(subsetInfo))) {
@@ -53,6 +59,15 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
     vars <- unique(subsetInfo$datCols[subsetInfo[,ID] %in% ll])
     sdat <- datM[datM[,ID] %in% ll, c(ID, vars)]
 
+    if(all(c("blockPosition", "subunitBlockPosition") %in% names(subsetInfo)) & is.null(useGroups)) {
+      vars2 <- subsetInfo[subsetInfo[,ID] %in% ll, c("datCols", "blockPosition", "subunitBlockPosition")]
+      vars2 <- set.col.type(vars2)
+      vars_long <- tidyr::pivot_longer(vars2, cols = -datCols, names_to = "variable", values_to = "value")
+      vars_transposed <- data.frame(tidyr::pivot_wider(vars_long, names_from = "datCols", values_from = "value"))
+      names(vars_transposed)[1] <- ID
+      sdat <- rbind(sdat[,match(names(vars_transposed), names(sdat))], vars_transposed)
+    }
+
     if("comment" %in% names(subsetInfo)) {
       commt <- unique(subsetInfo$comment[subsetInfo[,ID] %in% ll])
     }
@@ -85,7 +100,12 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
     print_non_na_chunks(df = sdat, ID = ID)
     cli::cli_par(); cli::cli_end()
     cli::cli_alert("Table of Values and NAs:")
-    count_values(df = sdat, ID = ID)
+    #count_values(df = sdat, ID = ID)
+    if(is.null(useGroups)) {
+      print(table(unlist(sdat[1,-which(names(sdat) %in% ID)])))
+    } else {
+      print(table(unlist(sdat[,-which(names(sdat) %in% ID)])))
+    }
 
     # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
     #
@@ -164,7 +184,9 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
     }
 
     if(is.null(useGroups)) {
-      captureInteraction <- rbind(captureInteraction, data.frame(ID=ll, choice = choice1, timeStamp=Sys.time()))
+      newCI <- data.frame(ID=ll, choice = choice1, timeStamp=Sys.time())
+      names(newCI)[1] <- ID
+      captureInteraction <- rbind(captureInteraction, newCI)
     } else {
       captureInteraction <- rbind(captureInteraction, data.frame(IDgroup=pp, choice = choice1, timeStamp=Sys.time()))
       names(captureInteraction)[1] <- useGroups
