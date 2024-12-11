@@ -3,15 +3,16 @@
 \title{Inspect data subsets visually and recode instantaneously}
 \description{
 This function facilitates the manual inspection and recoding of data subsets. For example, if a class of students in a large assessment is flagged with an issue such as 'audio was broken,' you may want to verify the validity of their response patterns. If their responses seem invalid, you can choose to recode the entire class to a value like 'missing coding impossible' (mci), which is typically treated as NA during IRT scaling later on. The function allows you to visually review all flagged subsets sequentially and make interactive decisions on whether to recode their data.}
-\usage{visualSubsetRecode(dat, subsetInfo, ID, toRecodeVal="mci", useGroups=NULL,
-                            positions=FALSE)}
+\usage{visualSubsetRecode(dat, subsetInfo, ID = "ID", toRecodeVal=-91,
+                      useGroups = NULL, positions = FALSE, comments = FALSE)}
 \arguments{
   \item{dat}{A data frame containing individuals and variables in a wide format. See \code{prepDat} in examples for an example.}
-  \item{subsetInfo}{A data frame where the column names must include the following: [ID]: Specifies the ID name in the first data set and identifies individual persons who are flagged. datCols: Indicates the variable(s) on which the person identified by the ID has been flagged. useGroups (optional): Identifies groups of persons that should be displayed together during the review process. See \code{subsetInfoMax} in examples for an example.}
+  \item{subsetInfo}{A data frame with the following columns (names are important!): [ID]: ID-name as specified via ID argument. Is ID name in the first data set and identifies individual persons who are flagged. "datCols": Indicates the variable(s) on which the person identified by the ID has been flagged. [useGroups] (optional): group-name as specified via useGroups argument. Identifies groups of persons that should be displayed together during the review process. See \code{subsetInfoMax} in examples for an example.}
   \item{ID}{A character vector of length 1 indicating the name of the case identifier variable in \code{dat}. Default is \code{"ID"}.}
   	\item{toRecodeVal}{Optional: A scalar indicating recode string. }
   	\item{useGroups}{Optional: A character string indicating the name of the group identifier column in subsetInfo. Used for group level subsetting. }
-  	\item{positions}{Logical: Whether subsetInfo contains columns "blockPosition" and "subunitBlockPosition". }
+  	\item{positions}{Logical: Whether subsetInfo contains columns "blockPosition" and "subunitBlockPosition" (names are important!). These will be displayed when visually inspecting the data and more options to the menu will be added.}
+  	\item{comments}{Logical: Whether subsetInfo contains column "comment" (name is important!). These will be displayed when visually inspecting the data.}
 }
 \value{
   The function returns a list containing two data frames. The first data frame is the modified input data, identical to the original except for the changes made during the review process. The second data frame, stored in subsetInfo, documents the choices made during the recoding process.

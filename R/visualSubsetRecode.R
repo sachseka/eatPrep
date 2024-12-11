@@ -1,5 +1,5 @@
-visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
-                               useGroups = NULL, positions = FALSE) {
+visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
+                               useGroups = NULL, positions = FALSE, comments = FALSE) {
   cli_setting()
 
   lapply(list(dat, subsetInfo), checkmate::assert_data_frame, min.rows = 1)
@@ -18,7 +18,11 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
   }
 
   if(isTRUE(positions)) {
+    stopifnot(all(c("blockPosition", "subunitBlockPosition") %in% names(subsetInfo)))
+  }
 
+  if(isTRUE(comments)) {
+    stopifnot(c("comment") %in% names(subsetInfo))
   }
 
   if(any(is.na(subsetInfo))) {
@@ -59,7 +63,8 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
     vars <- unique(subsetInfo$datCols[subsetInfo[,ID] %in% ll])
     sdat <- datM[datM[,ID] %in% ll, c(ID, vars)]
 
-    if(all(c("blockPosition", "subunitBlockPosition") %in% names(subsetInfo)) & is.null(useGroups)) {
+# sdat nach long, mit Block und Posi mergen
+    if(isTRUE(positions) & is.null(useGroups)) {
       vars2 <- subsetInfo[subsetInfo[,ID] %in% ll, c("datCols", "blockPosition", "subunitBlockPosition")]
       vars2 <- set.col.type(vars2)
       vars_long <- tidyr::pivot_longer(vars2, cols = -datCols, names_to = "variable", values_to = "value")
@@ -68,7 +73,54 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
       sdat <- rbind(sdat[,match(names(vars_transposed), names(sdat))], vars_transposed)
     }
 
-    if("comment" %in% names(subsetInfo)) {
+    if(isTRUE(positions) & !is.null(useGroups)) {
+      sdatl <- tidyr::pivot_longer(sdat, cols=vars, names_to = "datCols", values_drop_na = TRUE)
+      sI <- subsetInfo[subsetInfo[,ID] %in% ll, c(ID, "datCols", "blockPosition", "subunitBlockPosition")]
+      sI <- set.col.type(sI)
+      sdatl2 <- merge(sdatl, sI, by=c("IDSTUD", "datCols"), all.x=TRUE, all.y=FALSE)
+      sdatl2 <- sdatl2[order(sdatl2$IDSTUD, sdatl2$blockPosition, sdatl2$subunitBlockPosition),]
+      chunks <- split(sdatl2, sdatl2$IDSTUD)
+      extract_cols <- function(df) {
+        df[, c(2, 4, 5)]  # Extract columns 1, 3, and 4
+      }
+      standardized <- lapply(chunks, function(df) {
+        paste(as.matrix(extract_cols(df)), collapse = ",")  # Convert to a single string
+      })
+      unique_groups <- unique(standardized)  # Get unique standardized strings
+      grouped_indices <- lapply(unique_groups, function(u) {
+        which(standardized == u)  # Find indices of matching entries
+      })
+      merged_dfs <- lapply(grouped_indices, function(index) {
+        if(length(index)==1) {
+            ret <- chunks[[index]]
+            names(ret)[which(names(ret) %in% "value")] <- ret[1,1]
+            ret$subunitBlockPosition <- as.numeric(ret$subunitBlockPosition)
+            ret <- ret[order(ret$blockPosition, ret$subunitBlockPosition),]
+            ret$subunitBlockPosition <- NULL
+            return(ret[,-1])
+          }
+        if(length(index)>1) {
+            ch2 <- lapply(chunks[index], function(ret) {
+              names(ret)[which(names(ret) %in% "value")] <- ret[1,1]
+              return(ret[,-1])
+            ch2$subunitBlockPosition <- as.numeric(ch2$subunitBlockPosition)
+            })
+            ret2 <- mergeData("datCols", ch2)
+            ret2 <- ret2[order(ret2$blockPosition, as.numeric(ret2$subunitBlockPosition)),]
+            ret2 <- ret2[, c("datCols", setdiff(names(ret2), c("datCols", "blockPosition", "subunitBlockPosition")), "blockPosition")]
+            return(ret2)
+        }
+      })
+      sdat <- lapply(merged_dfs, function(xx) {
+        xx <- data.frame(t(xx))
+        names(xx) <- xx[1,]
+        xx <- xx[-1,]
+        return(xx)
+      })
+    }
+
+
+    if(isTRUE(comments)) {
       commt <- unique(subsetInfo$comment[subsetInfo[,ID] %in% ll])
     }
 
@@ -78,14 +130,18 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
       cli::cli_alert("group {.testtakergroup-label {pp}}", wrap = TRUE)
     }
     cli::cli_alert("{length(ll)} case{?s}: {.testtaker-label {ll}}", wrap = TRUE)
-    cli::cli_alert("{length(vars)} variable{?s}: {.unit-key {vars}}", wrap = TRUE)
+    if (length(vars) > 20) {
+      cli::cli_alert("{length(vars)} variable{?s}: {.unit-key {c(head(vars, 20), '...')}}", wrap = TRUE)
+    } else {
+      cli::cli_alert("{length(vars)} variable{?s}: {.unit-key {vars}}", wrap = TRUE)
+    }
 
-    if("comment" %in% names(subsetInfo)) {
+    if(isTRUE(comments)) {
       cli::cli_par(); cli::cli_end()
 
       cli::cli_alert("Issues:")
       cli::cli_ul(id = "comments")
-      if("comment" %in% names(subsetInfo)) {
+      if(isTRUE(comments)) {
         #cli::cli_alert("{.comment {commt}}", wrap = TRUE)
         cli::cli_li(commt, class = "comment")
       }
@@ -96,29 +152,46 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
 
     # cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
     #print(sdat)
+    if(inherits(sdat, "list")) {
+      print(sdat)
+    } else {
+      print_non_na_chunks(df = sdat, ID = ID)
+    }
 
-    print_non_na_chunks(df = sdat, ID = ID)
     cli::cli_par(); cli::cli_end()
     cli::cli_alert("Table of Values and NAs:")
     #count_values(df = sdat, ID = ID)
     if(is.null(useGroups)) {
-      print(table(unlist(sdat[1,-which(names(sdat) %in% ID)])))
+      print(table(unlist(datM[datM[,ID] %in% ll, vars])))
     } else {
-      print(table(unlist(sdat[,-which(names(sdat) %in% ID)])))
+      print(table(unlist(datM[datM[,ID] %in% ll, vars])))
     }
 
     # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
     #
     #
-    choices1 <- c(
-      "yes, all values",
-      "yes, all non-valid values (-99, -98, -97, -96)",
-      "no",
-      "flag, maybe later",
-      "go back",
-      "reset to original values",
-      "exit visualSubsetRecode"
-    )
+    if(isTRUE(positions)) {
+      choices1 <- c(
+        "yes, all values",
+        "yes, all non-valid values (-99, -98, -97, -96)",
+        "yes, specific blocks (submenu to select blocks follows)",
+        "no",
+        "flag for later review",
+        "go back to previous subset",
+        "reset to original values",
+        "exit visualSubsetRecode"
+      )
+      } else {
+          choices1 <- c(
+            "yes, all values",
+            "yes, all non-valid values (-99, -98, -97, -96)",
+            "no",
+            "flag for later review",
+            "go back to previous subset",
+            "reset to original values",
+            "exit visualSubsetRecode"
+          )
+    }
     choices2 <- c(
       "yes",
       "go back"
@@ -145,9 +218,14 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
           cli::cli_alert("group {.testtakergroup-label {pp}}", wrap = TRUE)
         }
         cli::cli_alert("{length(ll)} case{?s}: {.testtaker-label {ll}}", wrap = TRUE)
-        cli::cli_alert("{length(vars)} variable{?s}: {.unit-key {vars}}", wrap = TRUE)
+        if (length(vars) > 20) {
+          cli::cli_alert("{length(vars)} variable{?s}: {.unit-key {c(head(vars, 20), '...')}}", wrap = TRUE)
+        } else {
+          cli::cli_alert("{length(vars)} variable{?s}: {.unit-key {vars}}", wrap = TRUE)
+        }
 
-        if("comment" %in% names(subsetInfo)) {
+
+        if(isTRUE(comments)) {
           #cli::cli_alert("{.comment {commt}}", wrap = TRUE)
           cli::cli_li(commt, class = "comment")
         }
@@ -155,9 +233,20 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
         # cli::cli_inform("Display subset ({i} of {nn}): {ll} (case{?s}) x {vars} (variable{?s}):", wrap = TRUE)
         #print(sdat)
 
-        print_non_na_chunks(sdat, ID = ID)
-        count_values(df = sdat, ID = ID)
-
+        if(inherits(sdat, "list")) {
+          print(sdat)
+        } else {
+          print_non_na_chunks(df = sdat, ID = ID)
+        }
+        #count_values(df = sdat, ID = ID)
+        cli::cli_par(); cli::cli_end()
+        cli::cli_alert("Table of Values and NAs:")
+        if(is.null(useGroups)) {
+          print(table(unlist(datM[datM[,ID] %in% ll, vars])))
+        } else {
+          print(table(unlist(datM[datM[,ID] %in% ll, vars])))
+        }
+        cli::cli_par(); cli::cli_end()
         # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
         cli::cli_alert_info("Do you want to recode this subset to '{toRecodeVal}'?")
         choice1 <- menu(choices1)
@@ -176,8 +265,23 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
           datM[datM[,ID] %in% ll, vars][(!is.na(datM[datM[,ID] %in% ll, vars])) & ((datM[datM[,ID] %in% ll, vars]=="-99")| (datM[datM[,ID] %in% ll, vars]=="-98")| (datM[datM[,ID] %in% ll, vars]=="-97") | (datM[datM[,ID] %in% ll, vars]=="-96") )] <- toRecodeVal
           cli::cli_alert_success("Subsets' non-valid values successfully recoded to '{toRecodeVal}'!")
         } else {
-          if(choice1 != "exit visualSubsetRecode") {
-            cli::cli_alert_info(paste0("No recoding action was undertaken this time."))
+          if(choice1 == "yes, specific blocks (submenu to select blocks follows)") {
+              avBlocks <- unique(subsetInfo$blockPosition[subsetInfo[,ID] %in% ll])
+              choiCL <- list()
+              for(ii in seq(along=avBlocks)) {
+                  choicesBL <- paste(c("yes, block", "no, not block "), ii)
+                  choiCL[[ii]] <- menu(choicesBL)
+              }
+              recBlocks <- avBlocks[unlist(choiCL) == 1]
+              for(llID in ll) {
+                vars3 <- unique(subsetInfo$datCols[subsetInfo[,ID] %in% llID & subsetInfo$blockPosition %in% recBlocks])
+                datM[datM[,ID] %in% llID, vars3][!is.na(datM[datM[,ID] %in% llID, vars3])] <- toRecodeVal
+              }
+              cli::cli_alert_success("Blocks '{recBlocks}' successfully recoded to '{toRecodeVal}'!")
+          } else {
+            if(choice1 != "exit visualSubsetRecode") {
+              cli::cli_alert_info(paste0("No recoding action was undertaken this time."))
+            }
           }
         }
       }
@@ -188,11 +292,12 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = "mci",
       names(newCI)[1] <- ID
       captureInteraction <- rbind(captureInteraction, newCI)
     } else {
-      captureInteraction <- rbind(captureInteraction, data.frame(IDgroup=pp, choice = choice1, timeStamp=Sys.time()))
-      names(captureInteraction)[1] <- useGroups
+      newCIg <- data.frame(IDgroup=pp, choice = choice1, timeStamp=Sys.time())
+      names(newCIg)[1] <- useGroups
+      captureInteraction <- rbind(captureInteraction, newCIg)
     }
 
-    if(choice1 == "go back") {
+    if(choice1 == "go back to previous subset") {
       if(i == 1) {
         #return(list(datM, captureInteraction))
         cli::cli_alert_danger("--- No previous subset to go back to. ---", wrap = TRUE)
@@ -261,28 +366,28 @@ print_non_na_chunks <- function(df, ID="ID") {
     }
   }
 }
-
-count_values <- function(df, ID = "ID") {
-  if(dim(df)[1] == 1) {
-    prep_df <- df[names(df) != ID]
-    rownames(prep_df) <- df[[ID]]
-
-    tab_df <- apply(prep_df, 1, table, useNA = "always")
-
-    print(tab_df)
-  } else {
-    print("")
-    # Den Fall müsste man noch ergänzen...
-    # prep_df <- df[names(df) != ID]
-    # rownames(prep_df) <- df[[ID]]
-    #
-    # tab_df <- lapply(1:nrow(prep_df),
-    #                  function(row) apply(prep_df[row,], 1, function(x) table(x, useNA = "always")))
-    #
-    # all_rows <- sort(unique(unlist(lapply(tab_df, rownames))))
-    #
-    # df1 <- tab_df[[1]][all_rows, , drop = FALSE]
-    #
-    # cbind(tab_df[[1]],tab_df[[3]])
-  }
-}
+#
+# count_values <- function(df, ID = "ID") {
+#   if(dim(df)[1] == 1) {
+#     prep_df <- df[names(df) != ID]
+#     rownames(prep_df) <- df[[ID]]
+#
+#     tab_df <- apply(prep_df, 1, table, useNA = "always")
+#
+#     print(tab_df)
+#   } else {
+#     print("")
+#     # Den Fall müsste man noch ergänzen...
+#     # prep_df <- df[names(df) != ID]
+#     # rownames(prep_df) <- df[[ID]]
+#     #
+#     # tab_df <- lapply(1:nrow(prep_df),
+#     #                  function(row) apply(prep_df[row,], 1, function(x) table(x, useNA = "always")))
+#     #
+#     # all_rows <- sort(unique(unlist(lapply(tab_df, rownames))))
+#     #
+#     # df1 <- tab_df[[1]][all_rows, , drop = FALSE]
+#     #
+#     # cbind(tab_df[[1]],tab_df[[3]])
+#   }
+# }
