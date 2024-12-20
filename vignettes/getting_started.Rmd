@@ -42,7 +42,7 @@ We use `eatPrep` for the standardization and automation of the handling of such 
 
 ### Features
 
-The main purpose of `eatPrep` is to read, score, aggregate and merge data from a regular `SPSS` (`.sav`) data file (via the function `readSpss()`) and metadata from databases (`readDaemonXlsx()`) and Excel spreadsheets (`readMerkmalXlsx()`). Additional functions include checking the data (`checkData()`), meta data (`checkInputList()`), and the design (`checkDesign()`), recoding of (missing) values (`recodeData()`, `mnrCoding()`, `aggregateData()`, `scoreData()`,`collapseMissings()`), working with rater data (`meanAgree()`, `meanKappa()`), evaluating item categories (`catPbc()`, `evalPbc()`) and exporting prepared or raw item data sets to different formats (`writeSpss()`, `prep2GADS()`). Most of this can be done with a single function call to `automateDataPreparation()`.
+The main purpose of `eatPrep` is to read, score, aggregate and merge data from a regular `SPSS` (`.sav`) data file (via the function `readSpss()`) and meta data from databases (`readDaemonXlsx()`) and Excel spreadsheets (`readMerkmalXlsx()`). Additional functions include checking the data (`checkData()`), meta data (`checkInputList()`), and the design (`checkDesign()`), recoding of (missing) values (`recodeData()`, `mnrCoding()`, `aggregateData()`, `scoreData()`,`collapseMissings()`), working with rater data (`meanAgree()`, `meanKappa()`), evaluating item categories (`catPbc()`, `evalPbc()`) and exporting prepared or raw item data sets to different formats (`writeSpss()`, `prep2GADS()`). Most of this can be done with a single function call to `automateDataPreparation()`.
 
 |  |
 |------------------------------------------------------------------------|
@@ -143,7 +143,7 @@ Information/meta data about items is stored in many different ways, e.g., databa
 
 Sheets have specific names, also the columns in those sheets have specific names.
 
-`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content).
+`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional meta data about the items (such as information about the task's content).
 
 ```{r tempsetup}
 # Example: inputMinimal

@@ -118,7 +118,7 @@ kable(Mtypes, caption = "**Missing Types**")
 
 ## Input
 
-`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content). 
+`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional meta data about the items (such as information about the task's content). 
 
 For more Information on how the different layers or `Input Tables` look like, please see the [Getting Started Vignette](./vignettes/getting_started.Rmd).
 
@@ -278,7 +278,7 @@ str(datRec)
 
 After recoding missing values, the subunits are combined one by one via `aggregateData()`.
 
-![tbd: what are items and what are subitems ad what is going to be aggregated](cyclehire1.jpg)
+![tbd: what are items and what are subitems ad what is going to be aggregated](images/cyclehire1.jpg)
 
 This function needs three data frames: one containing the data to be aggregated (`dat`), one containing the subunit information (`subunits`), and one containing the unit information (`units`). 
 
