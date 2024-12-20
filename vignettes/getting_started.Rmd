@@ -22,7 +22,7 @@ library(knitr)
 
 ## Installation
 
-`eatPrep` is on GitHub. You can install R packages from GitHub via the `remotes` package. With the following code you can download both packages `remotes` and `eatPrep`. 
+`eatPrep` is on GitHub. You can install R packages from GitHub via the `remotes` package. With the following code you can download both packages `remotes` and `eatPrep`.
 
 ```{r installing and loading, warning=FALSE}
 #install.packages("remotes")
@@ -32,49 +32,47 @@ library(eatPrep)
 
 ## Introduction
 
-The goal of `eatPrep`, short for `Educational Assesment Tools: Preparation`, is to automate the preparation of item response test data; especially but not exclusively for typical use cases at the *Institute for Educational Quality Improvement* (IQB).
-Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDaemon`.
+The goal of `eatPrep`, short for `Educational Assesment Tools: Preparation`, is to automate the preparation of item response test data; especially but not exclusively for typical use cases at the *Institute for Educational Quality Improvement* (IQB). Therefore it works together with IQB-specific applications such as the `ItemDB` or `ZKDaemon`.
 
-#### Paper Competence Data Preparation
+### Paper Competence Data Preparation
 
 We usually give students paper tests or questionnaires that they fill out by hand, while being supervised. The results are later collected centrally. These tests are then scanned. For multiple choice questions or tick questions an optic scanning system is used that recognizes marked fields automatically and transmits them to a digital data bank. Trained coders evaluate the (partially) open questions. This data is usually in a SPSS (.sav) format.
 
-We use `eatPrep` for the standardization and automation of the handling of such data. 
+We use `eatPrep` for the standardization and automation of the handling of such data.
 
-#### Features
+### Features
 
 The main purpose of `eatPrep` is to read, score, aggregate and merge data from a regular `SPSS` (`.sav`) data file (via the function `readSpss()`) and metadata from databases (`readDaemonXlsx()`) and Excel spreadsheets (`readMerkmalXlsx()`). Additional functions include checking the data (`checkData()`), meta data (`checkInputList()`), and the design (`checkDesign()`), recoding of (missing) values (`recodeData()`, `mnrCoding()`, `aggregateData()`, `scoreData()`,`collapseMissings()`), working with rater data (`meanAgree()`, `meanKappa()`), evaluating item categories (`catPbc()`, `evalPbc()`) and exporting prepared or raw item data sets to different formats (`writeSpss()`, `prep2GADS()`). Most of this can be done with a single function call to `automateDataPreparation()`.
 
-||
-|--|
-|**Automation** of Data Preparation|
-|Various **tests**, plausibility checks and diagnostics|
-|Handling of many different **missing types**, if desired retention until the end (incl. missing-not-reached calculation)|
-|Additional **tools** (category separation, rater functions, semi-manual data cleansing, export functions...)|
-
+|  |
+|------------------------------------------------------------------------|
+| **Automation** of Data Preparation |
+| Various **tests**, plausibility checks and diagnostics |
+| Handling of many different **missing types**, if desired retention until the end (incl. missing-not-reached calculation) |
+| Additional **tools** (category separation, rater functions, semi-manual data cleansing, export functions...) |
 
 ## Data Structures of Paper Competency Data at the IQB
 
-In a prototypical scenario, we are constructing a test at the IQB, e.g. for educational purposes. For our pilot study, we have created several overlapping booklets and a variety of items with different item formats (constructed response, multiple choice).  
+In a prototypical scenario, we are constructing a test at the IQB, e.g. for educational purposes. For our pilot study, we have created several overlapping booklets and a variety of items with different item formats (constructed response, multiple choice).\
 Thereby, the data consists of several layers:
 
-|||
-|-|-|
-|**booklets** |containing blocks|
-|**blocks/cluster**| containing tasks|
-|**tasks**| contain units (=items) (usually for a common stimulus/testlet)
-| **units**| containing subunits/subitems|
-| **subunits**| having values |
-| **values**| including missings and recode values|
-|**valueRecodes**| also "Scores": A mapping of the original values to a smaller number of categories (usually at least True/False/Missing, i.e. 1/0/NA) that are better suited for IRT scaling|
+|  |  |
+|------------------------------------|------------------------------------|
+| **booklets** | containing blocks |
+| **blocks/cluster** | containing tasks |
+| **tasks** | contain units (=items) (usually for a common stimulus/testlet) |
+| **units** | containing subunits/subitems |
+| **subunits** | having values |
+| **values** | including missings and recode values |
+| **valueRecodes** | also "Scores": A mapping of the original values to a smaller number of categories (usually at least True/False/Missing, i.e. 1/0/NA) that are better suited for IRT scaling |
 
 **The goal is to**:
 
-1. Recode all items and subitems
-2. Aggregate subitems
-3. Recode aggregated subitems
+1.  Recode all items and subitems
+2.  Aggregate subitems
+3.  Recode aggregated subitems
 
-![](structure.jpg){width="400"}
+![](images/structure.jpg){width="400" style="display: block; margin: 0 auto"}
 
 ```{=html}
 <table>
@@ -87,22 +85,35 @@ Thereby, the data consists of several layers:
   </thead>
   <tbody>
     <tr>
-    <td><img src="cyclehire4.jpg" alt="Subitems, Items and Tasks" width="350" /></td>
-      <td style=width:100px; height:50px;><img src="cyclehire1.jpg" alt="Subitems, Items, Tasks, Values and Scores" width="350" /></td>
+    <td><img src="images/cyclehire4.jpg" alt="Subitems, Items and Tasks" width="300" /></td>
+      <td ><img src="images/cyclehire1.jpg" alt="Subitems, Items, Tasks, Values and Scores" width="300" /></td>
+    </tr>
+  </tbody>
+</table>
+```
+
+```{=html}
+<table>
+  <caption></caption>
+  <thead>
+    <tr>
+      <th>Tasks in blocks and blocks in booklets</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+    <td ><img src="images/bint.jpg" alt="Tasks in blocks and blocks in booklets" width="300" /></td>
     </tr>
   </tbody>
 </table>
 ```
 
 
+### Missing Values
 
-#### Data Structure
+Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that.
 
-#### Missing Values
-
-Now we would like to prepare the data collected in this way for scaling. In doing so, we would like to know if the booklets are speeded (number of mnr). Additionally, we intend to use different missing treatments for the actual scaling, so we preserve missing values during data preparation and recode them right before scaling the data. `eatPrep` can help us with all of that. 
-
-Here is an overview for different value types the IQB uses: 
+Here is an overview for different value types the IQB uses:
 
 ```{r missing types, echo=FALSE}
 mir98 <- c(-98, "mir", "missing invalid response",
@@ -123,34 +134,16 @@ kable(Mtypes, caption = "**Missing Types**")
 
 #### Representation of the Data Structure in eatPrep
 
+Now, how are booklets, blocks, tasks, items, subitems, values and scores stored in eatPreP?
 
+- analogous to a simple relational meta database: a list of several data frames with a predefined structure and fixed names
+- we need meta data about the items
 
---------------------------------------------------------------------------------
-                      old vignette
---------------------------------------------------------------------------------
-
-
-<!-- we also want to include additional information about the items (merkmalstabelle) -> PASST HIER EIGENTLICH GAR NICHT IN DIE DATENSTRUKTUR! -->
-<!-- And here is some additional information about the **items**: -->
-
-```{r item types, echo=FALSE}
-code <- c()
-label <- c()
-kurz <- c()
-recode_value <- c()
-#kable(Itypes <- data.frame(Code = code, Label = label, Abbr = kurz), caption = "**items types**")
-```
-
-
-## Input
-
-Information/metadata about items is stored in many different ways, e.g., databases, Excel sheets, sometimes even in item names. `eatPrep` requires this metadata to have a specific form, namely a series of relational tables. For `eatPrep` it is most convenient to store these tables in a list. When downloading the `eatPrep` package, you can find files with some example tables in the `data` folder. 
+Information/meta data about items is stored in many different ways, e.g., databases, Excel sheets, sometimes even in item names. `eatPrep` requires this meta data to have a specific form, namely a series of relational tables. For `eatPrep` it is most convenient to store these tables in a list. When downloading the `eatPrep` package, you can find files with some example tables in the `data` folder.
 
 Sheets have specific names, also the columns in those sheets have specific names.
 
-`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content). 
-
-<!--Example: inputList ? -->
+`inputMinimal` contains the bare minimum for all functions in `eatPrep` to work, `inputList` contains additional metadata about the items (such as information about the task's content).
 
 ```{r tempsetup}
 # Example: inputMinimal
@@ -164,10 +157,10 @@ inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", 
 ```
 
 ### Input Tables
+
 Let's look at the tables from bottom to top, starting with items and their values. In the values sheet, we define values and recode values for each subitem.
 
-Here we see 3 items (called units) from `inputList` bzw. `inputMinimal`.
-One mc (item 1), one short response (item 5), one item with 3 subitems short response (item 12)
+Here we see 3 items (called units) from `inputList` bzw. `inputMinimal`. One mc (item 1), one short response (item 5), one item with 3 subitems short response (item 12)
 
 ```{r inputList}
 items <- c("I01", "I05", "I12")
@@ -199,15 +192,57 @@ kable(inputMinimal$unitRecodings)
 
 The **minimal use case** is that each subitem corresponds to an item. In this case, the value sheet contains all information needed for recoding the items (apart from possibly renaming the recoded items).
 
-
-## Input Data
+### Input Data
 
 We have several overlapping booklets with several blocks in each booklet. Moreover, there is a unique identifier for each person and some additional information about each student like their gender or their socioeconomic status. There is one data set per booklet. In order to prepare the data, we need to construct one large data set.
 
-In order to do that we first need to read the data into R, check the data for invalid or or incorrect codes and then merge the data into one data set. In the following the different functions to do that are described. `inputDat` gives us a first idea on how the data is supposed to look like. 
+In order to do that we first need to read the data into R, check the data for invalid or or incorrect codes and then merge the data into one data set. In the following the different functions to do that are described. `inputDat` gives us a first idea on how the data is supposed to look like.
 
 ```{r inputDat}
 # looking at the data
 str(inputDat)
 ```
+
+## Functions in eatPrep
+
+Here you see an overview over the main functions of `eatPrep`. If you want to learn more about using this package for IRT analysis, this [vignette](/main_functions.Rmd) explains how to use these functions. 
+
+```{r outline functions, echo=FALSE}
+head1 <- c("**Reading in (Meta) Data**", "")
+head2 <- c("**Checks**", "")
+head3 <- c("**Merging, Recoding, Aggregating, Scoring**", "")
+head4 <- c("**Wrapper**", "")
+head5 <- c("**Export**", "")
+# 1
+read1 <- c("`readDaemonXlsx`", "read in the inputlist that was created using the EDV-tool 'ZKDaemon'.")
+read2 <- c("`readSpss`", "read in SPSS files.")
+read3 <- c("`readMerkmalXlsx`", "read in additional item and exercise attributes like processing time, formats, content categories, ...")
+# 2
+check1 <- c("`checkInputList`", "check the inputList for internal consistency.")
+check2 <- c("`checkData`", "check data sets according to item meta information and other plausibility checks of the data.")
+check3 <- c("`checkDesign`", "check data sets according to test design meta information.")
+# 3
+merge1 <- c("`mergeData`", "merging the data sets and diagnostics to ensure a fit.")
+recode1 <- c("`recodeData`", "recode the subitems according to meta information from the inputList.")
+aggregate1 <- c("`aggregateData`", "aggregate subitems into items.")
+score1 <- c("`scoreData`", "recode items that previously consisted out of subitems.")
+score2 <- c("`mnrCoding`", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
+# 4
+wrap1 <- c("`automateDataPreparation`", "wraps most of the other features into one big function.")
+# 5
+export1 <- c("`collapseMissings`", "recodes the missing types into predefined scores (usually 0.1, NA). Such a “collapster” R-data.frame can be passed directly to eatModel for scaling.")
+export2 <- c("`writeSpss`", "produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data.")
+export3 <- c("`prep2GADS`", "both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS.")
+
+outline <- rbind.data.frame(head1, read1, read2, read3,
+                            head2, check1, check2, check3,
+                            head3, merge1, recode1, aggregate1, score1, score2,
+                            head4, wrap1,
+                            head5, export1, export2, export3)
+names(outline) <- c("Function", "Explanation")
+kable(outline, caption = "**Functions Overview**")
+```
+
+
+
 
