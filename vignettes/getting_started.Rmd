@@ -68,11 +68,33 @@ Thereby, the data consists of several layers:
 | **values**| including missings and recode values|
 |**valueRecodes**| also "Scores": A mapping of the original values to a smaller number of categories (usually at least True/False/Missing, i.e. 1/0/NA) that are better suited for IRT scaling|
 
-The goal is to
+**The goal is to**:
 
-1. Recode all items & subitems
+1. Recode all items and subitems
 2. Aggregate subitems
 3. Recode aggregated subitems
+
+![](structure.jpg){width="400"}
+
+```{=html}
+<table>
+  <caption></caption>
+  <thead>
+    <tr>
+      <th>Subitems, Items and Tasks</th>
+      <th>Subitems, Items, Tasks, Values and Scores</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+    <td><img src="cyclehire4.jpg" alt="Subitems, Items and Tasks" width="350" /></td>
+      <td style=width:100px; height:50px;><img src="cyclehire1.jpg" alt="Subitems, Items, Tasks, Values and Scores" width="350" /></td>
+    </tr>
+  </tbody>
+</table>
+```
+
+
 
 #### Data Structure
 
