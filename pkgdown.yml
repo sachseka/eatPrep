@@ -3,7 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   getting_started: getting_started.html
-last_built: 2025-01-20T12:02Z
+last_built: 2025-01-29T08:01Z
 urls:
   reference: https://sachseka.github.io/eatPrep/reference
   article: https://sachseka.github.io/eatPrep/articles
