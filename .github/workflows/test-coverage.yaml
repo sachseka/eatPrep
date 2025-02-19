@@ -44,3 +44,5 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: sachseka/eatPrep
+          files: coverage.xml
+          fail_ci_if_error: true
