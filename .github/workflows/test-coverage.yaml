@@ -29,9 +29,7 @@ jobs:
       - name: Run test coverage
         run: |
           Rscript -e 'install.packages("covr")'
-          Rscript -e 'cov2 <- covr::package_coverage(type = "tests"); print(cov)'  # Debugging step
-          Rscript -e 'covr::to_cobertura(cov2, file = "coverage.xml")'
-          ls -lah  # Check if coverage.xml is generated
+          Rscript -e 'cov2 <- covr::package_coverage(type = "tests"); covr::to_cobertura(cov2, file = "coverage.xml")'
 
       - name: Show testthat output
         if: always()
