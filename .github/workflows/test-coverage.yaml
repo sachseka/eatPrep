@@ -26,7 +26,7 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
-      - name: name: Run test coverage
+      - name: Run test coverage
         run: |
           Rscript -e 'install.packages("covr")'
           Rscript -e 'cov2 <- covr::package_coverage(type = "tests"); print(cov)'  # Debugging step
