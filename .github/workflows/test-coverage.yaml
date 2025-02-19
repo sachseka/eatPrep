@@ -26,11 +26,12 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
-      - name: Run test coverage
+      - name: name: Run test coverage
         run: |
           Rscript -e 'install.packages("covr")'
-          Rscript -e 'covr::package_coverage(type = "tests")'
-          Rscript -e 'covr::codecov(quiet = FALSE, clean = FALSE, install_path = file.path(Sys.getenv("RUNNER_TEMP"), "package"))'
+          Rscript -e 'cov2 <- covr::package_coverage(type = "tests"); print(cov)'  # Debugging step
+          Rscript -e 'covr::to_cobertura(cov2, file = "coverage.xml")'
+          ls -lah  # Check if coverage.xml is generated
 
       - name: Show testthat output
         if: always()
