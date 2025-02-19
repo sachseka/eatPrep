@@ -52,3 +52,14 @@ jobs:
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+
+      - name: Run test coverage
+        run: |
+          Rscript -e 'install.packages("covr")'
+          Rscript -e 'covr::codecov()'
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
