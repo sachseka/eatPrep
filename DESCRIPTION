@@ -3,7 +3,7 @@ Type: Package
 Title: Prepare Data for IRT Analyses
 Version: 1.0.4
 Depends: R (>= 4.0.0), readxl
-Imports: dplyr, foreign, reshape2, irr, tidyr, eatTools (>= 0.7.7), irrCAC, combinat, cli (>= 3.6.1), eatGADS, checkmate, rcmdcheck
+Imports: dplyr, foreign, reshape2, irr, tidyr, eatTools (>= 0.7.7), irrCAC, combinat, cli (>= 3.6.1), eatGADS, checkmate
 Date: 2025-01-28
 Authors@R: c(
     person("Karoline A.", "Sachse", email = "karoline.sachse@iqb.hu-berlin.de", role = c("aut", "cre")),
