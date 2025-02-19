@@ -52,19 +52,3 @@ jobs:
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
-
-      - name: Run test coverage
-        run: |
-          Rscript -e 'install.packages("covr")'
-          Rscript -e 'covr::package_coverage(type = "tests")'
-          Rscript -e 'covr::codecov()'
-
-      - name: Debug coverage file
-        run: ls -R
-
-      - name: Upload coverage reports to Codecov
-          uses: codecov/codecov-action@v5
-          with:
-            token: ${{ secrets.CODECOV_TOKEN }}
-            slug: sachseka/eatPrep
-
