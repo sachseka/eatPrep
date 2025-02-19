@@ -44,5 +44,3 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: sachseka/eatPrep
-
-
