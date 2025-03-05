@@ -77,9 +77,9 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
       sdatl <- tidyr::pivot_longer(sdat, cols=vars, names_to = "datCols", values_drop_na = TRUE)
       sI <- subsetInfo[subsetInfo[,ID] %in% ll, c(ID, "datCols", "blockPosition", "subunitBlockPosition")]
       sI <- set.col.type(sI)
-      sdatl2 <- merge(sdatl, sI, by=c("IDSTUD", "datCols"), all.x=TRUE, all.y=FALSE)
-      sdatl2 <- sdatl2[order(sdatl2$IDSTUD, sdatl2$blockPosition, sdatl2$subunitBlockPosition),]
-      chunks <- split(sdatl2, sdatl2$IDSTUD)
+      sdatl2 <- merge(sdatl, sI, by=c(ID, "datCols"), all.x=TRUE, all.y=FALSE)
+      sdatl2 <- sdatl2[order(sdatl2[,ID], sdatl2$blockPosition, sdatl2$subunitBlockPosition),]
+      chunks <- split(sdatl2, sdatl2[,ID])
       extract_cols <- function(df) {
         df[, c(2, 4, 5)]  # Extract columns 1, 3, and 4
       }
