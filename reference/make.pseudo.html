@@ -47,44 +47,43 @@ of “pseudo raters”.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make.pseudo</span> <span class="op">(</span><span class="va">datLong</span>, <span class="va">idCol</span>, <span class="va">varCol</span>, <span class="va">codCol</span>, <span class="va">valueCol</span>, <span class="va">n.pseudo</span>, randomize.order <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>             verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make.pseudo</span><span class="op">(</span><span class="va">datLong</span>, <span class="va">idCol</span>, <span class="va">varCol</span>, <span class="va">codCol</span>, <span class="va">valueCol</span>, <span class="va">n.pseudo</span>, item.groups <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>            randomize.order <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <p></p>
 <dl><dt id="arg-datlong">datLong<a class="anchor" aria-label="anchor" href="#arg-datlong"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-Data set in the longformat, i.e. one row per examinee-variable-rater combination.</p></dd>
+<dd><p>Data set in the longformat, i.e. one row per examinee-variable-rater combination.</p></dd>
 
   <dt id="arg-idcol">idCol<a class="anchor" aria-label="anchor" href="#arg-idcol"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-Name or column number of the person identifier (ID) variable.</p></dd>
+<dd><p>Name or column number of the person identifier (ID) variable.</p></dd>
 
   <dt id="arg-varcol">varCol<a class="anchor" aria-label="anchor" href="#arg-varcol"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-Name or column number of the variable identifier.</p></dd>
+<dd><p>Name or column number of the variable identifier.</p></dd>
 
   <dt id="arg-codcol">codCol<a class="anchor" aria-label="anchor" href="#arg-codcol"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-Name or column number of the rater identifier variable.</p></dd>
+<dd><p>Name or column number of the rater identifier variable.</p></dd>
 
   <dt id="arg-valuecol">valueCol<a class="anchor" aria-label="anchor" href="#arg-valuecol"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-Name or column number of the value variable.</p></dd>
+<dd><p>Name or column number of the value variable.</p></dd>
 
   <dt id="arg-n-pseudo">n.pseudo<a class="anchor" aria-label="anchor" href="#arg-n-pseudo"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-How many pseudo rater should be used? (value must be lower than the number of real raters)</p></dd>
+<dd><p>How many pseudo rater should be used? (value must be lower than the number of real raters)</p></dd>
+
+  <dt id="arg-item-groups">item.groups<a class="anchor" aria-label="anchor" href="#arg-item-groups"></a></dt>
+<dd><p>Optional: List of linked variables that could later be aggregated into items. If two raters
+make inconsistent judgments, it may be more favorable for aggregation if all variables
+belonging to an item are coded by the same rater per examinee. However, if a rater has not
+rated all the variables of the item, the ratings of other raters are used for the variables
+not rated by this rater.</p></dd>
 
   <dt id="arg-randomize-order">randomize.order<a class="anchor" aria-label="anchor" href="#arg-randomize-order"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-Logical: if TRUE, the selection of raters to pseudo raters is random.</p></dd>
+<dd><p>Logical: if TRUE, the selection of raters to pseudo raters is random.</p></dd>
 
   <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p><!-- %%     ~~Describe \code{file} here~~ -->
-Logical: give information about number of persons, variables, raters?</p></dd>
+<dd><p>Logical: give information about number of persons, variables, raters?</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -100,9 +99,103 @@ Logical: give information about number of persons, variables, raters?</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">rater</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">oneRater</span> <span class="op">&lt;-</span> <span class="fu">make.pseudo</span> <span class="op">(</span>datLong<span class="op">=</span><span class="va">rater</span>, idCol<span class="op">=</span><span class="st">"id"</span>, varCol<span class="op">=</span><span class="st">"variable"</span>, codCol<span class="op">=</span><span class="st">"rater"</span>,</span></span>
-<span class="r-in"><span>            valueCol<span class="op">=</span><span class="st">"value"</span>, n.pseudo<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>            valueCol<span class="op">=</span><span class="st">"value"</span>, n.pseudo<span class="op">=</span><span class="fl">1</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                          N.persons: 1287</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                             N.vars: 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            N.coder: 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                coders per response: minimum 2, maximum 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    responses with multiple ratings: 2100 of 2100 (100 %)</span>
 <span class="r-in"><span><span class="va">twoRaters</span><span class="op">&lt;-</span> <span class="fu">make.pseudo</span> <span class="op">(</span>datLong<span class="op">=</span><span class="va">rater</span>, idCol<span class="op">=</span><span class="st">"id"</span>, varCol<span class="op">=</span><span class="st">"variable"</span>, codCol<span class="op">=</span><span class="st">"rater"</span>,</span></span>
 <span class="r-in"><span>            valueCol<span class="op">=</span><span class="st">"value"</span>, n.pseudo<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># with item groups, allowing that all variables belonging to an item are coded by the</span></span></span>
+<span class="r-in"><span><span class="co"># same rater (per examinee)</span></span></span>
+<span class="r-in"><span><span class="va">itemGroup</span><span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>first <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"V01"</span>, <span class="st">"V03"</span><span class="op">)</span>, second <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"V05"</span>, <span class="st">"V06"</span>, <span class="st">"V07"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">oneRater2</span><span class="op">&lt;-</span> <span class="fu">make.pseudo</span> <span class="op">(</span>datLong<span class="op">=</span><span class="va">rater</span>, idCol<span class="op">=</span><span class="st">"id"</span>, varCol<span class="op">=</span><span class="st">"variable"</span>, codCol<span class="op">=</span><span class="st">"rater"</span>,</span></span>
+<span class="r-in"><span>            item.groups <span class="op">=</span> <span class="va">itemGroup</span>, valueCol<span class="op">=</span><span class="st">"value"</span>, verbose<span class="op">=</span><span class="cn">TRUE</span>, n.pseudo<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                          N.persons: 1287</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                             N.vars: 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            N.coder: 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                coders per response: minimum 2, maximum 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    responses with multiple ratings: 2100 of 2100 (100 %)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> No common raters for some paired variables found. See attribute 'info' of the returned object for more information.</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">oneRater2</span>, <span class="st">"info"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              variable.bundle examinee</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0181         V01, V03    P0181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0338         V01, V03    P0338</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0347         V01, V03    P0347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0351         V01, V03    P0351</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0399         V01, V03    P0399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0508         V01, V03    P0508</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0553         V01, V03    P0553</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0652         V01, V03    P0652</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0716         V01, V03    P0716</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0734         V01, V03    P0734</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P0972         V01, V03    P0972</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P1089         V01, V03    P1089</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P1134         V01, V03    P1134</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P1233         V01, V03    P1233</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P1313         V01, V03    P1313</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> first.P1323         V01, V03    P1323</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0041   V05, V06, V07    P0041</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0043   V05, V06, V07    P0043</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0045   V05, V06, V07    P0045</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0066   V05, V06, V07    P0066</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0072   V05, V06, V07    P0072</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0079   V05, V06, V07    P0079</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0166   V05, V06, V07    P0166</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0233   V05, V06, V07    P0233</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0235   V05, V06, V07    P0235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0240   V05, V06, V07    P0240</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0242   V05, V06, V07    P0242</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0245   V05, V06, V07    P0245</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0429   V05, V06, V07    P0429</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0442   V05, V06, V07    P0442</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0443   V05, V06, V07    P0443</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0447   V05, V06, V07    P0447</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0449   V05, V06, V07    P0449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0603   V05, V06, V07    P0603</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0610   V05, V06, V07    P0610</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0638   V05, V06, V07    P0638</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0692   V05, V06, V07    P0692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0697   V05, V06, V07    P0697</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0757   V05, V06, V07    P0757</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0760   V05, V06, V07    P0760</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0907   V05, V06, V07    P0907</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0919   V05, V06, V07    P0919</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0924   V05, V06, V07    P0924</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0939   V05, V06, V07    P0939</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0948   V05, V06, V07    P0948</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P0995   V05, V06, V07    P0995</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1110   V05, V06, V07    P1110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1207   V05, V06, V07    P1207</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1229   V05, V06, V07    P1229</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1245   V05, V06, V07    P1245</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1252   V05, V06, V07    P1252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1254   V05, V06, V07    P1254</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1283   V05, V06, V07    P1283</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1289   V05, V06, V07    P1289</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1331   V05, V06, V07    P1331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1354   V05, V06, V07    P1354</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1368   V05, V06, V07    P1368</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1374   V05, V06, V07    P1374</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1386   V05, V06, V07    P1386</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1400   V05, V06, V07    P1400</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1428   V05, V06, V07    P1428</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1454   V05, V06, V07    P1454</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1472   V05, V06, V07    P1472</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1478   V05, V06, V07    P1478</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1484   V05, V06, V07    P1484</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1485   V05, V06, V07    P1485</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1487   V05, V06, V07    P1487</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1489   V05, V06, V07    P1489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1496   V05, V06, V07    P1496</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1572   V05, V06, V07    P1572</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1628   V05, V06, V07    P1628</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1671   V05, V06, V07    P1671</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1676   V05, V06, V07    P1676</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1707   V05, V06, V07    P1707</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1724   V05, V06, V07    P1724</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> second.P1744   V05, V06, V07    P1744</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
