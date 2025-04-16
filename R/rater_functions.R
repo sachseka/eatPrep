@@ -4,39 +4,63 @@
 ### codCol: Nummer oder Name der Kodiererspalte
 ### n.pseudo: wieviele Pseudocodierer?
 ### randomize.order: soll die Reihenfolge der Pseudocodes nach Zufall bestimmt werden?
-make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, randomize.order = TRUE, verbose = FALSE)   {
-      datLong     <- eatTools::makeDataFrame(datLong)
-      lapply(c(idCol, varCol, codCol, valueCol), checkmate::assert_scalar)
-      checkmate::assert_numeric(n.pseudo, len = 1)
-      lapply(c(randomize.order, verbose), checkmate::assert_logical, len = 1)
-
-      allVars     <- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
-      all.Names   <- lapply(allVars, FUN=function(ii) {existsBackgroundVariables(dat = datLong, variable=ii)})
-      if(length(all.Names) != length(unique(all.Names))) {stop("'idCol', 'varCol', 'codCol' and 'valueCol' overlap.\n")}
-      dat.i       <- datLong[,unlist(all.Names), drop = FALSE]                  ### untere zeilen "only for the sake of speed": wir sortieren alle Faelle VORHER aus, wo nichts gesampelt werden kann!
-      dat.i[,"index"] <- paste(dat.i[,unlist(all.Names[c("idCol")])], dat.i[,unlist(all.Names[c("varCol")])], sep="_")
-      index       <- table(dat.i[,"index"])
-      datWeg      <- dat.i[ which(dat.i[,"index"] %in% names(index)[which(index <= n.pseudo)]), ]
-      datSample   <- dat.i[ which(dat.i[,"index"] %in% names(index)[which(index > n.pseudo)]), ]
+make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, item.groups = NULL, randomize.order = TRUE, verbose = FALSE)   {
+      info   <- NULL                                                            ### initialisieren
+      datLong<- eatTools::makeDataFrame(datLong)
+      allVars<- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
+      allNams<- lapply(allVars, FUN=function(ii) {eatTools::existsBackgroundVariables(dat = datLong, variable=ii)})
+      add    <- setdiff(colnames(datLong), unlist(allNams))
+      if ( length(add)>0) {if(verbose) {cat(paste0("   Found ",length(add)," additional variables in long format data.frame: '",paste(add, collapse="', '"),"'. If these variable(s) vary between raters (within examinees and items), only the value according to the chosen rater will be kept.\n"))}}
+      if(length(allNams) != length(unique(allNams)) ) {stop("'idCol', 'varCol', 'codCol' and 'valueCol' overlap.\n")}
+      if(!is.null(item.groups)) {                                               ### checks
+        checkmate::assert_character(unlist(item.groups), unique=TRUE, any.missing = FALSE)
+        lapply(item.groups,checkmate::assert_character, min.len = 2)
+        nichtDrin <- setdiff(unlist(item.groups), datLong[,allNams[["varCol"]]])
+        if(length(nichtDrin)>0) {warning(paste0("Following ", length(nichtDrin), " items of 'item.groups' not included in data: '",paste(nichtDrin, collapse = "', '"), "'."))}
+      }                                                                         ### untere zeilen "only for the sake of speed": wir sortieren alle Faelle VORHER aus, wo nichts gesampelt werden kann!
+      datLong[,"index"] <- paste( datLong[,unlist(allNams[c("idCol")])], datLong[,unlist(allNams[c("varCol")])], sep="_")
+      index  <- table(datLong[,"index"])
+      datWeg <- datLong[ which ( datLong[,"index"] %in% names(index)[which ( index <= n.pseudo )] ) , ]
+      datSamp<- datLong[ which ( datLong[,"index"] %in% names(index)[which ( index > n.pseudo )] ) , ]
   ### Variableninformationen geben
       if(isTRUE(verbose)) {
-           cpr <- ### coder per response
-           cat(paste0("                      N.persons: ",length(unique(datLong[,all.Names[["idCol"]]])),
-               "\n                         N.vars: ", length(unique(datLong[,all.Names[["varCol"]]])),
-               "\n                        N.coder: ", length(unique(datLong[,all.Names[["codCol"]]])),
-               "\n            coders per response: minimum ", min(index), ", maximum ",max(index),
-               "\nresponses with multiple ratings: ", length(which(index > 1)), " of ",length(index), " (",round(100*length(which(index > 1)) / length(index), digits = 1), " %)\n"))
+         cat(paste0("                         N.persons: ",length(unique(datLong[,allNams[["idCol"]]]))  ,
+           "\n                            N.vars: ", length(unique(datLong[,allNams[["varCol"]]]))  ,
+           "\n                           N.coder: ", length(unique(datLong[,allNams[["codCol"]]])) ,
+           "\n               coders per response: minimum ", min(index), ", maximum ",max(index) ,
+           "\n   responses with multiple ratings: ", length(which(index > 1)) , " of ",length(index) , " (",round(100*length(which(index > 1)) / length(index), digits = 1) , " %)\n"))
       }
-      if(nrow(datSample)>0) {
-        datPseudo   <- do.call("rbind", by(data = datSample, INDICES = datSample[, unlist(all.Names[c("idCol", "varCol")])], FUN = function(sub.dat) {
-          stopifnot(nrow(sub.dat)>n.pseudo)
-          auswahl     <- sample(1:nrow(sub.dat), n.pseudo, replace = FALSE)
-          if(!randomize.order) { auswahl <- sort(auswahl) }
-          sub.dat     <- sub.dat[auswahl,]
-          return(sub.dat)}))
-        datWeg   <- rbind(datWeg, datPseudo)
+      if(nrow(datSamp)>0) {
+        allVars <- unique(datSamp[,allNams[["varCol"]]])
+        if(!is.null(item.groups)) {allVars <- c(setdiff(allVars, unlist(item.groups)), item.groups)}
+        datPseu <- lapply(allVars, FUN = function (vars) {
+                   datVar <- datSamp[which(datSamp[,allNams[["varCol"]]] %in% vars),]
+                   datVar <- by(data = datVar, INDICES = datVar[, allNams[["idCol"]]], FUN = function ( sub.dat) {
+                             stopifnot(nrow(sub.dat)>n.pseudo)                  ### wenn die Rater mit unterschiedlicher Haeufigkeit geratet haben, soll der haeufigste genommen werden
+                             nrat <- table(sub.dat[,allNams[["codCol"]]])       ### wenn der haeufigste weniger als die Haelfte der Codierungen bewertet hat, kann ggf. nicht ein einheitlicher Rater fuer paarweise verbundene Variablen genommen werden
+                             if(!is.null(item.groups) && max(nrat) < nrow(sub.dat)/2)  {
+                                info    <- rbind(info, data.frame ( variable.bundle = paste(vars, collapse= ", "), examinee = unique(sub.dat[,allNams[["idCol"]]]),stringsAsFactors = FALSE))
+                                auswahl <- do.call("rbind", by(data = sub.dat, INDICES = sub.dat[,allNams[["varCol"]]], FUN = function (sub.var.dat ) {
+                                           stopifnot(nrow(sub.var.dat)>n.pseudo)
+                                           ausw <- sample(unique(sub.var.dat[,allNams[["codCol"]]]), size = n.pseudo, replace=FALSE)
+                                           ausw <- sub.var.dat[which(sub.var.dat[,allNams[["codCol"]]] == ausw),]
+                                           return(ausw)}))
+                             } else {
+                                auswahl <- sample(names(nrat[which(nrat == max(nrat))]), size = n.pseudo, replace=FALSE)
+                                auswahl <- sub.dat[which(sub.dat[,allNams[["codCol"]]] %in% auswahl),]
+                             }
+                             if(!randomize.order) {auswahl <- data.frame(auswahl[sort(auswahl[,allNams[["codCol"]]],decreasing=FALSE,index.return=TRUE)$ix,])}
+                             return(list(auswahl=auswahl, info=info))})
+                   return(datVar)})
+        info    <- do.call("rbind", lapply(datPseu, FUN=function (x) {do.call("rbind", lapply(x, FUN = function (y) {return(y[["info"]])}))}))
+        datPseu <- do.call("rbind", lapply(datPseu, FUN=function (x) {do.call("rbind", lapply(x, FUN = function (y) {return(y[["auswahl"]])}))}))
+        datWeg  <- rbind(datWeg, datPseu)
       }
-      if(n.pseudo>1) { datWeg[,unlist(all.Names[c("codCol")])] <- paste("Cod",multiseq(datWeg[,"index"]),sep="_") }
+      if(n.pseudo>1) { datWeg[,unlist(allNams[c("codCol")])] <- paste("Cod",multiseq(datWeg[,"index"]),sep="_") }
+      if(!is.null(info)) {
+         cat("No common raters for some paired variables found. See attribute 'info' of the returned object for more information.\n")
+         attr(datWeg, "info") <- info
+      }
       return(datWeg)}
 
 ### function by Alexander Robitzsch calculates mean agreement among raters
