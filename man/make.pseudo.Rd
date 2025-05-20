@@ -5,7 +5,8 @@
 multiple raters. This function reduces the number of raters by the use
 of ``pseudo raters''.}
 \usage{
-make.pseudo(datLong, idCol, varCol, codCol, valueCol, n.pseudo, item.groups = NULL,
+make.pseudo(datLong, idCol, varCol, codCol, alwaysPrefer = NULL,
+            alwaysNeglect = NULL, valueCol, n.pseudo, item.groups = NULL,
             randomize.order = TRUE, verbose = FALSE)
 }
 \arguments{
@@ -21,11 +22,18 @@ Name or column number of the variable identifier.
   \item{codCol}{
 Name or column number of the rater identifier variable.
 }
+  \item{alwaysPrefer}{
+Optional: Single name of the rater that should always be preferred if it is part of a double coding.
+}
+  \item{alwaysNeglect}{
+Optional: Single name of the rater that should always be neglected if it is part of a double coding.
+This means that coding by this rater is only taken into account if no other rater has rated this response.
+}
   \item{valueCol}{
 Name or column number of the value variable.
 }
   \item{n.pseudo}{
-How many pseudo rater should be used? (value must be lower than the number of real raters)
+How many pseudo raters should be used? (value must be lower than the number of real raters)
 }
   \item{item.groups}{
 Optional: List of linked variables that could later be aggregated into items. If two raters
@@ -59,4 +67,14 @@ itemGroup<- list(first = c("V01", "V03"), second = c("V05", "V06", "V07"))
 oneRater2<- make.pseudo (datLong=rater, idCol="id", varCol="variable", codCol="rater",
             item.groups = itemGroup, valueCol="value", verbose=TRUE, n.pseudo=1)
 attr(oneRater2, "info")
+# prefer John
+oneRater <- make.pseudo (datLong=rater, idCol="id", varCol="variable", codCol="rater",
+            alwaysPrefer = "John", valueCol="value", n.pseudo=1, verbose=TRUE)
+# neglect Edward
+oneRater <- make.pseudo (datLong=rater, idCol="id", varCol="variable", codCol="rater",
+            alwaysNeglect = "Edward", valueCol="value", n.pseudo=1, verbose=TRUE)
+# prefer Dolores and neglect Edward
+oneRater <- make.pseudo (datLong=rater, idCol="id", varCol="variable", codCol="rater",
+            alwaysPrefer = "Dolores", alwaysNeglect = "Edward", valueCol="value",
+            n.pseudo=1, verbose=TRUE)
 }
