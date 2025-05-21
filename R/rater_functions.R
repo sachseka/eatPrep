@@ -8,7 +8,7 @@ make.pseudo <- function(datLong, idCol, varCol, codCol, alwaysPrefer = NULL, alw
       info   <- NULL                                                            ### initialisieren
       datLong<- eatTools::makeDataFrame(datLong)
       allVars<- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
-      allNams<- lapply(allVars, FUN=function(ii) {eatTools::existsBackgroundVariables(dat = datLong, variable=ii)})
+      allNams<- lapply(allVars, FUN=function(ii) {eatTools::existsBackgroundVariables(dat = datLong, variable=ii, warnIfMissing = TRUE,  stopIfMissingOnVars = c(allVars[["idCol"]], allVars[["varCol"]], allVars[["codCol"]]))})
       add    <- setdiff(colnames(datLong), unlist(allNams))
       stopifnot(all(unlist(lapply(list(alwaysPrefer, alwaysNeglect),FUN = function (x) {
            ret <- checkmate::test_character(x, len=1, null.ok = TRUE, any.missing = FALSE) || checkmate::test_numeric(x, len=1, null.ok = TRUE, any.missing = FALSE)
