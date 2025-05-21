@@ -4,14 +4,19 @@
 ### codCol: Nummer oder Name der Kodiererspalte
 ### n.pseudo: wieviele Pseudocodierer?
 ### randomize.order: soll die Reihenfolge der Pseudocodes nach Zufall bestimmt werden?
-make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, item.groups = NULL, randomize.order = TRUE, verbose = FALSE)   {
+make.pseudo <- function(datLong, idCol, varCol, codCol, alwaysPrefer = NULL, alwaysNeglect = NULL, valueCol, n.pseudo, item.groups = NULL, randomize.order = TRUE, verbose = FALSE)   {
       info   <- NULL                                                            ### initialisieren
       datLong<- eatTools::makeDataFrame(datLong)
       allVars<- list(idCol = idCol, varCol = varCol, codCol = codCol, valueCol=valueCol)
-      allNams<- lapply(allVars, FUN=function(ii) {eatTools::existsBackgroundVariables(dat = datLong, variable=ii)})
+      allNams<- lapply(allVars, FUN=function(ii) {eatTools::existsBackgroundVariables(dat = datLong, variable=ii, warnIfMissing = TRUE,  stopIfMissingOnVars = c(allVars[["idCol"]], allVars[["varCol"]], allVars[["codCol"]]))})
       add    <- setdiff(colnames(datLong), unlist(allNams))
+      stopifnot(all(unlist(lapply(list(alwaysPrefer, alwaysNeglect),FUN = function (x) {
+           ret <- checkmate::test_character(x, len=1, null.ok = TRUE, any.missing = FALSE) || checkmate::test_numeric(x, len=1, null.ok = TRUE, any.missing = FALSE)
+           if(!is.null(x)) {if(!x %in% datLong[,allNams[["codCol"]]]) {stop(paste0("Rater with name '",x,"' does not occur in column '",allNams[["codCol"]],"'."))}}
+           return(ret)}))))
       if ( length(add)>0) {if(verbose) {cat(paste0("   Found ",length(add)," additional variables in long format data.frame: '",paste(add, collapse="', '"),"'. If these variable(s) vary between raters (within examinees and items), only the value according to the chosen rater will be kept.\n"))}}
       if(length(allNams) != length(unique(allNams)) ) {stop("'idCol', 'varCol', 'codCol' and 'valueCol' overlap.\n")}
+      if(!is.null(alwaysPrefer) && !is.null(alwaysNeglect)) {stopifnot (alwaysPrefer != alwaysNeglect)}
       if(!is.null(item.groups)) {                                               ### checks
         checkmate::assert_character(unlist(item.groups), unique=TRUE, any.missing = FALSE)
         lapply(item.groups,checkmate::assert_character, min.len = 2)
@@ -38,6 +43,11 @@ make.pseudo <- function(datLong, idCol, varCol, codCol, valueCol, n.pseudo, item
                    datVar <- by(data = datVar, INDICES = datVar[, allNams[["idCol"]]], FUN = function ( sub.dat) {
                              stopifnot(nrow(sub.dat)>n.pseudo)                  ### wenn die Rater mit unterschiedlicher Haeufigkeit geratet haben, soll der haeufigste genommen werden
                              nrat <- table(sub.dat[,allNams[["codCol"]]])       ### wenn der haeufigste weniger als die Haelfte der Codierungen bewertet hat, kann ggf. nicht ein einheitlicher Rater fuer paarweise verbundene Variablen genommen werden
+                             if(!is.null(alwaysPrefer) && alwaysPrefer %in% sub.dat[,allNams[["codCol"]]]) {
+                                nrat <- nrat[which(names(nrat) == alwaysPrefer)]
+                             } else {
+                                if(!is.null(alwaysNeglect) && alwaysNeglect %in% sub.dat[,allNams[["codCol"]]]) {nrat <- nrat[which(names(nrat) != alwaysNeglect)]}
+                             }
                              if(!is.null(item.groups) && max(nrat) < nrow(sub.dat)/2)  {
                                 info    <- rbind(info, data.frame ( variable.bundle = paste(vars, collapse= ", "), examinee = unique(sub.dat[,allNams[["idCol"]]]),stringsAsFactors = FALSE))
                                 auswahl <- do.call("rbind", by(data = sub.dat, INDICES = sub.dat[,allNams[["varCol"]]], FUN = function (sub.var.dat ) {
