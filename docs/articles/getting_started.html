@@ -6,16 +6,15 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Getting Started • eatPrep</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started">
 </head>
 <body>
@@ -26,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,8 +39,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/getting_started.html">Getting Started</a></li>
+    <li><a class="dropdown-item" href="../articles/workshop-slides.html">Workshop Slides</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -81,7 +82,7 @@ the preparation of item response test data; especially but not
 exclusively for typical use cases at the <em>Institute for Educational
 Quality Improvement</em> (IQB). Therefore it works together with
 IQB-specific applications such as the <code>ItemDB</code> or
-<code>ZKDeamon</code>.</p>
+<code>ZKDaemon</code>.</p>
 <p>The main purpose of <code>eatPrep</code> is to read, score, aggregate
 and merge data from a regular <code>SPSS</code> (<code>.sav</code>) data
 file (via the function <code><a href="../reference/readSpss.html">readSpss()</a></code>) and metadata from
@@ -215,7 +216,7 @@ task’s content).</p>
 <span>                     booklets <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">booklets</span>,</span>
 <span>                     rotation <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">rotation</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="input-tables">Input tables<a class="anchor" aria-label="anchor" href="#input-tables"></a>
+<h3 id="input-tables">Input Tables<a class="anchor" aria-label="anchor" href="#input-tables"></a>
 </h3>
 <p>Let’s look at the tables from bottom to top, starting with items and
 their values. In the values sheet, we define values and recode values
@@ -615,13 +616,18 @@ the recoded items).</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="input-data">input data<a class="anchor" aria-label="anchor" href="#input-data"></a>
+<h2 id="input-data">Input Data<a class="anchor" aria-label="anchor" href="#input-data"></a>
 </h2>
 <p>We have several overlapping booklets with several blocks in each
 booklet. Moreover, there is a unique identifier for each person and some
 additional information about each student like their gender or their
 socioeconomic status. There is one data set per booklet. In order to
 prepare the data, we need to construct one large data set.</p>
+<p>In order to do that we first need to read the data into R, check the
+data for invalid or or incorrect codes and then merge the data into one
+data set. In the following the different functions to do that are
+described. <code>inputDat</code> gives us a first idea on how the data
+is supposed to look like.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># looking at the data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">inputDat</span><span class="op">)</span></span>
@@ -705,59 +711,599 @@ prepare the data, we need to construct one large data set.</p>
 <div class="section level3">
 <h3 id="getting-the-data">Getting the Data<a class="anchor" aria-label="anchor" href="#getting-the-data"></a>
 </h3>
-<p>To do this, we first need to get the information from our IQB data
-bank via ZKDeamon, or alternatively via SPSS.</p>
+<p>First, we need to get the information from our IQB data bank via
+ZKDaemon, or alternatively via SPSS.</p>
 <div class="section level4">
-<h4 id="readdeamonxlsx">readDeamonXlsx<a class="anchor" aria-label="anchor" href="#readdeamonxlsx"></a>
+<h4 id="items-via-zkdaemon">Items via ZKDaemon<a class="anchor" aria-label="anchor" href="#items-via-zkdaemon"></a>
 </h4>
+<p>ZKDaemon is a program used by IQB that can be found in the IQB
+internal folders (i:). After installing you can get the meta data and
+the items from your specific study using information stored in the IQB
+Databases (DB2/DB3/DB4). Alternatively you can get the meta data from an
+SPSS file via ZKDaemon. Within the program you can set missing types and
+import a test design. Then you can produce Excel files, which are
+expected to have the following sheets: “units”, “subunits”, “values”,
+“unitrecoding”, “sav-files”, “params”, “aggregate-missings”,
+“itemproperties”, “propertylabels”, “booklets”, and “blocks”.</p>
+<p>The function <code><a href="../reference/readDaemonXlsx.html">readDaemonXlsx()</a></code> reads the Excel file into
+R and will produce a warning if any sheets are missing. It needs one
+character string (filename) containing path, name and extension of the
+Excel file (.xlsx) produced by ZKDaemon.</p>
+<p>The function returns a list of data frames containing information
+that is required by the data preparation functions.
+<code>inputList</code> shows an example of this list.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">filename</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"inputList.xlsx"</span>, package <span class="op">=</span> <span class="st">"eatPrep"</span><span class="op">)</span></span>
+<span><span class="va">inpustList</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readDaemonXlsx.html">readDaemonXlsx</a></span><span class="op">(</span><span class="va">filename</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Reading sheet 'units'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'subunits'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'values'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'unitrecoding'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'sav-files'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'params'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'aggregate-missings'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'booklets'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'blocks'.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">inpustList</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 9</span></span>
+<span><span class="co">#&gt;  $ units        :'data.frame':   29 obs. of  6 variables:</span></span>
+<span><span class="co">#&gt;   ..$ unit             : chr [1:29] "I01" "I02" "I03" "I04" ...</span></span>
+<span><span class="co">#&gt;   ..$ unitLabel        : chr [1:29] "Animals: Weight of a duck" "Animals: Weight of a horse" "Animals: Weight of a mouse" "Animals: Weight of a cat" ...</span></span>
+<span><span class="co">#&gt;   ..$ unitDescription  : chr [1:29] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;   ..$ unitType         : chr [1:29] "TI" "TI" "TI" "TI" ...</span></span>
+<span><span class="co">#&gt;   ..$ unitAggregateRule: chr [1:29] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;   ..$ unitScoreRule    : chr [1:29] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ subunits     :'data.frame':   30 obs. of  9 variables:</span></span>
+<span><span class="co">#&gt;   ..$ unit               : chr [1:30] "I01" "I02" "I03" "I04" ...</span></span>
+<span><span class="co">#&gt;   ..$ subunit            : chr [1:30] "I01" "I02" "I03" "I04" ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitType        : chr [1:30] "1" "1" "1" "1" ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitLabel       : chr [1:30] "Animals: Weight of a duck" "Animals: Weight of a horse" "Animals: Weight of a mouse" "Animals: Weight of a cat" ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitDescription : chr [1:30] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitPosition    : chr [1:30] "a)" "b)" "c)" "d)" ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitTransniveau : chr [1:30] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitRecoded     : chr [1:30] "I01R" "I02R" "I03R" "I04R" ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitLabelRecoded: chr [1:30] "Recoded Animals: Weight of a duck" "Recoded Animals: Weight of a horse" "Recoded Animals: Weight of a mouse" "Recoded Animals: Weight of a cat" ...</span></span>
+<span><span class="co">#&gt;  $ values       :'data.frame':   220 obs. of  8 variables:</span></span>
+<span><span class="co">#&gt;   ..$ subunit                : chr [1:220] "I01" "I01" "I01" "I01" ...</span></span>
+<span><span class="co">#&gt;   ..$ value                  : chr [1:220] "1" "2" "3" "6" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueRecode            : chr [1:220] "0" "0" "1" "mnr" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueType              : chr [1:220] "vc" "vc" "vc" "mnr" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueLabel             : chr [1:220] "Response option 1 marked" "Response option 2 marked" "Response option 3 marked" "missing not reached" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueDescription       : chr [1:220] "Response option 1 marked" "Response option 2 marked" "Response option 3 marked" "missing not reached" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueLabelRecoded      : chr [1:220] "0" "0" "1" "mnr" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueDescriptionRecoded: chr [1:220] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ unitRecodings:'data.frame':   7 obs. of  7 variables:</span></span>
+<span><span class="co">#&gt;   ..$ unit             : chr [1:7] "I12" "I12" "I12" "I12" ...</span></span>
+<span><span class="co">#&gt;   ..$ value            : chr [1:7] "0" "1" "2" "3" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueRecode      : chr [1:7] "0" "0" "0" "1" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueType        : chr [1:7] "vc" "vc" "vc" "vc" ...</span></span>
+<span><span class="co">#&gt;   ..$ valueLabel       : chr [1:7] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;   ..$ valueDescription : chr [1:7] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;   ..$ valueLabelRecoded: chr [1:7] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ savFiles     :'data.frame':   3 obs. of  3 variables:</span></span>
+<span><span class="co">#&gt;   ..$ filename: chr [1:3] "booklet1.sav" "booklet2.sav" "booklet3.sav"</span></span>
+<span><span class="co">#&gt;   ..$ case.id : chr [1:3] "ID" "ID" "ID"</span></span>
+<span><span class="co">#&gt;   ..$ fullname: chr [1:3] NA NA NA</span></span>
+<span><span class="co">#&gt;  $ newID        :'data.frame':   1 obs. of  2 variables:</span></span>
+<span><span class="co">#&gt;   ..$ key  : chr "master-id"</span></span>
+<span><span class="co">#&gt;   ..$ value: chr "ID"</span></span>
+<span><span class="co">#&gt;  $ aggrMiss     :'data.frame':   7 obs. of  8 variables:</span></span>
+<span><span class="co">#&gt;   ..$ nam: chr [1:7] "vc" "mvi" "mnr" "mci" ...</span></span>
+<span><span class="co">#&gt;   ..$ vc : chr [1:7] "vc" "mvi" "vc" "mci" ...</span></span>
+<span><span class="co">#&gt;   ..$ mvi: chr [1:7] "mvi" "mvi" "err" "mci" ...</span></span>
+<span><span class="co">#&gt;   ..$ mnr: chr [1:7] "vc" "err" "mnr" "mci" ...</span></span>
+<span><span class="co">#&gt;   ..$ mci: chr [1:7] "mci" "mci" "mci" "mci" ...</span></span>
+<span><span class="co">#&gt;   ..$ mbd: chr [1:7] "err" "err" "err" "err" ...</span></span>
+<span><span class="co">#&gt;   ..$ mir: chr [1:7] "vc" "err" "mir" "mci" ...</span></span>
+<span><span class="co">#&gt;   ..$ mbi: chr [1:7] "vc" "err" "mnr" "mci" ...</span></span>
+<span><span class="co">#&gt;  $ booklets     :'data.frame':   3 obs. of  4 variables:</span></span>
+<span><span class="co">#&gt;   ..$ booklet: chr [1:3] "booklet1" "booklet2" "booklet3"</span></span>
+<span><span class="co">#&gt;   ..$ block1 : chr [1:3] "bl1" "bl4" "bl3"</span></span>
+<span><span class="co">#&gt;   ..$ block2 : chr [1:3] "bl2" "bl3" "bl1"</span></span>
+<span><span class="co">#&gt;   ..$ block3 : chr [1:3] "bl3" "bl2" "bl4"</span></span>
+<span><span class="co">#&gt;  $ blocks       :'data.frame':   30 obs. of  3 variables:</span></span>
+<span><span class="co">#&gt;   ..$ subunit             : chr [1:30] "I01" "I02" "I03" "I04" ...</span></span>
+<span><span class="co">#&gt;   ..$ block               : chr [1:30] "bl1" "bl1" "bl1" "bl1" ...</span></span>
+<span><span class="co">#&gt;   ..$ subunitBlockPosition: chr [1:30] "1" "2" "3" "4" ...</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="readmerkmalxlsx">readMerkmalXlsx<a class="anchor" aria-label="anchor" href="#readmerkmalxlsx"></a>
+<h4 id="merkmalsauszug">Merkmalsauszug<a class="anchor" aria-label="anchor" href="#merkmalsauszug"></a>
 </h4>
+<p>The software IQB Item-DB produces Excel files named “Merkmalsauszug”
+using information stored in the IQB Databases. The file is expected to
+have the sheets: “Itemmerkmale”, “Aufgabenmerkmale”. The order doesn’t
+matter. The file contains information about the attributes of the items
+and exercises.</p>
+<p>The function <code><a href="../reference/readMerkmalXlsx.html">readMerkmalXlsx()</a></code> read the Excel file into
+R and will produce a warning if any sheets are missing or wrongly
+specified. It needs one character string (filename) containing path,
+name and extension of the Excel file (.xlsx) produced by IQB Item-DB.
+Per default the Item-ID is created without converting numbers to
+lowercase letters (<code>tolcl</code>) and a merged data frame contaning
+both “Itemmerkmale” and “Aufgabenmerkmale” will be created
+(<code>alleM</code>).</p>
+<p>The function returns a list of data frames containing Itemmerkmale,
+Aufgabenmerkmale and AlleMerkmale (optional).</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">filename</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"itemmerkmale.xlsx"</span>, package <span class="op">=</span> <span class="st">"eatPrep"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/readMerkmalXlsx.html">readMerkmalXlsx</a></span><span class="op">(</span><span class="va">filename</span>, tolcl <span class="op">=</span> <span class="cn">FALSE</span>, alleM <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Reading sheet 'Aufgabenmerkmale'.</span></span>
+<span><span class="co">#&gt; Reading sheet 'Itemmerkmale'.</span></span>
+<span><span class="co">#&gt; Data frame 'AlleMerkmale' has been created.</span></span>
+<span><span class="co">#&gt; $Aufgabenmerkmale</span></span>
+<span><span class="co">#&gt;                      Aufgabe Zeit.A                     AufgID AufgTitel</span></span>
+<span><span class="co">#&gt; 1  Animals: Weight of a duck   0:00  Animals: Weight of a duck        NA</span></span>
+<span><span class="co">#&gt; 2 Animals: Weight of a horse   0:00 Animals: Weight of a horse        NA</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $Itemmerkmale</span></span>
+<span><span class="co">#&gt;                      Aufgabe Teilaufgabe Item Zeit.I Anforderungsbereich.MaP</span></span>
+<span><span class="co">#&gt; 1  Animals: Weight of a duck           A   01   0:00                       I</span></span>
+<span><span class="co">#&gt; 2 Animals: Weight of a horse           A   01   0:00                       I</span></span>
+<span><span class="co">#&gt; 3 Animals: Weight of a horse           B   02   0:00                      II</span></span>
+<span><span class="co">#&gt;   Bildungsstandards.MaP.allgemeine                Itemtyp.5er</span></span>
+<span><span class="co">#&gt; 1                               1a GA - Geschlossen Ankreuzen</span></span>
+<span><span class="co">#&gt; 2                             &lt;NA&gt; GA - Geschlossen Ankreuzen</span></span>
+<span><span class="co">#&gt; 3                             &lt;NA&gt; GA - Geschlossen Ankreuzen</span></span>
+<span><span class="co">#&gt;                       AufgID AufgTitel                       ItemID</span></span>
+<span><span class="co">#&gt; 1  Animals: Weight of a duck        NA  Animals: Weight of a duck01</span></span>
+<span><span class="co">#&gt; 2 Animals: Weight of a horse        NA Animals: Weight of a horse01</span></span>
+<span><span class="co">#&gt; 3 Animals: Weight of a horse        NA Animals: Weight of a horse02</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $AlleMerkmale</span></span>
+<span><span class="co">#&gt;                       AufgID                    Aufgabe Teilaufgabe Item</span></span>
+<span><span class="co">#&gt; 1  Animals: Weight of a duck  Animals: Weight of a duck           A   01</span></span>
+<span><span class="co">#&gt; 2 Animals: Weight of a horse Animals: Weight of a horse           A   01</span></span>
+<span><span class="co">#&gt; 3 Animals: Weight of a horse Animals: Weight of a horse           B   02</span></span>
+<span><span class="co">#&gt;                         ItemID Zeit.I Anforderungsbereich.MaP</span></span>
+<span><span class="co">#&gt; 1  Animals: Weight of a duck01   0:00                       I</span></span>
+<span><span class="co">#&gt; 2 Animals: Weight of a horse01   0:00                       I</span></span>
+<span><span class="co">#&gt; 3 Animals: Weight of a horse02   0:00                      II</span></span>
+<span><span class="co">#&gt;   Bildungsstandards.MaP.allgemeine                Itemtyp.5er Zeit.A</span></span>
+<span><span class="co">#&gt; 1                               1a GA - Geschlossen Ankreuzen   0:00</span></span>
+<span><span class="co">#&gt; 2                             &lt;NA&gt; GA - Geschlossen Ankreuzen   0:00</span></span>
+<span><span class="co">#&gt; 3                             &lt;NA&gt; GA - Geschlossen Ankreuzen   0:00</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="readspss">readSpss<a class="anchor" aria-label="anchor" href="#readspss"></a>
+<h4 id="spss-data">SPSS Data<a class="anchor" aria-label="anchor" href="#spss-data"></a>
 </h4>
-<!-- what about showing the functions readDeamonXlsx(), readMerkmalXlsx() and readSpss? their example .xlsx files are in inst/extdata. but there already is `inputDat`.
-
-usual workflow: reading in .xlsx (Deamon, Merkmal, SPSS), checking the data, merging the data (mergeData()) to one data set.
-
-1 readDeamonXlsx/MerkmalXlsx
-2 readSpss
-
--->
+<p>To get the input from SPSS data files, <code><a href="../reference/readSpss.html">readSpss()</a></code> reads
+the data into R and converts all variables to the class
+<code>character</code>. The function needs the name fo the SPSS data
+file and has the option to specify some more attributes. For more
+information use the help function <code><a href="../reference/readSpss.html">?readSpss</a></code>.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/readSpss.html">readSpss</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
 <h3 id="checking-data">Checking Data<a class="anchor" aria-label="anchor" href="#checking-data"></a>
 </h3>
-<!-- by using checkData() for missings, duplicated entries, invalid codes. 
-and checkDesign() for rotated block design of the df 
-
-3 checkData, checkDesign
--->
+<p>After reading in all the data, we need to check, whether it is in the
+right format and all missing codes were assigned correctly.</p>
+<div class="section level4">
+<h4 id="checkdata">checkData()<a class="anchor" aria-label="anchor" href="#checkdata"></a>
+</h4>
+<p><code><a href="../reference/checkData.html">checkData()</a></code> checks data frames for missing or duplicated
+entries in the ID variable, persons and/or variables without valid
+codes, and generally invalid codes. The results of that check will be
+written in the console.</p>
+<p>The function needs a data frame to be checked (<code>dat</code>) and
+its name (<code>datnam</code>), especially if there are multpile data
+frames (e.g. a list of data frames). Furthermore it needs data frames
+with code, subunit and unit information (<code>values</code>,
+<code>subunits</code> and <code>units</code>), and a string for an ID
+column name (ID). You can turn of printing information to the console
+with <code>verbose</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/checkData.html">checkData</a></span><span class="op">(</span><span class="va">dat</span>, <span class="va">datnam</span>, <span class="va">values</span>, <span class="va">subunits</span>, <span class="va">units</span>, ID <span class="op">=</span> <span class="cn">NULL</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Examples of data frames for <code>values</code>,
+<code>subunits</code> and <code>units</code> can be found by typing
+<code>inputList</code> in the console.</p>
+</div>
+<div class="section level4">
+<h4 id="checkdesign">checkDesign()<a class="anchor" aria-label="anchor" href="#checkdesign"></a>
+</h4>
+<p><code><a href="../reference/checkDesign.html">checkDesign()</a></code> checks whether a data frame corresponds to
+a particular rotated block design, i.e. whether all persons have valid
+codes on all items they were presented with and one consistent missing
+code for all items they were not presented with.</p>
+<p>The function also needs a data frame to be checked
+(<code>dat</code>), as well as data frames containing information on the
+number and column names of blocks in each booklet
+(<code>booklets</code>), on the names of subunits and their order within
+each block (<code>blocks</code>) and about which participant worked on
+which booklet (<code>rotation</code>). <code>sysMis</code> specifies the
+missing code for items that were not administered to a participant and
+<code>id</code> indicates the name of the participant identifier
+variable in <code>dat</code>.</p>
+<p><code>subunits</code> is an optional argument to identify the names
+of recoded subunits. And you can turn off printing information with
+<code>verbose</code>.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/checkDesign.html">checkDesign</a></span><span class="op">(</span><span class="va">dat</span>, <span class="va">booklets</span>, <span class="va">blocks</span>, <span class="va">rotation</span>, sysMis<span class="op">=</span><span class="st">"NA"</span>, id<span class="op">=</span><span class="st">"ID"</span>, subunits <span class="op">=</span> <span class="cn">NULL</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><code>inputDat</code> and <code>inputList</code> are examples on how
+these data frames are supposed to look like. When you copy and paste the
+following code in your console, you can look at the data frames.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">inputDat</span></span>
+<span><span class="va">inputList</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="merging-data">Merging Data<a class="anchor" aria-label="anchor" href="#merging-data"></a>
 </h3>
-<!-- 4 mergeData -->
+<p>Now that we checked that the data frames meet our requirements, we
+can merge a list of data frames into a single data frame by using
+<code><a href="../reference/mergeData.html">mergeData()</a></code>. For that we need a list of data frames, like
+<code>inputDat</code> which contains data of three booklets. The
+function returns a data frame containing unique cases and unique
+variables. All cases and all variables from the original data sets will
+be kept and matched.</p>
+<p><code><a href="../reference/mergeData.html">mergeData()</a></code> provides detailed diagnostics about value
+mismatches. If two identically named columns in two data sets do not
+have identical values, NAs are replaced by valid codes stemming from the
+other data set(s) and if two different valid values are found, the first
+value will be kept and the other dropped, and the user will be informed
+about the mismatch. Additionally, <code>NA</code> resulting from the
+merge (e.g., in repeated block designs) can be replaced with a customed
+character missing to facilitate future data preparation of the merged
+data set. See <code><a href="../reference/collapseMissings.html">collapseMissings()</a></code> for details on supported
+character missings for other functions in the <code>eatPrep</code>
+package.</p>
+<p>When merging data frames with this function you need to specify at
+least two arguments: <code>newID</code> and <code>datList</code>.
+<code>newID</code> has to be a character vector length one indicating
+the name of the identifier variable (ID) in the merged data set and/or
+the name of the ID in every data frame in <code>datList</code>, if not
+specified differently in <code>oldIDs</code>. <code>datList</code> is
+the list of data frames to be merged, e.g. <code>inputDat</code>.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mergedDataset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mergeData.html">mergeData</a></span><span class="op">(</span>newID <span class="op">=</span> <span class="st">"ID"</span>, datList <span class="op">=</span> <span class="va">inputDat</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Start merging of dataset 1.</span></span>
+<span><span class="co">#&gt; Start merging of dataset 2.</span></span>
+<span><span class="co">#&gt; Start merging of dataset 3.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">mergedDataset</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 'data.frame':    300 obs. of  32 variables:</span></span>
+<span><span class="co">#&gt;  $ ID   : chr  "person100" "person101" "person102" "person103" ...</span></span>
+<span><span class="co">#&gt;  $ hisei: num  49 NA 57 32 59 56 55 47 NA 50 ...</span></span>
+<span><span class="co">#&gt;  $ I01  : chr  "1" "9" "3" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I02  : chr  "4" "4" "4" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I03  : chr  "1" "2" "2" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I04  : chr  "2" "2" "3" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I05  : chr  "0" "0" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I06  : chr  "0" "9" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I07  : chr  "2" "2" "2" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I08  : chr  "0" "1" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I09  : chr  "2" "2" "2" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I10  : chr  "2" "1" "1" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I11  : chr  "4" "1" "3" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I12a : chr  "1" "0" "1" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I12b : chr  "0" "9" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I12c : chr  "4" "1" "2" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I13  : chr  "9" "4" "9" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I14  : chr  "9" "4" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I15  : chr  "9" "3" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I16  : chr  "9" "2" "9" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I17  : chr  "9" "3" "9" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I18  : chr  "9" "1" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I19  : chr  "9" "4" "9" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I20  : chr  "9" "1" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I21  : chr  "9" "2" "9" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I22  : chr  NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ I23  : chr  NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ I24  : chr  NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ I25  : chr  NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ I26  : chr  NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ I27  : chr  NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ I28  : chr  NA NA NA NA ...</span></span></code></pre></div>
+<p>Furthermore, you can specify some more arguments, but they have
+default options, so you don’t need to. Here is an example where the IDs
+are changed via <code>oldIDs</code> and where NAs are replaced by “mbd”
+(missing by design). For more information use the help function
+<code><a href="../reference/mergeData.html">?mergeData</a></code>.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mergedDataset2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mergeData.html">mergeData</a></span><span class="op">(</span>newID <span class="op">=</span> <span class="st">"idstud"</span>, datList <span class="op">=</span> <span class="va">inputDat</span>, oldIDs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID"</span>, <span class="st">"ID"</span>, <span class="st">"ID"</span><span class="op">)</span>, addMbd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Start merging of dataset 1.</span></span>
+<span><span class="co">#&gt; Start merging of dataset 2.</span></span>
+<span><span class="co">#&gt; Start merging of dataset 3.</span></span>
+<span><span class="co">#&gt; Start adding mbd according to data pattern.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">mergedDataset2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 'data.frame':    300 obs. of  32 variables:</span></span>
+<span><span class="co">#&gt;  $ idstud: chr  "person100" "person101" "person102" "person103" ...</span></span>
+<span><span class="co">#&gt;  $ hisei : num  49 NA 57 32 59 56 55 47 NA 50 ...</span></span>
+<span><span class="co">#&gt;  $ I01   : chr  "1" "9" "3" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I02   : chr  "4" "4" "4" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I03   : chr  "1" "2" "2" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I04   : chr  "2" "2" "3" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I05   : chr  "0" "0" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I06   : chr  "0" "9" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I07   : chr  "2" "2" "2" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I08   : chr  "0" "1" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I09   : chr  "2" "2" "2" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I10   : chr  "2" "1" "1" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I11   : chr  "4" "1" "3" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I12a  : chr  "1" "0" "1" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I12b  : chr  "0" "9" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I12c  : chr  "4" "1" "2" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I13   : chr  "9" "4" "9" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I14   : chr  "9" "4" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I15   : chr  "9" "3" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I16   : chr  "9" "2" "9" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I17   : chr  "9" "3" "9" "4" ...</span></span>
+<span><span class="co">#&gt;  $ I18   : chr  "9" "1" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I19   : chr  "9" "4" "9" "2" ...</span></span>
+<span><span class="co">#&gt;  $ I20   : chr  "9" "1" "9" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I21   : chr  "9" "2" "9" "3" ...</span></span>
+<span><span class="co">#&gt;  $ I22   : chr  "mbd" "mbd" "mbd" "mbd" ...</span></span>
+<span><span class="co">#&gt;  $ I23   : chr  "mbd" "mbd" "mbd" "mbd" ...</span></span>
+<span><span class="co">#&gt;  $ I24   : chr  "mbd" "mbd" "mbd" "mbd" ...</span></span>
+<span><span class="co">#&gt;  $ I25   : chr  "mbd" "mbd" "mbd" "mbd" ...</span></span>
+<span><span class="co">#&gt;  $ I26   : chr  "mbd" "mbd" "mbd" "mbd" ...</span></span>
+<span><span class="co">#&gt;  $ I27   : chr  "mbd" "mbd" "mbd" "mbd" ...</span></span>
+<span><span class="co">#&gt;  $ I28   : chr  "mbd" "mbd" "mbd" "mbd" ...</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="recode">Recode<a class="anchor" aria-label="anchor" href="#recode"></a>
+<h2 id="recoding-the-data">Recoding the Data<a class="anchor" aria-label="anchor" href="#recoding-the-data"></a>
 </h2>
+<p>After importing the data and making sure it has the right format, the
+next step is to adjust the missing values.</p>
+<div class="section level4">
+<h4 id="recodedata">recodeData()<a class="anchor" aria-label="anchor" href="#recodedata"></a>
+</h4>
+<p>First, you recode data sets with several kinds of missings values.
+For that, you need recode data sets with special consideration of
+missing values. See <code><a href="../reference/collapseMissings.html">collapseMissings()</a></code> for supported types
+of missing values. <code><a href="../reference/recodeData.html">recodeData()</a></code> recodes the specified data
+frames and will give warnings, if missing or incomplete recode
+information is found. Values without recode information will not be
+recoded.</p>
+<p>Examples of data frames <code>values</code> and <code>subunits</code>
+can be found when copy-pasting the following code in you console:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">inputList</span><span class="op">$</span><span class="va">values</span></span>
+<span><span class="va">inputList</span><span class="op">$</span><span class="va">subunits</span></span></code></pre></div>
+<p><code><a href="../reference/recodeData.html">recodeData()</a></code> uses the recode information from those two
+data frames and recodes the variables on <code>dat</code> accordingly.
+The columns will be named according to the specifications in
+<code>subunits$subunitRecoded</code>, if <code>subunits</code> is not
+provided, item names will not be changed for recoded items.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">datRec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/recodeData.html">recodeData</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">inputDat</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, values <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">values</span>, subunits <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">subunits</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Found no recode information for variable(s): </span></span>
+<span><span class="co">#&gt; ID, hisei. </span></span>
+<span><span class="co">#&gt; This/These variable(s) will not be recoded.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Variables... I01, I02, I03, I04, I05, I06, I07, I08, I09, I10, I11, I12a, I12b, I12c, I13, I14, I15, I16, I17, I18, I19, I20, I21</span></span>
+<span><span class="co">#&gt; ...have been recoded.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">datRec</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 'data.frame':    100 obs. of  25 variables:</span></span>
+<span><span class="co">#&gt;  $ ID   : chr  "person100" "person101" "person102" "person103" ...</span></span>
+<span><span class="co">#&gt;  $ hisei: chr  "49" NA "57" "32" ...</span></span>
+<span><span class="co">#&gt;  $ I01R : chr  "0" "mbi" "1" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I02R : chr  "0" "0" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I03R : chr  "0" "1" "1" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I04R : chr  "1" "1" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I05R : chr  "0" "0" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I06R : chr  "0" "mbi" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I07R : chr  "0" "0" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I08R : chr  "0" "1" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I09R : chr  "0" "0" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I10R : chr  "1" "0" "0" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I11R : chr  "0" "0" "1" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I12aR: chr  "1" "0" "1" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I12bR: chr  "0" "mbi" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I12cR: chr  "1" "0" "0" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I13R : chr  "mbi" "0" "mbi" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I14R : chr  "mbi" "0" "mbi" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I15R : chr  "mbi" "0" "mbi" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I16R : chr  "mbi" "0" "mbi" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I17R : chr  "mbi" "0" "mbi" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I18R : chr  "mbi" "1" "mbi" "1" ...</span></span>
+<span><span class="co">#&gt;  $ I19R : chr  "mbi" "1" "mbi" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I20R : chr  "mbi" "0" "mbi" "0" ...</span></span>
+<span><span class="co">#&gt;  $ I21R : chr  "mbi" "0" "mbi" "1" ...</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="mnrcoding">mnrCoding()<a class="anchor" aria-label="anchor" href="#mnrcoding"></a>
+</h4>
+<p>Then you can convert missing responses coded as “missing by
+intention” (<code>mbi</code>) at the end of a block of items to “missing
+not reached” (<code>mnr</code>) via <code><a href="../reference/mnrCoding.html">mnrCoding()</a></code>. The
+function returns a data frame with “missing not reached” coded as
+<code>mnr</code>. For each person with at least one <code>mnr</code> in
+the returned data set the names of recoded variables are given as an
+attribute to <code>dat</code>.</p>
+<p>For that to work you need to specify the following arguments, as they
+don’t have any default settings:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Argument</th>
+<th>Explanation</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>dat</strong></td>
+<td>A data set. Missing by intention needs to be coded
+<code>mbi</code>
+</td>
+</tr>
+<tr class="even">
+<td><strong>pid</strong></td>
+<td>Name or column number of the identifier (ID) variable in
+<code>dat</code>
+</td>
+</tr>
+<tr class="odd">
+<td><strong>rotation.id</strong></td>
+<td>A character vector of length 1 indicating the column name of the
+test booklet identifier in <code>dat</code>
+</td>
+</tr>
+<tr class="even">
+<td><strong>blocks</strong></td>
+<td>A data frame containing the sequence of subunits in each block in
+long format. The column names need to be <code>subunit</code>,
+<code>block</code>, <code>subunitBlockPosition</code>
+</td>
+</tr>
+<tr class="odd">
+<td><strong>booklets</strong></td>
+<td>A data frame containing the sequence of blocks in each booklet in
+wide format. The column names need to be <code>booklet</code>,
+<code>block1</code>, <code>block2</code>, <code>block3</code>, …</td>
+</tr>
+<tr class="even">
+<td><strong>breaks</strong></td>
+<td>Number of blocks after which <code>mbi</code> shall be recoded to
+<code>mnr</code>, e.g., <code>c(1,2)</code> to specify breaks after the
+first and second block</td>
+</tr>
+</tbody>
+</table>
+<p>There are more arguments with default values which to you can
+specify, but don’t have to.</p>
+<p><code>nMbi</code>, for instance, specifies the number of subunits at
+the end of a block that need to be coded <code>mbi</code>. The default
+is 2, i.e. if the last and second to last subitem in a block are coded
+<code>mbi</code>, both subunits, as well as the preceding subunits coded
+<code>mbi</code>, will be recoded to <code>mnr</code>. If
+<code>nMbi</code> is larger than the number of subunits in a given
+block, no subitem in this block will be recoded. If all subunits in a
+block are coded <code>mbi</code>, none of them will be recoded to
+<code>mnr</code>. `<code>nMbi</code> needs to be &gt; 0.</p>
+<p><code>subunits</code> has the default <code>NULL</code>, but when you
+specify a data frame, <code>recodeMbiToMnr</code> expects to find the
+recoded subunits in <code>dat</code>.</p>
+<p>Examples for the data frames <code>booklets</code>,
+<code>blocks</code>, <code>rotation</code> and <code>subunits</code> can
+be found via <code>inputList</code>. Here is an example use case of
+<code><a href="../reference/mnrCoding.html">mnrCoding()</a></code>. The first two functions
+(<code>automateDataPretatration()</code> and <code><a href="../reference/mergeData.html">mergeData()</a></code>)
+create the data frame <code>dat</code> for <code><a href="../reference/mnrCoding.html">mnrCoding()</a></code>.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prepDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/automateDataPreparation.html">automateDataPreparation</a></span><span class="op">(</span>inputList <span class="op">=</span> <span class="va">inputList</span>, </span>
+<span>    datList <span class="op">=</span> <span class="va">inputDat</span>, readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, </span>
+<span>    mergeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeData<span class="op">=</span><span class="cn">TRUE</span>, aggregateData<span class="op">=</span><span class="cn">FALSE</span>, </span>
+<span>    scoreData<span class="op">=</span> <span class="cn">FALSE</span>, writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">prepDat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mergeData.html">mergeData</a></span><span class="op">(</span><span class="st">"ID"</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">prepDat</span>, <span class="va">inputList</span><span class="op">$</span><span class="va">rotation</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnrDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mnrCoding.html">mnrCoding</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDat2</span>, pid <span class="op">=</span> <span class="st">"ID"</span>, </span>
+<span>    booklets <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">booklets</span>, blocks <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">blocks</span>, </span>
+<span>    rotation.id <span class="op">=</span> <span class="st">"booklet"</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, </span>
+<span>    subunits <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">subunits</span>, nMbi <span class="op">=</span> <span class="fl">2</span>, mbiCode <span class="op">=</span> <span class="st">"mbi"</span>, </span>
+<span>    mnrCode <span class="op">=</span> <span class="st">"mnr"</span>, invalidCodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mbd"</span>, <span class="st">"mir"</span>, <span class="st">"mci"</span><span class="op">)</span>, </span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ...identifying items in data (reference is blocks$subunit)</span></span>
+<span><span class="co">#&gt; Variables in data not recognized as items:</span></span>
+<span><span class="co">#&gt; ID, hisei, booklet</span></span>
+<span><span class="co">#&gt; If some of these excluded variables should have been identified as items (and thus be used for mnr coding) check 'blocks', 'subunits', 'dat'.</span></span>
+<span><span class="co">#&gt; ...identifying items with no mbi-codes ('mbi'):</span></span>
+<span><span class="co">#&gt; I04R, I08R</span></span>
+<span><span class="co">#&gt; If you expect mbi-codes on these variables check your data and option 'mbiCode'</span></span>
+<span><span class="co">#&gt; mnr statistics:</span></span>
+<span><span class="co">#&gt;      mnr cells: 553</span></span>
+<span><span class="co">#&gt;      unique cases with at least one mnr code: 89</span></span>
+<span><span class="co">#&gt;      unique items with at least one mnr code: 16</span></span>
+<span><span class="co">#&gt; unique cases ('ID') per booklet and booklet section (0s omitted):</span></span>
+<span><span class="co">#&gt;    booklet booklet.section N.ID</span></span>
+<span><span class="co">#&gt; 1 booklet1               2   11</span></span>
+<span><span class="co">#&gt; 2 booklet1               3   28</span></span>
+<span><span class="co">#&gt; 3 booklet2               1   28</span></span>
+<span><span class="co">#&gt; 4 booklet2               2   11</span></span>
+<span><span class="co">#&gt; 5 booklet2               3    1</span></span>
+<span><span class="co">#&gt; 6 booklet3               3   31</span></span>
+<span><span class="co">#&gt; start recoding (item-wise)</span></span>
+<span><span class="co">#&gt; done</span></span>
+<span><span class="co">#&gt; elapsed time: 0.1 secs</span></span></code></pre></div>
+<p>Type <code><a href="../reference/mnrCoding.html">?mnrCoding</a></code> into your console to learn more.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="aggregate">Aggregate<a class="anchor" aria-label="anchor" href="#aggregate"></a>
+<h2 id="aggregating-the-data">Aggregating the Data<a class="anchor" aria-label="anchor" href="#aggregating-the-data"></a>
 </h2>
+<p>After recoding missing values, the subunits are combined one by one
+via <code><a href="../reference/aggregateData.html">aggregateData()</a></code>.</p>
+<p>This function needs three data frames: one containing the data to be
+aggregated (<code>dat</code>), one containing the subunit information
+(<code>subunits</code>), and one containing the unit information
+(<code>units</code>).</p>
+<p>Optionally, you can specify how missing values should be aggregated
+(<code>aggregatemissings</code>) like in the example, or which column
+names the returned data frame should have (<code>recodedData</code>),
+for instance. Type <code><a href="../reference/aggregateData.html">?aggregateData</a></code> into your console to
+learn more.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">am</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"vc"</span> , <span class="st">"mvi"</span>, <span class="st">"vc"</span> , <span class="st">"mci"</span>, <span class="st">"err"</span>, <span class="st">"vc"</span> , <span class="st">"mbi"</span>, <span class="st">"err"</span>,</span>
+<span>  <span class="st">"mvi"</span>, <span class="st">"mvi"</span>, <span class="st">"err"</span>, <span class="st">"mci"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>,</span>
+<span>  <span class="st">"vc"</span> , <span class="st">"err"</span>, <span class="st">"mnr"</span>, <span class="st">"mci"</span>, <span class="st">"err"</span>, <span class="st">"mir"</span>, <span class="st">"mnr"</span>, <span class="st">"err"</span>,</span>
+<span>  <span class="st">"mci"</span>, <span class="st">"mci"</span>, <span class="st">"mci"</span>, <span class="st">"mci"</span>, <span class="st">"err"</span>, <span class="st">"mci"</span>, <span class="st">"mci"</span>, <span class="st">"err"</span>,</span>
+<span>  <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"mbd"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>,</span>
+<span>  <span class="st">"vc"</span> , <span class="st">"err"</span>, <span class="st">"mir"</span>, <span class="st">"mci"</span>, <span class="st">"err"</span>, <span class="st">"mir"</span>, <span class="st">"mir"</span>, <span class="st">"err"</span>,</span>
+<span>  <span class="st">"mbi"</span>, <span class="st">"err"</span>, <span class="st">"mnr"</span>, <span class="st">"mci"</span>, <span class="st">"err"</span>, <span class="st">"mir"</span>, <span class="st">"mbi"</span>, <span class="st">"err"</span>,</span>
+<span>  <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span>, <span class="st">"err"</span> <span class="op">)</span>,</span>
+<span>  nrow <span class="op">=</span> <span class="fl">8</span>, ncol <span class="op">=</span> <span class="fl">8</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">am</span><span class="op">)</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vc"</span> ,<span class="st">"mvi"</span>, <span class="st">"mnr"</span>, <span class="st">"mci"</span>,  <span class="st">"mbd"</span>, <span class="st">"mir"</span>, <span class="st">"mbi"</span>, <span class="st">"err"</span><span class="op">)</span>,</span>
+<span>       <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vc"</span> ,<span class="st">"mvi"</span>, <span class="st">"mnr"</span>, <span class="st">"mci"</span>,  <span class="st">"mbd"</span>, <span class="st">"mir"</span>, <span class="st">"mbi"</span>, <span class="st">"err"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># using datRec from the chapter "recodeData()"</span></span>
+<span><span class="va">datAggr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/aggregateData.html">aggregateData</a></span><span class="op">(</span><span class="va">datRec</span>, <span class="va">inputList</span><span class="op">$</span><span class="va">subunits</span>, <span class="va">inputList</span><span class="op">$</span><span class="va">units</span>,</span>
+<span>    aggregatemissings <span class="op">=</span> <span class="va">am</span>, rename <span class="op">=</span> <span class="cn">TRUE</span>, recodedData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    suppressErr <span class="op">=</span> <span class="cn">TRUE</span>, recodeErr <span class="op">=</span> <span class="st">"mci"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; All aggregation rules will be defaulted to 'SUM', because no other type is currently supported.</span></span>
+<span><span class="co">#&gt; Found 20 unit(s) with only one subunit in 'dat'. This/these subunit(s) will not be aggregated and renamed to their respective unit name(s).</span></span>
+<span><span class="co">#&gt; 1 units were aggregated: I12.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="score">Score<a class="anchor" aria-label="anchor" href="#score"></a>
+<h2 id="scoring-the-data">Scoring the Data<a class="anchor" aria-label="anchor" href="#scoring-the-data"></a>
 </h2>
+<p>The next step is to score data set with special consideration of
+missing values. The function <code><a href="../reference/scoreData.html">scoreData()</a></code> is very similar to
+<code><a href="../reference/recodeData.html">recodeData()</a></code>, but with a few defaults that are better
+suited for scoring. <code><a href="../reference/scoreData.html">scoreData()</a></code> will give warnings when
+incomplete scoring information is found. Values without scoring
+information will not be scored.</p>
+<p>Again, you need to specify three data frames. One data frame that you
+get after completing the steps you did so far or by using
+<code>automateDataPrepatation</code> (<code>dat</code>), one with
+information about the scoring of units (<code>unitrecodings</code>), and
+one with subunit information (<code>subunits</code>). Examples for the
+last two data frames can be found via <code>inputList</code>.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prepDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/automateDataPreparation.html">automateDataPreparation</a></span> <span class="op">(</span>inputList <span class="op">=</span> <span class="va">inputList</span>, datList <span class="op">=</span> <span class="va">inputDat</span>,</span>
+<span>    readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeData<span class="op">=</span><span class="cn">TRUE</span>,</span>
+<span>    aggregateData<span class="op">=</span><span class="cn">TRUE</span>, scoreData<span class="op">=</span> <span class="cn">FALSE</span>, writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">datSco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scoreData.html">scoreData</a></span><span class="op">(</span><span class="va">prepDat</span>, <span class="va">inputList</span><span class="op">$</span><span class="va">unitRecodings</span>, <span class="va">inputList</span><span class="op">$</span><span class="va">subunits</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> 1 unit was scored: `I12`.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="collapse">Collapse<a class="anchor" aria-label="anchor" href="#collapse"></a>
+<h2 id="collapsing-the-data">Collapsing the Data<a class="anchor" aria-label="anchor" href="#collapsing-the-data"></a>
 </h2>
+<p>The last step is to recode character missings to numerical types like
+0 or NA with <code><a href="../reference/collapseMissings.html">collapseMissings()</a></code>. All variables need to be
+converted to <code>numeric</code>, as well, so you can pass the data set
+to <code>eatModel</code> afterwards.</p>
+<p>You need the data frame that is returned by <code>recodeData</code>,
+which we called <code>datRec</code> earlier (<code>dat</code>).</p>
+<p><code>missing.rule</code> is a list containing information which
+character missings should be converted to <code>0</code>or
+<code>NA</code>. It has default settings, but you can adapt them if
+needed. Type <code><a href="../reference/collapseMissings.html">?collapseMissings</a></code> into your console to learn
+more.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">datColMis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMissings.html">collapseMissings</a></span><span class="op">(</span><span class="va">datRec</span><span class="op">)</span></span></code></pre></div>
+<p>After doing that you should have a data frame that you can now use
+for further processing with the <code>eatModel</code> package.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -770,7 +1316,7 @@ and checkDesign() for rotated block design of the df
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
