@@ -159,7 +159,7 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
     stopifnot(id %in% names(rotation))
 
     # Cases worked on the given booklet
-    cases <- rotation[,id][rotation$booklet == TH]
+    cases <- rotation[which(rotation$booklet == TH),id]
 
     # Subunit names in the given booklet (should only contain valid codes)
     subInBooklet <- unname(unlist(sapply(
