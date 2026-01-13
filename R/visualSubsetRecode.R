@@ -8,6 +8,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
   stopifnot(ID %in% names(dat))
   stopifnot(ID %in% names(subsetInfo))
   stopifnot("datCols" %in% names(subsetInfo))
+  # evtl check auf numerische Positionen?
 
   checkmate::assert_scalar(toRecodeVal)
   checkmate::assert_character(useGroups, len = 1, null.ok = TRUE)
@@ -19,6 +20,12 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
 
   if(isTRUE(positions)) {
     stopifnot(all(c("blockPosition", "subunitBlockPosition") %in% names(subsetInfo)))
+    if(test_warning(as.numeric, subsetInfo$blockPosition)) {
+      cli::cli_alert_danger("blockPosition must be convertible to numeric.", wrap = TRUE)
+    }
+    if(test_warning(as.numeric, subsetInfo$subunitBlockPosition)) {
+      cli::cli_alert_danger("blockPosition must be convertible to numeric.", wrap = TRUE)
+    }
   } else {
     cli::cli_alert_danger("If positions are not specified, subgroups won't be separated meaningfully.", wrap = TRUE)
   }
@@ -69,6 +76,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
     if(isTRUE(positions) & is.null(useGroups)) {
       vars2 <- subsetInfo[subsetInfo[[ID]] %in% ll, c("datCols", "blockPosition", "subunitBlockPosition")]
       vars2 <- set.col.type(vars2)
+      vars2 <- vars2[order(as.numeric(vars2$blockPosition), as.numeric(vars2$subunitBlockPosition)),]
       vars_long <- tidyr::pivot_longer(vars2, cols = -datCols, names_to = "variable", values_to = "value")
       vars_transposed <- data.frame(tidyr::pivot_wider(vars_long, names_from = "datCols", values_from = "value"))
       names(vars_transposed)[1] <- ID
@@ -79,11 +87,13 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
       sdatl <- tidyr::pivot_longer(sdat, cols=vars, names_to = "datCols", values_drop_na = TRUE)
       sI <- subsetInfo[subsetInfo[[ID]] %in% ll, c(ID, "datCols", "blockPosition", "subunitBlockPosition")]
       sI <- set.col.type(sI)
+      sI <- sI[order(sI[[ID]], as.numeric(sI$blockPosition), as.numeric(sI$subunitBlockPosition)),]
       sdatl2 <- merge(sdatl, sI, by=c(ID, "datCols"), all.x=TRUE, all.y=FALSE)
-      sdatl2 <- sdatl2[order(sdatl2[[ID]], sdatl2$blockPosition, sdatl2$subunitBlockPosition),]
+      sdatl2 <- sdatl2[!is.na(sdatl2$blockPosition),]
+      sdatl2 <- sdatl2[order(sdatl2[[ID]], as.numeric(sdatl2$blockPosition), as.numeric(sdatl2$subunitBlockPosition)),]
       chunks <- split(sdatl2, sdatl2[[ID]])
       extract_cols <- function(df) {
-        df[, c(2, 4, 5)]  # Extract columns 1, 3, and 4
+        df[, c("datCols", "blockPosition", "subunitBlockPosition")]  # Extract columns 1, 3, and 4
       }
       standardized <- lapply(chunks, function(df) {
         paste(as.matrix(extract_cols(df)), collapse = ",")  # Convert to a single string
@@ -97,8 +107,8 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
           ret <- chunks[[index]]
           names(ret)[which(names(ret) %in% "value")] <- ret[1,1]
           ret$subunitBlockPosition <- as.numeric(ret$subunitBlockPosition)
-          ret <- ret[order(ret$blockPosition, ret$subunitBlockPosition),]
-          ret$subunitBlockPosition <- NULL
+          ret <- ret[order(as.numeric(ret$blockPosition), as.numeric(ret$subunitBlockPosition)),]
+          #ret$subunitBlockPosition <- NULL
           return(ret[,-1])
         }
         if(length(index)>1) {
@@ -108,7 +118,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
             ch2$subunitBlockPosition <- as.numeric(ch2$subunitBlockPosition)
           })
           ret2 <- mergeData("datCols", ch2)
-          ret2 <- ret2[order(ret2$blockPosition, as.numeric(ret2$subunitBlockPosition)),]
+          ret2 <- ret2[order(as.numeric(ret2$blockPosition), as.numeric(ret2$subunitBlockPosition)),]
           ret2 <- ret2[, c("datCols", setdiff(names(ret2), c("datCols", "blockPosition", "subunitBlockPosition")), "blockPosition")]
           return(ret2)
         }
@@ -166,8 +176,8 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
     if(is.null(useGroups)) {
       print(table(unlist(datM[datM[[ID]] %in% ll, vars])))
     } else {
-      print(table(unlist(datM[datM[[ID]] %in% ll, vars])))
-    }
+      print(table(unlist(lapply(sdat, function(hh) hh[-which(row.names(hh) %in% c("blockPosition", "subunitBlockPosition")),]))))
+    } #wozu gleich diese Fallunterscheidung hier?
 
     # res1 <- menu(c("yes", "no", "flag, maybe later", paste0("go back (already set '", toRecodeVal,"' cannot be undone)")),
     #
@@ -368,6 +378,21 @@ print_non_na_chunks <- function(df, ID="ID") {
     }
   }
 }
+
+
+test_warning <- function(fun, arg) {
+  warnings_before <- warnings()
+  on.exit(warnings(warnings_before)) # Setzt Warnungen nach dem Test zurück
+  result <- withCallingHandlers(
+    fun(arg),
+    warning = function(w) {
+      invokeRestart("muffleWarning")
+      return(TRUE)
+    }
+  )
+  FALSE
+}
+
 #
 # count_values <- function(df, ID = "ID") {
 #   if(dim(df)[1] == 1) {
