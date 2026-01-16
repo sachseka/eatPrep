@@ -159,7 +159,7 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
     stopifnot(id %in% names(rotation))
 
     # Cases worked on the given booklet
-    cases <- rotation[which(rotation$booklet == TH),id]
+    cases <- unname(unlist(rotation[which(rotation$booklet == TH),id]))
 
     # Subunit names in the given booklet (should only contain valid codes)
     subInBooklet <- unname(unlist(sapply(
@@ -171,7 +171,7 @@ checkDesign <- function(dat, booklets, blocks, rotation, sysMis = "NA", id = "ID
     subOffBooklet <- setdiff(names(dat), c(subInBooklet, id))
 
     # Data to match, differs based on subunits in vs. off booklet
-    subPattern <- function(subunit) { dat[match(cases, dat[,id]), match(subunit, names(dat))] }
+    subPattern <- function(subunit) { dat[dat[, id] %in% cases, match(subunit, names(dat))] }
 
     # Pattern check based on system missing definition (NA vs. other)
     if (sysMis == "NA") {
