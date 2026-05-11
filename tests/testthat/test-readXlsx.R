@@ -1,5 +1,6 @@
 test_that("readDaemonXlsx reads bundled input workbook", {
-  path <- test_path("../../inst/extdata/inputList.xlsx")
+  path <- system.file("extdata", "inputList.xlsx", package = "eatPrep")
+  expect_true(nzchar(path))
 
   expect_message(input <- readDaemonXlsx(path), "Reading sheet 'units'")
   expect_named(
@@ -12,7 +13,8 @@ test_that("readDaemonXlsx reads bundled input workbook", {
 })
 
 test_that("readMerkmalXlsx reads bundled item features workbook", {
-  path <- test_path("../../inst/extdata/itemmerkmale.xlsx")
+  path <- system.file("extdata", "itemmerkmale.xlsx", package = "eatPrep")
+  expect_true(nzchar(path))
 
   expect_message(features <- readMerkmalXlsx(path), "AlleMerkmale")
   expect_named(features, c("Aufgabenmerkmale", "Itemmerkmale", "AlleMerkmale"))
