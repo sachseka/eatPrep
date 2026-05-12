@@ -61,3 +61,16 @@ test_that("plotCutsIDM uses the stored estimate column label", {
   expect_s3_class(p, "ggplot")
   expect_equal(p$labels$x, "Itemschwierigkeit (theta)")
 })
+
+test_that("plotCutsIDM uses rater values for y-axis limits", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 8),
+    Rater1 = c(1, 1, 2, 2, 3, 4, 4, 5),
+    Rater2 = c(1, 2, 2, 3, 3, 4, 5, 5)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = 2.5)
+  p <- plotCutsIDM(res)
+
+  expect_equal(p$scales$get_scales("y")$limits, c(1, 5))
+})

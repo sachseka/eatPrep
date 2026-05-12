@@ -12,6 +12,17 @@ plotCutsIDM <- function(res_list, est_col = NULL) {
   if (is.null(x_label)) {
     x_label <- "est"
   }
+  y_vals <- res_list$plot_data$stage_raw
+  y_vals <- y_vals[is.finite(y_vals)]
+  if (length(y_vals) == 0) {
+    y_limits <- c(1, max_lv)
+  } else {
+    y_limits <- range(y_vals)
+  }
+  if (y_limits[1] == y_limits[2]) {
+    y_limits <- y_limits + c(-0.5, 0.5)
+  }
+  y_breaks <- seq(floor(y_limits[1]), ceiling(y_limits[2]), by = 1)
 
   cuts_long <- res_list$cuts_per_person |>
     tidyr::pivot_longer(
@@ -33,7 +44,7 @@ plotCutsIDM <- function(res_list, est_col = NULL) {
       linetype = "solid"
     ) +
     ggplot2::facet_wrap(~ person, ncol = 2) +
-    ggplot2::scale_y_continuous(breaks = 1:max_lv, limits = c(1, max_lv)) +
+    ggplot2::scale_y_continuous(breaks = y_breaks, limits = y_limits) +
     ggplot2::labs(
       x = paste0("Itemschwierigkeit (", x_label, ")"),
       y = "Stufe",
