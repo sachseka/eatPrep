@@ -1,11 +1,19 @@
-plotCutsIDM <- function(res_list) {
+plotCutsIDM <- function(res_list, est_col = NULL) {
 
   checkmate::assert_list(res_list)
+  checkmate::assert_string(est_col, null.ok = TRUE)
 
   # Determine axis limits dynamically
   max_lv <- res_list$max_val
+  x_label <- est_col
+  if (is.null(x_label)) {
+    x_label <- res_list$est_col
+  }
+  if (is.null(x_label)) {
+    x_label <- "est"
+  }
 
-  cuts_long <- res_list$cuts_per_person %>%
+  cuts_long <- res_list$cuts_per_person |>
     tidyr::pivot_longer(
       cols = dplyr::starts_with("cut"),
       names_to = "cut_type",
@@ -27,7 +35,7 @@ plotCutsIDM <- function(res_list) {
     ggplot2::facet_wrap(~ person, ncol = 2) +
     ggplot2::scale_y_continuous(breaks = 1:max_lv, limits = c(1, max_lv)) +
     ggplot2::labs(
-      x = "Itemschwierigkeit (est)",
+      x = paste0("Itemschwierigkeit (", x_label, ")"),
       y = "Stufe",
       color = "Cut Score"
     ) +
