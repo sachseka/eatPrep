@@ -231,7 +231,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-05-12 10:10:08.114438
+#> Starting automateDataPreparation 2026-05-12 11:08:57.055125
 #> 
 #> Check data...
 #> 
@@ -308,5 +308,5 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-05-12 10:10:08.378018
+#> automateDataPreparation terminated successfully! 2026-05-12 11:08:57.318176
 ```
