@@ -151,15 +151,15 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
   	idCol <- which(colnames(missingInd) == idvarname)
 
   	# check for variables with only missing values
-  	missingInd[, - idCol] <- apply(missingInd[, - idCol], 2, as.numeric)
-  	varMissing <- colnames(missingInd[, - idCol])[colSums(missingInd[, - idCol]) == 0]
+  	missingInd[, - idCol] <- apply(missingInd[, - idCol, drop = FALSE], 2, as.numeric)
+  	varMissing <- colnames(missingInd[, - idCol, drop = FALSE])[colSums(missingInd[, - idCol, drop = FALSE]) == 0]
   	if (length(varMissing) > 0) {
   		if(verbose) message("Variable(s) ", paste(varMissing, collapse = ", "),
       " contain(s) only missing values.")
   	}
 
   	# check cases for cases with only missing values
-  	caseMissing <- missingInd[rowSums(missingInd[, - idCol]) == 0, idvarname]
+  	caseMissing <- missingInd[rowSums(missingInd[, - idCol, drop = FALSE]) == 0, idvarname]
   	if (length(caseMissing) > 0) {
   		if(verbose) message("Case(s) ", paste(caseMissing, collapse = ", "), " contain(s) only missing values.")
   	}
