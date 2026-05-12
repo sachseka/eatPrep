@@ -24,6 +24,10 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   lapply(list(dat, subunits, units), checkmate::assert_data_frame)
   lapply(c(rename, recodedData, suppressErr, verbose), checkmate::assert_logical, len = 1)
 
+  dat <- as.data.frame(dat)
+  subunits <- as.data.frame(subunits)
+  units <- as.data.frame(units)
+
   if(suppressErr == TRUE){
     if(length(recodeErr) != 1){
       message("recodeErr does not have a length of 1. err will be recoded to 'mci'.")
@@ -54,10 +58,11 @@ aggregateData <- function (dat, subunits, units, aggregatemissings = NULL, renam
   }
 
   if(is.data.frame(aggregatemissings)) {
-    stopifnot(setequal(aggregatemissings[,1],colnames(aggregatemissings)[-1]))
-    aggregatemissings <- aggregatemissings[match(colnames(aggregatemissings)[-1], aggregatemissings[,1]),]
+    aggregatemissings <- as.data.frame(aggregatemissings)
+    stopifnot(setequal(aggregatemissings[[1]],colnames(aggregatemissings)[-1]))
+    aggregatemissings <- aggregatemissings[match(colnames(aggregatemissings)[-1], aggregatemissings[[1]]),]
     am <- as.matrix(aggregatemissings[-1])
-    dimnames(am) <- list(aggregatemissings[, 1], colnames(aggregatemissings)[-1])
+    dimnames(am) <- list(aggregatemissings[[1]], colnames(aggregatemissings)[-1])
   }
 
   if(is.matrix(aggregatemissings)){
