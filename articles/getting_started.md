@@ -3,6 +3,7 @@
 ## Introduction
 
 ``` r
+
 #remotes::install_github("https://github.com/sachseka/eatPrep")
 library(eatPrep)
 #> Loading required package: readxl
@@ -69,15 +70,15 @@ help us with all of that.
 As a reminder, here is an overview for different value types the IQB
 uses:
 
-| Code | Label | Abbr                      | Explanation                                                                                           |
-|:-----|:------|:--------------------------|:------------------------------------------------------------------------------------------------------|
-| -98  | mir   | missing invalid response  | \(1\) Item was edited, and (2a) empty answer or (2b) invalid (joke) answer.                           |
-| -99  | mbo   | missing by omission       | Item wasn’t edited but seen, or wasn’t seen, but there are seen or edited subsequent Items.           |
-| -96  | mnr   | missing not reached       | \(1\) Item wasn’t seen, and (2) all subsequent Items weren’t seen, either.                            |
-| -97  | mci   | missing coding impossible | \(1\) Item should/could have been edited, and (2) answer can’t be analysed due to technical problems. |
-| -94  | mbd   | missing by design         | no answer, because Item wasn’t shown to the testperson by design.                                     |
+| Code | Label | Abbr | Explanation |
+|:---|:---|:---|:---|
+| -98 | mir | missing invalid response | \(1\) Item was edited, and (2a) empty answer or (2b) invalid (joke) answer. |
+| -99 | mbo | missing by omission | Item wasn’t edited but seen, or wasn’t seen, but there are seen or edited subsequent Items. |
+| -96 | mnr | missing not reached | \(1\) Item wasn’t seen, and (2) all subsequent Items weren’t seen, either. |
+| -97 | mci | missing coding impossible | \(1\) Item should/could have been edited, and (2) answer can’t be analysed due to technical problems. |
+| -94 | mbd | missing by design | no answer, because Item wasn’t shown to the testperson by design. |
 
-**missing types**
+**missing types** {.table}
 
 ## Input
 
@@ -96,6 +97,7 @@ to work, `inputList` contains additional metadata about the items (such
 as information about the task’s content).
 
 ``` r
+
 # Example: inputMinimal
 inputMinimal <- list(units = inputList$units[ -nrow(inputList$units), c("unit", "unitAggregateRule")],
                      subunits = inputList$subunits[, c("unit", "subunit","subunitRecoded")],
@@ -117,6 +119,7 @@ One mc (item 1), one short response (item 5), one item with 3 subitems
 short response (item 12)
 
 ``` r
+
 items <- c("I01", "I05", "I12")
 subitems <- c("I01", "I05", "I12a", "I12b", "I12c")
 
@@ -134,6 +137,7 @@ scoring information for each value (e.g., whether it is true, false, or
 missing). There are several types of missing values.
 
 ``` r
+
 kable(inputMinimal$values[which(inputMinimal$values$subunit %in% subitems), ])
 ```
 
@@ -181,6 +185,7 @@ the unrecoded variables in the original data, this can be specified via
 `eatPrep` is to count the number of correct subitems per item.
 
 ``` r
+
 kable(inputMinimal$subunits[which(inputMinimal$subunits$subunit %in% subitems), ])
 ```
 
@@ -200,6 +205,7 @@ example, I12 has 3 subitems, and one receives a credit if all subitems
 are solved correctly.
 
 ``` r
+
 kable(inputMinimal$unitRecodings)
 ```
 
@@ -232,6 +238,7 @@ described. `inputDat` gives us a first idea on how the data is supposed
 to look like.
 
 ``` r
+
 # looking at the data
 str(inputDat)
 #> List of 3
@@ -341,6 +348,7 @@ is required by the data preparation functions. `inputList` shows an
 example of this list.
 
 ``` r
+
 filename <- system.file("extdata", "inputList.xlsx", package = "eatPrep")
 inpustList <- readDaemonXlsx(filename)
 #> Reading sheet 'units'.
@@ -436,6 +444,7 @@ The function returns a list of data frames containing Itemmerkmale,
 Aufgabenmerkmale and AlleMerkmale (optional).
 
 ``` r
+
 filename <- system.file("extdata", "itemmerkmale.xlsx", package = "eatPrep")
 readMerkmalXlsx(filename, tolcl = FALSE, alleM = TRUE)
 #> Reading sheet 'Aufgabenmerkmale'.
@@ -486,6 +495,7 @@ help function
 [`?readSpss`](https://sachseka.github.io/eatPrep/reference/readSpss.md).
 
 ``` r
+
 readSpss(file)
 ```
 
@@ -509,6 +519,7 @@ ID column name (ID). You can turn of printing information to the console
 with `verbose`.
 
 ``` r
+
 checkData(dat, datnam, values, subunits, units, ID = NULL, verbose = TRUE)
 ```
 
@@ -535,6 +546,7 @@ name of the participant identifier variable in `dat`.
 subunits. And you can turn off printing information with `verbose`.
 
 ``` r
+
 checkDesign(dat, booklets, blocks, rotation, sysMis="NA", id="ID", subunits = NULL, verbose = TRUE)
 ```
 
@@ -543,6 +555,7 @@ supposed to look like. When you copy and paste the following code in
 your console, you can look at the data frames.
 
 ``` r
+
 inputDat
 inputList
 ```
@@ -578,6 +591,7 @@ the merged data set and/or the name of the ID in every data frame in
 list of data frames to be merged, e.g. `inputDat`.
 
 ``` r
+
 mergedDataset <- mergeData(newID = "ID", datList = inputDat)
 #> Start merging of dataset 1.
 #> Start merging of dataset 2.
@@ -625,6 +639,7 @@ design). For more information use the help function
 [`?mergeData`](https://sachseka.github.io/eatPrep/reference/mergeData.md).
 
 ``` r
+
 mergedDataset2 <- mergeData(newID = "idstud", datList = inputDat, oldIDs = c("ID", "ID", "ID"), addMbd = TRUE)
 #> Start merging of dataset 1.
 #> Start merging of dataset 2.
@@ -687,6 +702,7 @@ Examples of data frames `values` and `subunits` can be found when
 copy-pasting the following code in you console:
 
 ``` r
+
 inputList$values
 inputList$subunits
 ```
@@ -698,6 +714,7 @@ the specifications in `subunits$subunitRecoded`, if `subunits` is not
 provided, item names will not be changed for recoded items.
 
 ``` r
+
 datRec <- recodeData(dat = inputDat[[1]], values = inputList$values, subunits = inputList$subunits, verbose = TRUE)
 #> 
 #> Found no recode information for variable(s): 
@@ -748,14 +765,14 @@ the names of recoded variables are given as an attribute to `dat`.
 For that to work you need to specify the following arguments, as they
 don’t have any default settings:
 
-| Argument        | Explanation                                                                                                                                           |
-|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **dat**         | A data set. Missing by intention needs to be coded `mbi`                                                                                              |
-| **pid**         | Name or column number of the identifier (ID) variable in `dat`                                                                                        |
-| **rotation.id** | A character vector of length 1 indicating the column name of the test booklet identifier in `dat`                                                     |
-| **blocks**      | A data frame containing the sequence of subunits in each block in long format. The column names need to be `subunit`, `block`, `subunitBlockPosition` |
-| **booklets**    | A data frame containing the sequence of blocks in each booklet in wide format. The column names need to be `booklet`, `block1`, `block2`, `block3`, … |
-| **breaks**      | Number of blocks after which `mbi` shall be recoded to `mnr`, e.g., `c(1,2)` to specify breaks after the first and second block                       |
+| Argument | Explanation |
+|----|----|
+| **dat** | A data set. Missing by intention needs to be coded `mbi` |
+| **pid** | Name or column number of the identifier (ID) variable in `dat` |
+| **rotation.id** | A character vector of length 1 indicating the column name of the test booklet identifier in `dat` |
+| **blocks** | A data frame containing the sequence of subunits in each block in long format. The column names need to be `subunit`, `block`, `subunitBlockPosition` |
+| **booklets** | A data frame containing the sequence of blocks in each booklet in wide format. The column names need to be `booklet`, `block1`, `block2`, `block3`, … |
+| **breaks** | Number of blocks after which `mbi` shall be recoded to `mnr`, e.g., `c(1,2)` to specify breaks after the first and second block |
 
 There are more arguments with default values which to you can specify,
 but don’t have to.
@@ -781,6 +798,7 @@ create the data frame `dat` for
 [`mnrCoding()`](https://sachseka.github.io/eatPrep/reference/mnrCoding.md).
 
 ``` r
+
 prepDat <- automateDataPreparation(inputList = inputList, 
     datList = inputDat, readSpss = FALSE, checkData=FALSE, 
     mergeData = TRUE, recodeData=TRUE, aggregateData=FALSE, 
@@ -789,6 +807,7 @@ prepDat2 <- mergeData("ID", list(prepDat, inputList$rotation))
 ```
 
 ``` r
+
 mnrDat <- mnrCoding(dat = prepDat2, pid = "ID", 
     booklets = inputList$booklets, blocks = inputList$blocks, 
     rotation.id = "booklet", breaks = c(1, 2), 
@@ -839,6 +858,7 @@ returned data frame should have (`recodedData`), for instance. Type
 into your console to learn more.
 
 ``` r
+
 am <- matrix(c(
   "vc" , "mvi", "vc" , "mci", "err", "vc" , "mbi", "err",
   "mvi", "mvi", "err", "mci", "err", "err", "err", "err",
@@ -856,6 +876,7 @@ dimnames(am) <-
 ```
 
 ``` r
+
 # using datRec from the chapter "recodeData()"
 datAggr <- aggregateData(datRec, inputList$subunits, inputList$units,
     aggregatemissings = am, rename = TRUE, recodedData = TRUE,
@@ -885,12 +906,14 @@ scoring of units (`unitrecodings`), and one with subunit information
 `inputList`.
 
 ``` r
+
 prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
     aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
 ```
 
 ``` r
+
 datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
     verbose = TRUE)
 #> ✔ 1 unit was scored: `I12`.
@@ -914,6 +937,7 @@ adapt them if needed. Type
 into your console to learn more.
 
 ``` r
+
 datColMis <- collapseMissings(datRec)
 ```
 

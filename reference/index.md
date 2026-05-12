@@ -26,6 +26,9 @@
 
   Recode Character Missings of Different Types to 0 or `NA`
 
+- [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+  : Compute Cut Scores based on Rater's Monotonized Moving Averages
+
 - [`evalPbc()`](https://sachseka.github.io/eatPrep/reference/evalPbc.md)
   : Evaluate discrimination statistics
 
@@ -59,6 +62,9 @@
 
 - [`mnrCoding()`](https://sachseka.github.io/eatPrep/reference/mnrCoding.md)
   : Recode Missing by Intention to Missing not Reached
+
+- [`plotCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md)
+  : Plot Raw Values, Moving Average, and Monotonized Moving Average
 
 - [`prep2GADS()`](https://sachseka.github.io/eatPrep/reference/prep2gads.md)
   :
