@@ -6,9 +6,14 @@ catPbc <- function(datRaw, datRec, idRaw, idRec, context.vars = NULL,
   lapply(list(values, subunits), checkmate::assert_data_frame)
   checkmate::assert_logical(verbose, len = 1)
 
+  datRaw <- as.data.frame(datRaw)
+  datRec <- as.data.frame(datRec)
+  values <- as.data.frame(values)
+  subunits <- as.data.frame(subunits)
+
 	# Pruefen, ob IDs in beiden Datensaetzen uebereinstimmen
-	idrec <- datRec [ , idRec ]
-	idraw <- datRaw  [ , idRaw ]
+	idrec <- datRec[[idRec]]
+	idraw <- datRaw[[idRaw]]
 	if ( ! setequal(idrec, idraw) ) {
 		stop ( "catPbc: IDs in datasets are not all identical." )
 	} else {

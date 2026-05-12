@@ -11,6 +11,9 @@ prep2GADS <- function (dat, inputList, trafoType = c("scored", "raw"),
   checkmate::assert_character(trafoType, pattern ="^(scored|raw)$", len=1)
   checkmate::assert_logical(verbose, len=1)
 
+  dat <- as.data.frame(dat)
+  inputList <- lapply(inputList, function(x) if (is.data.frame(x)) as.data.frame(x) else x)
+
   trafoType <- match.arg(trafoType)
 
   # if(any(sapply(dat, is.factor))) stop("At least one of the variables in df is a factor. This is unusual in eatPrep and therefore handling is not implemented.")

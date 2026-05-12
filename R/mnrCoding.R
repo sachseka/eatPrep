@@ -12,6 +12,11 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
   checkmate::assert_character(invalidCodes)
   checkmate::assert_logical(verbose, len = 1)
 
+  dat <- as.data.frame(dat)
+  blocks <- as.data.frame(blocks)
+  booklets <- as.data.frame(booklets)
+  if (!is.null(subunits)) subunits <- as.data.frame(subunits)
+
 		# Startzeit
 		st <- Sys.time()
 
@@ -27,7 +32,7 @@ mnrCoding <- function ( dat , pid , rotation.id , blocks , booklets , breaks , s
 		if ( !check1 ) {
 				# geht natuerlich nur wenn subunits da ist
 				if ( !is.null ( subunits ) ) {
-						cn2 <- cn[! cn %in% blocks$subunits]
+						cn2 <- cn[! cn %in% blocks$subunit]
 
 						# jetzt versuchen, herauszufinden ob das rekodierte Variablen sind
 						check2 <- any ( cn2 %in% subunits$subunitRecoded )
