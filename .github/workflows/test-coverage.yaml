@@ -23,12 +23,13 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr
+          extra-packages: |
+            any::covr
+            any::xml2
           needs: coverage
 
       - name: Run test coverage
         run: |
-          Rscript -e 'install.packages("covr")'
           Rscript -e 'cov2 <- covr::package_coverage(type = "tests"); covr::to_cobertura(cov2, file = "coverage.xml")'
 
       - name: Show testthat output
