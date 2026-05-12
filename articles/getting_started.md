@@ -835,7 +835,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.0 secs
+#> elapsed time: 0.1 secs
 ```
 
 Type
