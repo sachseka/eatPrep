@@ -31,6 +31,19 @@ test_that("computeCutsIDM keeps pattern-based rater selection as default behavio
   expect_equal(res$cuts_per_person$person, c("Rater1", "Rater2"))
 })
 
+test_that("computeCutsIDM allows missing values in rater columns", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 8),
+    Rater1 = c(NA, 1, 2, 2, 3, 4, 4, 5),
+    Rater2 = c(1, 2, 2, 3, 3, 4, 5, NA)
+  )
+
+  res <- computeCutsIDM(dat)
+
+  expect_equal(res$cuts_per_person$person, c("Rater1", "Rater2"))
+  expect_true(any(is.na(res$plot_data$stage_raw)))
+})
+
 test_that("plotCutsIDM uses the stored estimate column label", {
   dat <- data.frame(
     theta = seq(-2, 2, length.out = 8),

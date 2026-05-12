@@ -71,7 +71,7 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     stop("No rater columns found.", call. = FALSE)
   }
   purrr::walk(person_cols, function(person_col) {
-    checkmate::assert_numeric(dat[[person_col]], any.missing = FALSE)
+    checkmate::assert_numeric(dat[[person_col]])
   })
 
   dat <- dat |>
