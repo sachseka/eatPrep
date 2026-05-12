@@ -36,6 +36,52 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.8" id="eatprep-108">eatPrep 1.0.8<a class="anchor" aria-label="anchor" href="#eatprep-108"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-1-0-8">bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-8"></a></h3>
+<ul><li>Improved handling of tibble inputs across data preparation workflows.</li>
+<li>
+<code><a href="../reference/checkData.html">checkData()</a></code>, <code><a href="../reference/mergeData.html">mergeData()</a></code>, <code><a href="../reference/aggregateData.html">aggregateData()</a></code>, <code><a href="../reference/cat.pbc.html">catPbc()</a></code>, <code><a href="../reference/mnrCoding.html">mnrCoding()</a></code>, and <code><a href="../reference/prep2gads.html">prep2GADS()</a></code> now coerce tibble inputs internally where needed.</li>
+<li>Fixed tibble handling for <code>aggregatemissings</code> in <code><a href="../reference/aggregateData.html">aggregateData()</a></code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-1-0-8">tests<a class="anchor" aria-label="anchor" href="#tests-1-0-8"></a></h3>
+<ul><li>Added regression tests for tibble inputs in core data preparation functions.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.7" id="eatprep-107">eatPrep 1.0.7<a class="anchor" aria-label="anchor" href="#eatprep-107"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-0-7">new features<a class="anchor" aria-label="anchor" href="#new-features-1-0-7"></a></h3>
+<ul><li>Added <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> for computing Item Descriptor Matching cut scores.</li>
+<li>Added <code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> for visualizing IDM ratings, smoothed ratings, monotonized curves, and resulting cut scores.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-1-0-7">improvements<a class="anchor" aria-label="anchor" href="#improvements-1-0-7"></a></h3>
+<ul><li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> supports custom item difficulty columns and custom rater columns.</li>
+<li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> allows missing values in rater columns.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> uses stored estimate column labels and adapts the y-axis range to observed rater values.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.6" id="eatprep-106">eatPrep 1.0.6<a class="anchor" aria-label="anchor" href="#eatprep-106"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-1-0-6">bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-6"></a></h3>
+<ul><li>Fixed ordering of blocks and subunits in <code><a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a></code> output when position information is used.</li>
+<li>Improved handling of numeric block and subunit position information in <code><a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a></code>.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.5" id="eatprep-105">eatPrep 1.0.5<a class="anchor" aria-label="anchor" href="#eatprep-105"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-1-0-5">bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-5"></a></h3>
+<ul><li>Fixed booklet-specific case selection in <code><a href="../reference/checkDesign.html">checkDesign()</a></code>.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.4" id="eatprep-104">eatPrep 1.0.4<a class="anchor" aria-label="anchor" href="#eatprep-104"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-1-0-4">bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-4"></a></h3>
