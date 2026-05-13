@@ -2,7 +2,7 @@
 title: "Main Functions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{eatPrep}
+  %\VignetteIndexEntry{Main Functions}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options:
