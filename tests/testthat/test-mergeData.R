@@ -118,8 +118,32 @@ test_that("multiple different valid codes II", {
 })
 
 test_that("missings in ID", {
-  expect_warning(mergeData("v1",list(dat2,dat3), verbose=FALSE),
-                 "Found missing value in ID variable in dataset 1. Output may not be as desired." )
+  expect_error(mergeData("v1",list(dat2,dat3), verbose=FALSE),
+               "Found missing value in ID variable in dataset 1. Please remove or repair missing IDs before merging." )
+})
+
+test_that("missings in ID in later datasets are errors", {
+  dat_missing_id <- data.frame(ID=c(1, NA),
+                               v1=c("0", "1"))
+
+  expect_error(mergeData("ID",list(dat0[,1:2],dat_missing_id), verbose=FALSE),
+               "Found missing value in ID variable in dataset 2. Please remove or repair missing IDs before merging." )
+})
+
+test_that("overwriteMbdSilently still reports non-mbd conflicts", {
+  dat_mbd_conflict1 <- data.frame(ID=c(1,2,3),
+                                  v1=c("mbd","A","C"))
+  dat_mbd_conflict2 <- data.frame(ID=c(1,2,3),
+                                  v1=c("B","X","C"))
+
+  res <- NULL
+  expect_message(
+    res <- mergeData("ID", list(dat_mbd_conflict1, dat_mbd_conflict2), verbose=TRUE),
+    "Multiple different valid codes in variable: 'v1' in 'dataset 2': \n The first value has been kept. \n IDs: 2\n Values: A&X"
+  )
+
+  expect_identical(res, data.frame(ID=c(1,2,3),
+                                   v1=c("B","A","C")))
 })
 
 test_that("error when varnames do end with .x or .y", {
