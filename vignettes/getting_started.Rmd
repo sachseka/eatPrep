@@ -212,33 +212,44 @@ head1 <- c("**Reading in (Meta) Data**", "")
 head2 <- c("**Checks**", "")
 head3 <- c("**Merging, Recoding, Aggregating, Scoring**", "")
 head4 <- c("**Wrapper**", "")
-head5 <- c("**Export**", "")
+head5 <- c("**Additional Diagnostics and Rater Tools**", "")
+head6 <- c("**Export**", "")
 # 1
-read1 <- c("`readDaemonXlsx`", "read in the inputlist that was created using the EDV-tool 'ZKDaemon'.")
-read2 <- c("`readSpss`", "read in SPSS files.")
-read3 <- c("`readMerkmalXlsx`", "read in additional item and exercise attributes like processing time, formats, content categories, ...")
+read1 <- c("[readDaemonXlsx()](main_functions.html#items-via-zkdaemon)", "read in the inputlist that was created using the EDV-tool 'ZKDaemon'.")
+read2 <- c("[readSpss()](main_functions.html#spss-data)", "read in SPSS files.")
+read3 <- c("[readMerkmalXlsx()](main_functions.html#merkmalsauszug)", "read in additional item and exercise attributes like processing time, formats, content categories, ...")
 # 2
-check1 <- c("`checkInputList`", "check the inputList for internal consistency.")
-check2 <- c("`checkData`", "check data sets according to item meta information and other plausibility checks of the data.")
-check3 <- c("`checkDesign`", "check data sets according to test design meta information.")
+check1 <- c("[checkInputList()](main_functions.html#checkinputlist)", "check the inputList for internal consistency.")
+check2 <- c("[checkData()](main_functions.html#checkdata)", "check data sets according to item meta information and other plausibility checks of the data.")
+check3 <- c("[checkDesign()](main_functions.html#checkdesign)", "check data sets according to test design meta information.")
 # 3
-merge1 <- c("`mergeData`", "merging the data sets and diagnostics to ensure a fit.")
-recode1 <- c("`recodeData`", "recode the subitems according to meta information from the inputList.")
-aggregate1 <- c("`aggregateData`", "aggregate subitems into items.")
-score1 <- c("`scoreData`", "recode items that previously consisted out of subitems.")
-score2 <- c("`mnrCoding`", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
+merge1 <- c("[mergeData()](main_functions.html#merging-data)", "merging the data sets and diagnostics to ensure a fit.")
+recode1 <- c("[recodeData()](main_functions.html#recoding-data)", "recode the subitems according to meta information from the inputList.")
+aggregate1 <- c("[aggregateData()](main_functions.html#aggregating-data)", "aggregate subitems into items.")
+score1 <- c("[scoreData()](main_functions.html#scoring-data)", "recode items that previously consisted out of subitems.")
+score2 <- c("[mnrCoding()](main_functions.html#mnrcoding)", "recoding the last items (if empty) in each block (see test design) as 'missing not reached'.")
 # 4
-wrap1 <- c("`automateDataPreparation`", "wraps most of the other features into one big function.")
+wrap1 <- c("[automateDataPreparation()](main_functions.html#wrapper)", "wraps most of the other features into one big function.")
 # 5
-export1 <- c("`collapseMissings`", "recodes the missing types into predefined scores (usually 0.1, NA). Such a \"collapster\" R-data.frame can be passed directly to eatModel for scaling.")
-export2 <- c("`writeSpss`", "produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data.")
-export3 <- c("`prep2GADS`", "both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS.")
+pbc1 <- c("[catPbc()](main_functions.html#category-discrimination)", "calculates category-level point-biserial correlations for recoded and raw item data.")
+pbc2 <- c("[evalPbc()](main_functions.html#category-discrimination)", "flags suspicious category discrimination patterns from the output of `catPbc()`.")
+rater1 <- c("[meanAgree()](main_functions.html#rater-agreement)", "calculates mean pairwise percentage agreement across raters.")
+rater2 <- c("[meanKappa()](main_functions.html#rater-agreement)", "calculates mean pairwise kappa across raters.")
+rater3 <- c("[make.pseudo()](main_functions.html#pseudo-raters)", "reduces multiple real raters to a smaller number of pseudo raters.")
+idm1 <- c("[computeCutsIDM()](main_functions.html#idm-cut-scores)", "computes cut scores for Item Descriptor Matching based on monotonized moving averages.")
+idm2 <- c("[plotCutsIDM()](main_functions.html#idm-cut-scores)", "plots the raw ratings, moving averages, monotonized curves and cut scores from `computeCutsIDM()`.")
+visual1 <- c("[visualSubsetRecode()](main_functions.html#visual-subset-recoding)", "supports interactive visual inspection and recoding of flagged subsets.")
+# 6
+export1 <- c("[collapseMissings()](main_functions.html#collapsing-data)", "recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling.")
+export2 <- c("[writeSpss()](main_functions.html#export-spss)", "produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data.")
+export3 <- c("[prep2GADS()](main_functions.html#prepare-for-eatgads)", "both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS.")
 
 outline <- rbind.data.frame(head1, read1, read2, read3,
                             head2, check1, check2, check3,
                             head3, merge1, recode1, aggregate1, score1, score2,
                             head4, wrap1,
-                            head5, export1, export2, export3)
+                            head5, pbc1, pbc2, rater1, rater2, rater3, idm1, idm2, visual1,
+                            head6, export1, export2, export3)
 names(outline) <- c("Function", "Explanation")
 kable(outline, caption = "**Functions Overview**")
 ```
