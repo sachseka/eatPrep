@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,20 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.9" id="eatprep-109">eatPrep 1.0.9<a class="anchor" aria-label="anchor" href="#eatprep-109"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-1-0-9">bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-9"></a></h3>
+<ul><li>
+<code><a href="../reference/mergeData.html">mergeData()</a></code> now stops when missing values are found in an ID variable instead of allowing missing IDs to be joined.</li>
+<li>
+<code><a href="../reference/mergeData.html">mergeData()</a></code> no longer suppresses diagnostics for non-<code>mbd</code> value conflicts when <code>overwriteMbdSilently = TRUE</code> and another conflict in the same variable involves <code>mbd</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-1-0-9">tests<a class="anchor" aria-label="anchor" href="#tests-1-0-9"></a></h3>
+<ul><li>Added regression tests for missing IDs in <code><a href="../reference/mergeData.html">mergeData()</a></code> and mixed <code>mbd</code>/non-<code>mbd</code> merge conflicts.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.8" id="eatprep-108">eatPrep 1.0.8<a class="anchor" aria-label="anchor" href="#eatprep-108"></a></h2>
 <div class="section level3">
