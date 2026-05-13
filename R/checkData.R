@@ -1,18 +1,20 @@
 checkData <- function (dat, datnam, values, subunits, units, ID=NULL, verbose = TRUE) {
 
+  checkmate::assert_data_frame(dat)
   checkmate::assert_character(datnam, len = 1)
   lapply(list(values, subunits, units), checkmate::assert_data_frame)
   checkmate::assert_character(ID, len = 1, null.ok = TRUE)
   checkmate::assert_logical(verbose, len = 1)
 
+  dat <- as.data.frame(dat)
+  values <- as.data.frame(values)
+  subunits <- as.data.frame(subunits)
+  units <- as.data.frame(units)
+
   # funVersion <- "checkData: "
 	varinfo <- makeInputCheckData (values, subunits, units)
 
 	if(verbose) message("\nChecking dataset ", datnam)
-
-	if (!inherits(dat, "data.frame")) {
-		stop ("dat must be a data.frame.")
-	}
 
 	# ID-Check <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   # find ID - stop if ID cannot be found
@@ -72,17 +74,19 @@ getID <- function(varinfo) {
 checkID <- function(dat, idvarname, verbose) {
   # funVersion <- "checkID: "
   # check dat for specified id variable
+  dat <- as.data.frame(dat)
 	if (is.na(match(idvarname, colnames(dat)))) {
 		stop("ID variable ", idvarname, "not found in dataset.")
 	} else {
-		emptyID <- which(nchar(dat[, idvarname]) == 0 | is.na(dat[, idvarname]))
+		idValues <- dat[[idvarname]]
+		emptyID <- which(nchar(idValues) == 0 | is.na(idValues))
 		if (length(emptyID > 0)) {
 		  stop("ID variable has empty cells in line(s) ", paste(emptyID, collapse = ", "))
 		} else {
 		  if(verbose) message("Only valid codes in ID variable.")
 		}
-		if (length(na.omit(dat[, idvarname])) != length(na.omit(unique(dat[, idvarname])))) {
-		  duplicatedID <- na.omit(unique(dat[, idvarname][duplicated(dat[, idvarname])]))
+		if (length(na.omit(idValues)) != length(na.omit(unique(idValues)))) {
+		  duplicatedID <- na.omit(unique(idValues[duplicated(idValues)]))
 		  stop("ID variable has ", length(duplicatedID),
 					  " duplicated entries for IDs: ", paste(duplicatedID, collapse = ", "))
 		} else {
@@ -96,6 +100,7 @@ checkID <- function(dat, idvarname, verbose) {
 checkVars <- function(dat, varinfo, verbose) {
 
   # funVersion <- "checkVars: "
+  dat <- as.data.frame(dat)
 
 	if (length(colnames(dat)) != length(unique(colnames(dat)))) {
 		duplicatedVarnames <- colnames(dat)
@@ -118,6 +123,7 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
 #  eatTools:::sunk(paste(funVersion, "Checking missing values", sep = ""))
 
   # funVersion <- "checkMissings: "
+  dat <- as.data.frame(dat)
 
   if(length(which(names(varinfo) == idvarname))> 0) {
     vars <- intersect(colnames(dat), names(varinfo)[- which(names(varinfo) == idvarname)])
@@ -133,7 +139,7 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
     missingInd <- matrix(data = NA, nrow = nrow(dat), ncol = length(vars) + 1)
 
     colnames(missingInd) <- c( idvarname, vars)
-  	missingInd[, idvarname] <- dat[, idvarname]
+    missingInd[, idvarname] <- dat[[idvarname]]
 
   	# Missing-Codes rausfinden: Welche Code-Typen beginnen mit einem "m"?
     for (var in vars) {
@@ -143,7 +149,7 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
   			if(verbose) message("Found no missing values definitions for variable ",
   			  var, ". This variable will only be checked for NA values.")
   		}
-  		missingInd[, var ] <- 1 * (!dat[, match(var, colnames(dat))] %in% c(NA, "", MissingCodes))
+      missingInd[, var ] <- 1 * (!dat[[var]] %in% c(NA, "", MissingCodes))
   	}
 
   	# zuerst missingInd in dataframe umwandeln, damit sie nicht mehr character ist
@@ -151,15 +157,15 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
   	idCol <- which(colnames(missingInd) == idvarname)
 
   	# check for variables with only missing values
-  	missingInd[, - idCol] <- apply(missingInd[, - idCol], 2, as.numeric)
-  	varMissing <- colnames(missingInd[, - idCol])[colSums(missingInd[, - idCol]) == 0]
+  	missingInd[, - idCol] <- apply(missingInd[, - idCol, drop = FALSE], 2, as.numeric)
+  	varMissing <- colnames(missingInd[, - idCol, drop = FALSE])[colSums(missingInd[, - idCol, drop = FALSE]) == 0]
   	if (length(varMissing) > 0) {
   		if(verbose) message("Variable(s) ", paste(varMissing, collapse = ", "),
       " contain(s) only missing values.")
   	}
 
   	# check cases for cases with only missing values
-  	caseMissing <- missingInd[rowSums(missingInd[, - idCol]) == 0, idvarname]
+  	caseMissing <- missingInd[rowSums(missingInd[, - idCol, drop = FALSE]) == 0, idvarname]
   	if (length(caseMissing) > 0) {
   		if(verbose) message("Case(s) ", paste(caseMissing, collapse = ", "), " contain(s) only missing values.")
   	}
@@ -170,6 +176,7 @@ checkMissings <- function (dat, varinfo, idvarname, verbose) {
 
 checkCodes <- function(dat, varinfo, idvarname, verbose) {
   # funVersion <- "checkCodes: "
+  dat <- as.data.frame(dat)
 
   if(length(which(names(varinfo) == idvarname))> 0) {
     vars <- intersect(colnames(dat), names(varinfo)[- which(names(varinfo) == idvarname)])
@@ -185,8 +192,8 @@ checkCodes <- function(dat, varinfo, idvarname, verbose) {
   	for (v in vars) {
   		if (!varinfo[[v]]$type %in% c("ID", "T1", "T2", "T3")) {
   			validCodes <- names(varinfo[[v]]$values)
-  			givenCodes <- names(table(dat[, match(v, colnames(dat))]))
-  			givenCodesFreq <- table(dat[, match(v, colnames(dat))])
+        givenCodes <- names(table(dat[[v]]))
+        givenCodesFreq <- table(dat[[v]])
   			if (length(validCodes > 0)) {
   			  invalidCodes <- setdiff(givenCodes, validCodes)
   			  if (length(invalidCodes > 0)) {

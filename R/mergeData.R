@@ -24,6 +24,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
     for(i in seq(along = datList)) {
       fkNam[[i]] <- NULL
       stopifnot(is.data.frame(datList[[i]]))
+      datList[[i]] <- as.data.frame(datList[[i]])
 
       if(any(unlist(lapply(datList[[i]], class)) == "factor")) {
         fkNam[[i]] <- names(which(unlist(lapply(lapply(datList[[i]], class), function(hh) "factor" %in% hh))))
@@ -38,14 +39,14 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
 				if(is.numeric(oldIDs)) {IDname1 <- colnames(datList[[i]])[oldIDs[i]]}
 
 			  if(is.character(IDname1) & IDname1 %in% names(datList[[i]])) {
-			    if(any(is.na(datList[[i]][,IDname1]))) {
+			    if(any(is.na(datList[[i]][[IDname1]]))) {
 			      warning("Found missing value in ID variable in dataset ", i, ". Output may not be as desired.")
 			    }
-  				if(length(na.omit(datList[[i]][,IDname1])) != length(na.omit(unique(datList[[i]][,IDname1])))) {
-  							doppelt <- na.omit(unique(datList[[i]][,IDname1][duplicated(datList[[i]][,IDname1])]))
-  							message("Multiple IDs in dataset ", i, " in " ,length(doppelt)," cases.")
-  							stop("Multiple IDs: ", paste(doppelt, collapse = ", "))
-  							}
+          if(length(na.omit(datList[[i]][[IDname1]])) != length(na.omit(unique(datList[[i]][[IDname1]])))) {
+            doppelt <- na.omit(unique(datList[[i]][[IDname1]][duplicated(datList[[i]][[IDname1]])]))
+            message("Multiple IDs in dataset ", i, " in " ,length(doppelt)," cases.")
+            stop("Multiple IDs: ", paste(doppelt, collapse = ", "))
+          }
 					names(datList[[i]])[names(datList[[i]]) == IDname1] <- newID
 					mergedData <- datList[[i]]
 				} else {
@@ -58,11 +59,11 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
         if(is.numeric(oldIDs)) {IDname2 <- colnames(datList[[i]])[oldIDs[i]]}
 
 				if(is.character(IDname2) & IDname2 %in% names(datList[[i]])) {
-				  if(any(is.na(datList[[i]][,IDname2]))) {
+				  if(any(is.na(datList[[i]][[IDname2]]))) {
 				    warning("Found missing values in ID variable in dataset ", i, ". Output may not be as desired.")
 				  }
-				  if(length(na.omit(datList[[i]][,IDname2])) != length(na.omit(unique(datList[[i]][,IDname2])))) {
-				    doppelt <- na.omit(unique(datList[[i]][,IDname2][duplicated(datList[[i]][,IDname2])]))
+				  if(length(na.omit(datList[[i]][[IDname2]])) != length(na.omit(unique(datList[[i]][[IDname2]])))) {
+				    doppelt <- na.omit(unique(datList[[i]][[IDname2]][duplicated(datList[[i]][[IDname2]])]))
 				    message("Multiple IDs in dataset ", i, " in " ,length(doppelt)," cases.")
 				    stop("Multiple IDs: ", paste(doppelt, collapse = ", "))
 				    }
@@ -76,8 +77,8 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
 
 					if(length(compar) > 0) {
 					  bb <- data.frame(lapply(compar, function(gg)   {
-					    x <- dat2[,paste0(gg, ".x")]
-					    y <- dat2[,paste0(gg, ".y")]
+					    x <- dat2[[paste0(gg, ".x")]]
+					    y <- dat2[[paste0(gg, ".y")]]
 					    if(isTRUE(overwriteMbdSilently)) {
 					      z <- ifelse(is.na(x) | x == "mbd" & !is.na(y),y,x)
 					    } else {
@@ -98,7 +99,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
   					      }
   					      message("Multiple different valid codes in variable: '",gg,
   					              "' in 'dataset ",i,"': \n The first value has been kept. \n IDs: ",
-  					              paste(dat2[,newID][b],collapse=", "),"\n Values: ", ab)
+                            paste(dat2[[newID]][b],collapse=", "),"\n Values: ", ab)
   					    }
   					    return(z)
 					    }
@@ -147,7 +148,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
         if(verbose) message("Start adding mbd according to data pattern.")
         for(pp in unique(d4ind$colNam)) {
           ids <- d4ind$rowID[d4ind$colNam == pp]
-          mergedData[mergedData[,newID] %in% ids,pp] <- "mbd"
+          mergedData[mergedData[[newID]] %in% ids,pp] <- "mbd"
         }
       }
     }
