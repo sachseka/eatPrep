@@ -5,7 +5,7 @@ vignette: >
   %\VignetteIndexEntry{eatPrep}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
@@ -134,7 +134,7 @@ kable(Mtypes, caption = "**Missing Types**")
 
 #### Representation of the Data Structure in eatPrep
 
-Now, how are booklets, blocks, tasks, items, subitems, values and scores stored in eatPreP?
+Now, how are booklets, blocks, tasks, items, subitems, values and scores stored in eatPrep?
 
 - analogous to a simple relational meta database: a list of several data frames with a predefined structure and fixed names
 - we need meta data about the items
@@ -205,7 +205,7 @@ str(inputDat)
 
 ## Functions in eatPrep
 
-Here you see an overview over the main functions of `eatPrep`. If you want to learn more about using this package for IRT analysis, this [vignette](/main_functions.Rmd) explains how to use these functions. 
+Here you see an overview over the main functions of `eatPrep`. If you want to learn more about using this package for IRT analysis, this [vignette](main_functions.html) explains how to use these functions.
 
 ```{r outline functions, echo=FALSE}
 head1 <- c("**Reading in (Meta) Data**", "")
@@ -230,7 +230,7 @@ score2 <- c("`mnrCoding`", "recoding the last items (if empty) in each block (se
 # 4
 wrap1 <- c("`automateDataPreparation`", "wraps most of the other features into one big function.")
 # 5
-export1 <- c("`collapseMissings`", "recodes the missing types into predefined scores (usually 0.1, NA). Such a “collapster” R-data.frame can be passed directly to eatModel for scaling.")
+export1 <- c("`collapseMissings`", "recodes the missing types into predefined scores (usually 0.1, NA). Such a \"collapster\" R-data.frame can be passed directly to eatModel for scaling.")
 export2 <- c("`writeSpss`", "produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data.")
 export3 <- c("`prep2GADS`", "both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS.")
 
