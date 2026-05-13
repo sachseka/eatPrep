@@ -1,3 +1,14 @@
+# eatPrep 1.0.9
+
+## bug fixes
+
+* `mergeData()` now stops when missing values are found in an ID variable instead of allowing missing IDs to be joined.
+* `mergeData()` no longer suppresses diagnostics for non-`mbd` value conflicts when `overwriteMbdSilently = TRUE` and another conflict in the same variable involves `mbd`.
+
+## tests
+
+* Added regression tests for missing IDs in `mergeData()` and mixed `mbd`/non-`mbd` merge conflicts.
+
 # eatPrep 1.0.8
 
 ## bug fixes

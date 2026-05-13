@@ -40,7 +40,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
 
 			  if(is.character(IDname1) & IDname1 %in% names(datList[[i]])) {
 			    if(any(is.na(datList[[i]][[IDname1]]))) {
-			      warning("Found missing value in ID variable in dataset ", i, ". Output may not be as desired.")
+			      stop("Found missing value in ID variable in dataset ", i, ". Please remove or repair missing IDs before merging.")
 			    }
           if(length(na.omit(datList[[i]][[IDname1]])) != length(na.omit(unique(datList[[i]][[IDname1]])))) {
             doppelt <- na.omit(unique(datList[[i]][[IDname1]][duplicated(datList[[i]][[IDname1]])]))
@@ -60,7 +60,7 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
 
 				if(is.character(IDname2) & IDname2 %in% names(datList[[i]])) {
 				  if(any(is.na(datList[[i]][[IDname2]]))) {
-				    warning("Found missing values in ID variable in dataset ", i, ". Output may not be as desired.")
+				    stop("Found missing value in ID variable in dataset ", i, ". Please remove or repair missing IDs before merging.")
 				  }
 				  if(length(na.omit(datList[[i]][[IDname2]])) != length(na.omit(unique(datList[[i]][[IDname2]])))) {
 				    doppelt <- na.omit(unique(datList[[i]][[IDname2]][duplicated(datList[[i]][[IDname2]])]))
@@ -79,17 +79,19 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
 					  bb <- data.frame(lapply(compar, function(gg)   {
 					    x <- dat2[[paste0(gg, ".x")]]
 					    y <- dat2[[paste0(gg, ".y")]]
+					    xIsMbd <- !is.na(x) & as.character(x) == "mbd"
+					    yIsMbd <- !is.na(y) & as.character(y) == "mbd"
 					    if(isTRUE(overwriteMbdSilently)) {
-					      z <- ifelse(is.na(x) | x == "mbd" & !is.na(y),y,x)
+					      z <- ifelse(is.na(x) | xIsMbd & !is.na(y),y,x)
 					    } else {
 					      z <- ifelse(is.na(x),y,x)
 					    }
-					    b <- which(x[!is.na(x) & !is.na(y)] != y[!is.na(x) & !is.na(y)])
-					    a <- cbind(x[!is.na(x) & !is.na(y)],y[!is.na(x) & !is.na(y)])[b,]
-					    if(any(grepl("mbd", a)) & isTRUE(overwriteMbdSilently)){
-					      return(z)
-					    } else {
-  					    b <- which(x!=y)
+					    b <- !is.na(x) & !is.na(y) & x != y
+					    if(isTRUE(overwriteMbdSilently)) {
+					      b <- b & !xIsMbd & !yIsMbd
+					    }
+					    a <- cbind(x[b], y[b])
+					    b <- which(b)
   					    if(verbose & length(a) > 0) {
   					      if(dim(data.frame(a))[2] == 1) {
   					        ab <- paste(a,collapse="&")
@@ -102,7 +104,6 @@ mergeData <- function(newID, datList, oldIDs=NULL, addMbd = FALSE,
                             paste(dat2[[newID]][b],collapse=", "),"\n Values: ", ab)
   					    }
   					    return(z)
-					    }
 					  }))
 					  names(bb) <- compar
 
