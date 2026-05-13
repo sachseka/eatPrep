@@ -387,24 +387,33 @@ explains how to use these functions.
 | Function | Explanation |
 |:---|:---|
 | **Reading in (Meta) Data** |  |
-| `readDaemonXlsx` | read in the inputlist that was created using the EDV-tool ‘ZKDaemon’. |
-| `readSpss` | read in SPSS files. |
-| `readMerkmalXlsx` | read in additional item and exercise attributes like processing time, formats, content categories, … |
+| [readDaemonXlsx()](https://sachseka.github.io/eatPrep/articles/main_functions.html#items-via-zkdaemon) | read in the inputlist that was created using the EDV-tool ‘ZKDaemon’. |
+| [readSpss()](https://sachseka.github.io/eatPrep/articles/main_functions.html#spss-data) | read in SPSS files. |
+| [readMerkmalXlsx()](https://sachseka.github.io/eatPrep/articles/main_functions.html#merkmalsauszug) | read in additional item and exercise attributes like processing time, formats, content categories, … |
 | **Checks** |  |
-| `checkInputList` | check the inputList for internal consistency. |
-| `checkData` | check data sets according to item meta information and other plausibility checks of the data. |
-| `checkDesign` | check data sets according to test design meta information. |
+| [checkInputList()](https://sachseka.github.io/eatPrep/articles/main_functions.html#checkinputlist) | check the inputList for internal consistency. |
+| [checkData()](https://sachseka.github.io/eatPrep/articles/main_functions.html#checkdata) | check data sets according to item meta information and other plausibility checks of the data. |
+| [checkDesign()](https://sachseka.github.io/eatPrep/articles/main_functions.html#checkdesign) | check data sets according to test design meta information. |
 | **Merging, Recoding, Aggregating, Scoring** |  |
-| `mergeData` | merging the data sets and diagnostics to ensure a fit. |
-| `recodeData` | recode the subitems according to meta information from the inputList. |
-| `aggregateData` | aggregate subitems into items. |
-| `scoreData` | recode items that previously consisted out of subitems. |
-| `mnrCoding` | recoding the last items (if empty) in each block (see test design) as ‘missing not reached’. |
+| [mergeData()](https://sachseka.github.io/eatPrep/articles/main_functions.html#merging-data) | merging the data sets and diagnostics to ensure a fit. |
+| [recodeData()](https://sachseka.github.io/eatPrep/articles/main_functions.html#recoding-data) | recode the subitems according to meta information from the inputList. |
+| [aggregateData()](https://sachseka.github.io/eatPrep/articles/main_functions.html#aggregating-data) | aggregate subitems into items. |
+| [scoreData()](https://sachseka.github.io/eatPrep/articles/main_functions.html#scoring-data) | recode items that previously consisted out of subitems. |
+| [mnrCoding()](https://sachseka.github.io/eatPrep/articles/main_functions.html#mnrcoding) | recoding the last items (if empty) in each block (see test design) as ‘missing not reached’. |
 | **Wrapper** |  |
-| `automateDataPreparation` | wraps most of the other features into one big function. |
+| [automateDataPreparation()](https://sachseka.github.io/eatPrep/articles/main_functions.html#wrapper) | wraps most of the other features into one big function. |
+| **Additional Diagnostics and Rater Tools** |  |
+| [catPbc()](https://sachseka.github.io/eatPrep/articles/main_functions.html#category-discrimination) | calculates category-level point-biserial correlations for recoded and raw item data. |
+| [evalPbc()](https://sachseka.github.io/eatPrep/articles/main_functions.html#category-discrimination) | flags suspicious category discrimination patterns from the output of [`catPbc()`](https://sachseka.github.io/eatPrep/reference/cat.pbc.md). |
+| [meanAgree()](https://sachseka.github.io/eatPrep/articles/main_functions.html#rater-agreement) | calculates mean pairwise percentage agreement across raters. |
+| [meanKappa()](https://sachseka.github.io/eatPrep/articles/main_functions.html#rater-agreement) | calculates mean pairwise kappa across raters. |
+| [make.pseudo()](https://sachseka.github.io/eatPrep/articles/main_functions.html#pseudo-raters) | reduces multiple real raters to a smaller number of pseudo raters. |
+| [computeCutsIDM()](https://sachseka.github.io/eatPrep/articles/main_functions.html#idm-cut-scores) | computes cut scores for Item Descriptor Matching based on monotonized moving averages. |
+| [plotCutsIDM()](https://sachseka.github.io/eatPrep/articles/main_functions.html#idm-cut-scores) | plots the raw ratings, moving averages, monotonized curves and cut scores from [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md). |
+| [visualSubsetRecode()](https://sachseka.github.io/eatPrep/articles/main_functions.html#visual-subset-recoding) | supports interactive visual inspection and recoding of flagged subsets. |
 | **Export** |  |
-| `collapseMissings` | recodes the missing types into predefined scores (usually 0.1, NA). Such a “collapster” R-data.frame can be passed directly to eatModel for scaling. |
-| `writeSpss` | produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data. |
-| `prep2GADS` | both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS. |
+| [collapseMissings()](https://sachseka.github.io/eatPrep/articles/main_functions.html#collapsing-data) | recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling. |
+| [writeSpss()](https://sachseka.github.io/eatPrep/articles/main_functions.html#export-spss) | produces an SPSS syntax and a .txt data set that can be read into SPSS with the syntax including all meta data. |
+| [prep2GADS()](https://sachseka.github.io/eatPrep/articles/main_functions.html#prepare-for-eatgads) | both the raw data sets and the finished, scored data sets, including all their meta data, can be exported into a GADSdat object for data storage or further processing in eatGADS. |
 
 **Functions Overview** {.table}

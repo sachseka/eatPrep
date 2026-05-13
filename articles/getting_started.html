@@ -836,16 +836,16 @@ explains how to use these functions.</p>
 <td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left"><code>readDaemonXlsx</code></td>
+<td align="left"><a href="main_functions.html#items-via-zkdaemon">readDaemonXlsx()</a></td>
 <td align="left">read in the inputlist that was created using the
 EDV-tool ‘ZKDaemon’.</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>readSpss</code></td>
+<td align="left"><a href="main_functions.html#spss-data">readSpss()</a></td>
 <td align="left">read in SPSS files.</td>
 </tr>
 <tr class="even">
-<td align="left"><code>readMerkmalXlsx</code></td>
+<td align="left"><a href="main_functions.html#merkmalsauszug">readMerkmalXlsx()</a></td>
 <td align="left">read in additional item and exercise attributes like
 processing time, formats, content categories, …</td>
 </tr>
@@ -854,16 +854,16 @@ processing time, formats, content categories, …</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left"><code>checkInputList</code></td>
+<td align="left"><a href="main_functions.html#checkinputlist">checkInputList()</a></td>
 <td align="left">check the inputList for internal consistency.</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>checkData</code></td>
+<td align="left"><a href="main_functions.html#checkdata">checkData()</a></td>
 <td align="left">check data sets according to item meta information and
 other plausibility checks of the data.</td>
 </tr>
 <tr class="even">
-<td align="left"><code>checkDesign</code></td>
+<td align="left"><a href="main_functions.html#checkdesign">checkDesign()</a></td>
 <td align="left">check data sets according to test design meta
 information.</td>
 </tr>
@@ -873,26 +873,26 @@ Scoring</strong></td>
 <td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left"><code>mergeData</code></td>
+<td align="left"><a href="main_functions.html#merging-data">mergeData()</a></td>
 <td align="left">merging the data sets and diagnostics to ensure a
 fit.</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>recodeData</code></td>
+<td align="left"><a href="main_functions.html#recoding-data">recodeData()</a></td>
 <td align="left">recode the subitems according to meta information from
 the inputList.</td>
 </tr>
 <tr class="even">
-<td align="left"><code>aggregateData</code></td>
+<td align="left"><a href="main_functions.html#aggregating-data">aggregateData()</a></td>
 <td align="left">aggregate subitems into items.</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>scoreData</code></td>
+<td align="left"><a href="main_functions.html#scoring-data">scoreData()</a></td>
 <td align="left">recode items that previously consisted out of
 subitems.</td>
 </tr>
 <tr class="even">
-<td align="left"><code>mnrCoding</code></td>
+<td align="left"><a href="main_functions.html#mnrcoding">mnrCoding()</a></td>
 <td align="left">recoding the last items (if empty) in each block (see
 test design) as ‘missing not reached’.</td>
 </tr>
@@ -901,27 +901,71 @@ test design) as ‘missing not reached’.</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left"><code>automateDataPreparation</code></td>
+<td align="left"><a href="main_functions.html#wrapper">automateDataPreparation()</a></td>
 <td align="left">wraps most of the other features into one big
 function.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Export</strong></td>
+<td align="left"><strong>Additional Diagnostics and Rater
+Tools</strong></td>
 <td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left"><code>collapseMissings</code></td>
-<td align="left">recodes the missing types into predefined scores
-(usually 0.1, NA). Such a “collapster” R-data.frame can be passed
-directly to eatModel for scaling.</td>
+<td align="left"><a href="main_functions.html#category-discrimination">catPbc()</a></td>
+<td align="left">calculates category-level point-biserial correlations
+for recoded and raw item data.</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>writeSpss</code></td>
+<td align="left"><a href="main_functions.html#category-discrimination">evalPbc()</a></td>
+<td align="left">flags suspicious category discrimination patterns from
+the output of <code><a href="../reference/cat.pbc.html">catPbc()</a></code>.</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="main_functions.html#rater-agreement">meanAgree()</a></td>
+<td align="left">calculates mean pairwise percentage agreement across
+raters.</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="main_functions.html#rater-agreement">meanKappa()</a></td>
+<td align="left">calculates mean pairwise kappa across raters.</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="main_functions.html#pseudo-raters">make.pseudo()</a></td>
+<td align="left">reduces multiple real raters to a smaller number of
+pseudo raters.</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="main_functions.html#idm-cut-scores">computeCutsIDM()</a></td>
+<td align="left">computes cut scores for Item Descriptor Matching based
+on monotonized moving averages.</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="main_functions.html#idm-cut-scores">plotCutsIDM()</a></td>
+<td align="left">plots the raw ratings, moving averages, monotonized
+curves and cut scores from <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code>.</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="main_functions.html#visual-subset-recoding">visualSubsetRecode()</a></td>
+<td align="left">supports interactive visual inspection and recoding of
+flagged subsets.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Export</strong></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="main_functions.html#collapsing-data">collapseMissings()</a></td>
+<td align="left">recodes missing types into predefined scores (usually
+0, 1, and NA). Such a collapsed R data frame can be passed directly to
+eatModel for scaling.</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="main_functions.html#export-spss">writeSpss()</a></td>
 <td align="left">produces an SPSS syntax and a .txt data set that can be
 read into SPSS with the syntax including all meta data.</td>
 </tr>
-<tr class="even">
-<td align="left"><code>prep2GADS</code></td>
+<tr class="odd">
+<td align="left"><a href="main_functions.html#prepare-for-eatgads">prep2GADS()</a></td>
 <td align="left">both the raw data sets and the finished, scored data
 sets, including all their meta data, can be exported into a GADSdat
 object for data storage or further processing in eatGADS.</td>

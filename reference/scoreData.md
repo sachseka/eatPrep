@@ -65,7 +65,7 @@ data(inputList)
 prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
     aggregateData=TRUE, scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-05-13 09:42:10.495203
+#> Starting automateDataPreparation 2026-05-13 11:26:28.654415
 #> 
 #> Check has been skipped.
 #> 
@@ -97,7 +97,7 @@ prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-05-13 09:42:10.611507
+#> automateDataPreparation terminated successfully! 2026-05-13 11:26:28.772406
 
 datSco <- scoreData(prepDat, inputList$unitRecodings, inputList$subunits,
     verbose = TRUE)
