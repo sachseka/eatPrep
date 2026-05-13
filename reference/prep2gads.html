@@ -19,6 +19,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting_started.html">Getting Started</a></li>
+    <li><a class="dropdown-item" href="../articles/main_functions.html">Main Functions</a></li>
     <li><a class="dropdown-item" href="../articles/workshop-slides.html">Workshop Slides</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -88,7 +89,7 @@
 <span class="r-in"><span><span class="va">prepDatScored</span> <span class="op">&lt;-</span> <span class="fu"><a href="automateDataPreparation.html">automateDataPreparation</a></span><span class="op">(</span>inputList <span class="op">=</span> <span class="va">inputList</span>, datList <span class="op">=</span> <span class="va">inputDat</span>,</span></span>
 <span class="r-in"><span>    readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeData<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>    aggregateData<span class="op">=</span><span class="cn">TRUE</span>, scoreData<span class="op">=</span><span class="cn">TRUE</span>, writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Starting automateDataPreparation 2026-05-12 16:42:48.304452</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Starting automateDataPreparation 2026-05-13 09:42:09.305472</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Check has been skipped.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
@@ -121,7 +122,7 @@
 <span class="r-msg co"><span class="r-pr">#&gt;</span> No SPSS-File has been written.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Missings are UNcollapsed.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> automateDataPreparation terminated successfully! 2026-05-12 16:42:48.440233</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> automateDataPreparation terminated successfully! 2026-05-13 09:42:09.440956</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">GADSobj1</span> <span class="op">&lt;-</span> <span class="fu">prep2GADS</span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDatScored</span>, inputList <span class="op">=</span> <span class="va">inputList</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, trafoType <span class="op">=</span> <span class="st">"scored"</span>,</span></span>
 <span class="r-in"><span>                                verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -133,7 +134,7 @@
 <span class="r-in"><span><span class="va">prepDatRaw</span> <span class="op">&lt;-</span> <span class="fu"><a href="automateDataPreparation.html">automateDataPreparation</a></span><span class="op">(</span>inputList <span class="op">=</span> <span class="va">inputList</span>, datList <span class="op">=</span> <span class="va">inputDat</span>,</span></span>
 <span class="r-in"><span>    readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeData<span class="op">=</span><span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>    aggregateData<span class="op">=</span><span class="cn">FALSE</span>, scoreData<span class="op">=</span><span class="cn">FALSE</span>, writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Starting automateDataPreparation 2026-05-12 16:42:48.48501</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Starting automateDataPreparation 2026-05-13 09:42:09.484308</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Check has been skipped.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
@@ -154,7 +155,7 @@
 <span class="r-msg co"><span class="r-pr">#&gt;</span> No SPSS-File has been written.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Missings are UNcollapsed.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> automateDataPreparation terminated successfully! 2026-05-12 16:42:48.526884</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> automateDataPreparation terminated successfully! 2026-05-13 09:42:09.524642</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">GADSobj2</span> <span class="op">&lt;-</span> <span class="fu">prep2GADS</span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDatRaw</span>, inputList <span class="op">=</span> <span class="va">inputList</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, trafoType <span class="op">=</span> <span class="st">"raw"</span>,</span></span>
 <span class="r-in"><span>                                verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
