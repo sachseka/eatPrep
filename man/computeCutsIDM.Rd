@@ -47,11 +47,90 @@ The function processes each rater by:
   \item Computing the cut score as the linearly interpolated item difficulty where the monotonized function crosses the specified boundary.
 }
 
+More formally, for a rater let \eqn{x_i} denote the item difficulty estimate and \eqn{r_i} the rating stage after conversion to the internal numeric scale. Items are first ordered such that \eqn{x_1 \leq \ldots \leq x_n}. If ordinal labels are used, \code{rating_levels} defines the mapping to this internal scale; for example \code{c("1a", "1b", "2", "3", "4")} is mapped to \eqn{1, 2, 3, 4, 5}. Boundaries are specified on this internal scale, so \code{2.5} is the boundary between the second and third ordered rating level.
+
+The smoothed value \eqn{z_i} is a symmetric moving average of order 1. Without missing values this is
+\deqn{
+z_i = \frac{r_{i-1} + r_i + r_{i+1}}{3},
+}{
+z_i = (r_{i-1} + r_i + r_{i+1}) / 3,
+}
+using padding values \eqn{r_0 = L_{\min}} and \eqn{r_{n+1} = L_{\max}} at the lower and upper end of the ordered series. \eqn{L_{\min}} and \eqn{L_{\max}} are derived from the observed rating scale and the supplied boundaries. With \code{missing = "drop"}, smoothing and the following isotonic regression are computed only on finite ratings; missing rows remain missing in the smoothed and monotonized series. With \code{missing = "smooth"}, missing values inside the moving-average window are ignored.
+
+The monotonized series \eqn{\hat y_i} is the isotonic least-squares fit
+\deqn{
+\hat y = \arg\min_{y_1 \leq \ldots \leq y_n} \sum_i (z_i - y_i)^2,
+}{
+yhat = argmin_{y_1 <= ... <= y_n} sum_i (z_i - y_i)^2,
+}
+computed with \code{\link[stats]{isoreg}} on finite smoothed values. This step forces the estimated relationship between item difficulty and rating stage to be non-decreasing.
+
+For each boundary \eqn{b}, the function finds the first ordered point \eqn{i} with \eqn{\hat y_i \geq b}. If no such point exists, the cut is \code{NA}. If \eqn{i = 1}, the cut is the first item difficulty. Otherwise the cut is linearly interpolated between the two surrounding points:
+\deqn{
+\lambda = \frac{b - \hat y_{i-1}}{\hat y_i - \hat y_{i-1}},
+\quad
+c_b = x_{i-1} + \lambda (x_i - x_{i-1}).
+}{
+lambda = (b - yhat_{i-1}) / (yhat_i - yhat_{i-1});
+c_b = x_{i-1} + lambda * (x_i - x_{i-1}).
+}
+\code{cuts_per_person} stores \eqn{c_b}, i.e. the cut on the item difficulty scale. The same interpolation factor is applied to the ordered item positions \eqn{p_i} to obtain
+\deqn{
+q_b = p_{i-1} + \lambda (p_i - p_{i-1}),
+}{
+q_b = p_{i-1} + lambda * (p_i - p_{i-1}),
+}
+which is stored in \code{cut_positions_per_person}. These item positions can be non-integer because they represent the crossing point between two neighboring items.
+
 Cut score columns start with \code{cut}. Canonical numeric boundaries such as \code{1.5} and \code{2.5} are labelled as \code{cut12} and \code{cut23} for numeric ratings. With ordinal labels, labels such as \code{cut_1a_1b} are used. Non-canonical boundaries include the boundary value, for example \code{cut_1a_1b_bound1_3}.
 
-In addition to the difficulty-scale cut scores, the function stores the corresponding interpolated item positions in \code{cut_positions_per_person}. \code{cut_statistics} reports mean, standard deviation, and standard error for both item positions (\code{page_*}) and difficulty cuts (\code{diff_*}). \code{level_statistics} summarizes the item difficulty intervals implied by the mean cuts, including item counts and item difficulty means and standard deviations per level.
+\code{cut_statistics} reports the mean, sample standard deviation, and standard error across raters for both item positions (\code{page_*}) and difficulty cuts (\code{diff_*}). Standard errors are computed as \eqn{SE = SD / \sqrt{m}}, where \eqn{m} is the number of finite rater-specific cuts. \code{cuts_summary} contains the mean difficulty cut per boundary. \code{level_statistics} uses these mean cuts as interval boundaries on the item difficulty scale, counts items in each interval, and reports the mean and sample standard deviation of item difficulties per level. Intervals are left-closed and right-open, except for the final interval, which is closed on both sides.
 }
 \value{
-A list containing \code{cuts_per_person}, \code{cut_positions_per_person}, \code{cuts_summary}, \code{cut_statistics}, \code{level_statistics}, \code{plot_data}, \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and additional metadata used by \code{plotCutsIDM()}.
+A named list with:
+\itemize{
+  \item \code{cuts_per_person}: one row per rater and one difficulty-scale cut column per boundary.
+  \item \code{cut_positions_per_person}: one row per rater and one interpolated item-position column per boundary.
+  \item \code{cuts_summary}: mean difficulty-scale cuts across raters.
+  \item \code{cut_statistics}: mean, standard deviation, and standard error for item-position and difficulty-scale cuts.
+  \item \code{level_statistics}: item difficulty intervals implied by \code{cuts_summary}, with item counts and item difficulty summaries.
+  \item \code{plot_data}: long-format raw, smoothed, and monotonized rating data used by \code{plotCutsIDM()}.
+  \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
+}
 }
 \author{Karoline Sachse}
+\examples{
+## Wide-format input with numeric rating stages
+dat <- data.frame(
+  est = seq(100, 800, by = 100),
+  Rater1 = c(1, 1, 2, 2, 3, 3, 4, 5),
+  Rater2 = c(1, 2, 2, 3, 3, 4, 4, 5)
+)
+
+cuts <- computeCutsIDM(dat, boundaries = c(1.5, 2.5, 3.5))
+cuts$cuts_per_person
+cuts$cuts_summary
+cuts$cut_statistics
+cuts$level_statistics
+
+## Long-format input with ordinal rating labels
+long_dat <- data.frame(
+  theta = rep(seq(100, 500, by = 100), 2),
+  rater = rep(c("Meyer", "Schmidt"), each = 5),
+  rating = c(
+    "1a", "1b", "2", "3", "4",
+    "1a", "1b", "2", "3", "4"
+  )
+)
+
+ord_cuts <- computeCutsIDM(
+  long_dat,
+  est_col = "theta",
+  rater_id_col = "rater",
+  rating_col = "rating",
+  rating_levels = c("1a", "1b", "2", "3", "4")
+)
+
+ord_cuts$cuts_summary
+names(ord_cuts$cuts_per_person)
+}
