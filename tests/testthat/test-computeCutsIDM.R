@@ -231,9 +231,17 @@ test_that("plotCutsIDM can hide raw and smoothed helper functions", {
 
   default_geoms <- vapply(p_default$layers, function(layer) class(layer$geom)[1], character(1))
   hidden_geoms <- vapply(p_hidden$layers, function(layer) class(layer$geom)[1], character(1))
+  default_linetypes <- vapply(p_default$layers, function(layer) {
+    if (is.null(layer$aes_params$linetype)) {
+      NA_character_
+    } else {
+      as.character(layer$aes_params$linetype)
+    }
+  }, character(1))
 
   expect_equal(sum(default_geoms == "GeomLine"), 3)
   expect_equal(sum(default_geoms == "GeomPoint"), 1)
+  expect_true("dashed" %in% default_linetypes)
   expect_equal(sum(hidden_geoms == "GeomLine"), 1)
   expect_equal(sum(hidden_geoms == "GeomPoint"), 0)
 })

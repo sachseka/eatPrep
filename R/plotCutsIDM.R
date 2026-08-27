@@ -53,17 +53,6 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       ggplot2::geom_point(ggplot2::aes(y = stage_raw), alpha = 0.35, size = 1, na.rm = TRUE)
   }
 
-  if (show_smoothed) {
-    pp <- pp +
-      ggplot2::geom_line(
-        ggplot2::aes(y = stage_sm, group = person),
-        linewidth = 0.45,
-        color = "blue",
-        alpha = 0.8,
-        na.rm = TRUE
-      )
-  }
-
   pp <- pp +
     ggplot2::geom_line(
       ggplot2::aes(y = stage_iso, group = person),
@@ -71,7 +60,21 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       color = "red",
       linetype = "solid",
       na.rm = TRUE
-    ) +
+    )
+
+  if (show_smoothed) {
+    pp <- pp +
+      ggplot2::geom_line(
+        ggplot2::aes(y = stage_sm, group = person),
+        linewidth = 0.45,
+        color = "blue",
+        alpha = 0.8,
+        linetype = "dashed",
+        na.rm = TRUE
+      )
+  }
+
+  pp <- pp +
     ggplot2::geom_hline(yintercept = res_list$boundaries, linetype = 2, color = "grey60") +
     ggplot2::geom_vline(
       data = cuts_long,

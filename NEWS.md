@@ -13,7 +13,7 @@
 * `computeCutsIDM()` returns additional IDM summary tables in `cut_positions_per_person`, `cut_statistics`, and `level_statistics`.
 * Cut score labels now reflect the actual boundary. Canonical numeric cuts retain labels such as `cut12` and `cut23`; ordinal and non-canonical cuts use labels such as `cut_1a_1b` or `cut_1a_1b_bound1_3`.
 * `plotCutsIDM()` uses ordinal rating labels on the y-axis when they are stored by `computeCutsIDM()`.
-* `plotCutsIDM()` now shows the raw rating trajectory and the non-monotonized moving average by default; both can be hidden with `show_raw = FALSE` and `show_smoothed = FALSE`.
+* `plotCutsIDM()` now shows the raw rating trajectory and the non-monotonized moving average by default; both can be hidden with `show_raw = FALSE` and `show_smoothed = FALSE`. The smoothed line is dashed so that it remains visible when it coincides with the monotonized curve.
 
 ## compatibility
 
