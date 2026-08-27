@@ -14,7 +14,10 @@ test_that("computeCutsIDM supports explicit estimate and rater columns", {
   expect_equal(res$est_col, "theta")
   expect_equal(unname(res$rater_cols), c("judge_a", "judge_b"))
   expect_equal(res$cuts_per_person$person, c("judge_a", "judge_b"))
-  expect_true(all(c("est", "person", "stage_raw", "stage_sm", "stage_iso") %in% names(res$plot_data)))
+  expect_true(all(c(
+    "est", "person", "stage_raw", "stage_sm", "stage_iso", "stage_resid"
+  ) %in% names(res$plot_data)))
+  expect_equal(res$plot_data$stage_resid, res$plot_data$stage_raw - res$plot_data$stage_sm)
 })
 
 test_that("computeCutsIDM keeps pattern-based rater selection as default behavior", {
@@ -244,6 +247,26 @@ test_that("plotCutsIDM can hide raw and smoothed helper functions", {
   expect_true("dashed" %in% default_linetypes)
   expect_equal(sum(hidden_geoms == "GeomLine"), 1)
   expect_equal(sum(hidden_geoms == "GeomPoint"), 0)
+})
+
+test_that("plotCutsIDM can show residual panels", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 8),
+    Rater1 = c(1, 1, 2, 2, 3, 4, 4, 5),
+    Rater2 = c(1, 2, 2, 3, 3, 4, 5, 5)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = 2.5)
+  p <- plotCutsIDM(res, show_residuals = TRUE)
+
+  geoms <- vapply(p$layers, function(layer) class(layer$geom)[1], character(1))
+  built <- ggplot2::ggplot_build(p)
+  panels <- as.character(unique(built$layout$layout$.panel))
+
+  expect_s3_class(p, "ggplot")
+  expect_true("GeomSegment" %in% geoms)
+  expect_equal(p$labels$y, "Stufe / Residuum")
+  expect_equal(panels, c("Ratings", "Residuals"))
 })
 
 test_that("plotCutsIDM can use ordinal rating labels on the y-axis", {

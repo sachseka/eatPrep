@@ -472,7 +472,8 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
         max_lv = max_val,
         missing = missing
       ),
-      stage_iso = .get_stage_iso_idm(est, stage_sm)
+      stage_iso = .get_stage_iso_idm(est, stage_sm),
+      stage_resid = stage_raw - stage_sm
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(person = as.character(person))
@@ -525,7 +526,10 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
 
   # 5. Prepare Long Data for Plotting
   iso_df <- dat_sm |>
-    dplyr::select(est, person, item_position, stage_raw, stage_sm, stage_iso, stage_label)
+    dplyr::select(
+      est, person, item_position, stage_raw, stage_sm, stage_iso,
+      stage_resid, stage_label
+    )
 
   return(list(
     cuts_per_person = cuts_per_person,

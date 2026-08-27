@@ -237,7 +237,7 @@ rater1 <- c("[meanAgree()](main_functions.html#rater-agreement)", "calculates me
 rater2 <- c("[meanKappa()](main_functions.html#rater-agreement)", "calculates mean pairwise kappa across raters.")
 rater3 <- c("[make.pseudo()](main_functions.html#pseudo-raters)", "reduces multiple real raters to a smaller number of pseudo raters.")
 idm1 <- c("[computeCutsIDM()](main_functions.html#idm-cut-scores)", "computes cut scores and summary statistics for Item Descriptor Matching based on monotonized moving averages.")
-idm2 <- c("[plotCutsIDM()](main_functions.html#idm-cut-scores)", "plots the raw ratings, moving averages, monotonized curves and cut scores from `computeCutsIDM()`.")
+idm2 <- c("[plotCutsIDM()](main_functions.html#idm-cut-scores)", "plots the raw ratings, moving averages, monotonized curves, optional residual panels, and cut scores from `computeCutsIDM()`.")
 visual1 <- c("[visualSubsetRecode()](main_functions.html#visual-subset-recoding)", "supports interactive visual inspection and recoding of flagged subsets.")
 # 6
 export1 <- c("[collapseMissings()](main_functions.html#collapsing-data)", "recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling.")

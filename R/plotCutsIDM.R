@@ -1,13 +1,19 @@
 plotCutsIDM <- function(res_list, est_col = NULL,
-                        show_raw = TRUE, show_smoothed = TRUE) {
+                        show_raw = TRUE, show_smoothed = TRUE,
+                        show_residuals = FALSE) {
 
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
   checkmate::assert_flag(show_raw)
   checkmate::assert_flag(show_smoothed)
+  checkmate::assert_flag(show_residuals)
 
   # Determine axis limits dynamically
   max_lv <- res_list$max_val
+  plot_data <- res_list$plot_data
+  if (!"stage_resid" %in% names(plot_data)) {
+    plot_data$stage_resid <- plot_data$stage_raw - plot_data$stage_sm
+  }
   x_label <- est_col
   if (is.null(x_label)) {
     x_label <- res_list$est_col
@@ -15,7 +21,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   if (is.null(x_label)) {
     x_label <- "est"
   }
-  y_vals <- res_list$plot_data$stage_raw
+  y_vals <- plot_data$stage_raw
   y_vals <- y_vals[is.finite(y_vals)]
   if (length(y_vals) == 0) {
     y_limits <- c(1, max_lv)
@@ -39,7 +45,105 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       values_to = "cut"
     )
 
-  pp <- ggplot2::ggplot(res_list$plot_data, ggplot2::aes(x = est))
+  if (show_residuals) {
+    panel_levels <- c("Ratings", "Residuals")
+    rating_data <- plot_data |>
+      dplyr::mutate(.panel = factor("Ratings", levels = panel_levels))
+    residual_data <- plot_data |>
+      dplyr::mutate(.panel = factor("Residuals", levels = panel_levels))
+    boundary_data <- tibble::tibble(
+      .panel = factor("Ratings", levels = panel_levels),
+      boundary = res_list$boundaries
+    )
+    zero_data <- tibble::tibble(
+      .panel = factor("Residuals", levels = panel_levels),
+      zero = 0
+    )
+
+    pp <- ggplot2::ggplot()
+
+    if (show_raw) {
+      pp <- pp +
+        ggplot2::geom_line(
+          data = rating_data,
+          ggplot2::aes(x = est, y = stage_raw, group = person),
+          linewidth = 0.3,
+          color = "grey45",
+          alpha = 0.7,
+          na.rm = TRUE
+        ) +
+        ggplot2::geom_point(
+          data = rating_data,
+          ggplot2::aes(x = est, y = stage_raw),
+          alpha = 0.35,
+          size = 1,
+          na.rm = TRUE
+        )
+    }
+
+    pp <- pp +
+      ggplot2::geom_line(
+        data = rating_data,
+        ggplot2::aes(x = est, y = stage_iso, group = person),
+        linewidth = 0.9,
+        color = "red",
+        linetype = "solid",
+        na.rm = TRUE
+      )
+
+    if (show_smoothed) {
+      pp <- pp +
+        ggplot2::geom_line(
+          data = rating_data,
+          ggplot2::aes(x = est, y = stage_sm, group = person),
+          linewidth = 0.45,
+          color = "blue",
+          alpha = 0.8,
+          linetype = "dashed",
+          na.rm = TRUE
+        )
+    }
+
+    pp <- pp +
+      ggplot2::geom_hline(
+        data = boundary_data,
+        ggplot2::aes(yintercept = boundary),
+        linetype = 2,
+        color = "grey60"
+      ) +
+      ggplot2::geom_hline(
+        data = zero_data,
+        ggplot2::aes(yintercept = zero),
+        linewidth = 0.4,
+        color = "grey60"
+      ) +
+      ggplot2::geom_segment(
+        data = residual_data,
+        ggplot2::aes(x = est, xend = est, y = 0, yend = stage_resid),
+        linewidth = 0.35,
+        color = "grey35",
+        alpha = 0.8,
+        na.rm = TRUE
+      ) +
+      ggplot2::geom_vline(
+        data = cuts_long,
+        ggplot2::aes(xintercept = cut, color = cut_type),
+        linewidth = .8,
+        alpha = 0.8,
+        linetype = "solid"
+      ) +
+      ggplot2::facet_grid(.panel ~ person, scales = "free_y") +
+      ggplot2::labs(
+        x = paste0("Itemschwierigkeit (", x_label, ")"),
+        y = "Stufe / Residuum",
+        color = "Cut Score"
+      ) +
+      ggplot2::theme_minimal()
+
+    return(pp)
+  }
+
+  pp <- ggplot2::ggplot(plot_data, ggplot2::aes(x = est))
 
   if (show_raw) {
     pp <- pp +

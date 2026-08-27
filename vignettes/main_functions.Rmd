@@ -507,6 +507,12 @@ Cut scores are interpolated boundary crossings of the monotonized curves. `cuts_
 plotCutsIDM(cuts)
 ```
 
+Residual panels can be added to inspect local deviations between raw ratings and the smoothed moving average.
+
+```{r idm residual plot example, fig.width=7, fig.height=6}
+plotCutsIDM(cuts, show_residuals = TRUE)
+```
+
 ### Visual Subset Recoding
 
 `visualSubsetRecode()` supports interactive inspection and recoding of flagged subsets. For example, if a group of students was affected by a technical issue, you can display the relevant responses and decide whether to recode them to a value such as `mci`. Because the function opens an interactive review flow, it is not evaluated in this vignette.

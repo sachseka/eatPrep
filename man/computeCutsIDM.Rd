@@ -94,7 +94,7 @@ A named list with:
   \item \code{cuts_summary}: mean difficulty-scale cuts across raters.
   \item \code{cut_statistics}: mean, standard deviation, and standard error for item-position and difficulty-scale cuts.
   \item \code{level_statistics}: item difficulty intervals implied by \code{cuts_summary}, with item counts and item difficulty summaries.
-  \item \code{plot_data}: long-format raw, smoothed, and monotonized rating data used by \code{plotCutsIDM()}.
+  \item \code{plot_data}: long-format raw, smoothed, monotonized, and residual rating data used by \code{plotCutsIDM()}.
   \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
 }
 }
