@@ -493,9 +493,13 @@ cuts <- computeCutsIDM(
   rating_levels = c("1a", "1b", "2", "3", "4")
 )
 cuts$cuts_summary
+cuts$cut_statistics
+cuts$level_statistics
 ```
 
 Missing ratings are dropped from smoothing and cut computation by default. Use `missing = "smooth"` for the previous smoothing behavior with `na.rm = TRUE`, or `missing = "error"` to reject incomplete ratings. The `boundaries` argument determines the requested cut scores. Canonical boundaries such as `1.5` and `2.5` describe cuts between adjacent levels; non-canonical boundaries are included in the generated cut labels.
+
+Cut scores are interpolated boundary crossings of the monotonized curves. `cuts_per_person` and `cuts_summary` report these cuts on the item difficulty scale. `cut_positions_per_person` stores the corresponding interpolated item positions, while `cut_statistics` and `level_statistics` summarize cuts and item difficulty intervals in the style often used in IDM documentation.
 
 `plotCutsIDM()` visualizes the raw ratings, moving averages, monotonized curves and resulting cut scores.
 

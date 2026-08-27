@@ -44,12 +44,14 @@ The function processes each rater by:
   \item Sorting items by difficulty (\code{est_col}).
   \item Applying a symmetric moving average (order = 1) with boundary padding at the minimum and maximum rating stage.
   \item Applying isotonic regression (\code{isoreg}) to ensure the mapping of difficulty to level is non-decreasing.
-  \item Computing the cut score as the item difficulty where the monotonized function first reaches or exceeds the specified boundary.
+  \item Computing the cut score as the linearly interpolated item difficulty where the monotonized function crosses the specified boundary.
 }
 
 Cut score columns start with \code{cut}. Canonical numeric boundaries such as \code{1.5} and \code{2.5} are labelled as \code{cut12} and \code{cut23} for numeric ratings. With ordinal labels, labels such as \code{cut_1a_1b} are used. Non-canonical boundaries include the boundary value, for example \code{cut_1a_1b_bound1_3}.
+
+In addition to the difficulty-scale cut scores, the function stores the corresponding interpolated item positions in \code{cut_positions_per_person}. \code{cut_statistics} reports mean, standard deviation, and standard error for both item positions (\code{page_*}) and difficulty cuts (\code{diff_*}). \code{level_statistics} summarizes the item difficulty intervals implied by the mean cuts, including item counts and item difficulty means and standard deviations per level.
 }
 \value{
-A list containing \code{cuts_per_person}, \code{cuts_summary}, \code{plot_data}, \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and additional metadata used by \code{plotCutsIDM()}.
+A list containing \code{cuts_per_person}, \code{cut_positions_per_person}, \code{cuts_summary}, \code{cut_statistics}, \code{level_statistics}, \code{plot_data}, \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and additional metadata used by \code{plotCutsIDM()}.
 }
 \author{Karoline Sachse}

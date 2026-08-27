@@ -9,6 +9,8 @@
 
 * `computeCutsIDM()` now uses `missing = "drop"` by default so missing ratings do not create smoothed values or contribute to cut computation.
 * `computeCutsIDM()` offers `missing = "smooth"` for legacy-like smoothing with missing values ignored inside the moving-average window.
+* `computeCutsIDM()` now computes cut scores as linearly interpolated boundary crossings of the monotonized curve.
+* `computeCutsIDM()` returns additional IDM summary tables in `cut_positions_per_person`, `cut_statistics`, and `level_statistics`.
 * Cut score labels now reflect the actual boundary. Canonical numeric cuts retain labels such as `cut12` and `cut23`; ordinal and non-canonical cuts use labels such as `cut_1a_1b` or `cut_1a_1b_bound1_3`.
 * `plotCutsIDM()` uses ordinal rating labels on the y-axis when they are stored by `computeCutsIDM()`.
 

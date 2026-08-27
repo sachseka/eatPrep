@@ -127,6 +127,42 @@ test_that("computeCutsIDM labels single canonical numeric boundary by crossed st
   expect_false("cut12" %in% names(res$cuts_per_person))
 })
 
+test_that("computeCutsIDM interpolates cut scores at plotted boundary crossings", {
+  dat <- data.frame(
+    est = c(0, 10),
+    Rater1 = c(1, 4)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = 2.5)
+  p <- plotCutsIDM(res)
+  built <- ggplot2::ggplot_build(p)
+  vline_layers <- Filter(function(layer) "xintercept" %in% names(layer), built$data)
+
+  expect_equal(res$cuts_per_person$cut23, 5)
+  expect_equal(vline_layers[[1]]$xintercept, 5)
+})
+
+test_that("computeCutsIDM returns cut and level statistics", {
+  dat <- data.frame(
+    est = c(0, 10),
+    Rater1 = c(1, 4),
+    Rater2 = c(1, 3)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = 2.5)
+
+  expect_equal(res$cut_positions_per_person$page_cut23, c(1.5, 1.75))
+  expect_equal(names(res$cut_statistics), c("statistic", "page_cut23", "diff_cut23"))
+  expect_equal(res$cut_statistics$statistic, c("Mean", "SD", "SE"))
+  expect_equal(res$cut_statistics$page_cut23, c(1.625, stats::sd(c(1.5, 1.75)), 0.125))
+  expect_equal(res$cut_statistics$diff_cut23, c(6.25, stats::sd(c(5, 7.5)), 1.25))
+
+  expect_equal(res$level_statistics$interval, c("[0,6.25)", "[6.25,10]"))
+  expect_equal(res$level_statistics$n_items, c(1L, 1L))
+  expect_equal(res$level_statistics$mean_itemdiff, c(0, 10))
+  expect_true(all(is.na(res$level_statistics$sd_itemdiff)))
+})
+
 test_that("computeCutsIDM distinguishes drop and smooth missing handling", {
   dat <- data.frame(
     est = c(-1, 0, 1),

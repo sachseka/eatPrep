@@ -12,7 +12,7 @@ plotCutsIDM(res_list, est_col = NULL)
   \item{est_col}{Optional character scalar. Label to use for the item difficulty axis. If \code{NULL}, the value stored by \code{computeCutsIDM()} is used.}
 }
 \details{
-One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. Blue lines represent the moving average, while red lines represent the monotonized curve used to find the vertical intercepts.
+One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. Blue lines represent the moving average, while red lines represent the monotonized curve used to find the vertical intercepts. Vertical cut lines are drawn at the cut scores stored by \code{computeCutsIDM()}, which are linearly interpolated boundary crossings of the monotonized curve.
 
 If \code{computeCutsIDM()} stored ordinal rating labels in \code{res_list}, these labels are used on the y-axis.
 }

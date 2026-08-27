@@ -27,23 +27,53 @@
   out
 }
 
-.get_cut_scores_idm <- function(x, y, b_vals) {
+.get_cut_scores_idm <- function(x, y, b_vals, position = seq_along(x)) {
   ok <- is.finite(x) & is.finite(y)
   x_ok <- x[ok]
   y_ok <- y[ok]
+  position_ok <- position[ok]
   if (length(x_ok) < 2) {
-    return(rep(NA_real_, length(b_vals)))
+    return(list(
+      cut = rep(NA_real_, length(b_vals)),
+      position = rep(NA_real_, length(b_vals))
+    ))
   }
 
-  iso <- isoreg(x_ok, y_ok)
-  y_iso <- iso$yf
-  vapply(b_vals, function(b) {
-    idx <- which(y_iso >= b)[1]
+  ord <- order(x_ok)
+  x_ok <- x_ok[ord]
+  y_ok <- y_ok[ord]
+  position_ok <- position_ok[ord]
+
+  cut_mat <- vapply(b_vals, function(b) {
+    idx <- which(y_ok >= b)[1]
     if (is.na(idx)) {
-      return(NA_real_)
+      return(c(cut = NA_real_, position = NA_real_))
     }
-    x_ok[idx]
-  }, numeric(1))
+    if (idx == 1) {
+      return(c(cut = x_ok[1], position = position_ok[1]))
+    }
+
+    x0 <- x_ok[idx - 1]
+    x1 <- x_ok[idx]
+    y0 <- y_ok[idx - 1]
+    y1 <- y_ok[idx]
+    position0 <- position_ok[idx - 1]
+    position1 <- position_ok[idx]
+    if (y1 == y0) {
+      return(c(cut = x1, position = position1))
+    }
+
+    ratio <- (b - y0) / (y1 - y0)
+    c(
+      cut = x0 + ratio * (x1 - x0),
+      position = position0 + ratio * (position1 - position0)
+    )
+  }, numeric(2))
+
+  list(
+    cut = unname(cut_mat["cut", ]),
+    position = unname(cut_mat["position", ])
+  )
 }
 
 .get_stage_iso_idm <- function(est, stage_sm) {
@@ -63,6 +93,82 @@
     return(NA_real_)
   }
   mean(x, na.rm = TRUE)
+}
+
+.cut_stats_idm <- function(x) {
+  x <- x[is.finite(x)]
+  if (length(x) == 0) {
+    return(c(Mean = NA_real_, SD = NA_real_, SE = NA_real_))
+  }
+  if (length(x) == 1) {
+    return(c(Mean = mean(x), SD = NA_real_, SE = NA_real_))
+  }
+
+  sd_x <- stats::sd(x)
+  c(Mean = mean(x), SD = sd_x, SE = sd_x / sqrt(length(x)))
+}
+
+.make_cut_statistics_idm <- function(cuts_per_person, cut_positions_per_person,
+                                     cut_names) {
+  out <- data.frame(statistic = c("Mean", "SD", "SE"), check.names = FALSE)
+
+  for (cut_name in cut_names) {
+    out[[paste0("page_", cut_name)]] <-
+      .cut_stats_idm(cut_positions_per_person[[paste0("page_", cut_name)]])
+  }
+  for (cut_name in cut_names) {
+    out[[paste0("diff_", cut_name)]] <-
+      .cut_stats_idm(cuts_per_person[[cut_name]])
+  }
+
+  tibble::as_tibble(out)
+}
+
+.format_interval_value_idm <- function(x) {
+  format(round(x, 2), trim = TRUE, scientific = FALSE)
+}
+
+.make_level_statistics_idm <- function(item_difficulties, cut_values) {
+  item_difficulties <- item_difficulties[is.finite(item_difficulties)]
+  cut_values <- cut_values[is.finite(cut_values)]
+
+  if (length(item_difficulties) == 0) {
+    return(tibble::tibble(
+      level = integer(),
+      interval = character(),
+      n_items = integer(),
+      mean_itemdiff = numeric(),
+      sd_itemdiff = numeric()
+    ))
+  }
+
+  break_values <- c(min(item_difficulties), cut_values, max(item_difficulties))
+  n_levels <- length(break_values) - 1
+
+  purrr::map_dfr(seq_len(n_levels), function(level) {
+    lower <- break_values[level]
+    upper <- break_values[level + 1]
+    if (level == n_levels) {
+      in_level <- item_difficulties >= lower & item_difficulties <= upper
+    } else {
+      in_level <- item_difficulties >= lower & item_difficulties < upper
+    }
+    values <- item_difficulties[in_level]
+
+    tibble::tibble(
+      level = level,
+      interval = paste0(
+        "[",
+        .format_interval_value_idm(lower),
+        ",",
+        .format_interval_value_idm(upper),
+        if (level == n_levels) "]" else ")"
+      ),
+      n_items = length(values),
+      mean_itemdiff = if (length(values) == 0) NA_real_ else mean(values),
+      sd_itemdiff = if (length(values) < 2) NA_real_ else stats::sd(values)
+    )
+  })
 }
 
 .sanitize_cut_label_idm <- function(x) {
@@ -359,6 +465,7 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     dplyr::arrange(person, est) |>
     dplyr::group_by(person) |>
     dplyr::mutate(
+      item_position = dplyr::row_number(),
       stage_sm = .smooth_group_idm(
         stage_raw,
         min_lv = min_val,
@@ -371,29 +478,61 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     dplyr::mutate(person = as.character(person))
 
   # 3. Calculate Cut Scores per Person
-  cuts_per_person <- purrr::map_dfr(prepared$person_order, function(p) {
+  cuts_per_person_list <- purrr::map(prepared$person_order, function(p) {
     df_sm <- dat_sm |>
       dplyr::filter(person == p) |>
-      dplyr::select(est, y_sm = stage_sm)
+      dplyr::select(est, item_position, y_iso = stage_iso)
 
-    cuts <- .get_cut_scores_idm(df_sm$est, df_sm$y_sm, boundaries)
-    res <- as.list(cuts)
+    cuts <- .get_cut_scores_idm(
+      x = df_sm$est,
+      y = df_sm$y_iso,
+      b_vals = boundaries,
+      position = df_sm$item_position
+    )
+
+    list(person = p, cut = cuts$cut, position = cuts$position)
+  })
+
+  cuts_per_person <- purrr::map_dfr(cuts_per_person_list, function(cuts) {
+    res <- as.list(cuts$cut)
     names(res) <- cut_names
 
-    dplyr::bind_cols(tibble::tibble(person = p), tibble::as_tibble(res))
+    dplyr::bind_cols(tibble::tibble(person = cuts$person), tibble::as_tibble(res))
+  })
+
+  cut_positions_per_person <- purrr::map_dfr(cuts_per_person_list, function(cuts) {
+    res <- as.list(cuts$position)
+    names(res) <- paste0("page_", cut_names)
+
+    dplyr::bind_cols(tibble::tibble(person = cuts$person), tibble::as_tibble(res))
   })
 
   # 4. Summary
   cuts_summary <- cuts_per_person |>
     dplyr::summarise(dplyr::across(dplyr::starts_with("cut"), .mean_idm))
+  cut_statistics <- .make_cut_statistics_idm(
+    cuts_per_person = cuts_per_person,
+    cut_positions_per_person = cut_positions_per_person,
+    cut_names = cut_names
+  )
+  item_difficulties <- dat_sm |>
+    dplyr::distinct(item_position, est) |>
+    dplyr::pull(est)
+  level_statistics <- .make_level_statistics_idm(
+    item_difficulties = item_difficulties,
+    cut_values = as.numeric(cuts_summary[1, cut_names])
+  )
 
   # 5. Prepare Long Data for Plotting
   iso_df <- dat_sm |>
-    dplyr::select(est, person, stage_raw, stage_sm, stage_iso, stage_label)
+    dplyr::select(est, person, item_position, stage_raw, stage_sm, stage_iso, stage_label)
 
   return(list(
     cuts_per_person = cuts_per_person,
+    cut_positions_per_person = cut_positions_per_person,
     cuts_summary = cuts_summary,
+    cut_statistics = cut_statistics,
+    level_statistics = level_statistics,
     plot_data = iso_df,
     boundaries = boundaries,
     cut_labels = cut_names,
