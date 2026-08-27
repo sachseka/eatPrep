@@ -1,3 +1,22 @@
+# eatPrep 1.0.10
+
+## new features
+
+* `computeCutsIDM()` now supports long-format IDM input with explicit rater identifier and rating columns.
+* `computeCutsIDM()` supports ordinal rating labels via `rating_levels`, for example `c("1a", "1b", "2", "3", "4")`.
+
+## improvements
+
+* `computeCutsIDM()` now uses `missing = "drop"` by default so missing ratings do not create smoothed values or contribute to cut computation.
+* `computeCutsIDM()` offers `missing = "smooth"` for legacy-like smoothing with missing values ignored inside the moving-average window.
+* Cut score labels now reflect the actual boundary. Canonical numeric cuts retain labels such as `cut12` and `cut23`; ordinal and non-canonical cuts use labels such as `cut_1a_1b` or `cut_1a_1b_bound1_3`.
+* `plotCutsIDM()` uses ordinal rating labels on the y-axis when they are stored by `computeCutsIDM()`.
+
+## compatibility
+
+* Existing wide-format calls to `computeCutsIDM()` remain supported.
+* The returned object remains compatible with `plotCutsIDM()`.
+
 # eatPrep 1.0.9
 
 ## bug fixes

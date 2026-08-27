@@ -474,18 +474,28 @@ head(oneRater)
 
 ### IDM Cut Scores
 
-`computeCutsIDM()` calculates cut scores for Item Descriptor Matching (IDM). The data set must contain item difficulty estimates and one or more numeric rater columns. The `boundaries` argument determines the requested cut scores, for example four boundaries for five performance levels.
+`computeCutsIDM()` calculates cut scores for Item Descriptor Matching (IDM). The preferred input is a long-format data set with item difficulty estimates, a rater identifier, and one rating column. Rater identifiers may be names or IDs. Ratings may be numeric, or they may be ordinal labels when their order is supplied via `rating_levels`. The previous wide-format input with one rating column per rater is still supported.
 
 ```{r idm cuts example}
 idmDat <- data.frame(
-  est = seq(-2, 2, length.out = 8),
-  Rater1 = c(1, 1, 2, 2, 3, 4, 4, 5),
-  Rater2 = c(1, 2, 2, 3, 3, 4, 5, 5)
+  est = rep(seq(-2, 2, length.out = 5), 2),
+  rater = rep(c("Meyer", "Schmidt"), each = 5),
+  rating = c(
+    "1a", "1b", "2", "3", "4",
+    "1a", "1b", "2", "3", "4"
+  )
 )
 
-cuts <- computeCutsIDM(idmDat)
+cuts <- computeCutsIDM(
+  idmDat,
+  rater_id_col = "rater",
+  rating_col = "rating",
+  rating_levels = c("1a", "1b", "2", "3", "4")
+)
 cuts$cuts_summary
 ```
+
+Missing ratings are dropped from smoothing and cut computation by default. Use `missing = "smooth"` for the previous smoothing behavior with `na.rm = TRUE`, or `missing = "error"` to reject incomplete ratings. The `boundaries` argument determines the requested cut scores. Canonical boundaries such as `1.5` and `2.5` describe cuts between adjacent levels; non-canonical boundaries are included in the generated cut labels.
 
 `plotCutsIDM()` visualizes the raw ratings, moving averages, monotonized curves and resulting cut scores.
 

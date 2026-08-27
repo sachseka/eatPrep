@@ -13,6 +13,8 @@ plotCutsIDM(res_list, est_col = NULL)
 }
 \details{
 One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. Blue lines represent the moving average, while red lines represent the monotonized curve used to find the vertical intercepts.
+
+If \code{computeCutsIDM()} stored ordinal rating labels in \code{res_list}, these labels are used on the y-axis.
 }
 \value{
 A \code{ggplot2} object.
