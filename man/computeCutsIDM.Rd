@@ -98,7 +98,6 @@ A named list with:
   \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
 }
 }
-\author{Karoline Sachse}
 \examples{
 ## Wide-format input with numeric rating stages
 dat <- data.frame(

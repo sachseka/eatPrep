@@ -1,7 +1,10 @@
-plotCutsIDM <- function(res_list, est_col = NULL) {
+plotCutsIDM <- function(res_list, est_col = NULL,
+                        show_raw = TRUE, show_smoothed = TRUE) {
 
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
+  checkmate::assert_flag(show_raw)
+  checkmate::assert_flag(show_smoothed)
 
   # Determine axis limits dynamically
   max_lv <- res_list$max_val
@@ -36,10 +39,39 @@ plotCutsIDM <- function(res_list, est_col = NULL) {
       values_to = "cut"
     )
 
-  pp <- ggplot2::ggplot(res_list$plot_data, ggplot2::aes(x = est)) +
-    ggplot2::geom_point(ggplot2::aes(y = stage_raw), alpha = 0.35, size = 1) +
-    ggplot2::geom_line(ggplot2::aes(y = stage_sm), linewidth = 1, color = "blue") +
-    ggplot2::geom_line(ggplot2::aes(y = stage_iso), linewidth = 1, color = "red", linetype = "solid") +
+  pp <- ggplot2::ggplot(res_list$plot_data, ggplot2::aes(x = est))
+
+  if (show_raw) {
+    pp <- pp +
+      ggplot2::geom_line(
+        ggplot2::aes(y = stage_raw, group = person),
+        linewidth = 0.3,
+        color = "grey45",
+        alpha = 0.7,
+        na.rm = TRUE
+      ) +
+      ggplot2::geom_point(ggplot2::aes(y = stage_raw), alpha = 0.35, size = 1, na.rm = TRUE)
+  }
+
+  if (show_smoothed) {
+    pp <- pp +
+      ggplot2::geom_line(
+        ggplot2::aes(y = stage_sm, group = person),
+        linewidth = 0.45,
+        color = "blue",
+        alpha = 0.8,
+        na.rm = TRUE
+      )
+  }
+
+  pp <- pp +
+    ggplot2::geom_line(
+      ggplot2::aes(y = stage_iso, group = person),
+      linewidth = 0.9,
+      color = "red",
+      linetype = "solid",
+      na.rm = TRUE
+    ) +
     ggplot2::geom_hline(yintercept = res_list$boundaries, linetype = 2, color = "grey60") +
     ggplot2::geom_vline(
       data = cuts_long,

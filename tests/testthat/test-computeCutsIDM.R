@@ -219,6 +219,25 @@ test_that("plotCutsIDM uses rater values for y-axis limits", {
   expect_equal(p$scales$get_scales("y")$limits, c(1, 5))
 })
 
+test_that("plotCutsIDM can hide raw and smoothed helper functions", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 8),
+    Rater1 = c(1, 1, 2, 2, 3, 4, 4, 5)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = 2.5)
+  p_default <- plotCutsIDM(res)
+  p_hidden <- plotCutsIDM(res, show_raw = FALSE, show_smoothed = FALSE)
+
+  default_geoms <- vapply(p_default$layers, function(layer) class(layer$geom)[1], character(1))
+  hidden_geoms <- vapply(p_hidden$layers, function(layer) class(layer$geom)[1], character(1))
+
+  expect_equal(sum(default_geoms == "GeomLine"), 3)
+  expect_equal(sum(default_geoms == "GeomPoint"), 1)
+  expect_equal(sum(hidden_geoms == "GeomLine"), 1)
+  expect_equal(sum(hidden_geoms == "GeomPoint"), 0)
+})
+
 test_that("plotCutsIDM can use ordinal rating labels on the y-axis", {
   dat <- data.frame(
     est = rep(seq(-2, 2, length.out = 5), 2),
