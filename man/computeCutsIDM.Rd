@@ -87,7 +87,7 @@ Cut score columns start with \code{cut}. Canonical numeric boundaries such as \c
 \code{cut_statistics} reports the mean, sample standard deviation, and standard error across raters for both item positions (\code{page_*}) and difficulty cuts (\code{diff_*}). Standard errors are computed as \eqn{SE = SD / \sqrt{m}}, where \eqn{m} is the number of finite rater-specific cuts. \code{cuts_summary} contains the mean difficulty cut per boundary. \code{level_statistics} uses these mean cuts as interval boundaries on the item difficulty scale, counts items in each interval, and reports the mean and sample standard deviation of item difficulties per level. Intervals are left-closed and right-open, except for the final interval, which is closed on both sides.
 }
 \value{
-A named list with:
+A \code{cutsIDM} object, i.e. a named list with:
 \itemize{
   \item \code{cuts_per_person}: one row per rater and one difficulty-scale cut column per boundary.
   \item \code{cut_positions_per_person}: one row per rater and one interpolated item-position column per boundary.
@@ -97,6 +97,7 @@ A named list with:
   \item \code{plot_data}: long-format raw, smoothed, monotonized, and residual rating data used by \code{plotCutsIDM()}.
   \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
 }
+\code{summary()} can be used to print the main cut score, boundary, and level-statistic tables in a compact form.
 }
 \examples{
 ## Wide-format input with numeric rating stages
@@ -111,6 +112,7 @@ cuts$cuts_per_person
 cuts$cuts_summary
 cuts$cut_statistics
 cuts$level_statistics
+summary(cuts)
 
 ## Long-format input with ordinal rating labels
 long_dat <- data.frame(

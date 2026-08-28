@@ -11,6 +11,7 @@ test_that("computeCutsIDM supports explicit estimate and rater columns", {
     rater_cols = c("judge_a", "judge_b")
   )
 
+  expect_s3_class(res, "cutsIDM")
   expect_equal(res$est_col, "theta")
   expect_equal(unname(res$rater_cols), c("judge_a", "judge_b"))
   expect_equal(res$cuts_per_person$person, c("judge_a", "judge_b"))
@@ -164,6 +165,30 @@ test_that("computeCutsIDM returns cut and level statistics", {
   expect_equal(res$level_statistics$n_items, c(1L, 1L))
   expect_equal(res$level_statistics$mean_itemdiff, c(0, 10))
   expect_true(all(is.na(res$level_statistics$sd_itemdiff)))
+})
+
+test_that("summary.cutsIDM returns and prints IDM summary tables", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 5),
+    Rater1 = c(1, 1, 2, 3, 4),
+    Rater2 = c(1, 2, 2, 3, 4)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = c(1.5, 2.5))
+  sum_res <- summary(res)
+  printed <- capture.output(print(sum_res, digits = 1))
+
+  expect_s3_class(sum_res, "summary.cutsIDM")
+  expect_equal(sum_res$settings$n_raters, 2L)
+  expect_equal(sum_res$settings$n_items, 5L)
+  expect_equal(sum_res$settings$n_cuts, 2L)
+  expect_equal(sum_res$boundaries$cut, c("cut12", "cut23"))
+  expect_equal(sum_res$boundaries$boundary, c(1.5, 2.5))
+  expect_equal(sum_res$cuts_summary, res$cuts_summary)
+  expect_equal(sum_res$cut_statistics, res$cut_statistics)
+  expect_equal(sum_res$level_statistics, res$level_statistics)
+  expect_true(any(grepl("IDM cut-score summary", printed, fixed = TRUE)))
+  expect_true(any(grepl("Mean cuts on difficulty scale", printed, fixed = TRUE)))
 })
 
 test_that("computeCutsIDM distinguishes drop and smooth missing handling", {

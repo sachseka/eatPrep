@@ -4,6 +4,7 @@
 
 * `computeCutsIDM()` now supports long-format IDM input with explicit rater identifier and rating columns.
 * `computeCutsIDM()` supports ordinal rating labels via `rating_levels`, for example `c("1a", "1b", "2", "3", "4")`.
+* `summary()` now provides a compact S3 summary for objects returned by `computeCutsIDM()`.
 
 ## improvements
 

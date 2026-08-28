@@ -1,3 +1,5 @@
+S3method(print,summary.cutsIDM)
+S3method(summary,cutsIDM)
 importFrom(irrCAC, bp.coeff.raw)
 importFrom(combinat, combn)
 importFrom(eatGADS, import_spss)

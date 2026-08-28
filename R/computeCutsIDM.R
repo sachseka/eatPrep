@@ -531,7 +531,7 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
       stage_resid, stage_label
     )
 
-  return(list(
+  structure(list(
     cuts_per_person = cuts_per_person,
     cut_positions_per_person = cut_positions_per_person,
     cuts_summary = cuts_summary,
@@ -550,5 +550,5 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     rating_labels = encoded$rating_labels,
     input_format = input_format,
     missing = missing
-  ))
+  ), class = c("cutsIDM", "list"))
 }
