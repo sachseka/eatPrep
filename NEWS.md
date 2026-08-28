@@ -21,6 +21,10 @@
 * `plotCutsIDM()` now shows the raw rating trajectory and the non-monotonized moving average by default; both can be hidden with `show_raw = FALSE` and `show_smoothed = FALSE`. The smoothed line is dashed so that it remains visible when it coincides with the monotonized curve.
 * `plotCutsIDM()` can add residual panels with `show_residuals = TRUE`; residuals are computed as raw rating minus smoothed moving average.
 
+## bug fixes
+
+* `plotCutsIDM()` no longer adds aggregate rater lines or rater-name labels to the cut score legend.
+
 ## compatibility
 
 * Existing wide-format calls to `computeCutsIDM()` remain supported.

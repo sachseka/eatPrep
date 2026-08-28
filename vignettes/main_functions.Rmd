@@ -522,7 +522,7 @@ The kappa diagnostics use the same wide raw rating matrix. `kappa_pairwise` cont
 plotCutsIDM(cuts)
 ```
 
-An aggregate panel can be added to inspect all monotonized rater curves together with the mean cuts. In this panel, rater curves are drawn in rater-specific colors and labelled by rater name by default. When several curves end at similar values, the labels are shifted slightly along the y-axis so that all names remain visible. The vertical cut lines are the means from `cuts$cuts_summary`, not newly estimated cuts from a pooled rating curve.
+An aggregate panel can be added to inspect all monotonized rater curves together with the mean cuts. In this panel, rater curves are drawn in rater-specific colors and labelled by rater name by default. When several curves end at similar values, the labels are shifted slightly along the y-axis so that all names remain visible. The legend remains restricted to the cut score labels. The vertical cut lines are the means from `cuts$cuts_summary`, not newly estimated cuts from a pooled rating curve.
 
 ```{r idm aggregate plot example, fig.width=7, fig.height=5}
 plotCutsIDM(cuts, show_aggregate = TRUE)

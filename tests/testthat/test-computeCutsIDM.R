@@ -510,6 +510,34 @@ test_that("plotCutsIDM can add an aggregate panel with mean cuts", {
   expect_equal(length(unique(label_layers[[1]]$colour)), 2L)
 })
 
+test_that("plotCutsIDM keeps aggregate rater layers out of the cut legend", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 8),
+    Rater1 = c(1, 1, 2, 2, 3, 4, 4, 5),
+    Rater2 = c(1, 2, 2, 3, 3, 4, 5, 5)
+  )
+
+  res <- computeCutsIDM(dat)
+  p <- plotCutsIDM(res, show_aggregate = TRUE)
+
+  mapped_color <- vapply(p$layers, function(layer) {
+    "colour" %in% names(layer$mapping)
+  }, logical(1))
+  cut_color_layers <- vapply(p$layers, function(layer) {
+    all(c("colour", "xintercept") %in% names(layer$mapping))
+  }, logical(1))
+  aggregate_color_layers <- mapped_color & !cut_color_layers
+
+  expect_true(any(cut_color_layers))
+  expect_true(any(aggregate_color_layers))
+  expect_false(any(vapply(p$layers[cut_color_layers], function(layer) {
+    identical(layer$show.legend, FALSE)
+  }, logical(1))))
+  expect_true(all(vapply(p$layers[aggregate_color_layers], function(layer) {
+    identical(layer$show.legend, FALSE)
+  }, logical(1))))
+})
+
 test_that("plotCutsIDM can hide aggregate rater labels", {
   dat <- data.frame(
     est = seq(-2, 2, length.out = 8),

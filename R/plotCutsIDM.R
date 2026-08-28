@@ -241,6 +241,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           linewidth = 0.45,
           alpha = 0.85,
           linetype = "solid",
+          show.legend = FALSE,
           na.rm = TRUE
         )
 
@@ -257,6 +258,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
             alpha = 0.95,
             hjust = 0,
             size = 3,
+            show.legend = FALSE,
             na.rm = TRUE
           )
       }
@@ -388,6 +390,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         linewidth = 0.45,
         alpha = 0.85,
         linetype = "solid",
+        show.legend = FALSE,
         na.rm = TRUE
       )
 
@@ -404,6 +407,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           alpha = 0.95,
           hjust = 0,
           size = 3,
+          show.legend = FALSE,
           na.rm = TRUE
         )
     }
