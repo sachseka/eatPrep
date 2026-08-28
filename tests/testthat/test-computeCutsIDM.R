@@ -395,11 +395,13 @@ test_that("plotCutsIDM can add an aggregate panel with mean cuts", {
   expect_equal(as.character(layout$.facet_person), c("Rater1", "Rater2", "Mean"))
   expect_equal(unique(aggregate_line_layer$PANEL), mean_panel)
   expect_equal(length(unique(aggregate_line_layer$group)), 2L)
+  expect_equal(length(unique(aggregate_line_layer$colour)), 2L)
   expect_equal(unique(aggregate_vline_layer$PANEL), mean_panel)
   expect_equal(aggregate_vline_layer$xintercept, expected_cuts)
   expect_length(label_layers, 1L)
   expect_equal(unique(label_layers[[1]]$PANEL), mean_panel)
   expect_equal(label_layers[[1]]$label, c("Rater1", "Rater2"))
+  expect_equal(length(unique(label_layers[[1]]$colour)), 2L)
 })
 
 test_that("plotCutsIDM can hide aggregate rater labels", {
@@ -421,6 +423,29 @@ test_that("plotCutsIDM can hide aggregate rater labels", {
 
   expect_s3_class(p, "ggplot")
   expect_length(label_layers, 0L)
+})
+
+test_that("plotCutsIDM spreads aggregate labels with identical endpoints", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 8),
+    Rater1 = c(1, 1, 2, 2, 3, 4, 4, 5),
+    Rater2 = c(1, 1, 2, 2, 3, 4, 4, 5),
+    Rater3 = c(1, 1, 2, 2, 3, 4, 4, 5)
+  )
+
+  res <- computeCutsIDM(dat)
+  p <- plotCutsIDM(res, show_aggregate = TRUE)
+  label_layers <- Filter(function(layer) {
+    "label" %in% names(layer)
+  }, ggplot2::ggplot_build(p)$data)
+
+  expect_s3_class(p, "ggplot")
+  expect_length(label_layers, 1L)
+  expect_equal(label_layers[[1]]$label, c("Rater1", "Rater2", "Rater3"))
+  expect_equal(length(unique(label_layers[[1]]$colour)), 3L)
+  expect_equal(length(unique(label_layers[[1]]$y)), 3L)
+  expect_true(all(label_layers[[1]]$y >= res$min_val))
+  expect_true(all(label_layers[[1]]$y <= res$max_val))
 })
 
 test_that("plotCutsIDM can combine aggregate and residual panels", {
@@ -447,6 +472,7 @@ test_that("plotCutsIDM can combine aggregate and residual panels", {
   expect_length(label_layers, 1L)
   expect_equal(unique(label_layers[[1]]$PANEL), mean_ratings_panel)
   expect_equal(label_layers[[1]]$label, c("Rater1", "Rater2"))
+  expect_equal(length(unique(label_layers[[1]]$colour)), 2L)
 })
 
 test_that("plotCutsIDM can show residual panels", {

@@ -14,13 +14,73 @@
   }
 }
 
-.aggregate_line_label_data_idm <- function(dat) {
-  dat |>
+.aggregate_rater_colors_idm <- function(persons) {
+  persons <- as.character(persons)
+  if (length(persons) == 0) {
+    return(stats::setNames(character(), character()))
+  }
+
+  stats::setNames(
+    grDevices::hcl.colors(length(persons), palette = "Dark 3"),
+    persons
+  )
+}
+
+.add_aggregate_colors_idm <- function(dat, colors) {
+  dat$.aggregate_color <- unname(colors[as.character(dat$person)])
+  dat
+}
+
+.spread_label_positions_idm <- function(y, lower, upper) {
+  n <- length(y)
+  if (n <= 1 || !is.finite(lower) || !is.finite(upper) || lower >= upper) {
+    return(y)
+  }
+
+  span <- upper - lower
+  min_gap <- min(span * 0.055, span / (n - 1))
+  ord <- order(y, seq_along(y))
+  sorted <- y[ord]
+
+  for (i in seq.int(2L, n)) {
+    sorted[i] <- max(sorted[i], sorted[i - 1L] + min_gap)
+  }
+
+  overflow <- sorted[n] - upper
+  if (overflow > 0) {
+    sorted <- sorted - overflow
+  }
+  underflow <- lower - sorted[1L]
+  if (underflow > 0) {
+    sorted <- sorted + underflow
+  }
+
+  out <- y
+  out[ord] <- sorted
+  out
+}
+
+.aggregate_line_label_data_idm <- function(dat, y_limits) {
+  dat <- dat |>
     dplyr::filter(is.finite(est), is.finite(stage_iso)) |>
-    dplyr::arrange(person, est, item_position) |>
+    dplyr::arrange(person, est)
+
+  if ("item_position" %in% names(dat)) {
+    dat <- dat |>
+      dplyr::arrange(person, est, item_position)
+  }
+
+  out <- dat |>
     dplyr::group_by(person) |>
     dplyr::slice_tail(n = 1) |>
     dplyr::ungroup()
+
+  out$.label_y <- .spread_label_positions_idm(
+    y = out$stage_iso,
+    lower = y_limits[1],
+    upper = y_limits[2]
+  )
+  out
 }
 
 plotCutsIDM <- function(res_list, est_col = NULL,
@@ -70,9 +130,11 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   person_order <- as.character(unique(plot_data$person))
   aggregate_label <- NULL
   facet_levels <- person_order
+  aggregate_colors <- NULL
   if (show_aggregate) {
     aggregate_label <- .aggregate_panel_label_idm(person_order)
     facet_levels <- c(facet_levels, aggregate_label)
+    aggregate_colors <- .aggregate_rater_colors_idm(person_order)
   }
 
   cuts_long <- res_list$cuts_per_person |>
@@ -117,9 +179,13 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         dplyr::mutate(
           .panel = factor("Ratings", levels = panel_levels),
           .facet_person = factor(aggregate_label, levels = facet_levels)
-        )
+        ) |>
+        .add_aggregate_colors_idm(aggregate_colors)
       if (show_aggregate_labels) {
-        aggregate_label_data <- .aggregate_line_label_data_idm(aggregate_rating_data)
+        aggregate_label_data <- .aggregate_line_label_data_idm(
+          dat = aggregate_rating_data,
+          y_limits = y_limits
+        )
       }
     }
     boundary_data <- tibble::tibble(
@@ -166,10 +232,14 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       pp <- pp +
         ggplot2::geom_line(
           data = aggregate_rating_data,
-          ggplot2::aes(x = est, y = stage_iso, group = person),
+          ggplot2::aes(
+            x = est,
+            y = stage_iso,
+            group = person,
+            color = I(.aggregate_color)
+          ),
           linewidth = 0.45,
-          color = "red",
-          alpha = 0.55,
+          alpha = 0.85,
           linetype = "solid",
           na.rm = TRUE
         )
@@ -178,12 +248,15 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         pp <- pp +
           ggplot2::geom_text(
             data = aggregate_label_data,
-            ggplot2::aes(x = est, y = stage_iso, label = person),
-            color = "red",
-            alpha = 0.9,
-            hjust = -0.05,
+            ggplot2::aes(
+              x = est,
+              y = .label_y,
+              label = person,
+              color = I(.aggregate_color)
+            ),
+            alpha = 0.95,
+            hjust = 0,
             size = 3,
-            check_overlap = TRUE,
             na.rm = TRUE
           )
       }
@@ -269,9 +342,13 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   aggregate_label_data <- NULL
   if (show_aggregate) {
     aggregate_plot_data <- plot_data |>
-      dplyr::mutate(.facet_person = factor(aggregate_label, levels = facet_levels))
+      dplyr::mutate(.facet_person = factor(aggregate_label, levels = facet_levels)) |>
+      .add_aggregate_colors_idm(aggregate_colors)
     if (show_aggregate_labels) {
-      aggregate_label_data <- .aggregate_line_label_data_idm(aggregate_plot_data)
+      aggregate_label_data <- .aggregate_line_label_data_idm(
+        dat = aggregate_plot_data,
+        y_limits = y_limits
+      )
     }
   }
 
@@ -302,10 +379,14 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     pp <- pp +
       ggplot2::geom_line(
         data = aggregate_plot_data,
-        ggplot2::aes(y = stage_iso, group = person),
+        ggplot2::aes(
+          x = est,
+          y = stage_iso,
+          group = person,
+          color = I(.aggregate_color)
+        ),
         linewidth = 0.45,
-        color = "red",
-        alpha = 0.55,
+        alpha = 0.85,
         linetype = "solid",
         na.rm = TRUE
       )
@@ -314,12 +395,15 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       pp <- pp +
         ggplot2::geom_text(
           data = aggregate_label_data,
-          ggplot2::aes(y = stage_iso, label = person),
-          color = "red",
-          alpha = 0.9,
-          hjust = -0.05,
+          ggplot2::aes(
+            x = est,
+            y = .label_y,
+            label = person,
+            color = I(.aggregate_color)
+          ),
+          alpha = 0.95,
+          hjust = 0,
           size = 3,
-          check_overlap = TRUE,
           na.rm = TRUE
         )
     }
