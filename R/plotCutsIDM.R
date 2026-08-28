@@ -14,10 +14,20 @@
   }
 }
 
+.aggregate_line_label_data_idm <- function(dat) {
+  dat |>
+    dplyr::filter(is.finite(est), is.finite(stage_iso)) |>
+    dplyr::arrange(person, est, item_position) |>
+    dplyr::group_by(person) |>
+    dplyr::slice_tail(n = 1) |>
+    dplyr::ungroup()
+}
+
 plotCutsIDM <- function(res_list, est_col = NULL,
                         show_raw = TRUE, show_smoothed = TRUE,
                         show_residuals = FALSE,
-                        show_aggregate = FALSE) {
+                        show_aggregate = FALSE,
+                        show_aggregate_labels = TRUE) {
 
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
@@ -25,6 +35,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   checkmate::assert_flag(show_smoothed)
   checkmate::assert_flag(show_residuals)
   checkmate::assert_flag(show_aggregate)
+  checkmate::assert_flag(show_aggregate_labels)
 
   # Determine axis limits dynamically
   max_lv <- res_list$max_val
@@ -100,12 +111,16 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         .facet_person = factor(person, levels = facet_levels)
       )
     aggregate_rating_data <- NULL
+    aggregate_label_data <- NULL
     if (show_aggregate) {
       aggregate_rating_data <- plot_data |>
         dplyr::mutate(
           .panel = factor("Ratings", levels = panel_levels),
           .facet_person = factor(aggregate_label, levels = facet_levels)
         )
+      if (show_aggregate_labels) {
+        aggregate_label_data <- .aggregate_line_label_data_idm(aggregate_rating_data)
+      }
     }
     boundary_data <- tibble::tibble(
       .panel = factor("Ratings", levels = panel_levels),
@@ -158,6 +173,20 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           linetype = "solid",
           na.rm = TRUE
         )
+
+      if (show_aggregate_labels) {
+        pp <- pp +
+          ggplot2::geom_text(
+            data = aggregate_label_data,
+            ggplot2::aes(x = est, y = stage_iso, label = person),
+            color = "red",
+            alpha = 0.9,
+            hjust = -0.05,
+            size = 3,
+            check_overlap = TRUE,
+            na.rm = TRUE
+          )
+      }
     }
 
     if (show_smoothed) {
@@ -215,6 +244,13 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         )
     }
 
+    if (show_aggregate && show_aggregate_labels) {
+      pp <- pp +
+        ggplot2::scale_x_continuous(
+          expand = ggplot2::expansion(mult = c(0.05, 0.18))
+        )
+    }
+
     pp <- pp +
       ggplot2::facet_grid(.panel ~ .facet_person, scales = "free_y") +
       ggplot2::labs(
@@ -230,9 +266,13 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   plot_data <- plot_data |>
     dplyr::mutate(.facet_person = factor(person, levels = facet_levels))
   aggregate_plot_data <- NULL
+  aggregate_label_data <- NULL
   if (show_aggregate) {
     aggregate_plot_data <- plot_data |>
       dplyr::mutate(.facet_person = factor(aggregate_label, levels = facet_levels))
+    if (show_aggregate_labels) {
+      aggregate_label_data <- .aggregate_line_label_data_idm(aggregate_plot_data)
+    }
   }
 
   pp <- ggplot2::ggplot(plot_data, ggplot2::aes(x = est))
@@ -269,6 +309,20 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         linetype = "solid",
         na.rm = TRUE
       )
+
+    if (show_aggregate_labels) {
+      pp <- pp +
+        ggplot2::geom_text(
+          data = aggregate_label_data,
+          ggplot2::aes(y = stage_iso, label = person),
+          color = "red",
+          alpha = 0.9,
+          hjust = -0.05,
+          size = 3,
+          check_overlap = TRUE,
+          na.rm = TRUE
+        )
+    }
   }
 
   if (show_smoothed) {
@@ -303,6 +357,13 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         alpha = 0.9,
         linetype = "solid",
         na.rm = TRUE
+      )
+  }
+
+  if (show_aggregate && show_aggregate_labels) {
+    pp <- pp +
+      ggplot2::scale_x_continuous(
+        expand = ggplot2::expansion(mult = c(0.05, 0.18))
       )
   }
 
