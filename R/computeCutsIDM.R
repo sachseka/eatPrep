@@ -258,14 +258,68 @@
   input_format
 }
 
+.make_item_table_idm <- function(dat_long) {
+  item_est <- dat_long |>
+    dplyr::distinct(item_id, est)
+  ambiguous_items <- item_est |>
+    dplyr::count(item_id, name = "n_est") |>
+    dplyr::filter(n_est > 1)
+  if (nrow(ambiguous_items) > 0) {
+    stop("Each item_id_col value must map to exactly one est_col value.", call. = FALSE)
+  }
+
+  item_order <- unique(dat_long$item_id)
+  item_est |>
+    dplyr::mutate(.item_order = match(item_id, item_order)) |>
+    dplyr::arrange(est, .item_order) |>
+    dplyr::mutate(item_position = dplyr::row_number()) |>
+    dplyr::select(item_id, est, item_position)
+}
+
+.assert_unique_long_cells_idm <- function(dat_long, item_id_col) {
+  duplicate_cell <- duplicated(dat_long[c("person", "item_id")])
+  if (!any(duplicate_cell)) {
+    return(invisible(NULL))
+  }
+
+  if (is.null(item_id_col)) {
+    stop(
+      "Long-format input without item_id_col requires at most one rating per ",
+      "rater and est_col value. Provide item_id_col when different items can ",
+      "share the same difficulty estimate.",
+      call. = FALSE
+    )
+  }
+
+  stop(
+    "Long-format input must contain at most one rating per rater and item_id_col value.",
+    call. = FALSE
+  )
+}
+
+.complete_long_grid_idm <- function(dat_long, person_order, item_table) {
+  tidyr::expand_grid(
+    person = person_order,
+    item_id = item_table$item_id
+  ) |>
+    dplyr::left_join(
+      dat_long |> dplyr::select(person, item_id, stage_value),
+      by = c("person", "item_id")
+    ) |>
+    dplyr::left_join(item_table, by = "item_id") |>
+    dplyr::mutate(person = factor(person, levels = person_order)) |>
+    dplyr::arrange(person, item_position) |>
+    dplyr::mutate(person = as.character(person))
+}
+
 .prepare_long_idm <- function(dat, est_col, rater_cols, rater_pattern,
-                              rater_id_col, rating_col, rating_levels,
-                              input_format) {
+                              item_id_col, rater_id_col, rating_col,
+                              rating_levels, input_format) {
   if (input_format == "wide") {
     person_cols <- rater_cols
     if (is.null(person_cols)) {
       person_cols <- grep(rater_pattern, names(dat), value = TRUE)
-      person_cols <- setdiff(person_cols, est_col)
+      person_cols <- setdiff(person_cols, c(est_col, item_id_col))
     } else {
       checkmate::assert_names(person_cols, subset.of = names(dat))
     }
@@ -279,8 +333,23 @@
         checkmate::assert_numeric(dat[[person_col]])
       })
     }
+    if (!is.null(item_id_col)) {
+      checkmate::assert_names(item_id_col, subset.of = names(dat))
+      if (!is.atomic(dat[[item_id_col]])) {
+        stop("item_id_col must identify an atomic vector.", call. = FALSE)
+      }
+      if (anyNA(dat[[item_id_col]])) {
+        stop("item_id_col must not contain missing values.", call. = FALSE)
+      }
+      item_id <- as.character(dat[[item_id_col]])
+      if (anyDuplicated(item_id)) {
+        stop("item_id_col must identify unique items in wide-format input.", call. = FALSE)
+      }
+    } else {
+      item_id <- as.character(seq_len(nrow(dat)))
+    }
 
-    wide_dat <- tibble::tibble(est = dat[[est_col]])
+    wide_dat <- tibble::tibble(item_id = item_id, est = dat[[est_col]])
     wide_dat[person_cols] <- dat[person_cols]
     if (!is.null(rating_levels)) {
       wide_dat <- wide_dat |>
@@ -293,11 +362,18 @@
         names_to = "person",
         values_to = "stage_value"
       )
+    item_table <- .make_item_table_idm(dat_long)
+    dat_long <- dat_long |>
+      dplyr::left_join(
+        item_table |> dplyr::select(item_id, item_position),
+        by = "item_id"
+      )
     rater_out <- person_cols
     names(rater_out) <- rater_out
     person_order <- person_cols
   } else {
-    checkmate::assert_names(c(rater_id_col, rating_col), subset.of = names(dat))
+    long_cols <- c(rater_id_col, rating_col, item_id_col)
+    checkmate::assert_names(long_cols, subset.of = names(dat))
     if (!is.atomic(dat[[rater_id_col]])) {
       stop("rater_id_col must identify an atomic vector.", call. = FALSE)
     }
@@ -307,13 +383,32 @@
     if (is.null(rating_levels)) {
       checkmate::assert_numeric(dat[[rating_col]])
     }
+    if (!is.null(item_id_col)) {
+      if (!is.atomic(dat[[item_id_col]])) {
+        stop("item_id_col must identify an atomic vector.", call. = FALSE)
+      }
+      if (anyNA(dat[[item_id_col]])) {
+        stop("item_id_col must not contain missing values.", call. = FALSE)
+      }
+      item_id <- as.character(dat[[item_id_col]])
+    } else {
+      item_id <- as.character(dat[[est_col]])
+    }
 
     dat_long <- tibble::tibble(
+      item_id = item_id,
       est = dat[[est_col]],
       person = as.character(dat[[rater_id_col]]),
       stage_value = dat[[rating_col]]
     )
     person_order <- unique(dat_long$person)
+    .assert_unique_long_cells_idm(dat_long, item_id_col = item_id_col)
+    item_table <- .make_item_table_idm(dat_long)
+    dat_long <- .complete_long_grid_idm(
+      dat_long = dat_long,
+      person_order = person_order,
+      item_table = item_table
+    )
     rater_out <- person_order
     names(rater_out) <- rater_out
   }
@@ -377,8 +472,8 @@
 }
 
 computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
-                           est_col = "est", rater_cols = NULL,
-                           rater_pattern = "Rater",
+                           est_col = "est", item_id_col = NULL,
+                           rater_cols = NULL, rater_pattern = "Rater",
                            rater_id_col = NULL, rating_col = NULL,
                            input_format = c("auto", "long", "wide"),
                            rating_levels = NULL,
@@ -395,6 +490,7 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
   if (any(!is.finite(dat[[est_col]]))) {
     stop("est_col must contain only finite values.", call. = FALSE)
   }
+  checkmate::assert_string(item_id_col, null.ok = TRUE)
   checkmate::assert_numeric(boundaries, min.len = 1, any.missing = FALSE)
   if (any(!is.finite(boundaries))) {
     stop("boundaries must contain only finite values.", call. = FALSE)
@@ -431,6 +527,7 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     est_col = est_col,
     rater_cols = rater_cols,
     rater_pattern = rater_pattern,
+    item_id_col = item_id_col,
     rater_id_col = rater_id_col,
     rating_col = rating_col,
     rating_levels = rating_levels,
@@ -462,10 +559,9 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
   # 2. Preparation and Smoothing
   dat_sm <- dat_long |>
     dplyr::mutate(person = factor(person, levels = prepared$person_order)) |>
-    dplyr::arrange(person, est) |>
+    dplyr::arrange(person, item_position) |>
     dplyr::group_by(person) |>
     dplyr::mutate(
-      item_position = dplyr::row_number(),
       stage_sm = .smooth_group_idm(
         stage_raw,
         min_lv = min_val,
@@ -517,7 +613,8 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     cut_names = cut_names
   )
   item_difficulties <- dat_sm |>
-    dplyr::distinct(item_position, est) |>
+    dplyr::distinct(item_position, item_id, est) |>
+    dplyr::arrange(item_position) |>
     dplyr::pull(est)
   level_statistics <- .make_level_statistics_idm(
     item_difficulties = item_difficulties,
@@ -527,7 +624,7 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
   # 5. Prepare Long Data for Plotting
   iso_df <- dat_sm |>
     dplyr::select(
-      est, person, item_position, stage_raw, stage_sm, stage_iso,
+      item_id, est, person, item_position, stage_raw, stage_sm, stage_iso,
       stage_resid, stage_label
     )
 
@@ -543,6 +640,7 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     min_val = min_val,
     max_val = max_val,
     est_col = est_col,
+    item_id_col = item_id_col,
     rater_cols = prepared$rater_cols,
     rater_id_col = rater_id_col,
     rating_col = rating_col,

@@ -70,7 +70,94 @@ test_that("computeCutsIDM supports long-format input with rater names", {
   expect_equal(res$est_col, "theta")
   expect_equal(unname(res$rater_cols), c("Meyer", "Schmidt"))
   expect_equal(res$cuts_per_person$person, c("Meyer", "Schmidt"))
-  expect_true(all(c("est", "person", "stage_raw", "stage_sm", "stage_iso") %in% names(res$plot_data)))
+  expect_true(all(c("item_id", "est", "person", "stage_raw", "stage_sm", "stage_iso") %in% names(res$plot_data)))
+})
+
+test_that("computeCutsIDM treats omitted long-format cells as missing ratings", {
+  wide_dat <- data.frame(
+    est = seq(-2, 2, length.out = 8),
+    Rater1 = c(1, 1, 2, NA, 3, 4, 4, 5),
+    Rater2 = c(1, 2, 2, 3, 3, 4, 5, 5)
+  )
+  long_dat <- tidyr::pivot_longer(
+    wide_dat,
+    cols = c("Rater1", "Rater2"),
+    names_to = "rater",
+    values_to = "rating"
+  ) |>
+    dplyr::filter(!(rater == "Rater1" & is.na(rating)))
+
+  wide_res <- computeCutsIDM(wide_dat)
+  long_res <- computeCutsIDM(
+    long_dat,
+    rater_id_col = "rater",
+    rating_col = "rating"
+  )
+
+  expect_equal(long_res$cuts_per_person, wide_res$cuts_per_person)
+  expect_equal(long_res$cut_positions_per_person, wide_res$cut_positions_per_person)
+  expect_equal(long_res$cuts_summary, wide_res$cuts_summary)
+  expect_equal(long_res$cut_statistics, wide_res$cut_statistics)
+  expect_equal(long_res$level_statistics, wide_res$level_statistics)
+  expect_equal(nrow(long_res$plot_data), nrow(wide_res$plot_data))
+  expect_true(any(is.na(long_res$plot_data$stage_raw)))
+})
+
+test_that("computeCutsIDM uses item_id_col for duplicated long-format difficulties", {
+  dat <- data.frame(
+    item = rep(c("item_1", "item_2", "item_3"), 2),
+    est = rep(c(0, 0, 1), 2),
+    rater = rep(c("Meyer", "Schmidt"), each = 3),
+    rating = c(1, 2, 3, 1, NA, 3)
+  )
+
+  res <- computeCutsIDM(
+    dat,
+    boundaries = 2.5,
+    item_id_col = "item",
+    rater_id_col = "rater",
+    rating_col = "rating"
+  )
+
+  expect_equal(unique(res$plot_data$item_id), c("item_1", "item_2", "item_3"))
+  expect_equal(nrow(res$plot_data), 6L)
+  expect_equal(
+    res$plot_data$item_position[res$plot_data$person == "Meyer"],
+    1:3
+  )
+})
+
+test_that("computeCutsIDM rejects ambiguous long-format item identities", {
+  dat <- data.frame(
+    est = c(0, 0, 1),
+    rater = c("Meyer", "Meyer", "Meyer"),
+    rating = c(1, 2, 3)
+  )
+
+  expect_error(
+    computeCutsIDM(dat, boundaries = 2.5, rater_id_col = "rater", rating_col = "rating"),
+    "item_id_col"
+  )
+})
+
+test_that("computeCutsIDM rejects duplicate long-format item-rater cells", {
+  dat <- data.frame(
+    item = c("item_1", "item_1", "item_2"),
+    est = c(0, 0, 1),
+    rater = c("Meyer", "Meyer", "Meyer"),
+    rating = c(1, 2, 3)
+  )
+
+  expect_error(
+    computeCutsIDM(
+      dat,
+      boundaries = 2.5,
+      item_id_col = "item",
+      rater_id_col = "rater",
+      rating_col = "rating"
+    ),
+    "one rating per rater and item_id_col"
+  )
 })
 
 test_that("computeCutsIDM maps ordinal rating labels with explicit levels", {

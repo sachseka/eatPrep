@@ -9,6 +9,7 @@ computeCutsIDM(
   dat,
   boundaries = c(1.5, 2.5, 3.5, 4.5),
   est_col = "est",
+  item_id_col = NULL,
   rater_cols = NULL,
   rater_pattern = "Rater",
   rater_id_col = NULL,
@@ -23,6 +24,7 @@ computeCutsIDM(
   \item{dat}{A data frame containing item difficulty estimates and rater ratings. Long and wide input formats are supported.}
   \item{boundaries}{Numeric vector. The cut boundaries on the internal ordinal rating scale. For example, \code{c(1.5, 2.5, 3.5)} calculates cuts between four adjacent performance levels.}
   \item{est_col}{Character scalar. Name of the column containing item difficulty estimates. Defaults to \code{"est"}.}
+  \item{item_id_col}{Optional character scalar. Name of an item identifier column. In long-format input this is used to complete the full item-by-rater grid before smoothing; omitted item-rater combinations are treated as missing ratings. If \code{NULL}, \code{est_col} is used as the item identity in long-format input. Supply \code{item_id_col} when different items can share the same difficulty estimate.}
   \item{rater_cols}{Character vector. Names of the rater rating columns for wide-format input. If \code{NULL}, rater columns are selected with \code{rater_pattern}.}
   \item{rater_pattern}{Character scalar. Pattern used to find rater rating columns when \code{rater_cols = NULL} in wide-format input. Defaults to \code{"Rater"}.}
   \item{rater_id_col}{Character scalar. Name of the rater identifier column for long-format input. Rater identifiers may be names or IDs.}
@@ -34,6 +36,8 @@ computeCutsIDM(
 }
 \details{
 The function supports two input formats. In long format, each row contains one item-rater combination and the columns identified by \code{est_col}, \code{rater_id_col}, and \code{rating_col}. In wide format, each row contains one item and one or more rater rating columns. Wide-format input keeps the previous default behavior.
+
+Long-format input is completed internally to the full item-by-rater grid before smoothing. Thus an omitted item-rater row is interpreted like an explicit missing rating, not like a removed item. If \code{item_id_col} is supplied, it defines the item identity used for this completion. If it is not supplied, \code{est_col} is used as a fallback item identity; this requires at most one rating per rater and difficulty value. When multiple distinct items may have identical difficulty estimates, \code{item_id_col} should be supplied.
 
 All input is normalized internally to a long representation with item difficulty, rater identifier, and numeric rating stage. If ratings are supplied as labels, \code{rating_levels} defines their ordinal order and the labels are mapped to \code{1, 2, ..., k} for computation.
 
@@ -94,8 +98,8 @@ A \code{cutsIDM} object, i.e. a named list with:
   \item \code{cuts_summary}: mean difficulty-scale cuts across raters.
   \item \code{cut_statistics}: mean, standard deviation, and standard error for item-position and difficulty-scale cuts.
   \item \code{level_statistics}: item difficulty intervals implied by \code{cuts_summary}, with item counts and item difficulty summaries.
-  \item \code{plot_data}: long-format raw, smoothed, monotonized, and residual rating data used by \code{plotCutsIDM()}.
-  \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
+  \item \code{plot_data}: long-format item identifiers, raw, smoothed, monotonized, and residual rating data used by \code{plotCutsIDM()}.
+  \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{item_id_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
 }
 \code{summary()} can be used to print the main cut score, boundary, and level-statistic tables in a compact form.
 }
@@ -116,6 +120,7 @@ summary(cuts)
 
 ## Long-format input with ordinal rating labels
 long_dat <- data.frame(
+  item = rep(paste0("item_", 1:5), 2),
   theta = rep(seq(100, 500, by = 100), 2),
   rater = rep(c("Meyer", "Schmidt"), each = 5),
   rating = c(
@@ -126,6 +131,7 @@ long_dat <- data.frame(
 
 ord_cuts <- computeCutsIDM(
   long_dat,
+  item_id_col = "item",
   est_col = "theta",
   rater_id_col = "rater",
   rating_col = "rating",

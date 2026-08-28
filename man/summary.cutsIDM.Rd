@@ -18,7 +18,7 @@ Builds and prints a compact summary for objects returned by \code{\link{computeC
 \details{
 The summary method does not recompute cut scores. It reorganizes the main results already stored in the \code{cutsIDM} object:
 \itemize{
-  \item \code{settings} reports the input format, missing-value handling, estimate column, number of raters, number of ordered item positions, and number of requested cuts.
+  \item \code{settings} reports the input format, missing-value handling, estimate and item identifier columns, number of raters, number of ordered item positions, and number of requested cuts.
   \item \code{boundaries} connects each cut label with the numeric boundary on the internal ordinal scale and, where possible, with the lower and upper rating levels it separates.
   \item \code{cuts_summary} contains the mean cut score on the item difficulty scale.
   \item \code{cut_statistics} contains mean, sample standard deviation, and standard error for interpolated item positions and difficulty-scale cuts.

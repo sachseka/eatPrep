@@ -3,12 +3,14 @@
 ## new features
 
 * `computeCutsIDM()` now supports long-format IDM input with explicit rater identifier and rating columns.
+* `computeCutsIDM()` gains `item_id_col` for explicit item identifiers, especially useful when long-format data contain several items with the same difficulty estimate.
 * `computeCutsIDM()` supports ordinal rating labels via `rating_levels`, for example `c("1a", "1b", "2", "3", "4")`.
 * `summary()` now provides a compact S3 summary for objects returned by `computeCutsIDM()`.
 
 ## improvements
 
 * `computeCutsIDM()` now uses `missing = "drop"` by default so missing ratings do not create smoothed values or contribute to cut computation.
+* Long-format IDM input is completed to the full item-by-rater grid before smoothing, so omitted item-rater rows are treated like explicit missing ratings.
 * `computeCutsIDM()` offers `missing = "smooth"` for legacy-like smoothing with missing values ignored inside the moving-average window.
 * `computeCutsIDM()` now computes cut scores as linearly interpolated boundary crossings of the monotonized curve.
 * `computeCutsIDM()` returns additional IDM summary tables in `cut_positions_per_person`, `cut_statistics`, and `level_statistics`.

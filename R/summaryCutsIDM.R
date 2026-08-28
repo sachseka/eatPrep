@@ -88,8 +88,13 @@ summary.cutsIDM <- function(object, digits = NULL, ...) {
     input_format = .null_chr_idm(object$input_format),
     missing = .null_chr_idm(object$missing),
     est_col = .null_chr_idm(object$est_col),
+    item_id_col = .null_chr_idm(object$item_id_col),
     n_raters = .count_unique_idm(object$cuts_per_person$person),
-    n_items = .count_unique_idm(object$plot_data$item_position),
+    n_items = if ("item_id" %in% names(object$plot_data)) {
+      .count_unique_idm(object$plot_data$item_id)
+    } else {
+      .count_unique_idm(object$plot_data$item_position)
+    },
     n_cuts = length(object$boundaries)
   )
 
