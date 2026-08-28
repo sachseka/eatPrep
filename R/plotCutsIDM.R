@@ -1,12 +1,30 @@
+.aggregate_panel_label_idm <- function(persons) {
+  label <- "Mean"
+  if (!label %in% persons) {
+    return(label)
+  }
+
+  idx <- 1L
+  repeat {
+    candidate <- paste0("Mean_", idx)
+    if (!candidate %in% persons) {
+      return(candidate)
+    }
+    idx <- idx + 1L
+  }
+}
+
 plotCutsIDM <- function(res_list, est_col = NULL,
                         show_raw = TRUE, show_smoothed = TRUE,
-                        show_residuals = FALSE) {
+                        show_residuals = FALSE,
+                        show_aggregate = FALSE) {
 
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
   checkmate::assert_flag(show_raw)
   checkmate::assert_flag(show_smoothed)
   checkmate::assert_flag(show_residuals)
+  checkmate::assert_flag(show_aggregate)
 
   # Determine axis limits dynamically
   max_lv <- res_list$max_val
@@ -38,19 +56,57 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     y_labels <- res_list$rating_labels[y_breaks]
   }
 
+  person_order <- as.character(unique(plot_data$person))
+  aggregate_label <- NULL
+  facet_levels <- person_order
+  if (show_aggregate) {
+    aggregate_label <- .aggregate_panel_label_idm(person_order)
+    facet_levels <- c(facet_levels, aggregate_label)
+  }
+
   cuts_long <- res_list$cuts_per_person |>
     tidyr::pivot_longer(
       cols = dplyr::starts_with("cut"),
       names_to = "cut_type",
       values_to = "cut"
+    ) |>
+    dplyr::mutate(
+      .facet_person = factor(person, levels = facet_levels)
     )
+  mean_cuts_long <- NULL
+  if (show_aggregate) {
+    mean_cuts_long <- res_list$cuts_summary |>
+      tidyr::pivot_longer(
+        cols = dplyr::starts_with("cut"),
+        names_to = "cut_type",
+        values_to = "cut"
+      ) |>
+      dplyr::mutate(
+        person = aggregate_label,
+        .facet_person = factor(aggregate_label, levels = facet_levels)
+      )
+  }
 
   if (show_residuals) {
     panel_levels <- c("Ratings", "Residuals")
     rating_data <- plot_data |>
-      dplyr::mutate(.panel = factor("Ratings", levels = panel_levels))
+      dplyr::mutate(
+        .panel = factor("Ratings", levels = panel_levels),
+        .facet_person = factor(person, levels = facet_levels)
+      )
     residual_data <- plot_data |>
-      dplyr::mutate(.panel = factor("Residuals", levels = panel_levels))
+      dplyr::mutate(
+        .panel = factor("Residuals", levels = panel_levels),
+        .facet_person = factor(person, levels = facet_levels)
+      )
+    aggregate_rating_data <- NULL
+    if (show_aggregate) {
+      aggregate_rating_data <- plot_data |>
+        dplyr::mutate(
+          .panel = factor("Ratings", levels = panel_levels),
+          .facet_person = factor(aggregate_label, levels = facet_levels)
+        )
+    }
     boundary_data <- tibble::tibble(
       .panel = factor("Ratings", levels = panel_levels),
       boundary = res_list$boundaries
@@ -91,6 +147,19 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         na.rm = TRUE
       )
 
+    if (show_aggregate) {
+      pp <- pp +
+        ggplot2::geom_line(
+          data = aggregate_rating_data,
+          ggplot2::aes(x = est, y = stage_iso, group = person),
+          linewidth = 0.45,
+          color = "red",
+          alpha = 0.55,
+          linetype = "solid",
+          na.rm = TRUE
+        )
+    }
+
     if (show_smoothed) {
       pp <- pp +
         ggplot2::geom_line(
@@ -130,9 +199,24 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         ggplot2::aes(xintercept = cut, color = cut_type),
         linewidth = .8,
         alpha = 0.8,
-        linetype = "solid"
-      ) +
-      ggplot2::facet_grid(.panel ~ person, scales = "free_y") +
+        linetype = "solid",
+        na.rm = TRUE
+      )
+
+    if (show_aggregate) {
+      pp <- pp +
+        ggplot2::geom_vline(
+          data = mean_cuts_long,
+          ggplot2::aes(xintercept = cut, color = cut_type),
+          linewidth = .9,
+          alpha = 0.9,
+          linetype = "solid",
+          na.rm = TRUE
+        )
+    }
+
+    pp <- pp +
+      ggplot2::facet_grid(.panel ~ .facet_person, scales = "free_y") +
       ggplot2::labs(
         x = paste0("Itemschwierigkeit (", x_label, ")"),
         y = "Stufe / Residuum",
@@ -141,6 +225,14 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       ggplot2::theme_minimal()
 
     return(pp)
+  }
+
+  plot_data <- plot_data |>
+    dplyr::mutate(.facet_person = factor(person, levels = facet_levels))
+  aggregate_plot_data <- NULL
+  if (show_aggregate) {
+    aggregate_plot_data <- plot_data |>
+      dplyr::mutate(.facet_person = factor(aggregate_label, levels = facet_levels))
   }
 
   pp <- ggplot2::ggplot(plot_data, ggplot2::aes(x = est))
@@ -166,6 +258,19 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       na.rm = TRUE
     )
 
+  if (show_aggregate) {
+    pp <- pp +
+      ggplot2::geom_line(
+        data = aggregate_plot_data,
+        ggplot2::aes(y = stage_iso, group = person),
+        linewidth = 0.45,
+        color = "red",
+        alpha = 0.55,
+        linetype = "solid",
+        na.rm = TRUE
+      )
+  }
+
   if (show_smoothed) {
     pp <- pp +
       ggplot2::geom_line(
@@ -185,9 +290,24 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       ggplot2::aes(xintercept = cut, color = cut_type),
       linewidth = .8,
       alpha = 0.8,
-      linetype = "solid"
-    ) +
-    ggplot2::facet_wrap(~ person, ncol = 2) +
+      linetype = "solid",
+      na.rm = TRUE
+    )
+
+  if (show_aggregate) {
+    pp <- pp +
+      ggplot2::geom_vline(
+        data = mean_cuts_long,
+        ggplot2::aes(xintercept = cut, color = cut_type),
+        linewidth = .9,
+        alpha = 0.9,
+        linetype = "solid",
+        na.rm = TRUE
+      )
+  }
+
+  pp <- pp +
+    ggplot2::facet_wrap(~ .facet_person, ncol = 2) +
     ggplot2::scale_y_continuous(breaks = y_breaks, labels = y_labels, limits = y_limits) +
     ggplot2::labs(
       x = paste0("Itemschwierigkeit (", x_label, ")"),

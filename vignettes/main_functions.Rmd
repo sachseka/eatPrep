@@ -510,6 +510,12 @@ Cut scores are interpolated boundary crossings of the monotonized curves. `cuts_
 plotCutsIDM(cuts)
 ```
 
+An aggregate panel can be added to inspect all monotonized rater curves together with the mean cuts.
+
+```{r idm aggregate plot example, fig.width=7, fig.height=5}
+plotCutsIDM(cuts, show_aggregate = TRUE)
+```
+
 Residual panels can be added to inspect local deviations between raw ratings and the smoothed moving average.
 
 ```{r idm residual plot example, fig.width=7, fig.height=6}
