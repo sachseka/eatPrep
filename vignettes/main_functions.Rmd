@@ -78,7 +78,7 @@ pbc2 <- c("[evalPbc()](#category-discrimination)", "flags suspicious category di
 rater1 <- c("[meanAgree()](#rater-agreement)", "calculates mean pairwise percentage agreement across raters.")
 rater2 <- c("[meanKappa()](#rater-agreement)", "calculates mean pairwise kappa across raters.")
 rater3 <- c("[make.pseudo()](#pseudo-raters)", "reduces multiple real raters to a smaller number of pseudo raters.")
-idm1 <- c("[computeCutsIDM()](#idm-cut-scores)", "computes cut scores and summary statistics for Item Descriptor Matching based on monotonized moving averages.")
+idm1 <- c("[computeCutsIDM()](#idm-cut-scores)", "computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages.")
 idm2 <- c("[plotCutsIDM()](#idm-cut-scores)", "plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from `computeCutsIDM()`.")
 visual1 <- c("[visualSubsetRecode()](#visual-subset-recoding)", "supports interactive visual inspection and recoding of flagged subsets.")
 
@@ -498,6 +498,11 @@ cuts <- computeCutsIDM(
 cuts$cuts_summary
 cuts$cut_statistics
 cuts$level_statistics
+cuts$modal_values
+cuts$rater_modal_correlations
+cuts$rater_kappa_statistics
+cuts$fleiss_kappa
+cuts$icc_statistics
 summary(cuts)
 ```
 
@@ -506,6 +511,10 @@ Internally, ordinal ratings are mapped to stage scores `1`, `2`, ..., `K` in the
 Missing ratings are dropped from smoothing and cut computation by default. In long-format input, omitted item-rater rows are completed internally and treated like explicit missing ratings. Use `item_id_col` whenever item identities should be preserved explicitly, especially when different items can have the same difficulty estimate. Use `missing = "smooth"` for the previous smoothing behavior with `na.rm = TRUE`, or `missing = "error"` to reject incomplete ratings. The `boundaries` argument determines the requested cut scores. Canonical boundaries such as `1.5` and `2.5` describe cuts between adjacent levels; non-canonical boundaries are included in the generated cut labels.
 
 Cut scores are interpolated boundary crossings of the monotonized curves. For example, the default boundary `2.5` is the transition between the second and third ordinal stage, here labelled `cut_1b_2`. `cuts_per_person` and `cuts_summary` report these cuts on the item difficulty scale. `cut_positions_per_person` stores the corresponding interpolated item positions, while `cut_statistics` and `level_statistics` summarize cuts and item difficulty intervals in the style often used in IDM documentation.
+
+Additional agreement diagnostics are computed on the raw internal rating stages, after long- and wide-format input have been normalized to the same complete item-by-rater grid. `modal_values` gives the item-wise modal rating stage. If the modal value is tied, the unique `modal_stage` is set to `NA`, while `modal_stages`, `modal_labels`, and `tie` keep the tie information. `rater_modal_correlations` correlates each individual rater series with the modal-value series. The leave-one-rater-out version recomputes the modal value without the currently evaluated rater, so the rater is compared with the remaining group rather than with a criterion partly defined by their own ratings.
+
+The kappa diagnostics use the same wide raw rating matrix. `kappa_pairwise` contains all pairwise Cohen kappa estimates from `meanKappa()`. `kappa_summary` summarizes these pairwise kappas overall, and `rater_kappa_statistics` gives each rater's mean and sample standard deviation across all pairings involving that rater. Fleiss kappa and the two ICC estimates for agreement and consistency are computed on complete item rows, because these procedures require a common set of items across raters. If the third, final IDM round is the target, filter the data to that round before calling `computeCutsIDM()`.
 
 `plotCutsIDM()` visualizes the raw ratings, moving averages, monotonized curves and resulting cut scores. Grey points and lines show the original ratings ordered by item difficulty. The dashed blue line shows the smoothed but not yet monotonized moving average. The red line shows the monotonized curve used for the cut computation.
 

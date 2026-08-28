@@ -171,6 +171,365 @@
   })
 }
 
+.rating_stage_labels_idm <- function(stage, rating_labels) {
+  out <- rep(NA_character_, length(stage))
+  ok <- !is.na(stage)
+
+  if (is.null(rating_labels)) {
+    out[ok] <- as.character(stage[ok])
+    return(out)
+  }
+
+  label_ok <- ok &
+    is.finite(stage) &
+    stage == floor(stage) &
+    stage >= 1 &
+    stage <= length(rating_labels)
+  out[label_ok] <- rating_labels[stage[label_ok]]
+  out[ok & !label_ok] <- as.character(stage[ok & !label_ok])
+  out
+}
+
+.modal_stages_idm <- function(x) {
+  x <- x[is.finite(x)]
+  if (length(x) == 0) {
+    return(numeric())
+  }
+
+  vals <- sort(unique(x))
+  counts <- tabulate(match(x, vals), nbins = length(vals))
+  vals[counts == max(counts)]
+}
+
+.strict_modal_stage_idm <- function(x) {
+  modes <- .modal_stages_idm(x)
+  if (length(modes) == 1) {
+    return(modes)
+  }
+
+  NA_real_
+}
+
+.make_rating_wide_idm <- function(dat_sm, person_order) {
+  item_table <- dat_sm |>
+    dplyr::distinct(item_position, item_id, est) |>
+    dplyr::arrange(item_position)
+  ratings <- matrix(
+    NA_real_,
+    nrow = nrow(item_table),
+    ncol = length(person_order),
+    dimnames = list(NULL, person_order)
+  )
+
+  for (person in person_order) {
+    person_dat <- dat_sm[dat_sm$person == person, ]
+    idx <- match(person_dat$item_position, item_table$item_position)
+    ratings[idx, person] <- person_dat$stage_raw
+  }
+
+  list(
+    items = item_table,
+    ratings = as.data.frame(ratings, check.names = FALSE)
+  )
+}
+
+.make_modal_values_idm <- function(rating_wide, rating_labels) {
+  rating_mat <- as.matrix(rating_wide$ratings)
+  if (nrow(rating_mat) == 0) {
+    return(tibble::tibble(
+      item_position = integer(),
+      item_id = character(),
+      est = numeric(),
+      n_ratings = integer(),
+      modal_n = integer(),
+      modal_prop = numeric(),
+      modal_stage = numeric(),
+      modal_label = character(),
+      modal_stages = character(),
+      modal_labels = character(),
+      tie = logical()
+    ))
+  }
+
+  modes <- apply(rating_mat, 1L, .modal_stages_idm, simplify = FALSE)
+  n_ratings <- rowSums(is.finite(rating_mat))
+  modal_n <- vapply(seq_along(modes), function(i) {
+    if (length(modes[[i]]) == 0) {
+      return(NA_integer_)
+    }
+    sum(rating_mat[i, ] == modes[[i]][1], na.rm = TRUE)
+  }, integer(1))
+  modal_stage <- vapply(modes, function(x) {
+    if (length(x) == 1) {
+      return(x)
+    }
+    NA_real_
+  }, numeric(1))
+  modal_stages <- vapply(modes, function(x) {
+    if (length(x) == 0) {
+      return(NA_character_)
+    }
+    paste(x, collapse = "/")
+  }, character(1))
+  modal_labels <- vapply(modes, function(x) {
+    if (length(x) == 0) {
+      return(NA_character_)
+    }
+    paste(.rating_stage_labels_idm(x, rating_labels), collapse = "/")
+  }, character(1))
+
+  dplyr::bind_cols(
+    rating_wide$items,
+    tibble::tibble(
+      n_ratings = as.integer(n_ratings),
+      modal_n = modal_n,
+      modal_prop = ifelse(n_ratings == 0, NA_real_, modal_n / n_ratings),
+      modal_stage = modal_stage,
+      modal_label = .rating_stage_labels_idm(modal_stage, rating_labels),
+      modal_stages = modal_stages,
+      modal_labels = modal_labels,
+      tie = lengths(modes) > 1L
+    )
+  )
+}
+
+.cor_with_n_idm <- function(x, y) {
+  ok <- is.finite(x) & is.finite(y)
+  n <- sum(ok)
+  if (n < 2 || stats::sd(x[ok]) == 0 || stats::sd(y[ok]) == 0) {
+    return(c(n = n, cor = NA_real_))
+  }
+
+  c(n = n, cor = stats::cor(x[ok], y[ok]))
+}
+
+.make_rater_modal_correlations_idm <- function(rating_wide, modal_values) {
+  rating_mat <- as.matrix(rating_wide$ratings)
+  persons <- colnames(rating_mat)
+  if (length(persons) == 0) {
+    return(tibble::tibble(
+      person = character(),
+      n_items_modal_all = integer(),
+      cor_modal_all = numeric(),
+      n_items_modal_loo = integer(),
+      cor_modal_leave_one_out = numeric()
+    ))
+  }
+
+  purrr::map_dfr(seq_along(persons), function(j) {
+    rating <- rating_mat[, j]
+    cor_all <- .cor_with_n_idm(rating, modal_values$modal_stage)
+    modal_loo <- if (ncol(rating_mat) <= 1) {
+      rep(NA_real_, nrow(rating_mat))
+    } else {
+      apply(rating_mat[, -j, drop = FALSE], 1L, .strict_modal_stage_idm)
+    }
+    cor_loo <- .cor_with_n_idm(rating, modal_loo)
+
+    tibble::tibble(
+      person = persons[j],
+      n_items_modal_all = as.integer(cor_all["n"]),
+      cor_modal_all = unname(cor_all["cor"]),
+      n_items_modal_loo = as.integer(cor_loo["n"]),
+      cor_modal_leave_one_out = unname(cor_loo["cor"])
+    )
+  })
+}
+
+.empty_kappa_pairwise_idm <- function() {
+  tibble::tibble(
+    Coder1 = character(),
+    Coder2 = character(),
+    N = integer(),
+    kappa = numeric()
+  )
+}
+
+.make_pairwise_kappa_idm <- function(rating_wide) {
+  rating_dat <- rating_wide$ratings
+  if (ncol(rating_dat) < 2) {
+    return(.empty_kappa_pairwise_idm())
+  }
+
+  kap <- tryCatch(
+    meanKappa(rating_dat, weight.mean = FALSE),
+    error = function(e) NULL
+  )
+  if (is.null(kap) || is.null(kap$agree.pairwise) || nrow(kap$agree.pairwise) == 0) {
+    return(.empty_kappa_pairwise_idm())
+  }
+
+  tibble::as_tibble(kap$agree.pairwise)
+}
+
+.make_kappa_summary_idm <- function(kappa_pairwise) {
+  if (nrow(kappa_pairwise) == 0) {
+    return(tibble::tibble(
+      n_pairs = 0L,
+      mean_kappa = NA_real_,
+      sd_kappa = NA_real_,
+      mean_n_items = NA_real_
+    ))
+  }
+
+  vals <- kappa_pairwise$kappa[is.finite(kappa_pairwise$kappa)]
+  tibble::tibble(
+    n_pairs = length(vals),
+    mean_kappa = if (length(vals) == 0) NA_real_ else mean(vals),
+    sd_kappa = if (length(vals) < 2) NA_real_ else stats::sd(vals),
+    mean_n_items = mean(kappa_pairwise$N, na.rm = TRUE)
+  )
+}
+
+.make_rater_kappa_statistics_idm <- function(kappa_pairwise, persons) {
+  purrr::map_dfr(persons, function(person) {
+    idx <- kappa_pairwise$Coder1 == person | kappa_pairwise$Coder2 == person
+    person_kappa <- kappa_pairwise$kappa[idx]
+    person_kappa <- person_kappa[is.finite(person_kappa)]
+    person_n <- kappa_pairwise$N[idx]
+
+    tibble::tibble(
+      person = person,
+      n_pairs = length(person_kappa),
+      mean_kappa = if (length(person_kappa) == 0) NA_real_ else mean(person_kappa),
+      sd_kappa = if (length(person_kappa) < 2) NA_real_ else stats::sd(person_kappa),
+      mean_n_items = if (length(person_n) == 0) NA_real_ else mean(person_n, na.rm = TRUE)
+    )
+  })
+}
+
+.finite_or_na_idm <- function(x) {
+  if (is.null(x) || length(x) == 0) {
+    return(NA_real_)
+  }
+  x <- as.numeric(x[1])
+  if (is.finite(x)) {
+    return(x)
+  }
+
+  NA_real_
+}
+
+.complete_rating_data_idm <- function(rating_wide) {
+  rating_dat <- rating_wide$ratings
+  rating_dat[stats::complete.cases(rating_dat), , drop = FALSE]
+}
+
+.make_fleiss_kappa_idm <- function(rating_wide) {
+  complete_dat <- .complete_rating_data_idm(rating_wide)
+  out <- tibble::tibble(
+    method = "Fleiss",
+    n_items = nrow(complete_dat),
+    n_raters = ncol(rating_wide$ratings),
+    kappa = NA_real_,
+    statistic = NA_real_,
+    p_value = NA_real_
+  )
+  if (nrow(complete_dat) < 2 || ncol(complete_dat) < 2) {
+    return(out)
+  }
+
+  kap <- tryCatch(
+    suppressWarnings(irr::kappam.fleiss(complete_dat)),
+    error = function(e) NULL
+  )
+  if (is.null(kap)) {
+    return(out)
+  }
+
+  out$kappa <- .finite_or_na_idm(kap$value)
+  out$statistic <- .finite_or_na_idm(kap$statistic)
+  out$p_value <- .finite_or_na_idm(kap$p.value)
+  out
+}
+
+.empty_icc_statistics_idm <- function(n_items, n_raters) {
+  tibble::tibble(
+    type = c("agreement", "consistency"),
+    model = "twoway",
+    unit = "single",
+    n_items = n_items,
+    n_raters = n_raters,
+    icc_name = NA_character_,
+    icc = NA_real_,
+    f_value = NA_real_,
+    df1 = NA_real_,
+    df2 = NA_real_,
+    p_value = NA_real_,
+    conf_level = NA_real_,
+    lbound = NA_real_,
+    ubound = NA_real_
+  )
+}
+
+.make_icc_statistics_idm <- function(rating_wide) {
+  complete_dat <- .complete_rating_data_idm(rating_wide)
+  out <- .empty_icc_statistics_idm(
+    n_items = nrow(complete_dat),
+    n_raters = ncol(rating_wide$ratings)
+  )
+  if (nrow(complete_dat) < 2 || ncol(complete_dat) < 2) {
+    return(out)
+  }
+
+  for (icc_type in out$type) {
+    icc <- tryCatch(
+      suppressWarnings(irr::icc(
+        complete_dat,
+        model = "twoway",
+        type = icc_type,
+        unit = "single"
+      )),
+      error = function(e) NULL
+    )
+    if (is.null(icc)) {
+      next
+    }
+
+    idx <- out$type == icc_type
+    out$icc_name[idx] <- icc$icc.name
+    out$icc[idx] <- .finite_or_na_idm(icc$value)
+    out$f_value[idx] <- .finite_or_na_idm(icc$Fvalue)
+    out$df1[idx] <- .finite_or_na_idm(icc$df1)
+    out$df2[idx] <- .finite_or_na_idm(icc$df2)
+    out$p_value[idx] <- .finite_or_na_idm(icc$p.value)
+    out$conf_level[idx] <- .finite_or_na_idm(icc$conf.level)
+    out$lbound[idx] <- .finite_or_na_idm(icc$lbound)
+    out$ubound[idx] <- .finite_or_na_idm(icc$ubound)
+  }
+
+  out
+}
+
+.make_agreement_statistics_idm <- function(dat_sm, person_order, rating_labels) {
+  rating_wide <- .make_rating_wide_idm(
+    dat_sm = dat_sm,
+    person_order = person_order
+  )
+  modal_values <- .make_modal_values_idm(
+    rating_wide = rating_wide,
+    rating_labels = rating_labels
+  )
+  rater_modal_correlations <- .make_rater_modal_correlations_idm(
+    rating_wide = rating_wide,
+    modal_values = modal_values
+  )
+  kappa_pairwise <- .make_pairwise_kappa_idm(rating_wide)
+
+  list(
+    modal_values = modal_values,
+    rater_modal_correlations = rater_modal_correlations,
+    kappa_pairwise = kappa_pairwise,
+    kappa_summary = .make_kappa_summary_idm(kappa_pairwise),
+    rater_kappa_statistics = .make_rater_kappa_statistics_idm(
+      kappa_pairwise = kappa_pairwise,
+      persons = person_order
+    ),
+    fleiss_kappa = .make_fleiss_kappa_idm(rating_wide),
+    icc_statistics = .make_icc_statistics_idm(rating_wide)
+  )
+}
+
 .sanitize_cut_label_idm <- function(x) {
   out <- gsub("[^A-Za-z0-9]+", "_", as.character(x))
   out <- gsub("^_+|_+$", "", out)
@@ -620,6 +979,11 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     item_difficulties = item_difficulties,
     cut_values = as.numeric(cuts_summary[1, cut_names])
   )
+  agreement_statistics <- .make_agreement_statistics_idm(
+    dat_sm = dat_sm,
+    person_order = prepared$person_order,
+    rating_labels = encoded$rating_labels
+  )
 
   # 5. Prepare Long Data for Plotting
   iso_df <- dat_sm |>
@@ -634,6 +998,13 @@ computeCutsIDM <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     cuts_summary = cuts_summary,
     cut_statistics = cut_statistics,
     level_statistics = level_statistics,
+    modal_values = agreement_statistics$modal_values,
+    rater_modal_correlations = agreement_statistics$rater_modal_correlations,
+    kappa_pairwise = agreement_statistics$kappa_pairwise,
+    kappa_summary = agreement_statistics$kappa_summary,
+    rater_kappa_statistics = agreement_statistics$rater_kappa_statistics,
+    fleiss_kappa = agreement_statistics$fleiss_kappa,
+    icc_statistics = agreement_statistics$icc_statistics,
     plot_data = iso_df,
     boundaries = boundaries,
     cut_labels = cut_names,

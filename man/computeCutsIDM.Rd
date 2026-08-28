@@ -89,6 +89,10 @@ which is stored in \code{cut_positions_per_person}. These item positions can be 
 Cut score columns start with \code{cut}. Canonical numeric boundaries such as \code{1.5} and \code{2.5} are labelled as \code{cut12} and \code{cut23} for numeric ratings. With ordinal labels, labels such as \code{cut_1a_1b} are used. Non-canonical boundaries include the boundary value, for example \code{cut_1a_1b_bound1_3}.
 
 \code{cut_statistics} reports the mean, sample standard deviation, and standard error across raters for both item positions (\code{page_*}) and difficulty cuts (\code{diff_*}). Standard errors are computed as \eqn{SE = SD / \sqrt{m}}, where \eqn{m} is the number of finite rater-specific cuts. \code{cuts_summary} contains the mean difficulty cut per boundary. \code{level_statistics} uses these mean cuts as interval boundaries on the item difficulty scale, counts items in each interval, and reports the mean and sample standard deviation of item difficulties per level. Intervals are left-closed and right-open, except for the final interval, which is closed on both sides.
+
+The object also contains descriptive agreement diagnostics computed from the raw internal rating stages after the input has been normalized to the complete item-by-rater grid. These diagnostics do not enter the cut-score interpolation itself. \code{modal_values} reports the modal rating stage for each item. If several stages are tied for the highest frequency, \code{modal_stage} and \code{modal_label} are set to \code{NA}, while \code{modal_stages}, \code{modal_labels}, and \code{tie} retain the tie information. \code{rater_modal_correlations} correlates each rater's raw rating series with the item-wise modal values. It reports the correlation with the modal values based on all raters and, additionally, with leave-one-rater-out modal values so that the evaluated rater does not help define the criterion. Items without a unique modal value are omitted from the corresponding correlation.
+
+Pairwise Cohen's kappa values are computed with \code{\link{meanKappa}} on the complete wide rating matrix. \code{kappa_summary} gives the mean and sample standard deviation across finite pairwise kappa values, and \code{rater_kappa_statistics} gives the same information per rater across all pairings involving that rater. \code{fleiss_kappa} and \code{icc_statistics} are computed on complete item rows, because these procedures require all raters to have a rating for the same item. They therefore summarize the rating round represented by the data supplied to \code{computeCutsIDM()}; if the third IDM round should be analyzed, the input should contain that final round.
 }
 \value{
 A \code{cutsIDM} object, i.e. a named list with:
@@ -98,6 +102,13 @@ A \code{cutsIDM} object, i.e. a named list with:
   \item \code{cuts_summary}: mean difficulty-scale cuts across raters.
   \item \code{cut_statistics}: mean, standard deviation, and standard error for item-position and difficulty-scale cuts.
   \item \code{level_statistics}: item difficulty intervals implied by \code{cuts_summary}, with item counts and item difficulty summaries.
+  \item \code{modal_values}: item-wise modal raw rating stages and labels, including tie indicators.
+  \item \code{rater_modal_correlations}: correlations of each rater's raw ratings with all-rater and leave-one-rater-out modal values.
+  \item \code{kappa_pairwise}: pairwise Cohen's kappa values returned by \code{\link{meanKappa}}.
+  \item \code{kappa_summary}: mean and sample standard deviation of finite pairwise Cohen's kappa values.
+  \item \code{rater_kappa_statistics}: per-rater mean and sample standard deviation of pairwise Cohen's kappa values.
+  \item \code{fleiss_kappa}: Fleiss kappa based on complete item rows.
+  \item \code{icc_statistics}: two-way single-measure ICC estimates for agreement and consistency based on complete item rows.
   \item \code{plot_data}: long-format item identifiers, raw, smoothed, monotonized, and residual rating data used by \code{plotCutsIDM()}.
   \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{item_id_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
 }
@@ -116,6 +127,10 @@ cuts$cuts_per_person
 cuts$cuts_summary
 cuts$cut_statistics
 cuts$level_statistics
+cuts$modal_values
+cuts$rater_kappa_statistics
+cuts$fleiss_kappa
+cuts$icc_statistics
 summary(cuts)
 
 ## Long-format input with ordinal rating labels
@@ -139,5 +154,6 @@ ord_cuts <- computeCutsIDM(
 )
 
 ord_cuts$cuts_summary
+ord_cuts$modal_values
 names(ord_cuts$cuts_per_person)
 }

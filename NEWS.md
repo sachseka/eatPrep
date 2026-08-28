@@ -6,6 +6,7 @@
 * `computeCutsIDM()` gains `item_id_col` for explicit item identifiers, especially useful when long-format data contain several items with the same difficulty estimate.
 * `computeCutsIDM()` supports ordinal rating labels via `rating_levels`, for example `c("1a", "1b", "2", "3", "4")`.
 * `summary()` now provides a compact S3 summary for objects returned by `computeCutsIDM()`.
+* `computeCutsIDM()` now reports IDM agreement diagnostics: item-wise modal values, rater-modal correlations, pairwise Cohen kappa summaries, Fleiss kappa, and ICC agreement/consistency.
 
 ## improvements
 

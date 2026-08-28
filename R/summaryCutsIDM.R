@@ -103,7 +103,13 @@ summary.cutsIDM <- function(object, digits = NULL, ...) {
     boundaries = .make_boundary_summary_idm(object),
     cuts_summary = object$cuts_summary,
     cut_statistics = object$cut_statistics,
-    level_statistics = object$level_statistics
+    level_statistics = object$level_statistics,
+    modal_values = object$modal_values,
+    rater_modal_correlations = object$rater_modal_correlations,
+    kappa_summary = object$kappa_summary,
+    rater_kappa_statistics = object$rater_kappa_statistics,
+    fleiss_kappa = object$fleiss_kappa,
+    icc_statistics = object$icc_statistics
   )
   class(out) <- c("summary.cutsIDM", "list")
   attr(out, "digits") <- digits
@@ -129,6 +135,18 @@ print.summary.cutsIDM <- function(x, digits = NULL, ...) {
   .print_idm_summary_table("Cut statistics", x$cut_statistics,
                            digits = digits, ...)
   .print_idm_summary_table("Level statistics", x$level_statistics,
+                           digits = digits, ...)
+  .print_idm_summary_table("Modal values per item", x$modal_values,
+                           digits = digits, ...)
+  .print_idm_summary_table("Rater correlations with modal values",
+                           x$rater_modal_correlations, digits = digits, ...)
+  .print_idm_summary_table("Pairwise Cohen kappa summary", x$kappa_summary,
+                           digits = digits, ...)
+  .print_idm_summary_table("Rater pairwise Cohen kappa", x$rater_kappa_statistics,
+                           digits = digits, ...)
+  .print_idm_summary_table("Fleiss kappa", x$fleiss_kappa,
+                           digits = digits, ...)
+  .print_idm_summary_table("ICC agreement and consistency", x$icc_statistics,
                            digits = digits, ...)
 
   invisible(x)

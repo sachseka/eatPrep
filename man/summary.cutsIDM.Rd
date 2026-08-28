@@ -23,11 +23,15 @@ The summary method does not recompute cut scores. It reorganizes the main result
   \item \code{cuts_summary} contains the mean cut score on the item difficulty scale.
   \item \code{cut_statistics} contains mean, sample standard deviation, and standard error for interpolated item positions and difficulty-scale cuts.
   \item \code{level_statistics} describes the item-difficulty intervals implied by the mean cuts.
+  \item \code{modal_values} contains item-wise modal raw rating stages and labels.
+  \item \code{rater_modal_correlations} reports correlations between each rater's raw rating series and the item-wise modal values, with all-rater and leave-one-rater-out modal criteria.
+  \item \code{kappa_summary} and \code{rater_kappa_statistics} summarize finite pairwise Cohen's kappa values overall and per rater.
+  \item \code{fleiss_kappa} and \code{icc_statistics} provide multi-rater agreement diagnostics based on complete item rows.
 }
 The returned object is a regular list with class \code{summary.cutsIDM}, so all component tables can still be extracted programmatically.
 }
 \value{
-A list of class \code{summary.cutsIDM} with the components \code{settings}, \code{boundaries}, \code{cuts_summary}, \code{cut_statistics}, and \code{level_statistics}. Printing the object returns it invisibly.
+A list of class \code{summary.cutsIDM} with the components \code{settings}, \code{boundaries}, \code{cuts_summary}, \code{cut_statistics}, \code{level_statistics}, \code{modal_values}, \code{rater_modal_correlations}, \code{kappa_summary}, \code{rater_kappa_statistics}, \code{fleiss_kappa}, and \code{icc_statistics}. Printing the object returns it invisibly.
 }
 \examples{
 dat <- data.frame(
@@ -42,4 +46,6 @@ summary(cuts)
 sum_cuts <- summary(cuts)
 sum_cuts$boundaries
 sum_cuts$level_statistics
+sum_cuts$rater_kappa_statistics
+sum_cuts$icc_statistics
 }

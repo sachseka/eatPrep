@@ -75,6 +75,7 @@ test_that("computeCutsIDM supports long-format input with rater names", {
 
 test_that("computeCutsIDM treats omitted long-format cells as missing ratings", {
   wide_dat <- data.frame(
+    item = paste0("item_", 1:8),
     est = seq(-2, 2, length.out = 8),
     Rater1 = c(1, 1, 2, NA, 3, 4, 4, 5),
     Rater2 = c(1, 2, 2, 3, 3, 4, 5, 5)
@@ -87,9 +88,10 @@ test_that("computeCutsIDM treats omitted long-format cells as missing ratings", 
   ) |>
     dplyr::filter(!(rater == "Rater1" & is.na(rating)))
 
-  wide_res <- computeCutsIDM(wide_dat)
+  wide_res <- computeCutsIDM(wide_dat, item_id_col = "item")
   long_res <- computeCutsIDM(
     long_dat,
+    item_id_col = "item",
     rater_id_col = "rater",
     rating_col = "rating"
   )
@@ -99,6 +101,13 @@ test_that("computeCutsIDM treats omitted long-format cells as missing ratings", 
   expect_equal(long_res$cuts_summary, wide_res$cuts_summary)
   expect_equal(long_res$cut_statistics, wide_res$cut_statistics)
   expect_equal(long_res$level_statistics, wide_res$level_statistics)
+  expect_equal(long_res$modal_values, wide_res$modal_values)
+  expect_equal(long_res$rater_modal_correlations, wide_res$rater_modal_correlations)
+  expect_equal(long_res$kappa_pairwise, wide_res$kappa_pairwise)
+  expect_equal(long_res$kappa_summary, wide_res$kappa_summary)
+  expect_equal(long_res$rater_kappa_statistics, wide_res$rater_kappa_statistics)
+  expect_equal(long_res$fleiss_kappa, wide_res$fleiss_kappa)
+  expect_equal(long_res$icc_statistics, wide_res$icc_statistics)
   expect_equal(nrow(long_res$plot_data), nrow(wide_res$plot_data))
   expect_true(any(is.na(long_res$plot_data$stage_raw)))
 })
@@ -185,6 +194,9 @@ test_that("computeCutsIDM maps ordinal rating labels with explicit levels", {
   )
   expect_type(res$plot_data$stage_raw, "double")
   expect_equal(stats::na.omit(unique(res$plot_data$stage_label)), c("1a", "1b", "2", "3", "4"))
+  expect_equal(res$modal_values$modal_stage, 1:5)
+  expect_equal(res$modal_values$modal_label, c("1a", "1b", "2", "3", "4"))
+  expect_equal(res$modal_values$modal_labels, c("1a", "1b", "2", "3", "4"))
 })
 
 test_that("computeCutsIDM includes non-canonical boundaries in cut labels", {
@@ -254,6 +266,91 @@ test_that("computeCutsIDM returns cut and level statistics", {
   expect_true(all(is.na(res$level_statistics$sd_itemdiff)))
 })
 
+test_that("computeCutsIDM returns modal and agreement statistics", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 4),
+    Rater1 = c(1, 1, 2, 3),
+    Rater2 = c(1, 2, 2, 3),
+    Rater3 = c(1, 3, 2, 4)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = c(1.5, 2.5))
+
+  expect_equal(
+    names(res$modal_values),
+    c(
+      "item_position", "item_id", "est", "n_ratings", "modal_n",
+      "modal_prop", "modal_stage", "modal_label", "modal_stages",
+      "modal_labels", "tie"
+    )
+  )
+  expect_equal(res$modal_values$n_ratings, rep(3L, 4))
+  expect_equal(res$modal_values$modal_n, c(3L, 1L, 3L, 2L))
+  expect_equal(res$modal_values$modal_prop, c(1, 1 / 3, 1, 2 / 3))
+  expect_equal(res$modal_values$modal_stage, c(1, NA, 2, 3))
+  expect_equal(res$modal_values$modal_stages, c("1", "1/2/3", "2", "3"))
+  expect_equal(res$modal_values$tie, c(FALSE, TRUE, FALSE, FALSE))
+
+  expect_equal(
+    names(res$rater_modal_correlations),
+    c(
+      "person", "n_items_modal_all", "cor_modal_all",
+      "n_items_modal_loo", "cor_modal_leave_one_out"
+    )
+  )
+  expect_equal(res$rater_modal_correlations$person, c("Rater1", "Rater2", "Rater3"))
+  expect_equal(res$rater_modal_correlations$n_items_modal_all, rep(3L, 3))
+  expect_equal(res$rater_modal_correlations$n_items_modal_loo, c(2L, 2L, 3L))
+  expect_true(all(is.finite(res$rater_modal_correlations$cor_modal_all)))
+
+  expect_equal(names(res$kappa_pairwise), c("Coder1", "Coder2", "N", "kappa"))
+  expect_equal(nrow(res$kappa_pairwise), 3L)
+  expect_equal(res$kappa_summary$n_pairs, 3L)
+  expect_equal(res$kappa_summary$mean_kappa, mean(res$kappa_pairwise$kappa))
+  expect_equal(res$kappa_summary$sd_kappa, stats::sd(res$kappa_pairwise$kappa))
+  expect_equal(res$rater_kappa_statistics$person, c("Rater1", "Rater2", "Rater3"))
+  expect_equal(res$rater_kappa_statistics$n_pairs, rep(2L, 3))
+
+  expect_equal(
+    names(res$fleiss_kappa),
+    c("method", "n_items", "n_raters", "kappa", "statistic", "p_value")
+  )
+  expect_equal(res$fleiss_kappa$n_items, 4L)
+  expect_equal(res$fleiss_kappa$n_raters, 3L)
+  expect_true(is.finite(res$fleiss_kappa$kappa))
+
+  expect_equal(
+    names(res$icc_statistics),
+    c(
+      "type", "model", "unit", "n_items", "n_raters", "icc_name", "icc",
+      "f_value", "df1", "df2", "p_value", "conf_level", "lbound", "ubound"
+    )
+  )
+  expect_equal(res$icc_statistics$type, c("agreement", "consistency"))
+  expect_equal(res$icc_statistics$n_items, rep(4L, 2))
+  expect_equal(res$icc_statistics$n_raters, rep(3L, 2))
+})
+
+test_that("computeCutsIDM handles agreement statistics with one rater", {
+  dat <- data.frame(
+    est = seq(-2, 2, length.out = 4),
+    Rater1 = c(1, 1, 2, 3)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = c(1.5, 2.5))
+
+  expect_equal(res$modal_values$modal_stage, c(1, 1, 2, 3))
+  expect_equal(nrow(res$kappa_pairwise), 0L)
+  expect_equal(res$kappa_summary$n_pairs, 0L)
+  expect_true(is.na(res$kappa_summary$mean_kappa))
+  expect_equal(res$rater_kappa_statistics$n_pairs, 0L)
+  expect_true(is.na(res$rater_kappa_statistics$mean_kappa))
+  expect_equal(res$rater_modal_correlations$n_items_modal_loo, 0L)
+  expect_true(is.na(res$rater_modal_correlations$cor_modal_leave_one_out))
+  expect_true(is.na(res$fleiss_kappa$kappa))
+  expect_true(all(is.na(res$icc_statistics$icc)))
+})
+
 test_that("summary.cutsIDM returns and prints IDM summary tables", {
   dat <- data.frame(
     est = seq(-2, 2, length.out = 5),
@@ -274,8 +371,17 @@ test_that("summary.cutsIDM returns and prints IDM summary tables", {
   expect_equal(sum_res$cuts_summary, res$cuts_summary)
   expect_equal(sum_res$cut_statistics, res$cut_statistics)
   expect_equal(sum_res$level_statistics, res$level_statistics)
+  expect_equal(sum_res$modal_values, res$modal_values)
+  expect_equal(sum_res$rater_modal_correlations, res$rater_modal_correlations)
+  expect_equal(sum_res$kappa_summary, res$kappa_summary)
+  expect_equal(sum_res$rater_kappa_statistics, res$rater_kappa_statistics)
+  expect_equal(sum_res$fleiss_kappa, res$fleiss_kappa)
+  expect_equal(sum_res$icc_statistics, res$icc_statistics)
   expect_true(any(grepl("IDM cut-score summary", printed, fixed = TRUE)))
   expect_true(any(grepl("Mean cuts on difficulty scale", printed, fixed = TRUE)))
+  expect_true(any(grepl("Modal values per item", printed, fixed = TRUE)))
+  expect_true(any(grepl("Fleiss kappa", printed, fixed = TRUE)))
+  expect_true(any(grepl("ICC agreement and consistency", printed, fixed = TRUE)))
 })
 
 test_that("computeCutsIDM distinguishes drop and smooth missing handling", {
