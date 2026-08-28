@@ -9,29 +9,151 @@ computeCutsIDM(
   dat,
   boundaries = c(1.5, 2.5, 3.5, 4.5),
   est_col = "est",
+  item_id_col = NULL,
   rater_cols = NULL,
-  rater_pattern = "Rater"
+  rater_pattern = "Rater",
+  rater_id_col = NULL,
+  rating_col = NULL,
+  input_format = c("auto", "long", "wide"),
+  rating_levels = NULL,
+  missing = c("drop", "smooth", "error"),
+  cut_labels = NULL
 )
 }
 \arguments{
-  \item{dat}{A data frame containing item difficulty estimates and rater columns.}
-  \item{boundaries}{Numeric vector. The number of cut scores to calculate. For example, \code{c(1.5, 2.5, 3.5)} will calculate 3 cuts at the specified steps for 4 performance levels.}
+  \item{dat}{A data frame containing item difficulty estimates and rater ratings. Long and wide input formats are supported.}
+  \item{boundaries}{Numeric vector. The cut boundaries on the internal ordinal rating scale. For example, \code{c(1.5, 2.5, 3.5)} calculates cuts between four adjacent performance levels.}
   \item{est_col}{Character scalar. Name of the column containing item difficulty estimates. Defaults to \code{"est"}.}
-  \item{rater_cols}{Character vector. Names of the rater columns. If \code{NULL}, rater columns are selected with \code{rater_pattern}.}
-  \item{rater_pattern}{Character scalar. Pattern used to find rater columns when \code{rater_cols = NULL}. Defaults to \code{"Rater"}.}
+  \item{item_id_col}{Optional character scalar. Name of an item identifier column. In long-format input this is used to complete the full item-by-rater grid before smoothing; omitted item-rater combinations are treated as missing ratings. If \code{NULL}, \code{est_col} is used as the item identity in long-format input. Supply \code{item_id_col} when different items can share the same difficulty estimate.}
+  \item{rater_cols}{Character vector. Names of the rater rating columns for wide-format input. If \code{NULL}, rater columns are selected with \code{rater_pattern}.}
+  \item{rater_pattern}{Character scalar. Pattern used to find rater rating columns when \code{rater_cols = NULL} in wide-format input. Defaults to \code{"Rater"}.}
+  \item{rater_id_col}{Character scalar. Name of the rater identifier column for long-format input. Rater identifiers may be names or IDs.}
+  \item{rating_col}{Character scalar. Name of the rating column for long-format input. Values may be numeric or ordinal labels when \code{rating_levels} is supplied.}
+  \item{input_format}{Character scalar. One of \code{"auto"}, \code{"long"}, or \code{"wide"}. In \code{"auto"} mode, the function uses long format when both \code{rater_id_col} and \code{rating_col} are supplied, otherwise wide format.}
+  \item{rating_levels}{Optional atomic vector defining the ordered rating scale, for example \code{c("1a", "1b", "2", "3", "4")}. Non-numeric ratings require this argument. If \code{boundaries} is not supplied, adjacent boundaries are derived from these levels.}
+  \item{missing}{Character scalar. \code{"drop"} excludes missing ratings from smoothing, isotonic regression, and cut computation. \code{"smooth"} keeps legacy-like smoothing with \code{na.rm = TRUE}. \code{"error"} rejects missing ratings.}
+  \item{cut_labels}{Optional character vector with one label per boundary. Labels must be unique and start with \code{"cut"} so that \code{plotCutsIDM()} remains compatible.}
 }
 \details{
-The function dynamically adjusts the smoothing padding and plot scales based on the length of \code{boundaries}. If the length of the boundaries vector is k, the function assumes there are k + 1 performance levels.
+The function supports two input formats. In long format, each row contains one item-rater combination and the columns identified by \code{est_col}, \code{rater_id_col}, and \code{rating_col}. In wide format, each row contains one item and one or more rater rating columns. Wide-format input keeps the previous default behavior.
 
-The function processes each rater column by:
+Long-format input is completed internally to the full item-by-rater grid before smoothing. Thus an omitted item-rater row is interpreted like an explicit missing rating, not like a removed item. If \code{item_id_col} is supplied, it defines the item identity used for this completion. If it is not supplied, \code{est_col} is used as a fallback item identity; this requires at most one rating per rater and difficulty value. When multiple distinct items may have identical difficulty estimates, \code{item_id_col} should be supplied.
+
+All input is normalized internally to a long representation with item difficulty, rater identifier, and numeric rating stage. If ratings are supplied as labels, \code{rating_levels} defines their ordinal order and the labels are mapped to \code{1, 2, ..., k} for computation.
+
+The smoothing padding and plot scale are based on the observed rating scale and the supplied boundaries. Missing ratings are handled according to \code{missing}. The default \code{"drop"} is conservative: missing ratings do not create smoothed values. The \code{"smooth"} option uses the legacy-like moving average behavior where missing values inside the smoothing window are ignored.
+
+The function processes each rater by:
 \enumerate{
   \item Sorting items by difficulty (\code{est_col}).
-  \item Applying a symmetric moving average (order = 1) with boundary padding (1 at the start, k+1 at the end).
+  \item Applying a symmetric moving average (order = 1) with boundary padding at the minimum and maximum rating stage.
   \item Applying isotonic regression (\code{isoreg}) to ensure the mapping of difficulty to level is non-decreasing.
-  \item Computing the cut score as the item difficulty where the monotonized function first reaches or exceeds the specified boundary.
+  \item Computing the cut score as the linearly interpolated item difficulty where the monotonized function crosses the specified boundary.
 }
+
+More formally, for a rater let \eqn{x_i} denote the item difficulty estimate and \eqn{r_i} the rating stage after conversion to the internal numeric scale. Items are first ordered such that \eqn{x_1 \leq \ldots \leq x_n}. If ordinal labels are used, \code{rating_levels} defines the mapping to this internal scale; for example \code{c("1a", "1b", "2", "3", "4")} is mapped to \eqn{1, 2, 3, 4, 5}. Boundaries are specified on this internal scale, so \code{2.5} is the boundary between the second and third ordered rating level.
+
+The smoothed value \eqn{z_i} is a symmetric moving average of order 1. Without missing values this is
+\deqn{
+z_i = \frac{r_{i-1} + r_i + r_{i+1}}{3},
+}{
+z_i = (r_{i-1} + r_i + r_{i+1}) / 3,
+}
+using padding values \eqn{r_0 = L_{\min}} and \eqn{r_{n+1} = L_{\max}} at the lower and upper end of the ordered series. \eqn{L_{\min}} and \eqn{L_{\max}} are derived from the observed rating scale and the supplied boundaries. With \code{missing = "drop"}, smoothing and the following isotonic regression are computed only on finite ratings; missing rows remain missing in the smoothed and monotonized series. With \code{missing = "smooth"}, missing values inside the moving-average window are ignored.
+
+The monotonized series \eqn{\hat y_i} is the isotonic least-squares fit
+\deqn{
+\hat y = \arg\min_{y_1 \leq \ldots \leq y_n} \sum_i (z_i - y_i)^2,
+}{
+yhat = argmin_{y_1 <= ... <= y_n} sum_i (z_i - y_i)^2,
+}
+computed with \code{\link[stats]{isoreg}} on finite smoothed values. This step forces the estimated relationship between item difficulty and rating stage to be non-decreasing.
+
+For each boundary \eqn{b}, the function finds the first ordered point \eqn{i} with \eqn{\hat y_i \geq b}. If no such point exists, the cut is \code{NA}. If \eqn{i = 1}, the cut is the first item difficulty. Otherwise the cut is linearly interpolated between the two surrounding points:
+\deqn{
+\lambda = \frac{b - \hat y_{i-1}}{\hat y_i - \hat y_{i-1}},
+\quad
+c_b = x_{i-1} + \lambda (x_i - x_{i-1}).
+}{
+lambda = (b - yhat_{i-1}) / (yhat_i - yhat_{i-1});
+c_b = x_{i-1} + lambda * (x_i - x_{i-1}).
+}
+\code{cuts_per_person} stores \eqn{c_b}, i.e. the cut on the item difficulty scale. The same interpolation factor is applied to the ordered item positions \eqn{p_i} to obtain
+\deqn{
+q_b = p_{i-1} + \lambda (p_i - p_{i-1}),
+}{
+q_b = p_{i-1} + lambda * (p_i - p_{i-1}),
+}
+which is stored in \code{cut_positions_per_person}. These item positions can be non-integer because they represent the crossing point between two neighboring items.
+
+Cut score columns start with \code{cut}. Canonical numeric boundaries such as \code{1.5} and \code{2.5} are labelled as \code{cut12} and \code{cut23} for numeric ratings. With ordinal labels, labels such as \code{cut_1a_1b} are used. Non-canonical boundaries include the boundary value, for example \code{cut_1a_1b_bound1_3}.
+
+\code{cut_statistics} reports the mean, sample standard deviation, and standard error across raters for both item positions (\code{page_*}) and difficulty cuts (\code{diff_*}). Standard errors are computed as \eqn{SE = SD / \sqrt{m}}, where \eqn{m} is the number of finite rater-specific cuts. \code{cuts_summary} contains the mean difficulty cut per boundary. \code{level_statistics} uses these mean cuts as interval boundaries on the item difficulty scale, counts items in each interval, and reports the mean and sample standard deviation of item difficulties per level. Intervals are left-closed and right-open, except for the final interval, which is closed on both sides.
+
+The object also contains descriptive agreement diagnostics computed from the raw internal rating stages after the input has been normalized to the complete item-by-rater grid. These diagnostics do not enter the cut-score interpolation itself. \code{modal_values} reports the modal rating stage for each item. If several stages are tied for the highest frequency, \code{modal_stage} and \code{modal_label} are set to \code{NA}, while \code{modal_stages}, \code{modal_labels}, and \code{tie} retain the tie information. \code{rater_modal_correlations} correlates each rater's raw rating series with the item-wise modal values. It reports the correlation with the modal values based on all raters and, additionally, with leave-one-rater-out modal values so that the evaluated rater does not help define the criterion. Items without a unique modal value are omitted from the corresponding correlation.
+
+Pairwise Cohen's kappa values are computed with \code{\link{meanKappa}} on the complete wide rating matrix. \code{kappa_summary} gives the mean and sample standard deviation across finite pairwise kappa values, and \code{rater_kappa_statistics} gives the same information per rater across all pairings involving that rater. \code{fleiss_kappa} and \code{icc_statistics} are computed on complete item rows, because these procedures require all raters to have a rating for the same item. They therefore summarize the rating round represented by the data supplied to \code{computeCutsIDM()}; if the third IDM round should be analyzed, the input should contain that final round.
 }
 \value{
-A list containing \code{cuts_per_person}, \code{cuts_summary}, \code{plot_data}, \code{boundaries}, and \code{max_val}.
+A \code{cutsIDM} object, i.e. a named list with:
+\itemize{
+  \item \code{cuts_per_person}: one row per rater and one difficulty-scale cut column per boundary.
+  \item \code{cut_positions_per_person}: one row per rater and one interpolated item-position column per boundary.
+  \item \code{cuts_summary}: mean difficulty-scale cuts across raters.
+  \item \code{cut_statistics}: mean, standard deviation, and standard error for item-position and difficulty-scale cuts.
+  \item \code{level_statistics}: item difficulty intervals implied by \code{cuts_summary}, with item counts and item difficulty summaries.
+  \item \code{modal_values}: item-wise modal raw rating stages and labels, including tie indicators.
+  \item \code{rater_modal_correlations}: correlations of each rater's raw ratings with all-rater and leave-one-rater-out modal values.
+  \item \code{kappa_pairwise}: pairwise Cohen's kappa values returned by \code{\link{meanKappa}}.
+  \item \code{kappa_summary}: mean and sample standard deviation of finite pairwise Cohen's kappa values.
+  \item \code{rater_kappa_statistics}: per-rater mean and sample standard deviation of pairwise Cohen's kappa values.
+  \item \code{fleiss_kappa}: Fleiss kappa based on complete item rows.
+  \item \code{icc_statistics}: two-way single-measure ICC estimates for agreement and consistency based on complete item rows.
+  \item \code{plot_data}: long-format item identifiers, raw, smoothed, monotonized, and residual rating data used by \code{plotCutsIDM()}.
+  \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{item_id_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
 }
-\author{Karoline Sachse}
+\code{summary()} can be used to print the main cut score, boundary, and level-statistic tables in a compact form.
+}
+\examples{
+## Wide-format input with numeric rating stages
+dat <- data.frame(
+  est = seq(100, 800, by = 100),
+  Rater1 = c(1, 1, 2, 2, 3, 3, 4, 5),
+  Rater2 = c(1, 2, 2, 3, 3, 4, 4, 5)
+)
+
+cuts <- computeCutsIDM(dat, boundaries = c(1.5, 2.5, 3.5))
+cuts$cuts_per_person
+cuts$cuts_summary
+cuts$cut_statistics
+cuts$level_statistics
+cuts$modal_values
+cuts$rater_kappa_statistics
+cuts$fleiss_kappa
+cuts$icc_statistics
+summary(cuts)
+
+## Long-format input with ordinal rating labels
+long_dat <- data.frame(
+  item = rep(paste0("item_", 1:5), 2),
+  theta = rep(seq(100, 500, by = 100), 2),
+  rater = rep(c("Meyer", "Schmidt"), each = 5),
+  rating = c(
+    "1a", "1b", "2", "3", "4",
+    "1a", "1b", "2", "3", "4"
+  )
+)
+
+ord_cuts <- computeCutsIDM(
+  long_dat,
+  item_id_col = "item",
+  est_col = "theta",
+  rater_id_col = "rater",
+  rating_col = "rating",
+  rating_levels = c("1a", "1b", "2", "3", "4")
+)
+
+ord_cuts$cuts_summary
+ord_cuts$modal_values
+names(ord_cuts$cuts_per_person)
+}
