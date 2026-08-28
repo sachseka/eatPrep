@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -216,13 +216,15 @@ pseudo raters.</td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="#idm-cut-scores">computeCutsIDM()</a></td>
-<td align="left">computes cut scores for Item Descriptor Matching based
-on monotonized moving averages.</td>
+<td align="left">computes cut scores, modal values, and agreement
+diagnostics for Item Descriptor Matching based on monotonized moving
+averages.</td>
 </tr>
 <tr class="even">
 <td align="left"><a href="#idm-cut-scores">plotCutsIDM()</a></td>
 <td align="left">plots the raw ratings, moving averages, monotonized
-curves and cut scores from <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code>.</td>
+curves, optional labelled aggregate or residual panels, and cut scores
+from <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code>.</td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="#visual-subset-recoding">visualSubsetRecode()</a></td>
@@ -1065,7 +1067,7 @@ create the data frame <code>dat</code> for <code><a href="../reference/mnrCoding
 <span><span class="co">#&gt; 6 booklet3               3   31</span></span>
 <span><span class="co">#&gt; start recoding (item-wise)</span></span>
 <span><span class="co">#&gt; done</span></span>
-<span><span class="co">#&gt; elapsed time: 0.1 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; elapsed time: 0.0 secs</span></span></code></pre></div>
 <p>Type <code><a href="../reference/mnrCoding.html">?mnrCoding</a></code> into your console to learn more.</p>
 </div>
 </div>
@@ -1135,7 +1137,7 @@ the final data preparation step.</p>
 <span>    recodeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeMnr <span class="op">=</span> <span class="cn">TRUE</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
 <span>    aggregateData <span class="op">=</span> <span class="cn">TRUE</span>, scoreData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    writeSpss <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting automateDataPreparation 2026-07-01 13:37:38.377963</span></span>
+<span><span class="co">#&gt; Starting automateDataPreparation 2026-08-28 08:30:19.81697</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Check data...</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1211,7 +1213,7 @@ the final data preparation step.</p>
 <span><span class="co">#&gt; No SPSS-File has been written.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Missings are UNcollapsed.</span></span>
-<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-07-01 13:37:38.646217</span></span></code></pre></div>
+<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-08-28 08:30:20.070636</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-diagnostics-and-rater-tools">Additional Diagnostics and Rater Tools<a class="anchor" aria-label="anchor" href="#additional-diagnostics-and-rater-tools"></a>
@@ -1326,28 +1328,263 @@ stay with the same pseudo rater where possible.</p>
 <h3 id="idm-cut-scores">IDM Cut Scores<a class="anchor" aria-label="anchor" href="#idm-cut-scores"></a>
 </h3>
 <p><code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> calculates cut scores for Item
-Descriptor Matching (IDM). The data set must contain item difficulty
-estimates and one or more numeric rater columns. The
-<code>boundaries</code> argument determines the requested cut scores,
-for example four boundaries for five performance levels.</p>
+Descriptor Matching (IDM). The preferred input is a long-format data set
+with item identifiers, item difficulty estimates, a rater identifier,
+and one rating column. Rater identifiers may be names or IDs. Ratings
+may be numeric, or they may be ordinal labels when their order is
+supplied via <code>rating_levels</code>. The previous wide-format input
+with one rating column per rater is still supported.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">idmDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
-<span>  Rater1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  Rater2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span>  item <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"item_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Meyer"</span>, <span class="st">"Schmidt"</span>, <span class="st">"Tran"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
+<span>  rating <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"1a"</span>, <span class="st">"1a"</span>, <span class="st">"1b"</span>, <span class="st">"2"</span>,  <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"4"</span>,</span>
+<span>    <span class="st">"1a"</span>, <span class="st">"1b"</span>, <span class="st">"1b"</span>, <span class="st">"2"</span>,  <span class="st">"3"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"4"</span>,</span>
+<span>    <span class="st">"1a"</span>, <span class="st">"1a"</span>, <span class="st">"1b"</span>, <span class="st">"1b"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"3"</span>, <span class="st">"4"</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cuts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDM.html">computeCutsIDM</a></span><span class="op">(</span><span class="va">idmDat</span><span class="op">)</span></span>
+<span><span class="va">cuts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDM.html">computeCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">idmDat</span>,</span>
+<span>  item_id_col <span class="op">=</span> <span class="st">"item"</span>,</span>
+<span>  rater_id_col <span class="op">=</span> <span class="st">"rater"</span>,</span>
+<span>  rating_col <span class="op">=</span> <span class="st">"rating"</span>,</span>
+<span>  rating_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1a"</span>, <span class="st">"1b"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span><span class="va">cuts</span><span class="op">$</span><span class="va">cuts_summary</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
-<span><span class="co">#&gt;   cut12     cut23 cut34 cut45</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> -<span style="color: #BB0000;">1.14</span> -<span style="color: #BB0000;">1.11</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-16</span> 0.857  1.71</span></span></code></pre></div>
+<span><span class="co">#&gt;   cut_1a_1b cut_1b_2 cut_2_3 cut_3_4</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     -<span style="color: #BB0000;">1.38</span>   -<span style="color: #BB0000;">0.429</span>   0.429    1.38</span></span>
+<span><span class="va">cuts</span><span class="op">$</span><span class="va">cut_statistics</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 9</span></span></span>
+<span><span class="co">#&gt;   statistic page_cut_1a_1b page_cut_1b_2 page_cut_2_3 page_cut_3_4</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Mean               2.08          3.75         5.25         6.92 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> SD                 0.520         0.5          0.5          0.520</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> SE                 0.300         0.289        0.289        0.300</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: diff_cut_1a_1b &lt;dbl&gt;, diff_cut_1b_2 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   diff_cut_2_3 &lt;dbl&gt;, diff_cut_3_4 &lt;dbl&gt;</span></span></span>
+<span><span class="va">cuts</span><span class="op">$</span><span class="va">level_statistics</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 5</span></span></span>
+<span><span class="co">#&gt;   level interval      n_items mean_itemdiff sd_itemdiff</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 [-2,-1.38)          2     -<span style="color: #BB0000;">1.71</span><span style="color: #949494;">e</span>+ 0       0.404</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 [-1.38,-0.43)       1     -<span style="color: #BB0000;">8.57</span><span style="color: #949494;">e</span><span style="color: #BB0000;">- 1</span>      <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 [-0.43,0.43)        2     -<span style="color: #BB0000;">1.11</span><span style="color: #949494;">e</span><span style="color: #BB0000;">-16</span>       0.404</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4 [0.43,1.38)         1      8.57<span style="color: #949494;">e</span><span style="color: #BB0000;">- 1</span>      <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 [1.38,2]            2      1.71<span style="color: #949494;">e</span>+ 0       0.404</span></span>
+<span><span class="va">cuts</span><span class="op">$</span><span class="va">modal_values</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 11</span></span></span>
+<span><span class="co">#&gt;   item_position item_id    est n_ratings modal_n modal_prop modal_stage</span></span>
+<span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>             1 item_1  -<span style="color: #BB0000;">2</span>             3       3      1               1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>             2 item_2  -<span style="color: #BB0000;">1.43</span>          3       2      0.667           1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>             3 item_3  -<span style="color: #BB0000;">0.857</span>         3       3      1               2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>             4 item_4  -<span style="color: #BB0000;">0.286</span>         3       2      0.667           3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>             5 item_5   0.286         3       2      0.667           3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>             6 item_6   0.857         3       3      1               4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>             7 item_7   1.43          3       2      0.667           5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>             8 item_8   2             3       3      1               5</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: modal_label &lt;chr&gt;, modal_stages &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   modal_labels &lt;chr&gt;, tie &lt;lgl&gt;</span></span></span>
+<span><span class="va">cuts</span><span class="op">$</span><span class="va">rater_modal_correlations</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
+<span><span class="co">#&gt;   person  n_items_modal_all cor_modal_all n_items_modal_loo</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Meyer                   8         1                     4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Schmidt                 8         0.958                 6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Tran                    8         0.958                 6</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: cor_modal_leave_one_out &lt;dbl&gt;</span></span></span>
+<span><span class="va">cuts</span><span class="op">$</span><span class="va">rater_kappa_statistics</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
+<span><span class="co">#&gt;   person  n_pairs mean_kappa sd_kappa mean_n_items</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Meyer         2      0.692    0                8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Schmidt       2      0.532    0.226            8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Tran          2      0.532    0.226            8</span></span>
+<span><span class="va">cuts</span><span class="op">$</span><span class="va">fleiss_kappa</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 6</span></span></span>
+<span><span class="co">#&gt;   method n_items n_raters kappa statistic      p_value</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Fleiss       8        3 0.583      5.69 0.000<span style="text-decoration: underline;">000</span>012<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="va">cuts</span><span class="op">$</span><span class="va">icc_statistics</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 14</span></span></span>
+<span><span class="co">#&gt;   type   model unit  n_items n_raters icc_name   icc f_value   df1   df2 p_value</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> agree… twow… sing…       8        3 ICC(A,1) 0.93     56.8     7    14 3.30<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> consi… twow… sing…       8        3 ICC(C,1) 0.949    56.8     7    14 3.30<span style="color: #949494;">e</span><span style="color: #BB0000;">-9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: conf_level &lt;dbl&gt;, lbound &lt;dbl&gt;, ubound &lt;dbl&gt;</span></span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cuts</span><span class="op">)</span></span>
+<span><span class="co">#&gt; IDM cut-score summary</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Settings</span></span>
+<span><span class="co">#&gt;  input_format missing est_col item_id_col n_raters n_items n_cuts</span></span>
+<span><span class="co">#&gt;          long    drop     est        item        3       8      4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Boundaries</span></span>
+<span><span class="co">#&gt;        cut boundary lower_level upper_level</span></span>
+<span><span class="co">#&gt;  cut_1a_1b      1.5          1a          1b</span></span>
+<span><span class="co">#&gt;   cut_1b_2      2.5          1b           2</span></span>
+<span><span class="co">#&gt;    cut_2_3      3.5           2           3</span></span>
+<span><span class="co">#&gt;    cut_3_4      4.5           3           4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Mean cuts on difficulty scale</span></span>
+<span><span class="co">#&gt;  cut_1a_1b cut_1b_2 cut_2_3 cut_3_4</span></span>
+<span><span class="co">#&gt;      -1.38    -0.43    0.43    1.38</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Cut statistics</span></span>
+<span><span class="co">#&gt;  statistic page_cut_1a_1b page_cut_1b_2 page_cut_2_3 page_cut_3_4</span></span>
+<span><span class="co">#&gt;       Mean           2.08          3.75         5.25         6.92</span></span>
+<span><span class="co">#&gt;         SD           0.52          0.50         0.50         0.52</span></span>
+<span><span class="co">#&gt;         SE           0.30          0.29         0.29         0.30</span></span>
+<span><span class="co">#&gt;  diff_cut_1a_1b diff_cut_1b_2 diff_cut_2_3 diff_cut_3_4</span></span>
+<span><span class="co">#&gt;           -1.38         -0.43         0.43         1.38</span></span>
+<span><span class="co">#&gt;            0.30          0.29         0.29         0.30</span></span>
+<span><span class="co">#&gt;            0.17          0.16         0.16         0.17</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level statistics</span></span>
+<span><span class="co">#&gt;  level      interval n_items mean_itemdiff sd_itemdiff</span></span>
+<span><span class="co">#&gt;      1    [-2,-1.38)       2         -1.71         0.4</span></span>
+<span><span class="co">#&gt;      2 [-1.38,-0.43)       1         -0.86          NA</span></span>
+<span><span class="co">#&gt;      3  [-0.43,0.43)       2          0.00         0.4</span></span>
+<span><span class="co">#&gt;      4   [0.43,1.38)       1          0.86          NA</span></span>
+<span><span class="co">#&gt;      5      [1.38,2]       2          1.71         0.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Modal values per item</span></span>
+<span><span class="co">#&gt;  item_position item_id   est n_ratings modal_n modal_prop modal_stage</span></span>
+<span><span class="co">#&gt;              1  item_1 -2.00         3       3       1.00           1</span></span>
+<span><span class="co">#&gt;              2  item_2 -1.43         3       2       0.67           1</span></span>
+<span><span class="co">#&gt;              3  item_3 -0.86         3       3       1.00           2</span></span>
+<span><span class="co">#&gt;              4  item_4 -0.29         3       2       0.67           3</span></span>
+<span><span class="co">#&gt;              5  item_5  0.29         3       2       0.67           3</span></span>
+<span><span class="co">#&gt;              6  item_6  0.86         3       3       1.00           4</span></span>
+<span><span class="co">#&gt;              7  item_7  1.43         3       2       0.67           5</span></span>
+<span><span class="co">#&gt;              8  item_8  2.00         3       3       1.00           5</span></span>
+<span><span class="co">#&gt;  modal_label modal_stages modal_labels   tie</span></span>
+<span><span class="co">#&gt;           1a            1           1a FALSE</span></span>
+<span><span class="co">#&gt;           1a            1           1a FALSE</span></span>
+<span><span class="co">#&gt;           1b            2           1b FALSE</span></span>
+<span><span class="co">#&gt;            2            3            2 FALSE</span></span>
+<span><span class="co">#&gt;            2            3            2 FALSE</span></span>
+<span><span class="co">#&gt;            3            4            3 FALSE</span></span>
+<span><span class="co">#&gt;            4            5            4 FALSE</span></span>
+<span><span class="co">#&gt;            4            5            4 FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Rater correlations with modal values</span></span>
+<span><span class="co">#&gt;   person n_items_modal_all cor_modal_all n_items_modal_loo</span></span>
+<span><span class="co">#&gt;    Meyer                 8          1.00                 4</span></span>
+<span><span class="co">#&gt;  Schmidt                 8          0.96                 6</span></span>
+<span><span class="co">#&gt;     Tran                 8          0.96                 6</span></span>
+<span><span class="co">#&gt;  cor_modal_leave_one_out</span></span>
+<span><span class="co">#&gt;                     1.00</span></span>
+<span><span class="co">#&gt;                     0.95</span></span>
+<span><span class="co">#&gt;                     0.95</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Pairwise Cohen kappa summary</span></span>
+<span><span class="co">#&gt;  n_pairs mean_kappa sd_kappa mean_n_items</span></span>
+<span><span class="co">#&gt;        3       0.59     0.18            8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Rater pairwise Cohen kappa</span></span>
+<span><span class="co">#&gt;   person n_pairs mean_kappa sd_kappa mean_n_items</span></span>
+<span><span class="co">#&gt;    Meyer       2       0.69     0.00            8</span></span>
+<span><span class="co">#&gt;  Schmidt       2       0.53     0.23            8</span></span>
+<span><span class="co">#&gt;     Tran       2       0.53     0.23            8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Fleiss kappa</span></span>
+<span><span class="co">#&gt;  method n_items n_raters kappa statistic p_value</span></span>
+<span><span class="co">#&gt;  Fleiss       8        3  0.58      5.69       0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ICC agreement and consistency</span></span>
+<span><span class="co">#&gt;         type  model   unit n_items n_raters icc_name  icc f_value df1 df2</span></span>
+<span><span class="co">#&gt;    agreement twoway single       8        3 ICC(A,1) 0.93    56.8   7  14</span></span>
+<span><span class="co">#&gt;  consistency twoway single       8        3 ICC(C,1) 0.95    56.8   7  14</span></span>
+<span><span class="co">#&gt;  p_value conf_level lbound ubound</span></span>
+<span><span class="co">#&gt;        0       0.95   0.76   0.98</span></span>
+<span><span class="co">#&gt;        0       0.95   0.84   0.99</span></span></code></pre></div>
+<p>Internally, ordinal ratings are mapped to stage scores
+<code>1</code>, <code>2</code>, …, <code>K</code> in the order given by
+<code>rating_levels</code>. For each rater, items are ordered by their
+difficulty estimate. The raw stage sequence is smoothed by a centered
+three-point moving average, using the minimum and maximum stage as
+boundary anchors at the two ends. The smoothed sequence is then
+monotonized with isotonic regression, because IDM assumes that expected
+rating stages should not decrease as item difficulty increases.</p>
+<p>Missing ratings are dropped from smoothing and cut computation by
+default. In long-format input, omitted item-rater rows are completed
+internally and treated like explicit missing ratings. Use
+<code>item_id_col</code> whenever item identities should be preserved
+explicitly, especially when different items can have the same difficulty
+estimate. Use <code>missing = "smooth"</code> for the previous smoothing
+behavior with <code>na.rm = TRUE</code>, or
+<code>missing = "error"</code> to reject incomplete ratings. The
+<code>boundaries</code> argument determines the requested cut scores.
+Canonical boundaries such as <code>1.5</code> and <code>2.5</code>
+describe cuts between adjacent levels; non-canonical boundaries are
+included in the generated cut labels.</p>
+<p>Cut scores are interpolated boundary crossings of the monotonized
+curves. For example, the default boundary <code>2.5</code> is the
+transition between the second and third ordinal stage, here labelled
+<code>cut_1b_2</code>. <code>cuts_per_person</code> and
+<code>cuts_summary</code> report these cuts on the item difficulty
+scale. <code>cut_positions_per_person</code> stores the corresponding
+interpolated item positions, while <code>cut_statistics</code> and
+<code>level_statistics</code> summarize cuts and item difficulty
+intervals in the style often used in IDM documentation.</p>
+<p>Additional agreement diagnostics are computed on the raw internal
+rating stages, after long- and wide-format input have been normalized to
+the same complete item-by-rater grid. <code>modal_values</code> gives
+the item-wise modal rating stage. If the modal value is tied, the unique
+<code>modal_stage</code> is set to <code>NA</code>, while
+<code>modal_stages</code>, <code>modal_labels</code>, and
+<code>tie</code> keep the tie information.
+<code>rater_modal_correlations</code> correlates each individual rater
+series with the modal-value series. The leave-one-rater-out version
+recomputes the modal value without the currently evaluated rater, so the
+rater is compared with the remaining group rather than with a criterion
+partly defined by their own ratings.</p>
+<p>The kappa diagnostics use the same wide raw rating matrix.
+<code>kappa_pairwise</code> contains all pairwise Cohen kappa estimates
+from <code><a href="../reference/meanKappa.html">meanKappa()</a></code>. <code>kappa_summary</code> summarizes
+these pairwise kappas overall, and <code>rater_kappa_statistics</code>
+gives each rater’s mean and sample standard deviation across all
+pairings involving that rater. Fleiss kappa and the two ICC estimates
+for agreement and consistency are computed on complete item rows,
+because these procedures require a common set of items across raters. If
+the third, final IDM round is the target, filter the data to that round
+before calling <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code>.</p>
 <p><code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> visualizes the raw ratings, moving
-averages, monotonized curves and resulting cut scores.</p>
+averages, monotonized curves and resulting cut scores. Grey points and
+lines show the original ratings ordered by item difficulty. The dashed
+blue line shows the smoothed but not yet monotonized moving average. The
+red line shows the monotonized curve used for the cut computation.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span><span class="op">)</span></span></code></pre></div>
 <p><img src="main_functions_files/figure-html/idm%20plot%20example-1.png" class="r-plt" alt="" width="672"></p>
+<p>An aggregate panel can be added to inspect all monotonized rater
+curves together with the mean cuts. In this panel, rater curves are
+drawn in rater-specific colors and labelled by rater name by default.
+When several curves end at similar values, the labels are shifted
+slightly along the y-axis so that all names remain visible. The legend
+remains restricted to the cut score labels. The vertical cut lines are
+the means from <code>cuts$cuts_summary</code>, not newly estimated cuts
+from a pooled rating curve.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20aggregate%20plot%20example-1.png" class="r-plt" alt="" width="672"></p>
+<p>Set <code>show_aggregate_labels = FALSE</code> if the direct labels
+make the aggregate panel too dense.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>, show_aggregate_labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20aggregate%20unlabeled%20plot%20example-1.png" class="r-plt" alt="" width="672"></p>
+<p>Residual panels can be added to inspect local deviations between raw
+ratings and the smoothed moving average. They can also be combined with
+the aggregate panel.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_residuals <span class="op">=</span> <span class="cn">TRUE</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20residual%20plot%20example-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
 <h3 id="visual-subset-recoding">Visual Subset Recoding<a class="anchor" aria-label="anchor" href="#visual-subset-recoding"></a>
@@ -1358,7 +1595,7 @@ affected by a technical issue, you can display the relevant responses
 and decide whether to recode them to a value such as <code>mci</code>.
 Because the function opens an interactive review flow, it is not
 evaluated in this vignette.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsetInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person100"</span>, <span class="st">"person101"</span>, <span class="st">"person102"</span><span class="op">)</span>,</span>
 <span>  datCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I01"</span>, <span class="st">"I02"</span>, <span class="st">"I03"</span><span class="op">)</span></span>
@@ -1392,7 +1629,7 @@ character missings should be converted to <code>0</code> or
 <code>NA</code>. It has default settings, but you can adapt them if
 needed. Type <code><a href="../reference/collapseMissings.html">?collapseMissings</a></code> into your console to learn
 more.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datColMis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMissings.html">collapseMissings</a></span><span class="op">(</span><span class="va">datRec</span><span class="op">)</span></span></code></pre></div>
 <p>After doing that you should have a data frame that you can now use
 for further processing with the <code>eatModel</code> package.</p>
@@ -1408,7 +1645,7 @@ frames <code>dat</code>, <code>values</code>, <code>subunits</code> and
 where to save those new files.</p>
 <p>The function creates and saves those files, but the actual return
 values for this function is <code>NULL</code>.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/writeSpss.html">writeSpss</a></span><span class="op">(</span><span class="va">dat</span>, <span class="va">values</span>, <span class="va">subunits</span>, <span class="va">units</span>,</span>
 <span>    filedat <span class="op">=</span> <span class="st">"mydata.txt"</span>, filesps <span class="op">=</span> <span class="st">"readmydata.sps"</span>,</span>
 <span>    missing.rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mvi <span class="op">=</span> <span class="fl">0</span>, mnr <span class="op">=</span> <span class="fl">0</span>, mci <span class="op">=</span> <span class="cn">NA</span>, mbd <span class="op">=</span> <span class="cn">NA</span>, mir <span class="op">=</span> <span class="fl">0</span>, mbi <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
@@ -1427,7 +1664,7 @@ example exports scored data (<code>trafoType</code> = “scored”), which
 usually has 0/1 values and mistypes like mbi/mbo etc. The second example
 exports the raw data (<code>trafoType</code> = “raw”), including the
 original values and subunits.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputDat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputList</span><span class="op">)</span></span>
 <span></span>
@@ -1441,7 +1678,7 @@ original values and subunits.</p>
 <span>                                      readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      recodeData<span class="op">=</span><span class="cn">FALSE</span>, aggregateData<span class="op">=</span><span class="cn">FALSE</span>, scoreData<span class="op">=</span><span class="cn">FALSE</span>,</span>
 <span>                                      writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GADSobj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prep2gads.html">prep2GADS</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDatScored</span>, inputList <span class="op">=</span> <span class="va">inputList</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, trafoType <span class="op">=</span> <span class="st">"scored"</span>,</span>
 <span>                      verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1468,7 +1705,7 @@ original values and subunits.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

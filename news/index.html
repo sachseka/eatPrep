@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,53 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.10" id="eatprep-1010">eatPrep 1.0.10<a class="anchor" aria-label="anchor" href="#eatprep-1010"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-0-10">new features<a class="anchor" aria-label="anchor" href="#new-features-1-0-10"></a></h3>
+<ul><li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> now supports long-format IDM input with explicit rater identifier and rating columns.</li>
+<li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> gains <code>item_id_col</code> for explicit item identifiers, especially useful when long-format data contain several items with the same difficulty estimate.</li>
+<li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> supports ordinal rating labels via <code>rating_levels</code>, for example <code>c("1a", "1b", "2", "3", "4")</code>.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> now provides a compact S3 summary for objects returned by <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code>.</li>
+<li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> now reports IDM agreement diagnostics: item-wise modal values, rater-modal correlations, pairwise Cohen kappa summaries, Fleiss kappa, and ICC agreement/consistency.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-1-0-10">improvements<a class="anchor" aria-label="anchor" href="#improvements-1-0-10"></a></h3>
+<ul><li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> now uses <code>missing = "drop"</code> by default so missing ratings do not create smoothed values or contribute to cut computation.</li>
+<li>Long-format IDM input is completed to the full item-by-rater grid before smoothing, so omitted item-rater rows are treated like explicit missing ratings.</li>
+<li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> offers <code>missing = "smooth"</code> for legacy-like smoothing with missing values ignored inside the moving-average window.</li>
+<li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> now computes cut scores as linearly interpolated boundary crossings of the monotonized curve.</li>
+<li>
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> returns additional IDM summary tables in <code>cut_positions_per_person</code>, <code>cut_statistics</code>, and <code>level_statistics</code>.</li>
+<li>Cut score labels now reflect the actual boundary. Canonical numeric cuts retain labels such as <code>cut12</code> and <code>cut23</code>; ordinal and non-canonical cuts use labels such as <code>cut_1a_1b</code> or <code>cut_1a_1b_bound1_3</code>.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> uses ordinal rating labels on the y-axis when they are stored by <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code>.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> can add an aggregate panel with <code>show_aggregate = TRUE</code>; it overlays all monotonized rater curves in rater-specific colors, labels them by rater name by default, and shows the mean cuts from <code>cuts_summary</code>.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> now shows the raw rating trajectory and the non-monotonized moving average by default; both can be hidden with <code>show_raw = FALSE</code> and <code>show_smoothed = FALSE</code>. The smoothed line is dashed so that it remains visible when it coincides with the monotonized curve.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> can add residual panels with <code>show_residuals = TRUE</code>; residuals are computed as raw rating minus smoothed moving average.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-1-0-10">bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-10"></a></h3>
+<ul><li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> no longer adds aggregate rater lines or rater-name labels to the cut score legend.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="compatibility-1-0-10">compatibility<a class="anchor" aria-label="anchor" href="#compatibility-1-0-10"></a></h3>
+<ul><li>Existing wide-format calls to <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> remain supported.</li>
+<li>The returned object remains compatible with <code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code>.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.9" id="eatprep-109">eatPrep 1.0.9<a class="anchor" aria-label="anchor" href="#eatprep-109"></a></h2>
 <div class="section level3">
@@ -133,7 +180,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -48,8 +48,8 @@ You can click on the specific function to jump to its explanation.
 | [meanAgree()](#rater-agreement) | calculates mean pairwise percentage agreement across raters. |
 | [meanKappa()](#rater-agreement) | calculates mean pairwise kappa across raters. |
 | [make.pseudo()](#pseudo-raters) | reduces multiple real raters to a smaller number of pseudo raters. |
-| [computeCutsIDM()](#idm-cut-scores) | computes cut scores for Item Descriptor Matching based on monotonized moving averages. |
-| [plotCutsIDM()](#idm-cut-scores) | plots the raw ratings, moving averages, monotonized curves and cut scores from [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md). |
+| [computeCutsIDM()](#idm-cut-scores) | computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages. |
+| [plotCutsIDM()](#idm-cut-scores) | plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md). |
 | [visualSubsetRecode()](#visual-subset-recoding) | supports interactive visual inspection and recoding of flagged subsets. |
 | **Export** |  |
 | [collapseMissings()](#collapsing-data) | recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling. |
@@ -840,7 +840,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 ```
 
 Type
@@ -883,7 +883,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-07-01 13:37:38.377963
+#> Starting automateDataPreparation 2026-08-28 08:30:19.81697
 #> 
 #> Check data...
 #> 
@@ -959,7 +959,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-07-01 13:37:38.646217
+#> automateDataPreparation terminated successfully! 2026-08-28 08:30:20.070636
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -1087,30 +1087,244 @@ head(oneRater)
 ### IDM Cut Scores
 
 [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
-calculates cut scores for Item Descriptor Matching (IDM). The data set
-must contain item difficulty estimates and one or more numeric rater
-columns. The `boundaries` argument determines the requested cut scores,
-for example four boundaries for five performance levels.
+calculates cut scores for Item Descriptor Matching (IDM). The preferred
+input is a long-format data set with item identifiers, item difficulty
+estimates, a rater identifier, and one rating column. Rater identifiers
+may be names or IDs. Ratings may be numeric, or they may be ordinal
+labels when their order is supplied via `rating_levels`. The previous
+wide-format input with one rating column per rater is still supported.
 
 ``` r
 
 idmDat <- data.frame(
-  est = seq(-2, 2, length.out = 8),
-  Rater1 = c(1, 1, 2, 2, 3, 4, 4, 5),
-  Rater2 = c(1, 2, 2, 3, 3, 4, 5, 5)
+  item = rep(paste0("item_", 1:8), 3),
+  est = rep(seq(-2, 2, length.out = 8), 3),
+  rater = rep(c("Meyer", "Schmidt", "Tran"), each = 8),
+  rating = c(
+    "1a", "1a", "1b", "2",  "2", "3", "4", "4",
+    "1a", "1b", "1b", "2",  "3", "3", "4", "4",
+    "1a", "1a", "1b", "1b", "2", "3", "3", "4"
+  )
 )
 
-cuts <- computeCutsIDM(idmDat)
+cuts <- computeCutsIDM(
+  idmDat,
+  item_id_col = "item",
+  rater_id_col = "rater",
+  rating_col = "rating",
+  rating_levels = c("1a", "1b", "2", "3", "4")
+)
 cuts$cuts_summary
 #> # A tibble: 1 × 4
-#>   cut12     cut23 cut34 cut45
-#>   <dbl>     <dbl> <dbl> <dbl>
-#> 1 -1.14 -1.11e-16 0.857  1.71
+#>   cut_1a_1b cut_1b_2 cut_2_3 cut_3_4
+#>       <dbl>    <dbl>   <dbl>   <dbl>
+#> 1     -1.38   -0.429   0.429    1.38
+cuts$cut_statistics
+#> # A tibble: 3 × 9
+#>   statistic page_cut_1a_1b page_cut_1b_2 page_cut_2_3 page_cut_3_4
+#>   <chr>              <dbl>         <dbl>        <dbl>        <dbl>
+#> 1 Mean               2.08          3.75         5.25         6.92 
+#> 2 SD                 0.520         0.5          0.5          0.520
+#> 3 SE                 0.300         0.289        0.289        0.300
+#> # ℹ 4 more variables: diff_cut_1a_1b <dbl>, diff_cut_1b_2 <dbl>,
+#> #   diff_cut_2_3 <dbl>, diff_cut_3_4 <dbl>
+cuts$level_statistics
+#> # A tibble: 5 × 5
+#>   level interval      n_items mean_itemdiff sd_itemdiff
+#>   <int> <chr>           <int>         <dbl>       <dbl>
+#> 1     1 [-2,-1.38)          2     -1.71e+ 0       0.404
+#> 2     2 [-1.38,-0.43)       1     -8.57e- 1      NA    
+#> 3     3 [-0.43,0.43)        2     -1.11e-16       0.404
+#> 4     4 [0.43,1.38)         1      8.57e- 1      NA    
+#> 5     5 [1.38,2]            2      1.71e+ 0       0.404
+cuts$modal_values
+#> # A tibble: 8 × 11
+#>   item_position item_id    est n_ratings modal_n modal_prop modal_stage
+#>           <int> <chr>    <dbl>     <int>   <int>      <dbl>       <dbl>
+#> 1             1 item_1  -2             3       3      1               1
+#> 2             2 item_2  -1.43          3       2      0.667           1
+#> 3             3 item_3  -0.857         3       3      1               2
+#> 4             4 item_4  -0.286         3       2      0.667           3
+#> 5             5 item_5   0.286         3       2      0.667           3
+#> 6             6 item_6   0.857         3       3      1               4
+#> 7             7 item_7   1.43          3       2      0.667           5
+#> 8             8 item_8   2             3       3      1               5
+#> # ℹ 4 more variables: modal_label <chr>, modal_stages <chr>,
+#> #   modal_labels <chr>, tie <lgl>
+cuts$rater_modal_correlations
+#> # A tibble: 3 × 5
+#>   person  n_items_modal_all cor_modal_all n_items_modal_loo
+#>   <chr>               <int>         <dbl>             <int>
+#> 1 Meyer                   8         1                     4
+#> 2 Schmidt                 8         0.958                 6
+#> 3 Tran                    8         0.958                 6
+#> # ℹ 1 more variable: cor_modal_leave_one_out <dbl>
+cuts$rater_kappa_statistics
+#> # A tibble: 3 × 5
+#>   person  n_pairs mean_kappa sd_kappa mean_n_items
+#>   <chr>     <int>      <dbl>    <dbl>        <dbl>
+#> 1 Meyer         2      0.692    0                8
+#> 2 Schmidt       2      0.532    0.226            8
+#> 3 Tran          2      0.532    0.226            8
+cuts$fleiss_kappa
+#> # A tibble: 1 × 6
+#>   method n_items n_raters kappa statistic      p_value
+#>   <chr>    <int>    <int> <dbl>     <dbl>        <dbl>
+#> 1 Fleiss       8        3 0.583      5.69 0.0000000125
+cuts$icc_statistics
+#> # A tibble: 2 × 14
+#>   type   model unit  n_items n_raters icc_name   icc f_value   df1   df2 p_value
+#>   <chr>  <chr> <chr>   <int>    <int> <chr>    <dbl>   <dbl> <dbl> <dbl>   <dbl>
+#> 1 agree… twow… sing…       8        3 ICC(A,1) 0.93     56.8     7    14 3.30e-9
+#> 2 consi… twow… sing…       8        3 ICC(C,1) 0.949    56.8     7    14 3.30e-9
+#> # ℹ 3 more variables: conf_level <dbl>, lbound <dbl>, ubound <dbl>
+summary(cuts)
+#> IDM cut-score summary
+#> 
+#> Settings
+#>  input_format missing est_col item_id_col n_raters n_items n_cuts
+#>          long    drop     est        item        3       8      4
+#> 
+#> Boundaries
+#>        cut boundary lower_level upper_level
+#>  cut_1a_1b      1.5          1a          1b
+#>   cut_1b_2      2.5          1b           2
+#>    cut_2_3      3.5           2           3
+#>    cut_3_4      4.5           3           4
+#> 
+#> Mean cuts on difficulty scale
+#>  cut_1a_1b cut_1b_2 cut_2_3 cut_3_4
+#>      -1.38    -0.43    0.43    1.38
+#> 
+#> Cut statistics
+#>  statistic page_cut_1a_1b page_cut_1b_2 page_cut_2_3 page_cut_3_4
+#>       Mean           2.08          3.75         5.25         6.92
+#>         SD           0.52          0.50         0.50         0.52
+#>         SE           0.30          0.29         0.29         0.30
+#>  diff_cut_1a_1b diff_cut_1b_2 diff_cut_2_3 diff_cut_3_4
+#>           -1.38         -0.43         0.43         1.38
+#>            0.30          0.29         0.29         0.30
+#>            0.17          0.16         0.16         0.17
+#> 
+#> Level statistics
+#>  level      interval n_items mean_itemdiff sd_itemdiff
+#>      1    [-2,-1.38)       2         -1.71         0.4
+#>      2 [-1.38,-0.43)       1         -0.86          NA
+#>      3  [-0.43,0.43)       2          0.00         0.4
+#>      4   [0.43,1.38)       1          0.86          NA
+#>      5      [1.38,2]       2          1.71         0.4
+#> 
+#> Modal values per item
+#>  item_position item_id   est n_ratings modal_n modal_prop modal_stage
+#>              1  item_1 -2.00         3       3       1.00           1
+#>              2  item_2 -1.43         3       2       0.67           1
+#>              3  item_3 -0.86         3       3       1.00           2
+#>              4  item_4 -0.29         3       2       0.67           3
+#>              5  item_5  0.29         3       2       0.67           3
+#>              6  item_6  0.86         3       3       1.00           4
+#>              7  item_7  1.43         3       2       0.67           5
+#>              8  item_8  2.00         3       3       1.00           5
+#>  modal_label modal_stages modal_labels   tie
+#>           1a            1           1a FALSE
+#>           1a            1           1a FALSE
+#>           1b            2           1b FALSE
+#>            2            3            2 FALSE
+#>            2            3            2 FALSE
+#>            3            4            3 FALSE
+#>            4            5            4 FALSE
+#>            4            5            4 FALSE
+#> 
+#> Rater correlations with modal values
+#>   person n_items_modal_all cor_modal_all n_items_modal_loo
+#>    Meyer                 8          1.00                 4
+#>  Schmidt                 8          0.96                 6
+#>     Tran                 8          0.96                 6
+#>  cor_modal_leave_one_out
+#>                     1.00
+#>                     0.95
+#>                     0.95
+#> 
+#> Pairwise Cohen kappa summary
+#>  n_pairs mean_kappa sd_kappa mean_n_items
+#>        3       0.59     0.18            8
+#> 
+#> Rater pairwise Cohen kappa
+#>   person n_pairs mean_kappa sd_kappa mean_n_items
+#>    Meyer       2       0.69     0.00            8
+#>  Schmidt       2       0.53     0.23            8
+#>     Tran       2       0.53     0.23            8
+#> 
+#> Fleiss kappa
+#>  method n_items n_raters kappa statistic p_value
+#>  Fleiss       8        3  0.58      5.69       0
+#> 
+#> ICC agreement and consistency
+#>         type  model   unit n_items n_raters icc_name  icc f_value df1 df2
+#>    agreement twoway single       8        3 ICC(A,1) 0.93    56.8   7  14
+#>  consistency twoway single       8        3 ICC(C,1) 0.95    56.8   7  14
+#>  p_value conf_level lbound ubound
+#>        0       0.95   0.76   0.98
+#>        0       0.95   0.84   0.99
 ```
+
+Internally, ordinal ratings are mapped to stage scores `1`, `2`, …, `K`
+in the order given by `rating_levels`. For each rater, items are ordered
+by their difficulty estimate. The raw stage sequence is smoothed by a
+centered three-point moving average, using the minimum and maximum stage
+as boundary anchors at the two ends. The smoothed sequence is then
+monotonized with isotonic regression, because IDM assumes that expected
+rating stages should not decrease as item difficulty increases.
+
+Missing ratings are dropped from smoothing and cut computation by
+default. In long-format input, omitted item-rater rows are completed
+internally and treated like explicit missing ratings. Use `item_id_col`
+whenever item identities should be preserved explicitly, especially when
+different items can have the same difficulty estimate. Use
+`missing = "smooth"` for the previous smoothing behavior with
+`na.rm = TRUE`, or `missing = "error"` to reject incomplete ratings. The
+`boundaries` argument determines the requested cut scores. Canonical
+boundaries such as `1.5` and `2.5` describe cuts between adjacent
+levels; non-canonical boundaries are included in the generated cut
+labels.
+
+Cut scores are interpolated boundary crossings of the monotonized
+curves. For example, the default boundary `2.5` is the transition
+between the second and third ordinal stage, here labelled `cut_1b_2`.
+`cuts_per_person` and `cuts_summary` report these cuts on the item
+difficulty scale. `cut_positions_per_person` stores the corresponding
+interpolated item positions, while `cut_statistics` and
+`level_statistics` summarize cuts and item difficulty intervals in the
+style often used in IDM documentation.
+
+Additional agreement diagnostics are computed on the raw internal rating
+stages, after long- and wide-format input have been normalized to the
+same complete item-by-rater grid. `modal_values` gives the item-wise
+modal rating stage. If the modal value is tied, the unique `modal_stage`
+is set to `NA`, while `modal_stages`, `modal_labels`, and `tie` keep the
+tie information. `rater_modal_correlations` correlates each individual
+rater series with the modal-value series. The leave-one-rater-out
+version recomputes the modal value without the currently evaluated
+rater, so the rater is compared with the remaining group rather than
+with a criterion partly defined by their own ratings.
+
+The kappa diagnostics use the same wide raw rating matrix.
+`kappa_pairwise` contains all pairwise Cohen kappa estimates from
+[`meanKappa()`](https://sachseka.github.io/eatPrep/reference/meanKappa.md).
+`kappa_summary` summarizes these pairwise kappas overall, and
+`rater_kappa_statistics` gives each rater’s mean and sample standard
+deviation across all pairings involving that rater. Fleiss kappa and the
+two ICC estimates for agreement and consistency are computed on complete
+item rows, because these procedures require a common set of items across
+raters. If the third, final IDM round is the target, filter the data to
+that round before calling
+[`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md).
 
 [`plotCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md)
 visualizes the raw ratings, moving averages, monotonized curves and
-resulting cut scores.
+resulting cut scores. Grey points and lines show the original ratings
+ordered by item difficulty. The dashed blue line shows the smoothed but
+not yet monotonized moving average. The red line shows the monotonized
+curve used for the cut computation.
 
 ``` r
 
@@ -1118,6 +1332,43 @@ plotCutsIDM(cuts)
 ```
 
 ![](main_functions_files/figure-html/idm%20plot%20example-1.png)
+
+An aggregate panel can be added to inspect all monotonized rater curves
+together with the mean cuts. In this panel, rater curves are drawn in
+rater-specific colors and labelled by rater name by default. When
+several curves end at similar values, the labels are shifted slightly
+along the y-axis so that all names remain visible. The legend remains
+restricted to the cut score labels. The vertical cut lines are the means
+from `cuts$cuts_summary`, not newly estimated cuts from a pooled rating
+curve.
+
+``` r
+
+plotCutsIDM(cuts, show_aggregate = TRUE)
+```
+
+![](main_functions_files/figure-html/idm%20aggregate%20plot%20example-1.png)
+
+Set `show_aggregate_labels = FALSE` if the direct labels make the
+aggregate panel too dense.
+
+``` r
+
+plotCutsIDM(cuts, show_aggregate = TRUE, show_aggregate_labels = FALSE)
+```
+
+![](main_functions_files/figure-html/idm%20aggregate%20unlabeled%20plot%20example-1.png)
+
+Residual panels can be added to inspect local deviations between raw
+ratings and the smoothed moving average. They can also be combined with
+the aggregate panel.
+
+``` r
+
+plotCutsIDM(cuts, show_residuals = TRUE, show_aggregate = TRUE)
+```
+
+![](main_functions_files/figure-html/idm%20residual%20plot%20example-1.png)
 
 ### Visual Subset Recoding
 

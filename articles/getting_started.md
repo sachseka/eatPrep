@@ -408,8 +408,8 @@ explains how to use these functions.
 | [meanAgree()](https://sachseka.github.io/eatPrep/articles/main_functions.html#rater-agreement) | calculates mean pairwise percentage agreement across raters. |
 | [meanKappa()](https://sachseka.github.io/eatPrep/articles/main_functions.html#rater-agreement) | calculates mean pairwise kappa across raters. |
 | [make.pseudo()](https://sachseka.github.io/eatPrep/articles/main_functions.html#pseudo-raters) | reduces multiple real raters to a smaller number of pseudo raters. |
-| [computeCutsIDM()](https://sachseka.github.io/eatPrep/articles/main_functions.html#idm-cut-scores) | computes cut scores for Item Descriptor Matching based on monotonized moving averages. |
-| [plotCutsIDM()](https://sachseka.github.io/eatPrep/articles/main_functions.html#idm-cut-scores) | plots the raw ratings, moving averages, monotonized curves and cut scores from [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md). |
+| [computeCutsIDM()](https://sachseka.github.io/eatPrep/articles/main_functions.html#idm-cut-scores) | computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages. |
+| [plotCutsIDM()](https://sachseka.github.io/eatPrep/articles/main_functions.html#idm-cut-scores) | plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md). |
 | [visualSubsetRecode()](https://sachseka.github.io/eatPrep/articles/main_functions.html#visual-subset-recoding) | supports interactive visual inspection and recoding of flagged subsets. |
 | **Export** |  |
 | [collapseMissings()](https://sachseka.github.io/eatPrep/articles/main_functions.html#collapsing-data) | recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling. |

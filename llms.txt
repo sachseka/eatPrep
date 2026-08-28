@@ -107,6 +107,10 @@ remotes::install_github("sachseka/eatPrep")
 - [`scoreData()`](https://sachseka.github.io/eatPrep/reference/scoreData.md)
   : Score Datasets with Several Kinds of Missing Values
 
+- [`summary(`*`<cutsIDM>`*`)`](https://sachseka.github.io/eatPrep/reference/summary.cutsIDM.md)
+  [`print(`*`<summary.cutsIDM>`*`)`](https://sachseka.github.io/eatPrep/reference/summary.cutsIDM.md)
+  : Summarize IDM Cut Score Objects
+
 - [`visualSubsetRecode()`](https://sachseka.github.io/eatPrep/reference/visualSubsetRecode.md)
   : Inspect data subsets visually and recode instantaneously
 
