@@ -1137,7 +1137,7 @@ the final data preparation step.</p>
 <span>    recodeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeMnr <span class="op">=</span> <span class="cn">TRUE</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
 <span>    aggregateData <span class="op">=</span> <span class="cn">TRUE</span>, scoreData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    writeSpss <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting automateDataPreparation 2026-08-31 14:40:23.035888</span></span>
+<span><span class="co">#&gt; Starting automateDataPreparation 2026-08-31 14:49:39.760889</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Check data...</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1213,7 +1213,7 @@ the final data preparation step.</p>
 <span><span class="co">#&gt; No SPSS-File has been written.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Missings are UNcollapsed.</span></span>
-<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-08-31 14:40:23.310179</span></span></code></pre></div>
+<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-08-31 14:49:40.015683</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-diagnostics-and-rater-tools">Additional Diagnostics and Rater Tools<a class="anchor" aria-label="anchor" href="#additional-diagnostics-and-rater-tools"></a>
@@ -1559,9 +1559,11 @@ before calling <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()
 averages, monotonized curves and resulting cut scores. Grey points and
 lines show the original ratings ordered by item difficulty. The dashed
 blue line shows the smoothed but not yet monotonized moving average. The
-red line shows the monotonized curve used for the cut computation.</p>
+red line shows the monotonized curve used for the cut computation.
+Because this example uses a compact item difficulty scale, the plot
+examples show cut labels with two digits after the decimal point.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, cut_value_digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="main_functions_files/figure-html/idm%20plot%20example-1.png" class="r-plt" alt="" width="672"></p>
 <p>An aggregate panel can be added to inspect all monotonized rater
 curves together with the mean cuts. In this panel, rater curves are
@@ -1572,18 +1574,28 @@ remains restricted to the cut score labels. The vertical cut lines are
 the means from <code>cuts$cuts_summary</code>, not newly estimated cuts
 from a pooled rating curve.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>, cut_value_digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="main_functions_files/figure-html/idm%20aggregate%20plot%20example-1.png" class="r-plt" alt="" width="672"></p>
 <p>Set <code>show_aggregate_labels = FALSE</code> if the direct labels
 make the aggregate panel too dense.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>, show_aggregate_labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_aggregate_labels <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="main_functions_files/figure-html/idm%20aggregate%20unlabeled%20plot%20example-1.png" class="r-plt" alt="" width="672"></p>
 <p>Residual panels can be added to inspect local deviations between raw
 ratings and the smoothed moving average. They can also be combined with
 the aggregate panel.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_residuals <span class="op">=</span> <span class="cn">TRUE</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  show_residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="main_functions_files/figure-html/idm%20residual%20plot%20example-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">

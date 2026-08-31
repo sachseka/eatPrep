@@ -883,7 +883,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-08-31 14:40:23.035888
+#> Starting automateDataPreparation 2026-08-31 14:49:39.760889
 #> 
 #> Check data...
 #> 
@@ -959,7 +959,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-08-31 14:40:23.310179
+#> automateDataPreparation terminated successfully! 2026-08-31 14:49:40.015683
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -1324,11 +1324,13 @@ visualizes the raw ratings, moving averages, monotonized curves and
 resulting cut scores. Grey points and lines show the original ratings
 ordered by item difficulty. The dashed blue line shows the smoothed but
 not yet monotonized moving average. The red line shows the monotonized
-curve used for the cut computation.
+curve used for the cut computation. Because this example uses a compact
+item difficulty scale, the plot examples show cut labels with two digits
+after the decimal point.
 
 ``` r
 
-plotCutsIDM(cuts)
+plotCutsIDM(cuts, cut_value_digits = 2)
 ```
 
 ![](main_functions_files/figure-html/idm%20plot%20example-1.png)
@@ -1344,7 +1346,7 @@ curve.
 
 ``` r
 
-plotCutsIDM(cuts, show_aggregate = TRUE)
+plotCutsIDM(cuts, show_aggregate = TRUE, cut_value_digits = 2)
 ```
 
 ![](main_functions_files/figure-html/idm%20aggregate%20plot%20example-1.png)
@@ -1354,7 +1356,12 @@ aggregate panel too dense.
 
 ``` r
 
-plotCutsIDM(cuts, show_aggregate = TRUE, show_aggregate_labels = FALSE)
+plotCutsIDM(
+  cuts,
+  show_aggregate = TRUE,
+  show_aggregate_labels = FALSE,
+  cut_value_digits = 2
+)
 ```
 
 ![](main_functions_files/figure-html/idm%20aggregate%20unlabeled%20plot%20example-1.png)
@@ -1365,7 +1372,12 @@ the aggregate panel.
 
 ``` r
 
-plotCutsIDM(cuts, show_residuals = TRUE, show_aggregate = TRUE)
+plotCutsIDM(
+  cuts,
+  show_residuals = TRUE,
+  show_aggregate = TRUE,
+  cut_value_digits = 2
+)
 ```
 
 ![](main_functions_files/figure-html/idm%20residual%20plot%20example-1.png)
