@@ -467,6 +467,49 @@ test_that("plotCutsIDM can hide raw and smoothed helper functions", {
   expect_equal(sum(hidden_geoms == "GeomPoint"), 0)
 })
 
+test_that("plotCutsIDM shows and hides cut values and item numbers", {
+  dat <- data.frame(
+    est = c(0, 10),
+    Rater1 = c(1, 4),
+    Rater2 = c(1, 3)
+  )
+
+  res <- computeCutsIDM(dat, boundaries = 2.5)
+  p_default <- plotCutsIDM(res, show_aggregate = TRUE)
+  default_labels <- unlist(lapply(
+    Filter(function(layer) "label" %in% names(layer), ggplot2::ggplot_build(p_default)$data),
+    function(layer) as.character(layer$label)
+  ), use.names = FALSE)
+
+  p_digits <- plotCutsIDM(
+    res,
+    show_aggregate = TRUE,
+    cut_value_digits = 2
+  )
+  digits_labels <- unlist(lapply(
+    Filter(function(layer) "label" %in% names(layer), ggplot2::ggplot_build(p_digits)$data),
+    function(layer) as.character(layer$label)
+  ), use.names = FALSE)
+
+  p_hidden <- plotCutsIDM(
+    res,
+    show_aggregate = TRUE,
+    show_cut_values = FALSE,
+    show_item_numbers = FALSE
+  )
+  hidden_labels <- unlist(lapply(
+    Filter(function(layer) "label" %in% names(layer), ggplot2::ggplot_build(p_hidden)$data),
+    function(layer) as.character(layer$label)
+  ), use.names = FALSE)
+
+  expect_s3_class(p_default, "ggplot")
+  expect_true(all(c("5", "8", "6", "1", "2") %in% default_labels))
+  expect_true(all(c("5", "7.5", "6.25") %in% digits_labels))
+  expect_true(all(c("Rater1", "Rater2") %in% default_labels))
+  expect_false(any(c("5", "8", "6", "1", "2") %in% hidden_labels))
+  expect_true(all(c("Rater1", "Rater2") %in% hidden_labels))
+})
+
 test_that("plotCutsIDM can add an aggregate panel with mean cuts", {
   dat <- data.frame(
     est = seq(-2, 2, length.out = 8),
@@ -475,7 +518,12 @@ test_that("plotCutsIDM can add an aggregate panel with mean cuts", {
   )
 
   res <- computeCutsIDM(dat)
-  p <- plotCutsIDM(res, show_aggregate = TRUE)
+  p <- plotCutsIDM(
+    res,
+    show_aggregate = TRUE,
+    show_cut_values = FALSE,
+    show_item_numbers = FALSE
+  )
   built <- ggplot2::ggplot_build(p)
   layout <- built$layout$layout
   mean_panel <- layout$PANEL[layout$.facet_person == "Mean"]
@@ -518,7 +566,12 @@ test_that("plotCutsIDM keeps aggregate rater layers out of the cut legend", {
   )
 
   res <- computeCutsIDM(dat)
-  p <- plotCutsIDM(res, show_aggregate = TRUE)
+  p <- plotCutsIDM(
+    res,
+    show_aggregate = TRUE,
+    show_cut_values = FALSE,
+    show_item_numbers = FALSE
+  )
 
   mapped_color <- vapply(p$layers, function(layer) {
     "colour" %in% names(layer$mapping)
@@ -549,7 +602,9 @@ test_that("plotCutsIDM can hide aggregate rater labels", {
   p <- plotCutsIDM(
     res,
     show_aggregate = TRUE,
-    show_aggregate_labels = FALSE
+    show_aggregate_labels = FALSE,
+    show_cut_values = FALSE,
+    show_item_numbers = FALSE
   )
   label_layers <- Filter(function(layer) {
     "label" %in% names(layer)
@@ -568,7 +623,12 @@ test_that("plotCutsIDM spreads aggregate labels with identical endpoints", {
   )
 
   res <- computeCutsIDM(dat)
-  p <- plotCutsIDM(res, show_aggregate = TRUE)
+  p <- plotCutsIDM(
+    res,
+    show_aggregate = TRUE,
+    show_cut_values = FALSE,
+    show_item_numbers = FALSE
+  )
   label_layers <- Filter(function(layer) {
     "label" %in% names(layer)
   }, ggplot2::ggplot_build(p)$data)
@@ -590,7 +650,13 @@ test_that("plotCutsIDM can combine aggregate and residual panels", {
   )
 
   res <- computeCutsIDM(dat)
-  p <- plotCutsIDM(res, show_residuals = TRUE, show_aggregate = TRUE)
+  p <- plotCutsIDM(
+    res,
+    show_residuals = TRUE,
+    show_aggregate = TRUE,
+    show_cut_values = FALSE,
+    show_item_numbers = FALSE
+  )
   built <- ggplot2::ggplot_build(p)
   layout <- built$layout$layout
   mean_ratings_panel <- layout$PANEL[

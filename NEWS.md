@@ -1,3 +1,12 @@
+# eatPrep 1.0.11
+
+## improvements
+
+* `plotCutsIDM()` now shows bold numeric cut values next to the vertical cut lines by default in individual rater panels and in the aggregate panel.
+* Cut value labels are rounded to whole numbers by default; use `cut_value_digits` to choose a different number of digits after the decimal point.
+* `plotCutsIDM()` now shows small bold item position numbers next to the raw grey points in individual rater panels by default.
+* Cut value and item number labels can be hidden with `show_cut_values = FALSE` and `show_item_numbers = FALSE`.
+
 # eatPrep 1.0.10
 
 ## new features
