@@ -19,13 +19,13 @@
 ## Citation
 
 Sachse K, Mahler N, Franikowski P (2026). *eatPrep: Prepare Data for IRT
-Analyses*. R package version 1.0.10,
+Analyses*. R package version 1.0.11,
 <https://sachseka.github.io/eatPrep/>.
 
     @Manual{,
       title = {eatPrep: Prepare Data for IRT Analyses},
       author = {Karoline A. Sachse and Nicole Mahler and Philipp Franikowski},
       year = {2026},
-      note = {R package version 1.0.10},
+      note = {R package version 1.0.11},
       url = {https://sachseka.github.io/eatPrep/},
     }

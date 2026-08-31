@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,10 @@
 <span>  show_smoothed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_residuals <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  show_aggregate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  show_aggregate_labels <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  show_aggregate_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_cut_values <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_item_numbers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">0L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -78,10 +81,20 @@
   <dt id="arg-show-aggregate-labels">show_aggregate_labels<a class="anchor" aria-label="anchor" href="#arg-show-aggregate-labels"></a></dt>
 <dd><p>Logical scalar. If <code>TRUE</code>, rater names are shown near the right-hand end of the monotonized curves in the aggregate panel. Only used when <code>show_aggregate = TRUE</code>.</p></dd>
 
+  <dt id="arg-show-cut-values">show_cut_values<a class="anchor" aria-label="anchor" href="#arg-show-cut-values"></a></dt>
+<dd><p>Logical scalar. If <code>TRUE</code>, numeric cut values are shown next to the vertical cut lines in individual panels and, when requested, in the aggregate panel.</p></dd>
+
+  <dt id="arg-show-item-numbers">show_item_numbers<a class="anchor" aria-label="anchor" href="#arg-show-item-numbers"></a></dt>
+<dd><p>Logical scalar. If <code>TRUE</code>, item position numbers are shown next to the raw grey points in the individual rater panels. Only used when <code>show_raw = TRUE</code>.</p></dd>
+
+  <dt id="arg-cut-value-digits">cut_value_digits<a class="anchor" aria-label="anchor" href="#arg-cut-value-digits"></a></dt>
+<dd><p>Non-negative integer scalar. Number of digits after the decimal point used for rounding cut value labels. The default <code>0L</code> shows rounded whole-number cut values.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. If <code>show_raw = TRUE</code>, grey points and a thin grey line show the original rater assignments after ordering items by difficulty. If <code>show_smoothed = TRUE</code>, a thin dashed blue line shows the moving average before monotonization. The red line represents the monotonized isotonic curve used to find the vertical intercepts. If the smoothed curve is already non-decreasing, the blue dashed line lies directly on top of the red line. Vertical cut lines are drawn at the cut scores stored by <code><a href="computeCutsIDM.html">computeCutsIDM()</a></code>, which are linearly interpolated boundary crossings of the monotonized curve.</p>
+<p>By default, the vertical cut lines are labelled with their numeric difficulty-scale values rounded to whole numbers. The number of digits after the decimal point can be changed with <code>cut_value_digits</code>. The grey raw-rating points in the individual rater panels are labelled with small item position numbers. These labels can be hidden with <code>show_cut_values = FALSE</code> and <code>show_item_numbers = FALSE</code>.</p>
 <p>Technically, the plot is constructed from <code>res_list$plot_data</code>. For each rater facet, the x-axis is the item difficulty column stored as <code>est</code>; the y-values are the raw rating stage <code>stage_raw</code>, the smoothed moving average <code>stage_sm</code>, and the monotonized isotonic fit <code>stage_iso</code>. Horizontal lines are drawn at <code>res_list$boundaries</code>. Vertical lines are drawn at the difficulty-scale cuts in <code>res_list$cuts_per_person</code>; therefore the plotted cut positions are on the same x-axis scale as the item difficulties. Interpolated item positions, if needed for tabular summaries, are stored separately in <code>res_list$cut_positions_per_person</code>.</p>
 <p>With <code>show_aggregate = TRUE</code>, the plot adds an aggregate panel labelled <code>Mean</code>. This panel overlays the monotonized rater curves from the individual panels as thin colored lines and draws vertical lines at the mean difficulty-scale cuts in <code>res_list$cuts_summary</code>. With <code>show_aggregate_labels = TRUE</code>, the colored curves are labelled by rater name near their right-hand end. Label positions are adjusted vertically when several rater curves end at similar values. These mean cuts correspond to the cut scores reported by <code>summary(res_list)</code>. The legend is reserved for cut score labels; aggregate rater colors are not added to the legend.</p>
 <p>With <code>show_residuals = TRUE</code>, the plot uses an additional row of facets. The residual in item \(i\) is \(e_i = r_i - z_i\), where \(r_i\) is the raw rating and \(z_i\) is the smoothed moving average. Residuals are drawn as vertical segments from zero to \(e_i\). The cut lines are repeated in the residual panel so that large local deviations can be inspected relative to the final cut locations.</p>
@@ -124,9 +137,17 @@
 <span class="r-in"><span><span class="fu">plotCutsIDM</span><span class="op">(</span><span class="va">res</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>, show_aggregate_labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plotCutsIDM-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Hide cut value and item number labels:</span></span></span>
+<span class="r-in"><span><span class="fu">plotCutsIDM</span><span class="op">(</span><span class="va">res</span>, show_cut_values <span class="op">=</span> <span class="cn">FALSE</span>, show_item_numbers <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plotCutsIDM-5.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Show cut value labels with two digits after the decimal point:</span></span></span>
+<span class="r-in"><span><span class="fu">plotCutsIDM</span><span class="op">(</span><span class="va">res</span>, cut_value_digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plotCutsIDM-6.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Add residual panels:</span></span></span>
 <span class="r-in"><span><span class="fu">plotCutsIDM</span><span class="op">(</span><span class="va">res</span>, show_residuals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plotCutsIDM-5.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="plotCutsIDM-7.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -106,7 +106,7 @@ prepDat <- automateDataPreparation (inputList = inputList,
     datList = inputDat, readSpss = FALSE, checkData=FALSE, 
     mergeData = TRUE, recodeData=TRUE, aggregateData=FALSE, 
     scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-08-28 08:30:06.730028
+#> Starting automateDataPreparation 2026-08-31 14:40:08.136384
 #> 
 #> Check has been skipped.
 #> 
@@ -134,7 +134,7 @@ prepDat <- automateDataPreparation (inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-08-28 08:30:06.828582
+#> automateDataPreparation terminated successfully! 2026-08-31 14:40:08.250952
        
 prepDat2 <- mergeData("ID", list(prepDat, inputList$rotation))       
 #> Start merging of dataset 1.
@@ -168,5 +168,5 @@ mnrDat <- mnrCoding (dat = prepDat2, pid = "ID",
 #> 
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.0 secs
+#> elapsed time: 0.1 secs
 ```

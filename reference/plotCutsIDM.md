@@ -14,7 +14,10 @@ plotCutsIDM(
   show_smoothed = TRUE,
   show_residuals = FALSE,
   show_aggregate = FALSE,
-  show_aggregate_labels = TRUE
+  show_aggregate_labels = TRUE,
+  show_cut_values = TRUE,
+  show_item_numbers = TRUE,
+  cut_value_digits = 0L
 )
 ```
 
@@ -61,6 +64,24 @@ plotCutsIDM(
   end of the monotonized curves in the aggregate panel. Only used when
   `show_aggregate = TRUE`.
 
+- show_cut_values:
+
+  Logical scalar. If `TRUE`, numeric cut values are shown next to the
+  vertical cut lines in individual panels and, when requested, in the
+  aggregate panel.
+
+- show_item_numbers:
+
+  Logical scalar. If `TRUE`, item position numbers are shown next to the
+  raw grey points in the individual rater panels. Only used when
+  `show_raw = TRUE`.
+
+- cut_value_digits:
+
+  Non-negative integer scalar. Number of digits after the decimal point
+  used for rounding cut value labels. The default `0L` shows rounded
+  whole-number cut values.
+
 ## Details
 
 One main idea of the IDM method is to account for rater noise by
@@ -76,6 +97,13 @@ scores stored by
 [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
 which are linearly interpolated boundary crossings of the monotonized
 curve.
+
+By default, the vertical cut lines are labelled with their numeric
+difficulty-scale values rounded to whole numbers. The number of digits
+after the decimal point can be changed with `cut_value_digits`. The grey
+raw-rating points in the individual rater panels are labelled with small
+item position numbers. These labels can be hidden with
+`show_cut_values = FALSE` and `show_item_numbers = FALSE`.
 
 Technically, the plot is constructed from `res_list$plot_data`. For each
 rater facet, the x-axis is the item difficulty column stored as `est`;
@@ -145,6 +173,14 @@ plotCutsIDM(res, show_aggregate = TRUE)
 
 ## Hide rater labels in the aggregate panel:
 plotCutsIDM(res, show_aggregate = TRUE, show_aggregate_labels = FALSE)
+
+
+## Hide cut value and item number labels:
+plotCutsIDM(res, show_cut_values = FALSE, show_item_numbers = FALSE)
+
+
+## Show cut value labels with two digits after the decimal point:
+plotCutsIDM(res, cut_value_digits = 2)
 
 
 ## Add residual panels:
