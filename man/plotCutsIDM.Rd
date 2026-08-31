@@ -12,7 +12,10 @@ plotCutsIDM(
   show_smoothed = TRUE,
   show_residuals = FALSE,
   show_aggregate = FALSE,
-  show_aggregate_labels = TRUE
+  show_aggregate_labels = TRUE,
+  show_cut_values = TRUE,
+  show_item_numbers = TRUE,
+  cut_value_digits = 0L
 )
 }
 \arguments{
@@ -23,9 +26,14 @@ plotCutsIDM(
   \item{show_residuals}{Logical scalar. If \code{TRUE}, an additional residual panel is shown for each rater. Residuals are computed as raw rating minus smoothed moving average.}
   \item{show_aggregate}{Logical scalar. If \code{TRUE}, an additional aggregate panel is shown. It overlays the monotonized rater curves in rater-specific colors and draws the mean cut scores from \code{res_list$cuts_summary}.}
   \item{show_aggregate_labels}{Logical scalar. If \code{TRUE}, rater names are shown near the right-hand end of the monotonized curves in the aggregate panel. Only used when \code{show_aggregate = TRUE}.}
+  \item{show_cut_values}{Logical scalar. If \code{TRUE}, numeric cut values are shown next to the vertical cut lines in individual panels and, when requested, in the aggregate panel.}
+  \item{show_item_numbers}{Logical scalar. If \code{TRUE}, item position numbers are shown next to the raw grey points in the individual rater panels. Only used when \code{show_raw = TRUE}.}
+  \item{cut_value_digits}{Non-negative integer scalar. Number of digits after the decimal point used for rounding cut value labels. The default \code{0L} shows rounded whole-number cut values.}
 }
 \details{
 One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. If \code{show_raw = TRUE}, grey points and a thin grey line show the original rater assignments after ordering items by difficulty. If \code{show_smoothed = TRUE}, a thin dashed blue line shows the moving average before monotonization. The red line represents the monotonized isotonic curve used to find the vertical intercepts. If the smoothed curve is already non-decreasing, the blue dashed line lies directly on top of the red line. Vertical cut lines are drawn at the cut scores stored by \code{computeCutsIDM()}, which are linearly interpolated boundary crossings of the monotonized curve.
+
+By default, the vertical cut lines are labelled with their numeric difficulty-scale values rounded to whole numbers. The number of digits after the decimal point can be changed with \code{cut_value_digits}. The grey raw-rating points in the individual rater panels are labelled with small item position numbers. These labels can be hidden with \code{show_cut_values = FALSE} and \code{show_item_numbers = FALSE}.
 
 Technically, the plot is constructed from \code{res_list$plot_data}. For each rater facet, the x-axis is the item difficulty column stored as \code{est}; the y-values are the raw rating stage \code{stage_raw}, the smoothed moving average \code{stage_sm}, and the monotonized isotonic fit \code{stage_iso}. Horizontal lines are drawn at \code{res_list$boundaries}. Vertical lines are drawn at the difficulty-scale cuts in \code{res_list$cuts_per_person}; therefore the plotted cut positions are on the same x-axis scale as the item difficulties. Interpolated item positions, if needed for tabular summaries, are stored separately in \code{res_list$cut_positions_per_person}.
 
@@ -59,6 +67,12 @@ plotCutsIDM(res, show_aggregate = TRUE)
 
 ## Hide rater labels in the aggregate panel:
 plotCutsIDM(res, show_aggregate = TRUE, show_aggregate_labels = FALSE)
+
+## Hide cut value and item number labels:
+plotCutsIDM(res, show_cut_values = FALSE, show_item_numbers = FALSE)
+
+## Show cut value labels with two digits after the decimal point:
+plotCutsIDM(res, cut_value_digits = 2)
 
 ## Add residual panels:
 plotCutsIDM(res, show_residuals = TRUE)

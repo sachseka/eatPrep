@@ -83,11 +83,84 @@
   out
 }
 
+.format_cut_values_idm <- function(cuts, digits = 0L) {
+  vapply(cuts, function(value) {
+    if (!is.finite(value)) {
+      return(NA_character_)
+    }
+
+    label <- format(
+      round(value, digits = digits),
+      nsmall = digits,
+      trim = TRUE,
+      scientific = FALSE
+    )
+    if (digits > 0L) {
+      label <- sub("0+$", "", label)
+      label <- sub("\\.$", "", label)
+    }
+    label
+  }, character(1))
+}
+
+.cut_value_label_data_idm <- function(dat, y, panel = NULL,
+                                      panel_levels = NULL,
+                                      digits = 0L) {
+  dat <- dat |>
+    dplyr::filter(is.finite(cut)) |>
+    dplyr::mutate(
+      .cut_value_label = .format_cut_values_idm(cut, digits = digits),
+      .cut_value_y = y
+    )
+
+  if (!is.null(panel)) {
+    dat <- dat |>
+      dplyr::mutate(.panel = factor(panel, levels = panel_levels))
+  }
+
+  dat
+}
+
+.item_number_label_data_idm <- function(dat) {
+  if (!"item_position" %in% names(dat)) {
+    return(dat[FALSE, , drop = FALSE])
+  }
+
+  dat |>
+    dplyr::filter(
+      is.finite(est),
+      is.finite(stage_raw),
+      !is.na(item_position)
+    ) |>
+    dplyr::mutate(.item_number_label = as.character(item_position))
+}
+
+.x_expansion_idm <- function(show_aggregate, show_aggregate_labels,
+                             show_raw, show_item_numbers) {
+  right <- 0.05
+  if (show_aggregate && show_aggregate_labels) {
+    right <- max(right, 0.18)
+  }
+  if (show_raw && show_item_numbers) {
+    right <- max(right, 0.08)
+  }
+
+  ggplot2::expansion(mult = c(0.05, right))
+}
+
+.needs_x_expansion_idm <- function(show_aggregate, show_aggregate_labels,
+                                   show_raw, show_item_numbers) {
+  (show_aggregate && show_aggregate_labels) || (show_raw && show_item_numbers)
+}
+
 plotCutsIDM <- function(res_list, est_col = NULL,
                         show_raw = TRUE, show_smoothed = TRUE,
                         show_residuals = FALSE,
                         show_aggregate = FALSE,
-                        show_aggregate_labels = TRUE) {
+                        show_aggregate_labels = TRUE,
+                        show_cut_values = TRUE,
+                        show_item_numbers = TRUE,
+                        cut_value_digits = 0L) {
 
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
@@ -96,6 +169,15 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   checkmate::assert_flag(show_residuals)
   checkmate::assert_flag(show_aggregate)
   checkmate::assert_flag(show_aggregate_labels)
+  checkmate::assert_flag(show_cut_values)
+  checkmate::assert_flag(show_item_numbers)
+  checkmate::assert_integerish(
+    cut_value_digits,
+    len = 1,
+    lower = 0,
+    any.missing = FALSE
+  )
+  cut_value_digits <- as.integer(cut_value_digits)
 
   # Determine axis limits dynamically
   max_lv <- res_list$max_val
@@ -172,6 +254,10 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         .panel = factor("Residuals", levels = panel_levels),
         .facet_person = factor(person, levels = facet_levels)
       )
+    item_number_data <- NULL
+    if (show_raw && show_item_numbers) {
+      item_number_data <- .item_number_label_data_idm(rating_data)
+    }
     aggregate_rating_data <- NULL
     aggregate_label_data <- NULL
     if (show_aggregate) {
@@ -185,6 +271,26 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         aggregate_label_data <- .aggregate_line_label_data_idm(
           dat = aggregate_rating_data,
           y_limits = y_limits
+        )
+      }
+    }
+    cut_value_data <- NULL
+    mean_cut_value_data <- NULL
+    if (show_cut_values) {
+      cut_value_data <- .cut_value_label_data_idm(
+        dat = cuts_long,
+        y = y_limits[2],
+        panel = "Ratings",
+        panel_levels = panel_levels,
+        digits = cut_value_digits
+      )
+      if (show_aggregate) {
+        mean_cut_value_data <- .cut_value_label_data_idm(
+          dat = mean_cuts_long,
+          y = y_limits[2],
+          panel = "Ratings",
+          panel_levels = panel_levels,
+          digits = cut_value_digits
         )
       }
     }
@@ -216,6 +322,26 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           size = 1,
           na.rm = TRUE
         )
+      if (show_item_numbers) {
+        pp <- pp +
+          ggplot2::geom_text(
+            data = item_number_data,
+            ggplot2::aes(
+              x = est,
+              y = stage_raw,
+              label = .item_number_label
+            ),
+            hjust = -0.45,
+            vjust = 0.5,
+            size = 2,
+            color = "grey25",
+            alpha = 0.65,
+            fontface = "bold",
+            show.legend = FALSE,
+            na.rm = TRUE,
+            inherit.aes = FALSE
+          )
+      }
     }
 
     pp <- pp +
@@ -319,10 +445,61 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         )
     }
 
-    if (show_aggregate && show_aggregate_labels) {
+    if (show_cut_values) {
+      pp <- pp +
+        ggplot2::geom_text(
+          data = cut_value_data,
+          ggplot2::aes(
+            x = cut,
+            y = .cut_value_y,
+            label = .cut_value_label,
+            color = cut_type
+          ),
+          angle = 90,
+          hjust = 1.1,
+          vjust = -0.25,
+          size = 2.6,
+          fontface = "bold",
+          show.legend = FALSE,
+          na.rm = TRUE,
+          inherit.aes = FALSE
+        )
+      if (show_aggregate) {
+        pp <- pp +
+          ggplot2::geom_text(
+            data = mean_cut_value_data,
+            ggplot2::aes(
+              x = cut,
+              y = .cut_value_y,
+              label = .cut_value_label,
+              color = cut_type
+            ),
+            angle = 90,
+            hjust = 1.1,
+            vjust = -0.25,
+            size = 2.6,
+            fontface = "bold",
+            show.legend = FALSE,
+            na.rm = TRUE,
+            inherit.aes = FALSE
+          )
+      }
+    }
+
+    if (.needs_x_expansion_idm(
+      show_aggregate = show_aggregate,
+      show_aggregate_labels = show_aggregate_labels,
+      show_raw = show_raw,
+      show_item_numbers = show_item_numbers
+    )) {
       pp <- pp +
         ggplot2::scale_x_continuous(
-          expand = ggplot2::expansion(mult = c(0.05, 0.18))
+          expand = .x_expansion_idm(
+            show_aggregate = show_aggregate,
+            show_aggregate_labels = show_aggregate_labels,
+            show_raw = show_raw,
+            show_item_numbers = show_item_numbers
+          )
         )
     }
 
@@ -340,6 +517,10 @@ plotCutsIDM <- function(res_list, est_col = NULL,
 
   plot_data <- plot_data |>
     dplyr::mutate(.facet_person = factor(person, levels = facet_levels))
+  item_number_data <- NULL
+  if (show_raw && show_item_numbers) {
+    item_number_data <- .item_number_label_data_idm(plot_data)
+  }
   aggregate_plot_data <- NULL
   aggregate_label_data <- NULL
   if (show_aggregate) {
@@ -350,6 +531,22 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       aggregate_label_data <- .aggregate_line_label_data_idm(
         dat = aggregate_plot_data,
         y_limits = y_limits
+      )
+    }
+  }
+  cut_value_data <- NULL
+  mean_cut_value_data <- NULL
+  if (show_cut_values) {
+    cut_value_data <- .cut_value_label_data_idm(
+      dat = cuts_long,
+      y = y_limits[2],
+      digits = cut_value_digits
+    )
+    if (show_aggregate) {
+      mean_cut_value_data <- .cut_value_label_data_idm(
+        dat = mean_cuts_long,
+        y = y_limits[2],
+        digits = cut_value_digits
       )
     }
   }
@@ -366,6 +563,26 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         na.rm = TRUE
       ) +
       ggplot2::geom_point(ggplot2::aes(y = stage_raw), alpha = 0.35, size = 1, na.rm = TRUE)
+    if (show_item_numbers) {
+      pp <- pp +
+        ggplot2::geom_text(
+          data = item_number_data,
+          ggplot2::aes(
+            x = est,
+            y = stage_raw,
+            label = .item_number_label
+          ),
+          hjust = -0.45,
+          vjust = 0.5,
+          size = 2,
+          color = "grey25",
+          alpha = 0.65,
+          fontface = "bold",
+          show.legend = FALSE,
+          na.rm = TRUE,
+          inherit.aes = FALSE
+        )
+    }
   }
 
   pp <- pp +
@@ -448,10 +665,61 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       )
   }
 
-  if (show_aggregate && show_aggregate_labels) {
+  if (show_cut_values) {
+    pp <- pp +
+      ggplot2::geom_text(
+        data = cut_value_data,
+        ggplot2::aes(
+          x = cut,
+          y = .cut_value_y,
+          label = .cut_value_label,
+          color = cut_type
+        ),
+        angle = 90,
+        hjust = 1.1,
+        vjust = -0.25,
+        size = 2.6,
+        fontface = "bold",
+        show.legend = FALSE,
+        na.rm = TRUE,
+        inherit.aes = FALSE
+      )
+    if (show_aggregate) {
+      pp <- pp +
+        ggplot2::geom_text(
+          data = mean_cut_value_data,
+          ggplot2::aes(
+            x = cut,
+            y = .cut_value_y,
+            label = .cut_value_label,
+            color = cut_type
+          ),
+          angle = 90,
+          hjust = 1.1,
+          vjust = -0.25,
+          size = 2.6,
+          fontface = "bold",
+          show.legend = FALSE,
+          na.rm = TRUE,
+          inherit.aes = FALSE
+        )
+    }
+  }
+
+  if (.needs_x_expansion_idm(
+    show_aggregate = show_aggregate,
+    show_aggregate_labels = show_aggregate_labels,
+    show_raw = show_raw,
+    show_item_numbers = show_item_numbers
+  )) {
     pp <- pp +
       ggplot2::scale_x_continuous(
-        expand = ggplot2::expansion(mult = c(0.05, 0.18))
+        expand = .x_expansion_idm(
+          show_aggregate = show_aggregate,
+          show_aggregate_labels = show_aggregate_labels,
+          show_raw = show_raw,
+          show_item_numbers = show_item_numbers
+        )
       )
   }
 
