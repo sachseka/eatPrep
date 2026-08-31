@@ -516,28 +516,38 @@ Additional agreement diagnostics are computed on the raw internal rating stages,
 
 The kappa diagnostics use the same wide raw rating matrix. `kappa_pairwise` contains all pairwise Cohen kappa estimates from `meanKappa()`. `kappa_summary` summarizes these pairwise kappas overall, and `rater_kappa_statistics` gives each rater's mean and sample standard deviation across all pairings involving that rater. Fleiss kappa and the two ICC estimates for agreement and consistency are computed on complete item rows, because these procedures require a common set of items across raters. If the third, final IDM round is the target, filter the data to that round before calling `computeCutsIDM()`.
 
-`plotCutsIDM()` visualizes the raw ratings, moving averages, monotonized curves and resulting cut scores. Grey points and lines show the original ratings ordered by item difficulty. The dashed blue line shows the smoothed but not yet monotonized moving average. The red line shows the monotonized curve used for the cut computation.
+`plotCutsIDM()` visualizes the raw ratings, moving averages, monotonized curves and resulting cut scores. Grey points and lines show the original ratings ordered by item difficulty. The dashed blue line shows the smoothed but not yet monotonized moving average. The red line shows the monotonized curve used for the cut computation. Because this example uses a compact item difficulty scale, the plot examples show cut labels with two digits after the decimal point.
 
 ```{r idm plot example, fig.width=7, fig.height=5}
-plotCutsIDM(cuts)
+plotCutsIDM(cuts, cut_value_digits = 2)
 ```
 
 An aggregate panel can be added to inspect all monotonized rater curves together with the mean cuts. In this panel, rater curves are drawn in rater-specific colors and labelled by rater name by default. When several curves end at similar values, the labels are shifted slightly along the y-axis so that all names remain visible. The legend remains restricted to the cut score labels. The vertical cut lines are the means from `cuts$cuts_summary`, not newly estimated cuts from a pooled rating curve.
 
 ```{r idm aggregate plot example, fig.width=7, fig.height=5}
-plotCutsIDM(cuts, show_aggregate = TRUE)
+plotCutsIDM(cuts, show_aggregate = TRUE, cut_value_digits = 2)
 ```
 
 Set `show_aggregate_labels = FALSE` if the direct labels make the aggregate panel too dense.
 
 ```{r idm aggregate unlabeled plot example, fig.width=7, fig.height=5}
-plotCutsIDM(cuts, show_aggregate = TRUE, show_aggregate_labels = FALSE)
+plotCutsIDM(
+  cuts,
+  show_aggregate = TRUE,
+  show_aggregate_labels = FALSE,
+  cut_value_digits = 2
+)
 ```
 
 Residual panels can be added to inspect local deviations between raw ratings and the smoothed moving average. They can also be combined with the aggregate panel.
 
 ```{r idm residual plot example, fig.width=8, fig.height=6}
-plotCutsIDM(cuts, show_residuals = TRUE, show_aggregate = TRUE)
+plotCutsIDM(
+  cuts,
+  show_residuals = TRUE,
+  show_aggregate = TRUE,
+  cut_value_digits = 2
+)
 ```
 
 ### Visual Subset Recoding
