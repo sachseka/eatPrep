@@ -1,5 +1,6 @@
 # eatPrep 1.0.12
 
+* Population SDs in both plot functions now apply the variance correction `n/(n-1)` separately within each PV and population, counting available respondents with positive weights. Corrected PV variances are averaged before taking the square root.
 * Both `plotPopulationCutsIDM()` and `plotCutsIDM()` now display M and SD for each population in the legend (or the subtitle for ungrouped input). Weighted means and descriptive population variances are estimated separately per PV, then averaged across PVs; SD is the square root of the average variance. Use `show_population_stats = FALSE` to hide them and `population_stats_digits` to set decimal places. In the rater view, PV data are required.
 * Explanatory captions are now hidden by default in both plot functions. Set `show_caption = TRUE` to display the explanations of densities/silhouettes, percentages, and M/SD. This does not hide the statistics or percentage labels themselves.
 * Population percentages now align with the visible cut intervals in both plot views. Crowded labels shift minimally with thin connection lines, while population rows stay aligned. Placement adapts to figure size, zoom, and reversed score axes.

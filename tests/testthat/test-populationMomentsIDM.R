@@ -19,11 +19,11 @@ test_that("moments average per-PV weighted means and population variances", {
   result <- .population_moments_idm(dat)
   expect_equal(result$.population, c("A", "B"))
   expect_equal(result$.mean, c(7.5, 117))
-  expect_equal(result$.sd, sqrt(c(7.5, 30)))
-  # For A, average PV variances 3 and 12 before taking the square root.
-  expect_false(isTRUE(all.equal(result$.sd[1], (sqrt(3) + sqrt(12)) / 2)))
-  # Averaging respondent PVs first would give the much smaller SD sqrt(3)/2.
-  expect_false(isTRUE(all.equal(result$.sd[1], sqrt(3) / 2)))
+  expect_equal(result$.sd, sqrt(c(15, 60)))
+  # For A, n = 2 in each PV: corrected variances are 6 and 24.
+  expect_false(isTRUE(all.equal(result$.sd[1], (sqrt(6) + sqrt(24)) / 2)))
+  # Averaging respondent PVs first would give the much smaller SD sqrt(6)/2.
+  expect_false(isTRUE(all.equal(result$.sd[1], sqrt(6) / 2)))
   dat$.weight <- dat$.weight * 1e200
   expect_equal(.population_moments_idm(dat), result)
 })
@@ -32,7 +32,7 @@ test_that("moments handle equal weights, constant values and large offsets", {
   pop <- moment_population_fixture_idm()[1:2, ]
   result <- .population_moments_idm(.prepare_population_idm(pop, c("PV1", "PV2")))
   expect_equal(result$.mean, 8)
-  expect_equal(result$.sd, sqrt(10))
+  expect_equal(result$.sd, sqrt(20))
   pop[c("PV1", "PV2")] <- pop[c("PV1", "PV2")] + 1e12
   shifted <- .population_moments_idm(.prepare_population_idm(pop, c("PV1", "PV2")))
   expect_equal(shifted$.mean - 1e12, result$.mean)
@@ -42,16 +42,29 @@ test_that("moments handle equal weights, constant values and large offsets", {
   expect_equal(constant$.sd, 0)
 })
 
+test_that("single-PV correction matches sample SD and excludes zero-weight rows from n", {
+  pop <- data.frame(PV1 = c(1, 3, 8), weight = 1)
+  moments <- function(x) .population_moments_idm(
+    .prepare_population_idm(x, "PV1", weight_col = "weight")
+  )
+  expect_equal(moments(pop)$.sd, stats::sd(pop$PV1))
+  pop$weight <- c(1, 2, 3)
+  expected <- moments(pop)
+  expect_equal(expected$.mean, 31 / 6)
+  expect_equal(expected$.sd, sqrt(305 / 24))
+  expect_equal(moments(rbind(pop, data.frame(PV1 = 1000, weight = 0))), expected)
+})
+
 test_that("variance pooling preserves repeated PV spreads and handles large SDs", {
   pop <- data.frame(PV1 = c(0, 4), PV2 = c(0, 4))
   moments <- function(x) .population_moments_idm(.prepare_population_idm(x, c("PV1", "PV2")))
-  expect_equal(moments(pop)$.sd, 2)
+  expect_equal(moments(pop)$.sd, sqrt(8))
   # A difference between PV means does not add to the descriptive variance.
   pop$PV2 <- pop$PV2 + 100
-  expect_equal(moments(pop)$.sd, 2)
+  expect_equal(moments(pop)$.sd, sqrt(8))
   expect_equal(moments(pop)$.mean, 52)
   pop <- data.frame(PV1 = c(0, 4e200), PV2 = c(0, 8e200))
-  expect_equal(moments(pop)$.sd / 1e200, sqrt(10))
+  expect_equal(moments(pop)$.sd / 1e200, sqrt(20))
   pop[,] <- 5
   expect_equal(moments(pop)$.sd, 0)
 })
@@ -69,7 +82,8 @@ test_that("wide and long moments use the same available weights within each PV",
   result <- .population_moments_idm(wide)
   expect_equal(result, .population_moments_idm(long))
   expect_equal(result$.mean, 43 / 6)
-  expect_equal(result$.sd, sqrt((3 + 80 / 9) / 2))
+  # Correct separately with n = 2 for PV1 and n = 3 for PV2.
+  expect_equal(result$.sd, sqrt((2 * 3 + (3 / 2) * 80 / 9) / 2))
 })
 
 test_that("population legends show independently switchable and formatted moments", {
@@ -79,7 +93,7 @@ test_that("population legends show independently switchable and formatted moment
   shown <- do.call(plotPopulationCutsIDM, args)
   hidden <- do.call(plotPopulationCutsIDM, c(args, list(show_population_stats = FALSE)))
   expect_equal(as.character(shown$scales$get_scales("fill")$get_labels()),
-                 c("A\nM = 7.50; SD = 2.74", "B\nM = 117.00; SD = 5.48"))
+                 c("A\nM = 7.50; SD = 3.87", "B\nM = 117.00; SD = 7.75"))
   expect_equal(hidden$scales$get_scales("fill")$get_labels(), c("A", "B"))
   expect_equal(ggplot2::ggplot_build(shown)$data, ggplot2::ggplot_build(hidden)$data)
   expect_equal(shown$facet$percentage_labels, hidden$facet$percentage_labels)
@@ -90,7 +104,7 @@ test_that("population legends show independently switchable and formatted moment
     cut_selection = "both"
   )))
   expect_equal(as.character(changed$scales$get_scales("fill")$get_labels()),
-                 c("A\nM = 7.5; SD = 2.7", "B\nM = 117.0; SD = 5.5"))
+                 c("A\nM = 7.5; SD = 3.9", "B\nM = 117.0; SD = 7.7"))
   grDevices::pdf(file = NULL)
   on.exit(grDevices::dev.off())
   expect_s3_class(ggplot2::ggplotGrob(shown), "gtable")
@@ -101,7 +115,7 @@ test_that("ungrouped moments use a subtitle and invalid settings are rejected", 
                pv_cols = c("PV1", "PV2"), weight_col = "weight")
   shown <- do.call(plotPopulationCutsIDM, args)
   hidden <- do.call(plotPopulationCutsIDM, c(args, list(show_population_stats = FALSE)))
-  expect_equal(shown$labels$subtitle, "M = 7.50; SD = 2.74")
+  expect_equal(shown$labels$subtitle, "M = 7.50; SD = 3.87")
   expect_null(hidden$labels$subtitle)
   expect_null(shown$scales$get_scales("fill"))
   for (bad in list(NA, 1, c(TRUE, FALSE))) {

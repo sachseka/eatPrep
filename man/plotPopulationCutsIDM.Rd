@@ -95,13 +95,15 @@ set of distributions on fixed axes.
 
 With \code{show_population_stats = TRUE}, M and SD are calculated from the
 observed PVs and sampling weights, separately within each population and PV.
-For each PV, normalize weights to sum to one, compute its weighted mean, then
-take the square root of the weighted mean squared deviation from that mean.
+For each PV, normalize weights to sum to one, compute its weighted mean, and
+multiply the weighted mean squared deviation by \eqn{n_j/(n_j-1)} before taking
+the square root. Here \eqn{n_j} is the number of observed respondents with
+positive weights in that PV and population, after missing-data handling.
 The displayed M averages the PV means; the displayed SD is the square root of
 the average PV variance: \eqn{SD = \sqrt{m^{-1}\sum_{j=1}^{m} SD_j^2}}, where
 \eqn{m} is the number of PVs. Every PV has equal weight. No variance component
-for differences between PV means is added. This is a descriptive population SD,
-without an \eqn{n-1} sample-variance correction. It is not a standard error.
+for differences between PV means is added. This estimates population SD with
+an \eqn{n_j/(n_j-1)} variance correction; it is not a standard error.
 Respondents' PVs are never averaged before computing these statistics.
 With \code{pv_missing = "drop"}, each PV uses its own available observations
 and renormalized weights. Zero-weight observations are excluded.

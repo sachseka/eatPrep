@@ -20,7 +20,10 @@
       if (scale == 0) return(c(M = origin, SD = 0))
       z <- centered / scale
       m <- sum(w * z)
-      c(M = origin + scale * m, SD = scale * sqrt(sum(w * (z - m)^2)))
+      # Preparation retains at least two valid, positive-weight observations
+      # per PV and population. Apply the correction before pooling variances.
+      n <- nrow(draw)
+      c(M = origin + scale * m, SD = scale * sqrt(n / (n - 1) * sum(w * (z - m)^2)))
     }, numeric(2))
     # Pool variances, then take the square root. Scale the SDs first to avoid
     # overflow when the variances exceed the numeric range but the SD does not.

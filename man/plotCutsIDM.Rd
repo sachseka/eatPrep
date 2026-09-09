@@ -158,7 +158,8 @@ Both views are descriptive estimates and do not calculate uncertainty intervals.
 
 With population data, M and SD are shown by default using the same computation
 as \code{plotPopulationCutsIDM()}: M averages the weighted PV means, and SD is
-the square root of the average weighted PV variance. See its details for the
+the square root of the average weighted PV variance, with an \eqn{n/(n-1)}
+correction applied separately within each PV and population. See its details for the
 formula and weighting convention.
 The statistics describe each whole population on the supplied score metric and
 are shared across rating and mean panels, including plots with residual panels.
