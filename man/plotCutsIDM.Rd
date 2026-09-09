@@ -69,9 +69,9 @@ plotCutsIDM(
   \item{population_alpha}{Finite silhouette opacity between zero and one. Default \code{0.15}.}
   \item{population_col}{Optional population grouping column in wide or long PV input. Labels must be non-missing and non-empty. Groups are drawn and listed in their order of first appearance; unused factor levels are ignored. Default \code{NULL} treats all rows as one population.}
   \item{population_colors}{Optional named character vector with exactly one color per observed population label. Requires \code{population_col}. Default \code{NULL} uses blue and orange for two groups or a qualitative palette for more groups. A separate population fill legend is added.}
-  \item{show_percentages}{Logical scalar. Default \code{TRUE} adds percentage tables to rating panels when \code{pv_data} is supplied. Columns \code{[1]}, \code{[2]}, and so on identify cut intervals from left to right, with one colored row per population in legend order. Residual panels have no percentage labels. \code{FALSE} hides the tables and their additional caption. Has no plotting effect without \code{pv_data}.}
+  \item{show_percentages}{Logical scalar. Default \code{TRUE} adds percentage tables to rating panels when \code{pv_data} is supplied, with one colored row per population in legend order. Residual panels have no percentage labels. \code{FALSE} hides the tables and their additional caption. Has no plotting effect without \code{pv_data}.}
   \item{percentage_digits}{Integer scalar from zero to ten. Decimal places in percentage labels. Default \code{1L}. Displayed totals can differ slightly from 100 percent because of rounding.}
-  \item{percentage_size}{Finite non-negative percentage-table text size in millimetres, including interval headers. Default \code{3}. Reduce this size or increase figure width for many intervals or small panels.}
+  \item{percentage_size}{Finite non-negative percentage-table text size in millimetres. Default \code{3}. Reduce this size or increase figure width for many intervals or small panels.}
 }
 \details{
 One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. If \code{show_raw = TRUE}, grey points and a thin grey line show the original rater assignments after ordering items by difficulty. If \code{show_smoothed = TRUE}, a thin dashed blue line shows the moving average before monotonization. The red line represents the monotonized isotonic curve used to find the vertical intercepts. If the smoothed curve is already non-decreasing, the blue dashed line lies directly on top of the red line. Vertical cut lines are drawn at the cut scores stored by \code{computeCutsIDM()}, which are linearly interpolated boundary crossings of the monotonized curve.
@@ -114,9 +114,8 @@ represent rating stages} or density-axis values. Every rating and aggregate
 panel repeats all populations with the same scaling; residual panels stay clear.
 
 By default, each rating panel with population data also contains a percentage
-table. Its equally spaced columns identify cut intervals in left-to-right order;
-their numbers are interval indices, not rating stages or positions on the score
-axis. Each population has a separate row, following the population legend's
+table. Its equally spaced columns follow cut intervals in left-to-right order.
+Each population has a separate row, following the population legend's
 order and colors. The mean panel recomputes shares using its mean cuts; it does
 not average individual raters' percentages. Space above the data is reserved for
 the tables. Residual panels receive no percentage labels.

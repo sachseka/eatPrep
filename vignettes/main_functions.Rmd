@@ -802,21 +802,13 @@ plotCutsIDM(
 
 #### Population percentages within the cut intervals
 
-Both plot functions now show population percentages by default when PV data are supplied. Each panel has a small table above its data: columns `[1]`, `[2]`, and so on refer to cut intervals from left to right, with a separate colored row for each population in legend order. For one ungrouped population, the table has a single neutral row.
+Both plot functions now show population percentages by default when PV data are supplied. Each panel has a small table above its data, with a separate colored row for each population in legend order. Percentages follow the cut intervals from left to right. For one ungrouped population, the table has a single neutral row.
 
 **The percentage labels are estimated population shares. Silhouette height still communicates distribution shape only and does not represent rating stages or density-axis values.** These meanings are also explained in the plot captions.
 
-For a panel with two cuts `c1` and `c2`, the table columns mean:
-
-| Column | PV values included |
-|:--|:--|
-| `[1]` | Below `c1` |
-| `[2]` | At or above `c1`, but below `c2` |
-| `[3]` | At or above `c2` |
-
 In general, there is one more interval than there are cuts. A value **exactly on a cut belongs to the upper interval**. The outer intervals extend to minus and plus infinity, so all available PV observations contribute, even when they fall outside a displayed x-axis window. The actual, unrounded cuts determine interval membership. Identical adjacent cuts create an empty interval with 0%; they are not merged.
 
-Table columns have equal display width so that close or identical cuts do not cause percentage labels to overlap. The column numbers identify interval order, **not rating stages or score-axis positions**. The table should therefore be read as a table, not as labels located at the interval midpoints. With many cuts or a narrow plot, reduce `percentage_size` or increase the figure width.
+Table columns have equal display width so that close or identical cuts do not cause percentage labels to overlap. With many cuts or a narrow plot, reduce `percentage_size` or increase the figure width.
 
 ```{r idm population percentages, fig.width=9, fig.height=7}
 plotPopulationCutsIDM(
@@ -857,7 +849,7 @@ per_pv <- rbind(
   PV1 = shares_at_0_and_10(toy_pvs$PV1, toy_pvs$weight),
   PV2 = shares_at_0_and_10(toy_pvs$PV2, toy_pvs$weight)
 )
-colnames(per_pv) <- c("[1]", "[2]", "[3]")
+colnames(per_pv) <- c("Below 0", "0 to below 10", "10 and above")
 rbind(per_pv, Mean = colMeans(per_pv))
 # PV1: 10%, 20%, 70%; PV2: 20%, 40%, 40%; displayed estimate: 15%, 30%, 55%.
 ```

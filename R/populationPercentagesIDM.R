@@ -63,11 +63,6 @@
     panel_values <- values[as.character(values$.facet_person) == panel, , drop = FALSE]
     n_intervals <- max(panel_values$.interval)
     centers <- x_range[1] + diff(x_range) * (seq_len(n_intervals) - 0.5) / n_intervals
-    header <- data.frame(
-      .facet_person = panel, .percentage_x = centers,
-      .percentage_label = paste0("[", seq_len(n_intervals), "]"),
-      .percentage_color = "grey35", .percentage_vjust = 0.8
-    )
     labels <- data.frame(
       .facet_person = panel,
       .percentage_x = centers[panel_values$.interval],
@@ -75,9 +70,9 @@
                                          digits = as.integer(percentage_digits)), "%"),
       .percentage_color = if (is.null(population_colors)) "grey25" else
         unname(population_colors[as.character(panel_values$.population)]),
-      .percentage_vjust = 0.8 + 1.8 * as.integer(panel_values$.population)
+      .percentage_vjust = 1.2 + 1.8 * (as.integer(panel_values$.population) - 1L)
     )
-    text_rows[[length(text_rows) + 1L]] <- rbind(header, labels)
+    text_rows[[length(text_rows) + 1L]] <- labels
   }
   if (length(summary$incomplete)) {
     warning(paste0("Percentages omitted for panels with incomplete cuts: ",
@@ -94,7 +89,7 @@
   if (show_residuals) labels$.panel <- factor("Ratings", levels = c("Ratings", "Residuals"))
 
   # Use axis expansion for the annotation band; label rows never train the y scale.
-  upper_expand <- 0.05 + 0.12 * (length(summary$populations) + 1) * percentage_size / 3
+  upper_expand <- 0.05 + 0.12 * length(summary$populations) * percentage_size / 3
   y_scale <- pp$scales$get_scales("y")
   if (is.null(y_scale)) {
     y_scale <- ggplot2::scale_y_continuous()
@@ -111,7 +106,7 @@
     }
   }
   caption <- pp$labels$caption
-  explanation <- paste0("Percentages: intervals [1], [2], ... from left to right; weighted PV estimates.\n",
+  explanation <- paste0("Percentages: weighted PV estimates.\n",
                          "Values on a cut enter the upper interval; rounding may affect totals.")
   pp + ggplot2::geom_label(
     data = labels,

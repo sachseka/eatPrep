@@ -55,9 +55,9 @@ plotPopulationCutsIDM(
   \item{population_alpha}{Finite fill opacity between zero and one. Default \code{0.25}.}
   \item{population_col}{Optional grouping column identifying populations in wide or long input. Labels must be non-missing and non-empty. Groups are drawn and listed in their order of first appearance; unused factor levels are ignored. Default \code{NULL} treats all rows as one population and preserves the ungrouped plot.}
   \item{population_colors}{Optional named character vector of colors, with exactly one name matching each observed population label. Requires \code{population_col}. Default \code{NULL} selects blue and orange for two groups, or a qualitative palette for more groups. A separate fill legend identifies populations; cut colors keep their existing meaning.}
-  \item{show_percentages}{Logical scalar. Default \code{TRUE} adds a percentage table at the top of each panel. Columns \code{[1]}, \code{[2]}, and so on identify cut intervals from left to right. Each population has a colored row, in population-legend order. \code{FALSE} hides the table and its additional caption.}
+  \item{show_percentages}{Logical scalar. Default \code{TRUE} adds a percentage table at the top of each panel. Each population has a colored row, in population-legend order. \code{FALSE} hides the table and its additional caption.}
   \item{percentage_digits}{Integer scalar from zero to ten. Decimal places shown in percentage labels. Default \code{1L}. Rounding is for display only and can make displayed totals differ slightly from 100 percent.}
-  \item{percentage_size}{Finite non-negative text size in millimetres for the percentage table, including interval headers. Default \code{3}. For many intervals or small figures, reduce this size or increase the figure width.}
+  \item{percentage_size}{Finite non-negative text size in millimetres for the percentage table. Default \code{3}. For many intervals or small figures, reduce this size or increase the figure width.}
 }
 \details{
 A Gaussian kernel density is estimated separately for each PV, using sampling
@@ -102,9 +102,8 @@ rounding or density smoothing does not change percentages. Individual panels
 use their rater's cuts. The mean panel recomputes shares at the mean cuts; it
 does not average rater percentages.
 
-The percentage table uses equally spaced columns, including for narrow or empty
-intervals. Column numbers indicate interval order, not rating stages or positions
-on the score axis. Rows follow population-legend order and colors; ungrouped data
+The percentage table uses equally spaced columns in cut-interval order, including
+for narrow or empty intervals. Rows follow population-legend order and colors; ungrouped data
 have one neutral row. Additional space above the data is reserved for the table.
 If a panel has any missing or infinite cut, its percentage table is replaced
 with an explanatory message and a warning identifies the panel. Descending cut
@@ -206,7 +205,6 @@ plotPopulationCutsIDM(cuts, populations_long, respondent_id_col = "student",
                       population_col = "group", population_colors = colors)
 
 ## Percentages use actual panel cuts, independently of density smoothing.
-## [1] is below the first cut; the last column is at/above the last cut.
 plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
                       weight_col = "weight", population_col = "group",
                       cut_selection = "both", percentage_digits = 2,
