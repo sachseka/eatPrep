@@ -183,7 +183,8 @@ test_that("classed numeric identifiers retain their character interpretation", {
   wide <- .prepare_population_idm(pop, c("PV1", "PV2"),
                                   respondent_id_col = "student", population_col = "population")
   expect_equal(unique(wide$.id), c("a", "b", "c"))
-  expect_equal(levels(wide$.population), c("f", "10"))
+  # Preserve the class's own formatting, including any leading zero.
+  expect_equal(levels(wide$.population), unique(as.character(pop$population)))
   long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
   long$pv <- as.hexmode(10 + match(long$pv, c("PV1", "PV2")))
   long_dat <- .prepare_population_idm(

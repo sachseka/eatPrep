@@ -49,6 +49,73 @@
   list(values = result, incomplete = incomplete, populations = populations)
 }
 
+.spread_percentage_labels_idm <- function(targets, widths, panel_width, gap = 1) {
+  # Subtract required spacings, then use isotonic regression for the smallest
+  # squared displacement that preserves order and keeps boxes inside the panel.
+  offsets <- c(0, cumsum((utils::head(widths, -1) + utils::tail(widths, -1)) / 2 + gap))
+  lower <- widths[1] / 2
+  upper <- panel_width - utils::tail(widths, 1) / 2 - utils::tail(offsets, 1)
+  fitted <- if (length(targets) == 1L) targets else
+    stats::isoreg(seq_along(targets), targets - offsets)$yf
+  pmin(pmax(fitted, lower), max(lower, upper)) + offsets
+}
+
+.percentage_cell_idm <- function(text, color, padding, x, y) {
+  grid::grobTree(
+    grid::rectGrob(
+      width = grid::grobWidth(text) + 2 * padding,
+      height = grid::grobHeight(text) + 2 * padding,
+      gp = grid::gpar(fill = "white", col = color, lwd = 0.5)
+    ),
+    text, vp = grid::viewport(x = x, y = y)
+  )
+}
+
+makeContent.population_percentage_band <- function(x) {
+  panel_width <- grid::convertWidth(grid::unit(1, "npc"), "mm", valueOnly = TRUE)
+  labels <- x$labels
+  widths <- vapply(x$text, function(text) {
+    grid::convertWidth(grid::grobWidth(text), "mm", valueOnly = TRUE) + 1
+  }, numeric(1))
+  columns <- unique(labels$.percentage_interval)
+  column_widths <- vapply(columns, function(column) {
+    max(widths[labels$.percentage_interval == column])
+  }, numeric(1))
+  targets <- labels$.percentage_anchor[match(columns, labels$.percentage_interval)]
+  order <- order(targets, columns)
+  # Only if the combined label widths exceed the entire panel, reduce text and
+  # padding together. This prevents overflow into neighboring facets on resize.
+  shrink <- min(1, panel_width / (sum(column_widths) + length(columns) - 1))
+  positions <- numeric(length(columns))
+  positions[order] <- .spread_percentage_labels_idm(
+    targets[order] * panel_width, column_widths[order] * shrink,
+    panel_width, gap = shrink
+  )
+  row_heights <- grid::convertHeight(x$row_heights, "mm", valueOnly = TRUE)
+  row_centers <- sum(row_heights) + x$leader_height -
+    cumsum(row_heights) + row_heights / 2
+  cells <- lapply(seq_len(nrow(labels)), function(i) {
+    text <- x$text[[i]]
+    text$gp$fontsize <- text$gp$fontsize * shrink
+    .percentage_cell_idm(
+      text, labels$.percentage_color[i], grid::unit(0.5 * shrink, "mm"),
+      x = grid::unit(positions[match(labels$.percentage_interval[i], columns)], "mm"),
+      y = grid::unit(row_centers[labels$.percentage_row[i]], "mm")
+    )
+  })
+  shifted <- which(abs(positions - targets * panel_width) > 0.1)
+  if (length(shifted) && x$leader_height > 0) {
+    leaders <- grid::segmentsGrob(
+      x0 = grid::unit(targets[shifted], "npc"), y0 = grid::unit(0, "mm"),
+      x1 = grid::unit(positions[shifted], "mm"),
+      y1 = grid::unit(x$leader_height, "mm"),
+      gp = grid::gpar(col = "grey55", lwd = 0.5), name = "percentage-leaders"
+    )
+    cells <- c(list(leaders), cells)
+  }
+  grid::setChildren(x, do.call(grid::gList, cells))
+}
+
 .population_percentage_table_idm <- function(labels, percentage_size, theme) {
   family <- theme$text$family
   if (is.null(family)) family <- ""
@@ -67,25 +134,23 @@
     do.call(grid::unit.pmax, lapply(text[cells], grid::grobHeight)) +
       2 * padding + gap
   })
-  table <- gtable::gtable(
-    widths = grid::unit(rep(1, max(labels$.percentage_columns)), "null"),
-    heights = do.call(grid::unit.c, row_heights)
+  row_heights <- do.call(grid::unit.c, row_heights)
+  leader_height <- if (all(is.na(labels$.percentage_lower))) 0 else 2.5
+  # Keep text children available for inspection before drawing. makeContent
+  # measures the final facet width and lays out these cells on every redraw.
+  cells <- lapply(seq_along(text), function(i) {
+    .percentage_cell_idm(text[[i]], labels$.percentage_color[i], padding,
+                         x = grid::unit(labels$.percentage_anchor[i], "npc"),
+                         y = grid::unit(0.5, "npc"))
+  })
+  band <- grid::gTree(
+    labels = labels, text = text, row_heights = row_heights,
+    leader_height = leader_height, children = do.call(grid::gList, cells),
+    cl = "population_percentage_band"
   )
-  for (i in seq_along(text)) {
-    cell <- grid::grobTree(
-      grid::rectGrob(
-        width = grid::grobWidth(text[[i]]) + 2 * padding,
-        height = grid::grobHeight(text[[i]]) + 2 * padding,
-        gp = grid::gpar(fill = "white", col = labels$.percentage_color[i], lwd = 0.5)
-      ),
-      text[[i]]
-    )
-    table <- gtable::gtable_add_grob(
-      table, cell, t = labels$.percentage_row[i], l = labels$.percentage_interval[i],
-      clip = "off", name = paste0("percentage-cell-", i)
-    )
-  }
-  table
+  table <- gtable::gtable(widths = grid::unit(1, "null"),
+                          heights = sum(row_heights) + grid::unit(leader_height, "mm"))
+  gtable::gtable_add_grob(table, band, t = 1, l = 1, clip = "off", name = "percentage-labels")
 }
 
 .population_percentage_facet_idm <- function(facet, labels, percentage_size,
@@ -115,8 +180,8 @@
         cell <- panel_cells[panel_cells$.row == layout$ROW[i] &
                               panel_cells$.col == layout$COL[i], , drop = FALSE]
         if (!nrow(cell)) next
-        # Keep interval order aligned with score direction after scale/coordinate
-        # transformations, just as labels drawn inside the panel would be.
+        # Transform cut boundaries into panel coordinates, including reversed
+        # axes and zoom. Outer intervals end at the visible panel edge.
         x_scale <- x_scales[[layout$SCALE_X[i]]]
         scale_limits <- x_scale$get_limits()
         score_limits <- x_scale$get_transformation()$inverse(scale_limits)
@@ -125,10 +190,27 @@
           data.frame(x = scale_limits, y = mean(panel_range$y.range)), panel_range
         )
         direction <- if (inherits(coord, "CoordFlip")) positions$y else positions$x
-        if (isTRUE(diff(score_limits) * diff(direction) < 0)) {
+        reversed <- isTRUE(diff(score_limits) * diff(direction) < 0)
+        if (reversed) {
+          # Also preserve visual interval order when ties or zoomed-out cuts
+          # share an anchor and the collision layout must separate them.
           panel_labels$.percentage_interval <- panel_labels$.percentage_columns + 1L -
             panel_labels$.percentage_interval
         }
+        boundary_position <- function(boundaries, edge) {
+          out <- rep(edge, length(boundaries))
+          finite <- is.finite(boundaries)
+          positions <- coord$transform(
+            data.frame(x = x_scale$transform(boundaries[finite]),
+                       y = rep(mean(panel_range$y.range), sum(finite))), panel_range
+          )
+          out[finite] <- if (inherits(coord, "CoordFlip")) positions$y else positions$x
+          pmax(0, pmin(1, out))
+        }
+        panel_labels$.percentage_anchor <- (
+          boundary_position(panel_labels$.percentage_lower, as.numeric(reversed)) +
+            boundary_position(panel_labels$.percentage_upper, as.numeric(!reversed))
+        ) / 2
         bands[[length(bands) + 1L]] <- list(
           cell = cell,
           grob = .population_percentage_table_idm(panel_labels, percentage_size, theme),
@@ -165,7 +247,6 @@
   summary <- .population_percentages_idm(dat, cuts)
   values <- summary$values
   text_rows <- list()
-  # Equal-width table columns avoid collisions when adjacent cuts are close or tied.
   for (panel in unique(as.character(values$.facet_person))) {
     panel_values <- values[as.character(values$.facet_person) == panel, , drop = FALSE]
     n_intervals <- max(panel_values$.interval)
@@ -173,6 +254,8 @@
       .facet_person = panel,
       .percentage_interval = panel_values$.interval,
       .percentage_columns = n_intervals,
+      .percentage_lower = panel_values$.lower,
+      .percentage_upper = panel_values$.upper,
       .percentage_label = paste0(formatC(panel_values$.percentage, format = "f",
                                          digits = as.integer(percentage_digits)), "%"),
       .percentage_color = if (is.null(population_colors)) "grey25" else
@@ -187,6 +270,7 @@
     text_rows[[length(text_rows) + 1L]] <- data.frame(
       .facet_person = summary$incomplete, .percentage_interval = 1L,
       .percentage_columns = 1L,
+      .percentage_lower = NA_real_, .percentage_upper = NA_real_,
       .percentage_label = "Percentages unavailable\n(incomplete cuts)",
       .percentage_color = "grey35", .percentage_row = 1L
     )

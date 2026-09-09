@@ -255,8 +255,12 @@ test_that("percentage columns follow reversed score axes", {
   column_labels <- function(plot) {
     grob <- ggplot2::ggplotGrob(plot)
     band <- grob$grobs[[which(grepl("^population-percentages-", grob$layout$name))[1]]]
-    cells <- band$grobs[order(band$layout$l)]
-    vapply(cells, function(cell) percentage_text_grobs_idm(cell)[[1]]$label, character(1))
+    grid::pushViewport(grid::viewport(width = grid::unit(100, "mm"), height = sum(band$heights)))
+    on.exit(grid::popViewport())
+    drawn <- grid::makeContent(band$grobs[[1]])
+    cells <- as.list(drawn$children)[!names(drawn$children) %in% "percentage-leaders"]
+    cells <- cells[order(vapply(cells, function(cell) as.numeric(cell$vp$x), numeric(1)))]
+    unname(vapply(cells, function(cell) percentage_text_grobs_idm(cell)[[1]]$label, character(1)))
   }
   normal <- column_labels(p)
   expect_false(identical(normal, rev(normal)))
@@ -265,5 +269,87 @@ test_that("percentage columns follow reversed score axes", {
     expect_equal(column_labels(p + ggplot2::coord_cartesian(reverse = "x")), rev(normal))
     expect_equal(column_labels(p + ggplot2::scale_x_reverse() +
                                  ggplot2::coord_cartesian(reverse = "x")), normal)
+    expect_equal(column_labels(p + ggplot2::coord_cartesian(xlim = c(20, 30), reverse = "x")),
+                 rev(normal))
   }
+})
+
+test_that("percentage anchors follow actual intervals and visible outer edges", {
+  res <- percentage_cuts_fixture_idm()
+  res$cuts_summary[1, res$cut_labels] <- as.list(c(0, 1))
+  pop <- percentage_population_fixture_idm()
+  grDevices::pdf(file = NULL)
+  on.exit(grDevices::dev.off())
+  anchors <- function(plot) {
+    grob <- ggplot2::ggplotGrob(plot)
+    band <- grob$grobs[[which(grepl("^population-percentages-", grob$layout$name))[1]]]
+    band$grobs[[1]]$labels$.percentage_anchor
+  }
+  for (fun in list(plotPopulationCutsIDM, plotCutsIDM)) {
+    args <- list(res_list = res, pv_data = pop, pv_cols = c("PV1", "PV2"),
+                 population_col = "population")
+    if (identical(fun, plotCutsIDM)) {
+      # Use the same known cuts in every rating panel.
+      for (j in seq_along(res$cut_labels)) args$res_list$cuts_per_person[[res$cut_labels[j]]] <- c(0, 1)[j]
+    }
+    p <- do.call(fun, args)
+    # Visible midpoints: -2.5, 0.5, 8 on a [-5, 15] axis.
+    expect_equal(anchors(p + ggplot2::coord_cartesian(xlim = c(-5, 15), expand = FALSE)),
+                 rep(c(0.125, 0.275, 0.65), 2))
+    # Zooming changes the visible tail midpoint, not the computed shares.
+    expect_equal(anchors(p + ggplot2::coord_cartesian(xlim = c(0, 2), expand = FALSE)),
+                 rep(c(0, 0.25, 0.75), 2))
+  }
+})
+
+test_that("collision layout moves only crowded labels and preserves order", {
+  expect_equal(.spread_percentage_labels_idm(c(10, 40, 90), c(8, 10, 8), 100),
+                 c(10, 40, 90))
+  expect_equal(.spread_percentage_labels_idm(c(10, 50, 50, 90), rep(8, 4), 100),
+                 c(10, 45.5, 54.5, 90))
+  expect_equal(.spread_percentage_labels_idm(c(0, 1, 100), rep(8, 3), 100),
+                 c(4, 13, 96))
+})
+
+test_that("drawing measures label widths, aligns populations and connects displaced labels", {
+  labels <- data.frame(
+    .percentage_label = rep(c("10.0%", "0.0%", "30.0%", "60.0%"), 2),
+    .percentage_color = rep(c("blue", "orange"), each = 4),
+    .percentage_interval = rep(1:4, 2), .percentage_row = rep(1:2, each = 4),
+    .percentage_lower = rep(c(-Inf, 0, 0, 1), 2),
+    .percentage_anchor = rep(c(0.1, 0.5, 0.5, 0.9), 2)
+  )
+  grDevices::pdf(file = NULL)
+  on.exit(grDevices::dev.off())
+  render <- function(width) {
+    table <- .population_percentage_table_idm(labels, 3, ggplot2::theme_minimal())
+    grid::pushViewport(grid::viewport(width = grid::unit(width, "mm"),
+                                      height = sum(table$heights)))
+    on.exit(grid::popViewport())
+    band <- grid::makeContent(table$grobs[[1]])
+    cells <- as.list(band$children)[!names(band$children) %in% "percentage-leaders"]
+    x <- unname(vapply(cells, function(cell) as.numeric(cell$vp$x), numeric(1)))
+    widths <- vapply(cells, function(cell) {
+      grid::convertWidth(cell$children[[1]]$width, "mm", valueOnly = TRUE)
+    }, numeric(1))
+    expect_equal(x[1:4], x[5:8])
+    expect_true(all(x - widths / 2 >= -1e-8))
+    expect_true(all(x + widths / 2 <= width + 1e-8))
+    expect_true(all(diff(x[1:4]) >= (head(widths[1:4], -1) + tail(widths[1:4], -1)) / 2))
+    leaders <- band$children[["percentage-leaders"]]
+    expect_equal(as.numeric(leaders$x0), c(0.5, 0.5))
+    x[1:4]
+  }
+  wide <- render(100)
+  expect_equal(wide[c(1, 4)], c(10, 90))
+  narrow <- render(70)
+  expect_gt(abs(narrow[2] / 70 - 0.5), abs(wide[2] / 100 - 0.5))
+  # Even a very narrow export fits; all rows shrink together only if necessary.
+  labels$.percentage_anchor <- rep(seq(0.125, 0.875, length.out = 4), 2)
+  table <- .population_percentage_table_idm(labels, 3, ggplot2::theme_minimal())
+  grid::pushViewport(grid::viewport(width = grid::unit(10, "mm"), height = sum(table$heights)))
+  band <- grid::makeContent(table$grobs[[1]])
+  grid::popViewport()
+  texts <- percentage_text_grobs_idm(band)
+  expect_true(all(vapply(texts, function(text) text$gp$fontsize, numeric(1)) < 3 * 72.27 / 25.4))
 })

@@ -105,12 +105,22 @@ rounding or density smoothing does not change percentages. Individual panels
 use their rater's cuts. The mean panel recomputes shares at the mean cuts; it
 does not average rater percentages.
 
-The percentage table uses equally spaced columns in cut-interval order, including
-for narrow or empty intervals. Rows follow population-legend order and colors; ungrouped data
+Percentage labels are horizontally centered between the visible cut positions.
+For outer intervals, the midpoint between the outermost cut and the visible
+panel edge is used. Narrow or empty intervals retain their labels: overlapping
+labels are shifted as little as possible while preserving their order, with
+thin lines connecting shifted columns to their interval midpoints. Population
+rows share the same horizontal positions. Placement is recalculated at drawing
+time using the actual text widths, including after zooming or reversing the
+score axis. Intervals wholly outside a zoomed view are anchored at its edge;
+zooming does not change their percentages.
+Rows follow population-legend order and colors; ungrouped data
 have one neutral row. The table occupies a separate band above the data, with
 height determined by its text size and number of rows. It does not change the
 data axes or overlap curves when the figure is resized. Increase figure height
 for many panels or populations, and figure width for many intervals.
+If the combined label widths exceed the panel width, text and padding are
+reduced together to fit; increase figure width to retain the requested text size.
 If a panel has any missing or infinite cut, its percentage table is replaced
 with an explanatory message and a warning identifies the panel. Descending cut
 sequences cause an error when percentages are enabled.

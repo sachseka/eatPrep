@@ -114,7 +114,13 @@ represent rating stages} or density-axis values. Every rating and aggregate
 panel repeats all populations with the same scaling; residual panels stay clear.
 
 By default, each rating panel with population data also contains a percentage
-table. Its equally spaced columns follow cut intervals in left-to-right order.
+table. Percentage labels are centered between the visible cut positions; outer
+intervals use the midpoint between the outermost cut and the visible panel edge.
+Crowded labels shift as little as possible, preserving interval order, with thin
+lines connecting shifted columns to their interval midpoints. Population rows
+stay horizontally aligned. Placement uses rendered text widths and adapts to
+resizing, zooming, and reversed score axes. Intervals wholly outside a zoomed
+view are anchored at its edge, with their percentages unchanged.
 Each population has a separate row, following the population legend's
 order and colors. The mean panel recomputes shares using its mean cuts; it does
 not average individual raters' percentages. Each table occupies a separate band
@@ -122,6 +128,8 @@ above the data, with height determined by its text size and number of rows.
 The data axes are unchanged, and the tables stay clear of rating curves when
 the figure is resized. Increase figure height for many panels or populations,
 and figure width for many intervals. Residual panels receive no percentage labels.
+If the combined label widths exceed the panel width, text and padding are
+reduced together to fit; increase figure width to retain the requested text size.
 
 Percentages are calculated directly from PVs and sampling weights, separately
 for every population and PV, then averaged equally across PVs. Available weights

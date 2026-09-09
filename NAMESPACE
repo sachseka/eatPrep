@@ -1,5 +1,7 @@
 S3method(print,summary.cutsIDM)
 S3method(summary,cutsIDM)
+S3method(makeContent,population_percentage_band)
+importFrom(grid, makeContent)
 importFrom(irrCAC, bp.coeff.raw)
 importFrom(combinat, combn)
 importFrom(eatGADS, import_spss)

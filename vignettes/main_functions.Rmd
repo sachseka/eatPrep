@@ -808,7 +808,9 @@ Both plot functions now show population percentages by default when PV data are 
 
 In general, there is one more interval than there are cuts. A value **exactly on a cut belongs to the upper interval**. The outer intervals extend to minus and plus infinity, so all available PV observations contribute, even when they fall outside a displayed x-axis window. The actual, unrounded cuts determine interval membership. Identical adjacent cuts create an empty interval with 0%; they are not merged.
 
-Table columns have equal display width so that close or identical cuts do not cause percentage labels to overlap. With many cuts or a narrow plot, reduce `percentage_size` or increase the figure width.
+Percentage labels are positioned midway between their visible cut boundaries. For the two outer intervals, they sit midway between the outermost cut and the corresponding visible panel edge. Both population rows use the same horizontal positions. When close or identical cuts would cause labels to overlap, the labels shift only as far as needed while preserving interval order. Thin connection lines point from shifted columns to their interval midpoints.
+
+Placement uses the actual text widths when drawing, so it adapts to resizing, zooming, and reversed score axes. Intervals wholly outside a zoomed view are anchored at the nearest edge, while their estimated shares still include all available PV observations. With many cuts or a narrow plot, increase the figure width or reduce `percentage_size`. If all labels together are wider than the entire panel, text and padding are reduced together to keep them inside it.
 
 ```{r idm population percentages, fig.width=9, fig.height=7}
 plotPopulationCutsIDM(
@@ -827,6 +829,25 @@ plotPopulationCutsIDM(
 ```
 
 Each individual panel computes the shares using that rater's cuts. The mean panel computes them using the mean cuts. **Percentages at mean cuts are not averages of the raters' percentages.** The same panel cuts are applied separately to both populations so that their shares can be compared directly.
+
+The following example deliberately uses unevenly spaced item estimates, producing cuts that are close together. The short connection lines identify intervals whose percentage labels need extra room. The same positioning is used in `plotCutsIDM()`.
+
+```{r idm percentages uneven cuts, fig.width=8, fig.height=5}
+uneven_items <- data.frame(
+  est = c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, 0, 3),
+  Rater1 = c(1, 1, 2, 3, 4, 5, 5, 5)
+)
+uneven_cuts <- computeCutsIDM(uneven_items)
+plotPopulationCutsIDM(
+  uneven_cuts,
+  pv_data = populations,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  cut_value_digits = 2
+)
+```
 
 The calculation first obtains a weighted percentage within each PV: the sum of weights in an interval divided by the total available weight, multiplied by 100. It then averages those percentages equally across PVs, separately for each population. Without `weight_col`, this reduces to ordinary observed proportions within each PV. Respondents' PVs are never averaged before assigning values to intervals.
 

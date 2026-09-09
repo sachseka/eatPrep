@@ -1,5 +1,6 @@
 # eatPrep 1.0.12
 
+* Population percentages now align with the visible cut intervals in both plot views. Crowded labels shift minimally with thin connection lines, while population rows stay aligned. Placement adapts to figure size, zoom, and reversed score axes.
 * Population preparation preserves distinct large numeric respondent, PV, and population identifiers, including during missing-data checks.
 * Population density grids adapt to the bandwidth so narrow, separated distributions remain accurately resolved. Smoothing settings requiring excessive grid resolution produce an informative error.
 * Percentage tables reserve space above each rating panel based on their rendered text height, keeping percentages clear of curves and cut labels when figures are resized.
