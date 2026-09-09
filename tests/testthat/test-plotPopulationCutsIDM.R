@@ -511,6 +511,74 @@ test_that("population labels and named colors are validated", {
                "requires population_col")
 })
 
+test_that("population_fill colors all groups in legend order in both plot views", {
+  pop <- population_groups_fixture_idm()
+  # Factor levels do not override the documented order of first appearance.
+  pop <- pop[order(pop$population, decreasing = TRUE), ]
+  pop$population <- factor(pop$population, levels = c("A", "B"))
+  for (fun in list(plotPopulationCutsIDM, plotCutsIDM)) {
+    args <- list(res_list = cuts_fixture_idm(), pv_data = pop, pv_cols = c("PV1", "PV2"),
+                 weight_col = "weight", population_col = "population")
+    if (identical(fun, plotCutsIDM)) args$show_residuals <- TRUE
+    default <- do.call(fun, args)
+    expect_equal(default$scales$get_scales("fill")$map(c("B", "A")), c("#0072B2", "#E69F00"))
+    for (fills in list("grey50", c("purple", "gold"))) {
+      p <- do.call(fun, c(args, list(population_fill = fills)))
+      expected <- rep_len(fills, 2)
+      expect_equal(p$scales$get_scales("fill")$get_limits(), c("B", "A"))
+      expect_equal(p$scales$get_scales("fill")$map(c("B", "A")), expected)
+      built <- ggplot2::ggplot_build(p)
+      expect_setequal(unique(built$data[[1]]$fill), expected)
+      expect_setequal(unique(p$facet$percentage_labels$.percentage_color), expected)
+      if (identical(fun, plotPopulationCutsIDM)) {
+        expect_setequal(unique(built$data[[2]]$colour), expected)
+      }
+      expect_s3_class(render_population_plot_idm(p), "gtable")
+    }
+    explicit <- do.call(fun, c(args, list(population_fill = "grey50",
+                                         population_colors = c(A = "red", B = "blue"))))
+    expect_equal(explicit$scales$get_scales("fill")$map(c("B", "A")), c("blue", "red"))
+    long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
+    args$pv_data <- long
+    args$pv_cols <- NULL
+    args$respondent_id_col <- "student"
+    args$pv_id_col <- "pv"
+    args$pv_value_col <- "score"
+    p <- do.call(fun, c(args, list(population_fill = c("purple", "gold"))))
+    expect_equal(p$scales$get_scales("fill")$map(c("B", "A")), c("purple", "gold"))
+  }
+})
+
+test_that("population_fill warns and restores defaults for incorrect color counts", {
+  pop <- population_groups_fixture_idm()
+  third <- pop[pop$population == "A", ]
+  third$population <- "C"
+  pop <- rbind(pop, third)
+  for (fun in list(plotPopulationCutsIDM, plotCutsIDM)) {
+    args <- list(res_list = cuts_fixture_idm(), pv_data = pop, pv_cols = c("PV1", "PV2"),
+                 weight_col = "weight", population_col = "population")
+    baseline <- do.call(fun, args)
+    for (fills in list(character(), c("red", "blue"), c("red", "blue", "gold", "green"))) {
+      expect_warning(p <- do.call(fun, c(args, list(population_fill = fills))),
+                     "population_fill.*exactly 3 colors.*using default colors")
+      expect_equal(ggplot2::ggplot_build(p)$data, ggplot2::ggplot_build(baseline)$data)
+      expect_equal(p$facet$percentage_labels, baseline$facet$percentage_labels)
+    }
+    p <- do.call(fun, c(args, list(population_fill = c("red", "blue", "gold"))))
+    expect_equal(p$scales$get_scales("fill")$map(c("A", "B", "C")), c("red", "blue", "gold"))
+    args$pv_data <- third
+    one <- do.call(fun, c(args, list(population_fill = "purple")))
+    expect_equal(one$scales$get_scales("fill")$map("C"), "purple")
+    args$population_col <- NULL
+    one <- do.call(fun, c(args, list(population_fill = "purple")))
+    expect_null(one$scales$get_scales("fill"))
+    expect_equal(unique(ggplot2::ggplot_build(one)$data[[1]]$fill), "purple")
+    expect_warning(p <- do.call(fun, c(args, list(population_fill = c("red", "blue")))),
+                   "population_fill.*exactly 1 colors.*using default colors")
+    expect_equal(unique(ggplot2::ggplot_build(p)$data[[1]]$fill), "grey50")
+  }
+})
+
 test_that("grouping a single population preserves its estimated density", {
   pop <- population_fixture_idm()
   pop$population <- "A"

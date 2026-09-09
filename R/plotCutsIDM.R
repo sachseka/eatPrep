@@ -212,7 +212,11 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       weight_col, input_format, pv_missing, population_col
     )
     population_density <- .population_density_idm(population_data, density_bw, density_adjust)
-    colors <- .population_colors_idm(population_density, population_colors)
+    style <- .population_style_idm(
+      population_density, if (missing(population_fill)) NULL else population_fill, population_colors
+    )
+    population_fill <- style$fill
+    colors <- style$colors
   }
 
   # Determine axis limits dynamically

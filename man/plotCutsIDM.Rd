@@ -68,10 +68,10 @@ plotCutsIDM(
   \item{density_bw}{Optional positive finite bandwidth in score units. Default \code{NULL} averages unweighted \code{stats::bw.nrd0()} bandwidths across PVs within each population, then averages those population means. All populations and PVs share this bandwidth. Sampling weights affect the density estimates, not automatic bandwidth selection.}
   \item{density_adjust}{Positive finite multiplier for the common density bandwidth. Default \code{1}.}
   \item{population_height}{Finite fraction between zero and one of the rating-axis range occupied by the highest silhouette peak across all populations. Default \code{0.25}. All silhouettes use the same height factor. This is a display setting for \strong{distribution shape only}; silhouette height \strong{does not represent rating stages} or density-axis values.}
-  \item{population_fill}{Silhouette fill color when \code{population_col = NULL}. Default \code{"grey50"}. With grouping, use \code{population_colors} instead.}
+  \item{population_fill}{Character vector of silhouette fill colors. An explicitly supplied single color applies to all populations. Otherwise supply exactly one color per observed population, in order of first appearance in the data (the population legend order); vector names are ignored. Too few or too many colors, including an empty vector, trigger a warning and restore the default colors. If omitted, ungrouped input uses \code{"grey50"}; grouped input uses the automatic palette described under \code{population_colors}. Explicit \code{population_colors} takes precedence.}
   \item{population_alpha}{Finite silhouette opacity between zero and one. Default \code{0.15}.}
   \item{population_col}{Optional population grouping column in wide or long PV input. Labels must be non-missing and non-empty. Groups are drawn and listed in their order of first appearance; unused factor levels are ignored. Default \code{NULL} treats all rows as one population.}
-  \item{population_colors}{Optional named character vector with exactly one color per observed population label. Requires \code{population_col}. Default \code{NULL} uses blue and orange for two groups or a qualitative palette for more groups. A separate population fill legend is added.}
+  \item{population_colors}{Optional named character vector with exactly one color per observed population label. Requires \code{population_col} and takes precedence over \code{population_fill}. With neither color argument supplied, grouped input uses blue and orange for two groups (blue for one), or a qualitative palette for more groups. A separate population fill legend is added.}
   \item{show_percentages}{Logical scalar. Default \code{TRUE} adds percentage tables to rating panels when \code{pv_data} is supplied, with one colored row per population in legend order. Residual panels have no percentage labels. \code{FALSE} hides the tables and their additional caption. Has no plotting effect without \code{pv_data}.}
   \item{percentage_digits}{Integer scalar from zero to ten. Decimal places in percentage labels. Default \code{1L}. Displayed totals can differ slightly from 100 percent because of rounding.}
   \item{percentage_size}{Finite non-negative percentage-table text size in millimetres. Default \code{3}. Reduce this size or increase figure width for many intervals or small panels.}
@@ -247,6 +247,12 @@ plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
             population_col = "group",
             population_colors = c(A = "#0072B2", B = "#E69F00"),
             population_alpha = 0.2, show_aggregate = TRUE)
+
+## One explicit fill color applies to all population silhouettes.
+plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
+            weight_col = "weight", population_col = "group", population_fill = "grey50")
+## Or use population_fill = c("#009E73", "#CC79A7") in population legend order.
+## Three colors for these two groups would warn and restore the default palette.
 
 ## Long input and residuals: silhouettes still show distribution shape only.
 populations_long <- tidyr::pivot_longer(

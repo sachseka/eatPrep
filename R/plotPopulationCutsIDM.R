@@ -233,8 +233,29 @@
                              limits = names(colors), breaks = names(colors))
 }
 
+.population_style_idm <- function(density, population_fill = NULL, population_colors = NULL) {
+  colors <- .population_colors_idm(density, population_colors)
+  fill <- "grey50"
+  # Explicit named colors retain precedence. NULL here means population_fill
+  # was omitted, preserving the automatic palette for grouped populations.
+  if (is.null(population_colors) && !is.null(population_fill)) {
+    n <- if (is.null(colors)) 1L else length(colors)
+    if (!length(population_fill) %in% c(1L, n)) {
+      warning(sprintf(
+        "population_fill must contain one color or exactly %d colors for the plotted populations; using default colors.",
+        n
+      ), call. = FALSE)
+    } else if (is.null(colors)) {
+      fill <- unname(population_fill)
+    } else {
+      colors <- stats::setNames(rep_len(unname(population_fill), n), names(colors))
+    }
+  }
+  list(fill = fill, colors = colors)
+}
+
 .validate_population_style_idm <- function(population_fill, population_alpha) {
-  checkmate::assert_string(population_fill)
+  checkmate::assert_character(population_fill, any.missing = FALSE)
   tryCatch(grDevices::col2rgb(population_fill), error = function(e) {
     stop("population_fill must be a valid color.", call. = FALSE)
   })
@@ -316,7 +337,11 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
     weight_col, input_format, pv_missing, population_col
   )
   density <- .population_density_idm(dat, density_bw, density_adjust)
-  colors <- .population_colors_idm(density, population_colors)
+  style <- .population_style_idm(
+    density, if (missing(population_fill)) NULL else population_fill, population_colors
+  )
+  population_fill <- style$fill
+  colors <- style$colors
   persons <- as.character(res_list$cuts_per_person$person)
   mean_label <- .aggregate_panel_label_idm(persons)
   cut_tables <- list()

@@ -755,7 +755,29 @@ plotPopulationCutsIDM(
 )
 ```
 
-The filled densities overlap without stacking. Their outlines and a separate **Population** legend identify the groups; the **Cut Score** colors and legend keep their existing meaning. Blue and orange are the defaults for two populations. `population_colors` overrides these with a named color vector containing exactly one entry for each observed population label. Reuse that vector across figures for consistent colors. `population_fill` applies only when `population_col = NULL`. More than two groups are supported, with a qualitative default palette.
+The filled densities overlap without stacking. Their outlines and a separate **Population** legend identify the groups; the **Cut Score** colors and legend keep their existing meaning. Blue and orange are the defaults for two populations. `population_colors` overrides these with a named color vector containing exactly one entry for each observed population label. Reuse that vector across figures for consistent colors. More than two groups are supported, with a qualitative default palette.
+
+Alternatively, set `population_fill` in either plot function. An explicitly supplied single color, such as `population_fill = "grey50"`, colors **all populations alike**. A vector with exactly one color per population follows the order of first appearance in the data, which is also the legend order; names on this vector are ignored. Grouped percentage rows, legend keys, and density outlines follow the same colors. If you supply too many or too few colors (except the single-color case), the plot warns and uses its default palette. An empty vector also triggers this fallback. Without grouping, the fallback is grey. Omitting `population_fill` preserves the automatic colors; an explicitly supplied `population_colors` takes precedence over `population_fill`.
+
+```{r idm population fill vector, fig.width=8, fig.height=6}
+plotPopulationCutsIDM(
+  cuts, pv_data = populations, pv_cols = pv_names,
+  weight_col = "weight", population_col = "cohort",
+  population_fill = c("#009E73", "#CC79A7")
+)
+```
+
+The same single color can be used for both populations in the rater background. Their names and statistics still appear separately in the legend. **Silhouette height shows distribution shape only and does not represent rating stages.**
+
+```{r idm population fill single color, fig.width=8, fig.height=6, fig.cap="Both populations use the same color. Silhouette height shows distribution shape only and does not represent rating stages."}
+plotCutsIDM(
+  cuts, pv_data = populations, pv_cols = pv_names,
+  weight_col = "weight", population_col = "cohort",
+  population_fill = "grey50"
+)
+```
+
+For these two populations, `population_fill = c("red", "blue", "green")` would warn and restore the default blue/orange palette.
 
 For the rater background, all silhouettes use **one shared height factor**. The highest density peak across all populations occupies `population_height` times the rating range above its lower limit. The other peaks retain their relative heights; the curves are neither stacked nor individually stretched to the same peak. This preserves visible differences in concentration.
 
