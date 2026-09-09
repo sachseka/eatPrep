@@ -528,6 +528,19 @@ An aggregate panel can be added to inspect all monotonized rater curves together
 plotCutsIDM(cuts, show_aggregate = TRUE, cut_value_digits = 2)
 ```
 
+Adjust the text sizes inside the graph with `item_number_size` (item positions), `cut_value_size` (numeric cuts), and `aggregate_label_size` (rater names in the aggregate panel). Sizes are in millimetres, with defaults of `2`, `2.6`, and `3`, respectively. These settings also apply when residual panels are shown.
+
+```{r idm label sizes example, fig.width=7, fig.height=5}
+plotCutsIDM(
+  cuts,
+  show_aggregate = TRUE,
+  cut_value_digits = 2,
+  item_number_size = 3,
+  cut_value_size = 3.5,
+  aggregate_label_size = 4
+)
+```
+
 Set `show_aggregate_labels = FALSE` if the direct labels make the aggregate panel too dense.
 
 ```{r idm aggregate unlabeled plot example, fig.width=7, fig.height=5}
@@ -547,6 +560,161 @@ plotCutsIDM(
   show_residuals = TRUE,
   show_aggregate = TRUE,
   cut_value_digits = 2
+)
+```
+
+### Population Distributions and IDM Cuts
+
+There are two ways to display a population distribution from plausible values (PVs):
+
+| Purpose | Function | Meaning of the vertical axis |
+|:--|:--|:--|
+| Inspect where the cuts divide the population distribution | `plotPopulationCutsIDM()` | Population density |
+| Inspect the population alongside the rater curves | `plotCutsIDM(..., pv_data = ...)` | Rating stages; the background silhouette shows **distribution shape only** |
+
+**The background silhouette's height does not represent rating stages or density-axis values.** Its height is scaled for display. Use the standalone population plot when you need a density axis. This distinction is also stated in the caption of every `plotCutsIDM()` plot with a population background; retain that caption or an equivalent explanation when sharing the plot.
+
+#### Prepare population PVs on the cut-score metric
+
+Pass a data frame for one population and one domain. The PVs must already be on the same metric as the item estimates and cuts: these plotting functions do not transform scores or check that different scales have been linked. Population respondents are distinct from the raters and items used to calculate the cuts; no respondent-to-rater join is performed.
+
+The following synthetic data illustrate five PV columns and sampling weights on the compact metric used by `cuts` above. In an analysis, use the PVs and weights supplied with your population data.
+
+```{r idm population data}
+set.seed(42)
+population <- data.frame(
+  student = seq_len(300),
+  weight = runif(300, 0.5, 2)
+)
+population_location <- rnorm(300, mean = 0, sd = 0.85)
+pv_names <- paste0("PV", 1:5)
+population[pv_names] <- replicate(
+  5, population_location + rnorm(300, sd = 0.3)
+)
+head(population)
+```
+
+Wide input has one row per respondent. Select PV columns explicitly with `pv_cols` so that numeric IDs, weights, or PVs from other domains cannot be included accidentally. `respondent_id_col` is optional for wide input; when supplied, its values must be unique. `weight_col = NULL`, the default, gives every respondent equal weight. Supplied sampling weights must be finite, non-missing and non-negative; zero-weight respondents are excluded.
+
+#### Standalone density with mean or individual cuts
+
+The default standalone plot draws the mean cuts from `cuts$cuts_summary` over a lightly filled population density. The vertical axis is density, and the cut lines use the supplied difficulty-scale values without re-estimation.
+
+```{r idm population mean plot, fig.width=7, fig.height=4.5}
+plotPopulationCutsIDM(
+  cuts,
+  pv_data = population,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  cut_value_digits = 2
+)
+```
+
+Use `cut_selection = "individual"` for one facet per rater, or `"both"` to include the mean-cut facet as well. Every facet uses the **same population distribution and fixed axes**; the distribution is not conditional on a rater. Use `population_fill` and `population_alpha` for appearance, and `cut_value_size`, `cut_value_digits`, or `show_cut_values = FALSE` for cut labels.
+
+```{r idm population individual plot, fig.width=8, fig.height=6}
+plotPopulationCutsIDM(
+  cuts,
+  pv_data = population,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  cut_selection = "both",
+  cut_value_digits = 2,
+  cut_value_size = 3,
+  population_fill = "steelblue",
+  population_alpha = 0.2
+)
+```
+
+#### Equivalent long-format input
+
+Long input has one row per respondent and PV, with explicit respondent ID, PV identifier, and numeric value columns. A respondent must have the same sampling weight across all PV rows. Duplicate respondent-PV rows cause an error. `input_format = "auto"` selects long format when `pv_id_col` or `pv_value_col` is supplied; explicit `"wide"` and `"long"` are also supported.
+
+```{r idm population long input, fig.width=7, fig.height=4.5}
+population_long <- tidyr::pivot_longer(
+  population,
+  cols = dplyr::all_of(pv_names),
+  names_to = "pv",
+  values_to = "score"
+)
+
+# This gives the same distribution and mean cuts as the wide-input example.
+plotPopulationCutsIDM(
+  cuts,
+  pv_data = population_long,
+  respondent_id_col = "student",
+  pv_id_col = "pv",
+  pv_value_col = "score",
+  weight_col = "weight",
+  cut_value_digits = 2
+)
+```
+
+#### How PVs, weights, and smoothing are combined
+
+Both functions estimate a Gaussian kernel density separately for each PV, normalizing the available sampling weights to sum to one within each PV. They then average the densities with equal weight across PVs on a common 512-point grid. **Do not average a respondent's PVs first**: the distribution of respondent averages would discard within-respondent PV variation. This follows the principle of computing population estimates separately for each PV and averaging those estimates, described in the [OECD PISA analysis guidance](https://www.oecd.org/en/about/programmes/pisa/how-to-prepare-and-analyse-the-pisa-database.html).
+
+By default, the common bandwidth is the mean of `stats::bw.nrd0()` bandwidths calculated separately for each PV after exclusions. This avoids treating stacked PVs as additional independently sampled respondents when selecting the bandwidth. The automatic bandwidth rule is unweighted; sampling weights enter the density calculation itself. Supply a positive `density_bw` in score units to choose the bandwidth explicitly. `density_adjust` multiplies that bandwidth: values above one smooth more, and values below one smooth less. For example, add `density_adjust = 1.2` to either plotting call. The grid extends three effective bandwidths beyond the observed PV range; all finite plotted cuts are included in the displayed x-range.
+
+These are descriptive population density estimates. The plots do not compute uncertainty intervals, replicate-weight variances, or percentages between cuts. A density height is not itself a percentage of respondents.
+
+#### Missing values and incomplete long input
+
+The default `pv_missing = "error"` rejects missing PV values, including respondent-PV combinations omitted from long input. With `pv_missing = "drop"`, such values are omitted with a warning, and weights are renormalized within each PV. Consequently, different PVs can use different respondent subsets. Each PV must retain at least two observed respondents with positive weights. Infinite PV values and invalid or missing weights always cause an error.
+
+```{r idm population missing values, results='hide'}
+population_incomplete <- population
+population_incomplete$PV1[1] <- NA_real_
+
+# Explicit omission produces a warning reporting the missing respondent-PV value.
+population_plot_incomplete <- plotPopulationCutsIDM(
+  cuts,
+  pv_data = population_incomplete,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  pv_missing = "drop"
+)
+```
+
+Include every intended PV identifier in long input. A PV that is entirely absent from the supplied data cannot be detected. The functions do not impute missing PVs.
+
+#### Population silhouette behind rater curves
+
+Supply `pv_data` to `plotCutsIDM()` to add the population background. The PV input, weighting, and smoothing arguments are identical to the standalone function. `pv_data = NULL` preserves the existing plot.
+
+**Read the silhouette horizontally to locate the population relative to the cuts. Its height communicates distribution shape only and does not represent rating stages or density-axis values.** `population_height = 0.25` places its peak at one quarter of the rating range above the lower rating limit; this is a display choice, not a statistical value. Changing `population_height` changes neither the estimated density nor the cuts.
+
+```{r idm population silhouette plot, fig.width=8, fig.height=6, fig.cap="The population silhouette shows distribution shape only. Its height does not represent rating stages or density-axis values."}
+plotCutsIDM(
+  cuts,
+  show_aggregate = TRUE,
+  pv_data = population,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  cut_value_digits = 2,
+  population_height = 0.25,
+  population_fill = "steelblue",
+  population_alpha = 0.15
+)
+```
+
+The same silhouette and height scaling are repeated in every rating facet, including the aggregate panel. The rating axis, rater curves, cut labels, and cut values keep their existing meaning. The shared x-range expands to include the population distribution, so the item curves may occupy a smaller part of the horizontal space. The explanatory plot caption is part of the default output: keep it when adding titles, changing themes, or exporting figures.
+
+Residual panels stay clear of the silhouette. The following example also demonstrates long-format input for the combined view.
+
+```{r idm population silhouette residuals, fig.width=10, fig.height=6, fig.cap="Only rating panels contain the population silhouette. Silhouette height shows distribution shape, not rating stages or density-axis values."}
+plotCutsIDM(
+  cuts,
+  show_aggregate = TRUE,
+  show_residuals = TRUE,
+  pv_data = population_long,
+  respondent_id_col = "student",
+  pv_id_col = "pv",
+  pv_value_col = "score",
+  weight_col = "weight",
+  cut_value_digits = 2,
+  population_height = 0.25,
+  population_alpha = 0.15
 )
 ```
 

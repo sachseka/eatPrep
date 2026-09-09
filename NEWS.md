@@ -1,3 +1,10 @@
+# eatPrep 1.0.12
+
+* `plotCutsIDM()` gains `item_number_size`, `cut_value_size`, and `aggregate_label_size` to adjust text sizes inside the graph, including plots with residual panels. Defaults preserve the existing sizes.
+* New `plotPopulationCutsIDM()` displays a population density estimated from wide- or long-format plausible values, with optional sampling weights and mean, individual, or both sets of IDM cuts.
+* `plotCutsIDM()` gains an optional population background through `pv_data`. The silhouette communicates **distribution shape only**: its height **does not represent rating stages** or density-axis values. Every plot using the background includes an explanatory caption; residual panels stay clear.
+* Both population views share per-PV density estimation, a common bandwidth and grid, explicit missing-data handling, and adjustable smoothing and appearance. Help examples and the main-functions vignette demonstrate both input layouts and both plot purposes.
+
 # eatPrep 1.0.11
 
 ## improvements

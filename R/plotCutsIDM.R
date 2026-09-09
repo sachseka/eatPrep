@@ -160,7 +160,19 @@ plotCutsIDM <- function(res_list, est_col = NULL,
                         show_aggregate_labels = TRUE,
                         show_cut_values = TRUE,
                         show_item_numbers = TRUE,
-                        cut_value_digits = 0L) {
+                        cut_value_digits = 0L,
+                        item_number_size = 2,
+                        cut_value_size = 2.6,
+                        aggregate_label_size = 3,
+                        pv_data = NULL, pv_cols = NULL,
+                        respondent_id_col = NULL,
+                        pv_id_col = NULL, pv_value_col = NULL,
+                        weight_col = NULL,
+                        input_format = c("auto", "long", "wide"),
+                        pv_missing = c("error", "drop"),
+                        density_bw = NULL, density_adjust = 1,
+                        population_height = 0.25,
+                        population_fill = "grey50", population_alpha = 0.15) {
 
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
@@ -171,6 +183,9 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   checkmate::assert_flag(show_aggregate_labels)
   checkmate::assert_flag(show_cut_values)
   checkmate::assert_flag(show_item_numbers)
+  checkmate::assert_number(item_number_size, lower = 0, finite = TRUE)
+  checkmate::assert_number(cut_value_size, lower = 0, finite = TRUE)
+  checkmate::assert_number(aggregate_label_size, lower = 0, finite = TRUE)
   checkmate::assert_integerish(
     cut_value_digits,
     len = 1,
@@ -178,6 +193,17 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     any.missing = FALSE
   )
   cut_value_digits <- as.integer(cut_value_digits)
+
+  population_density <- NULL
+  if (!is.null(pv_data)) {
+    checkmate::assert_number(population_height, lower = 0, upper = 1, finite = TRUE)
+    .validate_population_style_idm(population_fill, population_alpha)
+    population_data <- .prepare_population_idm(
+      pv_data, pv_cols, respondent_id_col, pv_id_col, pv_value_col,
+      weight_col, input_format, pv_missing
+    )
+    population_density <- .population_density_idm(population_data, density_bw, density_adjust)
+  }
 
   # Determine axis limits dynamically
   max_lv <- res_list$max_val
@@ -304,6 +330,12 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     )
 
     pp <- ggplot2::ggplot()
+    if (!is.null(population_density)) {
+      pp <- pp + .population_background_idm(
+        population_density, y_limits, TRUE,
+        population_height, population_fill, population_alpha
+      ) + ggplot2::labs(caption = .population_shape_caption_idm())
+    }
 
     if (show_raw) {
       pp <- pp +
@@ -333,7 +365,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
             ),
             hjust = -0.45,
             vjust = 0.5,
-            size = 2,
+            size = item_number_size,
             color = "grey25",
             alpha = 0.65,
             fontface = "bold",
@@ -383,7 +415,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
             ),
             alpha = 0.95,
             hjust = 0,
-            size = 3,
+            size = aggregate_label_size,
             show.legend = FALSE,
             na.rm = TRUE
           )
@@ -458,7 +490,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           angle = 90,
           hjust = 1.1,
           vjust = -0.25,
-          size = 2.6,
+          size = cut_value_size,
           fontface = "bold",
           show.legend = FALSE,
           na.rm = TRUE,
@@ -477,7 +509,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
             angle = 90,
             hjust = 1.1,
             vjust = -0.25,
-            size = 2.6,
+            size = cut_value_size,
             fontface = "bold",
             show.legend = FALSE,
             na.rm = TRUE,
@@ -552,6 +584,12 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   }
 
   pp <- ggplot2::ggplot(plot_data, ggplot2::aes(x = est))
+  if (!is.null(population_density)) {
+    pp <- pp + .population_background_idm(
+      population_density, y_limits, FALSE,
+      population_height, population_fill, population_alpha
+    ) + ggplot2::labs(caption = .population_shape_caption_idm())
+  }
 
   if (show_raw) {
     pp <- pp +
@@ -574,7 +612,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           ),
           hjust = -0.45,
           vjust = 0.5,
-          size = 2,
+          size = item_number_size,
           color = "grey25",
           alpha = 0.65,
           fontface = "bold",
@@ -623,7 +661,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           ),
           alpha = 0.95,
           hjust = 0,
-          size = 3,
+          size = aggregate_label_size,
           show.legend = FALSE,
           na.rm = TRUE
         )
@@ -678,7 +716,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         angle = 90,
         hjust = 1.1,
         vjust = -0.25,
-        size = 2.6,
+        size = cut_value_size,
         fontface = "bold",
         show.legend = FALSE,
         na.rm = TRUE,
@@ -697,7 +735,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
           angle = 90,
           hjust = 1.1,
           vjust = -0.25,
-          size = 2.6,
+          size = cut_value_size,
           fontface = "bold",
           show.legend = FALSE,
           na.rm = TRUE,
