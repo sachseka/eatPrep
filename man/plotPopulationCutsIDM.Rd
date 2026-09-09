@@ -28,7 +28,10 @@ plotPopulationCutsIDM(
   population_fill = "grey50",
   population_alpha = 0.25,
   population_col = NULL,
-  population_colors = NULL
+  population_colors = NULL,
+  show_percentages = TRUE,
+  percentage_digits = 1L,
+  percentage_size = 3
 )
 }
 \arguments{
@@ -52,6 +55,9 @@ plotPopulationCutsIDM(
   \item{population_alpha}{Finite fill opacity between zero and one. Default \code{0.25}.}
   \item{population_col}{Optional grouping column identifying populations in wide or long input. Labels must be non-missing and non-empty. Groups are drawn and listed in their order of first appearance; unused factor levels are ignored. Default \code{NULL} treats all rows as one population and preserves the ungrouped plot.}
   \item{population_colors}{Optional named character vector of colors, with exactly one name matching each observed population label. Requires \code{population_col}. Default \code{NULL} selects blue and orange for two groups, or a qualitative palette for more groups. A separate fill legend identifies populations; cut colors keep their existing meaning.}
+  \item{show_percentages}{Logical scalar. Default \code{TRUE} adds a percentage table at the top of each panel. Columns \code{[1]}, \code{[2]}, and so on identify cut intervals from left to right. Each population has a colored row, in population-legend order. \code{FALSE} hides the table and its additional caption.}
+  \item{percentage_digits}{Integer scalar from zero to ten. Decimal places shown in percentage labels. Default \code{1L}. Rounding is for display only and can make displayed totals differ slightly from 100 percent.}
+  \item{percentage_size}{Finite non-negative text size in millimetres for the percentage table, including interval headers. Default \code{3}. For many intervals or small figures, reduce this size or increase the figure width.}
 }
 \details{
 A Gaussian kernel density is estimated separately for each PV, using sampling
@@ -78,8 +84,38 @@ in both plotting functions to keep the population colors consistent. Cut lines
 are drawn over the densities, and all selected rater/mean facets repeat the same
 set of distributions on fixed axes.
 
-This is a descriptive density estimate. It does not compute confidence intervals,
-replicate-weight variances, or the proportions between cuts. Sampling weights
+With \code{show_percentages = TRUE}, shares are computed directly from the PV
+observations, independently of density estimation. For each population and PV,
+sum the sampling weights in each cut interval and divide by the total available
+weight for that population and PV. Multiply by 100 and average these percentages
+equally across PVs. Respondents' PVs are never averaged before classification.
+Without \code{weight_col}, observations have equal weight. With
+\code{pv_missing = "drop"}, each denominator uses the available observations
+separately for its population and PV.
+
+For cuts \eqn{c_1, \ldots, c_K}, intervals are \eqn{(-\infty, c_1)},
+\eqn{[c_1, c_2)}, through \eqn{[c_K, \infty)}. A value exactly on a cut enters
+the upper interval. Identical adjacent cuts create an empty interval with zero
+percent. All observed PVs are included, including values outside the visible
+plot range. Actual unrounded cuts determine membership: changing cut-label
+rounding or density smoothing does not change percentages. Individual panels
+use their rater's cuts. The mean panel recomputes shares at the mean cuts; it
+does not average rater percentages.
+
+The percentage table uses equally spaced columns, including for narrow or empty
+intervals. Column numbers indicate interval order, not rating stages or positions
+on the score axis. Rows follow population-legend order and colors; ungrouped data
+have one neutral row. Additional space above the data is reserved for the table.
+If a panel has any missing or infinite cut, its percentage table is replaced
+with an explanatory message and a warning identifies the panel. Descending cut
+sequences cause an error when percentages are enabled.
+
+Percentage labels are estimated population shares. Unlike these numeric labels,
+silhouette height in \code{plotCutsIDM()} communicates distribution shape only,
+not rating stages or readable density-axis values.
+
+These are descriptive point estimates without confidence intervals or
+replicate-weight variances. Sampling weights
 affect the estimated density, but not the automatic bandwidth rule. An explicit
 \code{density_bw} can be supplied when a different smoothing choice is needed.
 With \code{pv_missing = "drop"}, different PVs may use different respondent
@@ -168,4 +204,16 @@ populations_long <- tidyr::pivot_longer(
 plotPopulationCutsIDM(cuts, populations_long, respondent_id_col = "student",
                       pv_id_col = "pv", pv_value_col = "score", weight_col = "weight",
                       population_col = "group", population_colors = colors)
+
+## Percentages use actual panel cuts, independently of density smoothing.
+## [1] is below the first cut; the last column is at/above the last cut.
+plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
+                      weight_col = "weight", population_col = "group",
+                      cut_selection = "both", percentage_digits = 2,
+                      percentage_size = 3.5)
+
+## Hide percentage tables, keeping the density and numeric cut labels.
+plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
+                      weight_col = "weight", population_col = "group",
+                      show_percentages = FALSE)
 }

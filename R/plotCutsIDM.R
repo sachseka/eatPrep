@@ -173,9 +173,12 @@ plotCutsIDM <- function(res_list, est_col = NULL,
                         density_bw = NULL, density_adjust = 1,
                         population_height = 0.25,
                         population_fill = "grey50", population_alpha = 0.15,
-                        population_col = NULL, population_colors = NULL) {
+                        population_col = NULL, population_colors = NULL,
+                        show_percentages = TRUE, percentage_digits = 1L,
+                        percentage_size = 3) {
 
   checkmate::assert_list(res_list)
+  .validate_percentages_idm(show_percentages, percentage_digits, percentage_size)
   checkmate::assert_string(est_col, null.ok = TRUE)
   checkmate::assert_flag(show_raw)
   checkmate::assert_flag(show_smoothed)
@@ -269,6 +272,17 @@ plotCutsIDM <- function(res_list, est_col = NULL,
         person = aggregate_label,
         .facet_person = factor(aggregate_label, levels = facet_levels)
       )
+  }
+
+  add_percentages <- function(pp) {
+    if (!show_percentages || is.null(population_density)) return(pp)
+    percentage_cuts <- dplyr::bind_rows(cuts_long, mean_cuts_long)
+    x_values <- c(population_density$.population_x, plot_data$est, percentage_cuts$cut)
+    .add_population_percentages_idm(
+      pp, population_data, percentage_cuts, x_range = range(x_values[is.finite(x_values)]),
+      population_colors = colors, percentage_digits = percentage_digits,
+      percentage_size = percentage_size, show_residuals = show_residuals
+    )
   }
 
   if (show_residuals) {
@@ -547,7 +561,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       ) +
       ggplot2::theme_minimal()
 
-    return(pp)
+    return(add_percentages(pp))
   }
 
   plot_data <- plot_data |>
@@ -774,5 +788,5 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     ) +
     ggplot2::theme_minimal()
 
-  return(pp)
+  return(add_percentages(pp))
 }

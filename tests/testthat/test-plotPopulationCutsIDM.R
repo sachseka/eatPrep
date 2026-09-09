@@ -189,7 +189,8 @@ test_that("standalone plots show stored cuts and identical density in all facets
     expect_equal(p$labels$y, "Population density")
     expect_s3_class(render_population_plot_idm(p), "gtable")
   }
-  hidden <- plotPopulationCutsIDM(res, pop, pv_cols = "PV1", show_cut_values = FALSE)
+  hidden <- plotPopulationCutsIDM(res, pop, pv_cols = "PV1", show_cut_values = FALSE,
+                                  show_percentages = FALSE)
   expect_false(any(vapply(hidden$layers, function(l) inherits(l$geom, "GeomText"), logical(1))))
 })
 
@@ -197,7 +198,8 @@ test_that("missing cuts and a rater called Mean do not break population panels",
   res <- cuts_fixture_idm()
   res$cuts_per_person$person[1] <- "Mean"
   res$cuts_summary[1, res$cut_labels] <- NA_real_
-  p <- plotPopulationCutsIDM(res, population_fixture_idm(), pv_cols = "PV1", cut_selection = "both")
+  p <- plotPopulationCutsIDM(res, population_fixture_idm(), pv_cols = "PV1", cut_selection = "both",
+                             show_percentages = FALSE)
   built <- ggplot2::ggplot_build(p)
   expect_equal(as.character(built$layout$layout$.facet_person), c("Mean", "Rater2", "Mean_1"))
   expect_s3_class(render_population_plot_idm(p), "gtable")
@@ -211,7 +213,7 @@ test_that("background adds only a shape layer to rating facets and preserves exi
       args <- list(res_list = res, show_residuals = residuals, show_aggregate = aggregate)
       original <- do.call(plotCutsIDM, args)
       p <- do.call(plotCutsIDM, c(args, list(pv_data = pop, pv_cols = c("PV1", "PV2"),
-                                           population_height = 0.4)))
+                                           population_height = 0.4, show_percentages = FALSE)))
       before <- ggplot2::ggplot_build(original)
       after <- ggplot2::ggplot_build(p)
       expect_equal(after$data[-1], before$data)
@@ -427,7 +429,7 @@ test_that("multiple silhouettes share a height factor and stay out of residual p
   for (residuals in c(FALSE, TRUE)) {
     p <- plotCutsIDM(res, pv_data = pop, pv_cols = c("PV1", "PV2"), weight_col = "weight",
                      population_col = "population", show_residuals = residuals,
-                     show_aggregate = TRUE, population_height = 0.4)
+                     show_aggregate = TRUE, population_height = 0.4, show_percentages = FALSE)
     built <- ggplot2::ggplot_build(p)
     base <- ggplot2::ggplot_build(plotCutsIDM(res, show_residuals = residuals, show_aggregate = TRUE))
     expect_equal(built$data[-1], base$data)

@@ -656,7 +656,7 @@ Both functions estimate a Gaussian kernel density separately for each PV, normal
 
 By default, the common bandwidth is the mean of `stats::bw.nrd0()` bandwidths calculated separately for each PV after exclusions. This avoids treating stacked PVs as additional independently sampled respondents when selecting the bandwidth. The automatic bandwidth rule is unweighted; sampling weights enter the density calculation itself. Supply a positive `density_bw` in score units to choose the bandwidth explicitly. `density_adjust` multiplies that bandwidth: values above one smooth more, and values below one smooth less. For example, add `density_adjust = 1.2` to either plotting call. The grid extends three effective bandwidths beyond the observed PV range; all finite plotted cuts are included in the displayed x-range.
 
-These are descriptive population density estimates. The plots do not compute uncertainty intervals, replicate-weight variances, or percentages between cuts. A density height is not itself a percentage of respondents.
+These are descriptive population estimates. The plots do not compute uncertainty intervals or replicate-weight variances. Percentage tables are shown by default and are computed directly from PV observations, as explained below. A density height is not itself a percentage of respondents.
 
 #### Missing values and incomplete long input
 
@@ -799,6 +799,107 @@ plotCutsIDM(
   cut_value_digits = 2
 )
 ```
+
+#### Population percentages within the cut intervals
+
+Both plot functions now show population percentages by default when PV data are supplied. Each panel has a small table above its data: columns `[1]`, `[2]`, and so on refer to cut intervals from left to right, with a separate colored row for each population in legend order. For one ungrouped population, the table has a single neutral row.
+
+**The percentage labels are estimated population shares. Silhouette height still communicates distribution shape only and does not represent rating stages or density-axis values.** These meanings are also explained in the plot captions.
+
+For a panel with two cuts `c1` and `c2`, the table columns mean:
+
+| Column | PV values included |
+|:--|:--|
+| `[1]` | Below `c1` |
+| `[2]` | At or above `c1`, but below `c2` |
+| `[3]` | At or above `c2` |
+
+In general, there is one more interval than there are cuts. A value **exactly on a cut belongs to the upper interval**. The outer intervals extend to minus and plus infinity, so all available PV observations contribute, even when they fall outside a displayed x-axis window. The actual, unrounded cuts determine interval membership. Identical adjacent cuts create an empty interval with 0%; they are not merged.
+
+Table columns have equal display width so that close or identical cuts do not cause percentage labels to overlap. The column numbers identify interval order, **not rating stages or score-axis positions**. The table should therefore be read as a table, not as labels located at the interval midpoints. With many cuts or a narrow plot, reduce `percentage_size` or increase the figure width.
+
+```{r idm population percentages, fig.width=9, fig.height=7}
+plotPopulationCutsIDM(
+  cuts,
+  pv_data = populations,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  cut_selection = "both",
+  cut_value_digits = 2,
+  show_percentages = TRUE,
+  percentage_digits = 1,
+  percentage_size = 3
+)
+```
+
+Each individual panel computes the shares using that rater's cuts. The mean panel computes them using the mean cuts. **Percentages at mean cuts are not averages of the raters' percentages.** The same panel cuts are applied separately to both populations so that their shares can be compared directly.
+
+The calculation first obtains a weighted percentage within each PV: the sum of weights in an interval divided by the total available weight, multiplied by 100. It then averages those percentages equally across PVs, separately for each population. Without `weight_col`, this reduces to ordinary observed proportions within each PV. Respondents' PVs are never averaged before assigning values to intervals.
+
+For a hand-checkable illustration, suppose a panel has cuts at 0 and 10:
+
+```{r idm percentage arithmetic}
+toy_pvs <- data.frame(
+  PV1 = c(-1, 0, 10, 11),
+  PV2 = c(1, -1, 9, 10),
+  weight = c(1, 2, 3, 4)
+)
+shares_at_0_and_10 <- function(x, w) {
+  100 * c(
+    sum(w[x < 0]),
+    sum(w[x >= 0 & x < 10]),
+    sum(w[x >= 10])
+  ) / sum(w)
+}
+per_pv <- rbind(
+  PV1 = shares_at_0_and_10(toy_pvs$PV1, toy_pvs$weight),
+  PV2 = shares_at_0_and_10(toy_pvs$PV2, toy_pvs$weight)
+)
+colnames(per_pv) <- c("[1]", "[2]", "[3]")
+rbind(per_pv, Mean = colMeans(per_pv))
+# PV1: 10%, 20%, 70%; PV2: 20%, 40%, 40%; displayed estimate: 15%, 30%, 55%.
+```
+
+With `pv_missing = "drop"`, each population and PV uses its own available observations and weight denominator after exclusions. The previously documented checks for weights, IDs, and duplicate rows still apply. Changing `density_bw`, `density_adjust`, `population_height`, or `cut_value_digits` cannot change percentage estimates: these settings affect smoothing, silhouette display, or cut-label formatting, not the underlying PV classifications.
+
+The same percentage table is available in the combined rater view, including with long-format population data. It appears in rating and mean panels, never in residual panels:
+
+```{r idm rating percentages, fig.width=10, fig.height=7, fig.cap="Numeric percentage labels estimate population shares. Silhouette height shows distribution shape only and does not represent rating stages or density-axis values."}
+plotCutsIDM(
+  cuts,
+  pv_data = populations_long,
+  respondent_id_col = "student",
+  pv_id_col = "pv",
+  pv_value_col = "score",
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  show_aggregate = TRUE,
+  show_residuals = TRUE,
+  cut_value_digits = 2,
+  percentage_digits = 1,
+  percentage_size = 3
+)
+```
+
+`percentage_digits` controls displayed decimal places (default 1, supported range 0 to 10); `percentage_size` controls text size in millimetres (default 3). Percentages are not adjusted to force rounded labels to total exactly 100%. Small rounding differences are therefore possible. To hide the tables while retaining distributions and numeric cut labels, set `show_percentages = FALSE` in either function:
+
+```{r idm hide population percentages, fig.width=8, fig.height=6}
+plotCutsIDM(
+  cuts,
+  pv_data = populations,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  population_col = "cohort",
+  show_aggregate = TRUE,
+  cut_value_digits = 2,
+  show_percentages = FALSE
+)
+```
+
+If a panel contains any missing or infinite cut, its percentage table is replaced with an explanatory message and a warning identifies the affected panel. Complete panels still show their percentages. Descending cut sequences cause an error when percentage computation is enabled. The estimates are descriptive point estimates; uncertainty intervals are not computed.
 
 ### Visual Subset Recoding
 

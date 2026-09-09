@@ -259,10 +259,13 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
                                   est_col = NULL, show_cut_values = TRUE,
                                   cut_value_digits = 0L, cut_value_size = 2.6,
                                   population_fill = "grey50", population_alpha = 0.25,
-                                  population_col = NULL, population_colors = NULL) {
+                                  population_col = NULL, population_colors = NULL,
+                                  show_percentages = TRUE, percentage_digits = 1L,
+                                  percentage_size = 3) {
   # ggplot2 evaluates these names within the layer data.
   .population_x <- .population_density <- cut_type <- .cut_value_y <- .cut_value_label <- NULL
   .population <- .population_color <- NULL
+  .validate_percentages_idm(show_percentages, percentage_digits, percentage_size)
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
   checkmate::assert_flag(show_cut_values)
@@ -338,7 +341,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
       fontface = "bold", show.legend = FALSE, na.rm = TRUE
     )
   }
-  pp +
+  pp <- pp +
     ggplot2::facet_wrap(~ .facet_person, ncol = 2) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05))) +
     ggplot2::labs(
@@ -350,4 +353,13 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
       }
     ) +
     ggplot2::theme_minimal()
+  if (show_percentages) {
+    pp <- .add_population_percentages_idm(
+      pp, dat, cuts,
+      x_range = range(c(density$.population_x, cuts$cut[is.finite(cuts$cut)])),
+      population_colors = colors, percentage_digits = percentage_digits,
+      percentage_size = percentage_size
+    )
+  }
+  pp
 }
