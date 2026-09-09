@@ -117,8 +117,11 @@ By default, each rating panel with population data also contains a percentage
 table. Its equally spaced columns follow cut intervals in left-to-right order.
 Each population has a separate row, following the population legend's
 order and colors. The mean panel recomputes shares using its mean cuts; it does
-not average individual raters' percentages. Space above the data is reserved for
-the tables. Residual panels receive no percentage labels.
+not average individual raters' percentages. Each table occupies a separate band
+above the data, with height determined by its text size and number of rows.
+The data axes are unchanged, and the tables stay clear of rating curves when
+the figure is resized. Increase figure height for many panels or populations,
+and figure width for many intervals. Residual panels receive no percentage labels.
 
 Percentages are calculated directly from PVs and sampling weights, separately
 for every population and PV, then averaged equally across PVs. Available weights

@@ -1,5 +1,9 @@
 # eatPrep 1.0.12
 
+* Population preparation preserves distinct large numeric respondent, PV, and population identifiers, including during missing-data checks.
+* Population density grids adapt to the bandwidth so narrow, separated distributions remain accurately resolved. Smoothing settings requiring excessive grid resolution produce an informative error.
+* Percentage tables reserve space above each rating panel based on their rendered text height, keeping percentages clear of curves and cut labels when figures are resized.
+* The package now requires ggplot2 3.5.0 or newer for independent population and cut colors.
 * Both population views now show per-population percentages for each panel's cut intervals. Shares are computed from weighted PV observations and averaged across PVs, independently of density smoothing; equality belongs to the upper interval. Use `show_percentages = FALSE` to hide the tables, and `percentage_digits` / `percentage_size` to format them. Incomplete cut panels show an explanatory message. Silhouette height remains a display of distribution shape, not rating stages.
 * Both population plot views gain `population_col` to overlay multiple populations and `population_colors` for named colors. Densities use a common bandwidth and grid, with independent weight normalization and a separate population legend. Background silhouettes share one height factor and continue to show distribution shape only, not rating stages.
 * `plotCutsIDM()` gains `item_number_size`, `cut_value_size`, and `aggregate_label_size` to adjust text sizes inside the graph, including plots with residual panels. Defaults preserve the existing sizes.

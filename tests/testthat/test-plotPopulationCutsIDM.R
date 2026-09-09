@@ -149,6 +149,72 @@ test_that("long input checks duplicate cells, identifiers, and respondent weight
   expect_error(prepare(bad), "PV identifiers")
 })
 
+test_that("numeric respondent and PV IDs retain their full precision", {
+  pop <- data.frame(student = 1e15 + 1:3, PV1 = c(NA, 1, 2), PV2 = 3:5,
+                    weight = c(1, 2, 3))
+  expect_error(.prepare_population_idm(pop, c("PV1", "PV2"),
+                                       respondent_id_col = "student"), "Missing PV")
+  pop$PV1[1] <- 0
+  wide <- .prepare_population_idm(pop, c("PV1", "PV2"),
+                                  respondent_id_col = "student", weight_col = "weight")
+  expect_equal(length(unique(wide$.id)), 3L)
+  expect_equal(as.numeric(unique(wide$.id)), pop$student)
+
+  long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
+  long$pv <- 1e15 + match(long$pv, c("PV1", "PV2"))
+  prepare_long <- function(d) .prepare_population_idm(
+    d, respondent_id_col = "student", pv_id_col = "pv", pv_value_col = "score",
+    weight_col = "weight"
+  )
+  long_dat <- prepare_long(long)
+  expect_equal(length(unique(long_dat$.id)), 3L)
+  expect_equal(length(unique(long_dat$.pv)), 2L)
+  expect_equal(.population_density_idm(wide), .population_density_idm(long_dat))
+  expect_error(prepare_long(long[-1, ]), "Missing PV")
+  long$weight[1] <- 99
+  expect_error(prepare_long(long), "same weight")
+})
+
+test_that("classed numeric identifiers retain their character interpretation", {
+  # Base hexmode supplies class-specific numeric labels without a test dependency.
+  pop <- data.frame(PV1 = 0:5, PV2 = 1:6)
+  pop$student <- as.hexmode(rep(10:12, 2))
+  pop$population <- as.hexmode(rep(15:16, each = 3))
+  wide <- .prepare_population_idm(pop, c("PV1", "PV2"),
+                                  respondent_id_col = "student", population_col = "population")
+  expect_equal(unique(wide$.id), c("a", "b", "c"))
+  expect_equal(levels(wide$.population), c("f", "10"))
+  long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
+  long$pv <- as.hexmode(10 + match(long$pv, c("PV1", "PV2")))
+  long_dat <- .prepare_population_idm(
+    long, respondent_id_col = "student", pv_id_col = "pv", pv_value_col = "score",
+    population_col = "population"
+  )
+  expect_equal(unique(long_dat$.pv), c("b", "c"))
+  expect_equal(.population_density_idm(wide), .population_density_idm(long_dat))
+})
+
+test_that("numeric identifier wrappers cannot bypass missing-PV validation", {
+  pop <- data.frame(student = I(1e15 + 1:3), PV1 = c(NA, 1, 2), PV2 = 3:5)
+  expect_error(.prepare_population_idm(pop, c("PV1", "PV2"),
+                                       respondent_id_col = "student"), "Missing PV")
+  pop$PV1[1] <- 0
+  wide <- .prepare_population_idm(pop, c("PV1", "PV2"), respondent_id_col = "student")
+  expect_equal(as.numeric(unique(wide$.id)), 1e15 + 1:3)
+  long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
+  long$pv <- I(1e15 + match(long$pv, c("PV1", "PV2")))
+  long_dat <- .prepare_population_idm(
+    long, respondent_id_col = "student", pv_id_col = "pv", pv_value_col = "score"
+  )
+  expect_equal(length(unique(long_dat$.pv)), 2L)
+  expect_equal(.population_density_idm(wide), .population_density_idm(long_dat))
+  pop <- rbind(pop, pop)
+  pop$population <- I(rep(1e15 + 1:2, each = 3))
+  grouped <- .prepare_population_idm(pop, c("PV1", "PV2"),
+                                     respondent_id_col = "student", population_col = "population")
+  expect_equal(as.numeric(levels(grouped$.population)), 1e15 + 1:2)
+})
+
 test_that("density smoothing controls and constant samples work", {
   dat <- .prepare_population_idm(population_fixture_idm(), "PV1")
   expect_equal(.population_density_idm(dat, density_bw = 2),
@@ -159,6 +225,23 @@ test_that("density smoothing controls and constant samples work", {
   }
   dat$.value <- 3
   expect_true(all(is.finite(.population_density_idm(dat)$.population_density)))
+})
+
+test_that("small bandwidths retain kernel shape and density area", {
+  pop <- data.frame(PV1 = c(-0.5, 0, 0.5, 100), weight = 1:4)
+  dat <- .prepare_population_idm(pop, "PV1", weight_col = "weight")
+  den <- .population_density_idm(dat, density_bw = 0.01)
+  area <- sum(diff(den$.population_x) *
+                (head(den$.population_density, -1) + tail(den$.population_density, -1)) / 2)
+  expect_equal(area, 1, tolerance = 0.002)
+  x <- den$.population_x[den$.population_density > max(den$.population_density) / 1000]
+  reference <- vapply(x, function(at) {
+    sum(stats::dnorm(at, mean = pop$PV1, sd = 0.01) * pop$weight / sum(pop$weight))
+  }, numeric(1))
+  actual <- den$.population_density[den$.population_density > max(den$.population_density) / 1000]
+  expect_lt(max(abs(actual - reference)) / max(reference), 0.005)
+  expect_error(.population_density_idm(dat, density_bw = 1e-8),
+               "bandwidth is too small.*increase density_bw or density_adjust")
 })
 
 test_that("standalone plots show stored cuts and identical density in all facets", {
@@ -297,6 +380,21 @@ prepare_population_groups_idm <- function(pop, pv_missing = "error") {
                           population_col = "population")
 }
 
+test_that("numeric population labels do not merge distinct populations", {
+  pop <- population_groups_fixture_idm()
+  population_ids <- 1e15 + 1:2
+  pop$population <- population_ids[match(pop$population, c("A", "B"))]
+  dat <- prepare_population_groups_idm(pop)
+  expect_equal(length(unique(dat$.population)), 2L)
+  expect_equal(as.numeric(levels(dat$.population)), population_ids)
+  den <- .population_density_idm(dat)
+  reference_pop <- pop
+  reference_pop$population <- rep(c("A", "B"), each = 8)
+  reference <- .population_density_idm(prepare_population_groups_idm(reference_pop))
+  expect_equal(den[setdiff(names(den), ".population")],
+               reference[setdiff(names(reference), ".population")])
+})
+
 test_that("population groups keep respondent IDs and weights separate in both layouts", {
   pop <- population_groups_fixture_idm()
   long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
@@ -339,6 +437,30 @@ test_that("each population has its own unit-area PV average on a common grid", {
   expect_equal(den, .population_density_idm(dat, density_bw = 0.7))
   # Repeating an entire sample cannot increase its density area or height.
   expect_equal(den, .population_density_idm(rbind(dat, dat[dat$.population == "B", ]), density_bw = 0.7))
+})
+
+test_that("automatic smoothing resolves narrow separated populations", {
+  pop <- data.frame(
+    PV1 = c(seq(0, 0.01, length.out = 10), 10 + seq(0, 0.01, length.out = 10)),
+    population = rep(c("A", "B"), each = 10)
+  )
+  dat <- .prepare_population_idm(pop, "PV1", population_col = "population")
+  den <- .population_density_idm(dat)
+  bandwidth <- mean(vapply(split(pop$PV1, pop$population), stats::bw.nrd0, numeric(1)))
+  for (label in c("A", "B")) {
+    group <- den[den$.population == label, ]
+    area <- sum(diff(group$.population_x) *
+                  (head(group$.population_density, -1) + tail(group$.population_density, -1)) / 2)
+    expect_equal(area, 1, tolerance = 0.002)
+    near_peak <- group$.population_density > max(group$.population_density) / 1000
+    reference <- vapply(group$.population_x[near_peak], function(at) {
+      mean(stats::dnorm(at, mean = pop$PV1[pop$population == label], sd = bandwidth))
+    }, numeric(1))
+    expect_lt(max(abs(group$.population_density[near_peak] - reference)) / max(reference),
+              0.005)
+  }
+  expect_equal(den$.population_x[den$.population == "A"],
+               den$.population_x[den$.population == "B"])
 })
 
 test_that("automatic bandwidth treats populations equally even with different PV counts", {

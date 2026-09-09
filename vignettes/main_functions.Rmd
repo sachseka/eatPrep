@@ -652,7 +652,7 @@ plotPopulationCutsIDM(
 
 #### How PVs, weights, and smoothing are combined
 
-Both functions estimate a Gaussian kernel density separately for each PV, normalizing the available sampling weights to sum to one within each PV. They then average the densities with equal weight across PVs on a common 512-point grid. **Do not average a respondent's PVs first**: the distribution of respondent averages would discard within-respondent PV variation. This follows the principle of computing population estimates separately for each PV and averaging those estimates, described in the [OECD PISA analysis guidance](https://www.oecd.org/en/about/programmes/pisa/how-to-prepare-and-analyse-the-pisa-database.html).
+Both functions estimate a Gaussian kernel density separately for each PV, normalizing the available sampling weights to sum to one within each PV. They then average the densities with equal weight across PVs on a common grid with at least 512 points. The grid becomes finer when needed to resolve narrow distributions or small bandwidths. If the requested smoothing needs excessive grid resolution, increase `density_bw` or `density_adjust` as indicated by the error message. **Do not average a respondent's PVs first**: the distribution of respondent averages would discard within-respondent PV variation. This follows the principle of computing population estimates separately for each PV and averaging those estimates, described in the [OECD PISA analysis guidance](https://www.oecd.org/en/about/programmes/pisa/how-to-prepare-and-analyse-the-pisa-database.html).
 
 By default, the common bandwidth is the mean of `stats::bw.nrd0()` bandwidths calculated separately for each PV after exclusions. This avoids treating stacked PVs as additional independently sampled respondents when selecting the bandwidth. The automatic bandwidth rule is unweighted; sampling weights enter the density calculation itself. Supply a positive `density_bw` in score units to choose the bandwidth explicitly. `density_adjust` multiplies that bandwidth: values above one smooth more, and values below one smooth less. For example, add `density_adjust = 1.2` to either plotting call. The grid extends three effective bandwidths beyond the observed PV range; all finite plotted cuts are included in the displayed x-range.
 
@@ -876,7 +876,7 @@ plotCutsIDM(
 )
 ```
 
-`percentage_digits` controls displayed decimal places (default 1, supported range 0 to 10); `percentage_size` controls text size in millimetres (default 3). Percentages are not adjusted to force rounded labels to total exactly 100%. Small rounding differences are therefore possible. To hide the tables while retaining distributions and numeric cut labels, set `show_percentages = FALSE` in either function:
+`percentage_digits` controls displayed decimal places (default 1, supported range 0 to 10); `percentage_size` controls text size in millimetres (default 3). Tables reserve their own space above each rating panel, so they remain clear of curves and cut labels when the figure is resized. Increase figure height for many raters or populations and figure width for many intervals. Percentages are not adjusted to force rounded labels to total exactly 100%. Small rounding differences are therefore possible. To hide the tables while retaining distributions and numeric cut labels, set `show_percentages = FALSE` in either function:
 
 ```{r idm hide population percentages, fig.width=8, fig.height=6}
 plotCutsIDM(

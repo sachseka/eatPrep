@@ -63,7 +63,10 @@ plotPopulationCutsIDM(
 A Gaussian kernel density is estimated separately for each PV, using sampling
 weights normalized to sum to one within that PV. These densities are averaged
 with equal weight across PVs. All estimates use a common bandwidth and a shared
-512-point grid extending three bandwidths beyond the observed PV range.
+grid extending three bandwidths beyond the observed PV range. The grid has at
+least 512 points and becomes finer when needed to resolve the bandwidth.
+Smoothing settings requiring excessive grid resolution cause an error;
+increase \code{density_bw} or \code{density_adjust} in that case.
 Respondents' PVs are never averaged before estimating the distribution. The
 automatic bandwidth is based on the respondent count within each PV, not on the
 number of stacked PV observations.
@@ -104,7 +107,10 @@ does not average rater percentages.
 
 The percentage table uses equally spaced columns in cut-interval order, including
 for narrow or empty intervals. Rows follow population-legend order and colors; ungrouped data
-have one neutral row. Additional space above the data is reserved for the table.
+have one neutral row. The table occupies a separate band above the data, with
+height determined by its text size and number of rows. It does not change the
+data axes or overlap curves when the figure is resized. Increase figure height
+for many panels or populations, and figure width for many intervals.
 If a panel has any missing or infinite cut, its percentage table is replaced
 with an explanatory message and a warning identifies the panel. Descending cut
 sequences cause an error when percentages are enabled.

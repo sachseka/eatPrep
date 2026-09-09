@@ -277,9 +277,8 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   add_percentages <- function(pp) {
     if (!show_percentages || is.null(population_density)) return(pp)
     percentage_cuts <- dplyr::bind_rows(cuts_long, mean_cuts_long)
-    x_values <- c(population_density$.population_x, plot_data$est, percentage_cuts$cut)
     .add_population_percentages_idm(
-      pp, population_data, percentage_cuts, x_range = range(x_values[is.finite(x_values)]),
+      pp, population_data, percentage_cuts,
       population_colors = colors, percentage_digits = percentage_digits,
       percentage_size = percentage_size, show_residuals = show_residuals
     )

@@ -1,3 +1,22 @@
+.population_identifier_labels_idm <- function(x) {
+  labels <- as.character(x)
+  if (is.numeric(x)) {
+    # Default numeric formatting can merge distinct, exactly representable IDs.
+    # Repair only default labels; preserve class-specific representations such
+    # as integer64, whose underlying doubles do not contain the identifier value.
+    raw <- unclass(x)
+    ordinary <- is.finite(raw) & labels == as.character(raw)
+    loses_precision <- rep(FALSE, length(raw))
+    loses_precision[ordinary] <- as.numeric(labels[ordinary]) != raw[ordinary]
+    labels[loses_precision] <- sprintf("%.17g", raw[loses_precision])
+  }
+  if (anyDuplicated(labels[!duplicated(x)])) {
+    stop("Distinct identifiers must have distinct character labels; supply explicit character identifiers.",
+         call. = FALSE)
+  }
+  labels
+}
+
 .prepare_population_idm <- function(pv_data, pv_cols = NULL,
                                     respondent_id_col = NULL,
                                     pv_id_col = NULL, pv_value_col = NULL,
@@ -20,7 +39,7 @@
         (is.numeric(population) && any(!is.finite(population)))) {
       stop("Population labels must be non-missing, non-empty finite identifiers.", call. = FALSE)
     }
-    population <- as.character(population)
+    population <- .population_identifier_labels_idm(population)
     population_names <- unique(population)
     groups <- lapply(population_names, function(label) {
       # Validate IDs, PV completeness, and weights within each population.
@@ -95,7 +114,7 @@
       stop("Wide PV input requires one row per respondent.", call. = FALSE)
     }
     dat <- do.call(rbind, lapply(pv_cols, function(col) {
-      data.frame(.id = as.character(id), .pv = col,
+      data.frame(.id = .population_identifier_labels_idm(id), .pv = col,
                  .value = pv_data[[col]], .weight = weights)
     }))
   } else {
@@ -103,7 +122,8 @@
     if (!valid_id(pv_id)) {
       stop("PV identifiers must be non-missing, non-empty finite identifiers.", call. = FALSE)
     }
-    dat <- data.frame(.id = as.character(id), .pv = as.character(pv_id),
+    dat <- data.frame(.id = .population_identifier_labels_idm(id),
+                      .pv = .population_identifier_labels_idm(pv_id),
                       .value = pv_data[[pv_value_col]], .weight = weights)
     if (anyDuplicated(dat[c(".id", ".pv")])) {
       stop("Long PV input requires at most one row per respondent and PV.", call. = FALSE)
@@ -157,11 +177,25 @@
   bw <- density_bw * density_adjust
   checkmate::assert_number(bw, lower = .Machine$double.xmin, finite = TRUE)
   limits <- range(dat$.value) + c(-3, 3) * bw
+  if (any(!is.finite(limits)) || !is.finite(diff(limits)) || diff(limits) <= 0) {
+    stop("PV range and density bandwidth must define distinct finite density limits.",
+         call. = FALSE)
+  }
+  # Resolve each kernel on the shared grid, including density()'s four-bandwidth
+  # internal padding at either end. Keep the original grid for ordinary inputs.
+  grid_points <- 8 * (diff(limits) / bw + 8) + 1
+  max_grid_points <- 262144L
+  if (!is.finite(grid_points) || grid_points > max_grid_points) {
+    stop(paste0("Density bandwidth is too small for the PV range; increase density_bw ",
+                "or density_adjust (maximum density grid size is ", max_grid_points, ")."),
+         call. = FALSE)
+  }
+  grid_points <- max(512L, 2^ceiling(log2(grid_points)))
   out <- lapply(seq_along(draws), function(i) {
     densities <- lapply(draws[[i]], function(d) {
       w <- d$.weight / max(d$.weight)
       stats::density(d$.value, weights = w / sum(w), bw = bw,
-                     from = limits[1], to = limits[2], n = 512)
+                     from = limits[1], to = limits[2], n = grid_points)
     })
     result <- data.frame(
       .population_x = densities[[1]]$x,
@@ -356,7 +390,6 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
   if (show_percentages) {
     pp <- .add_population_percentages_idm(
       pp, dat, cuts,
-      x_range = range(c(density$.population_x, cuts$cut[is.finite(cuts$cut)])),
       population_colors = colors, percentage_digits = percentage_digits,
       percentage_size = percentage_size
     )

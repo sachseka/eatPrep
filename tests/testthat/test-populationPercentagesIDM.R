@@ -24,6 +24,12 @@ percentage_cut_table_idm <- function(x = c(0, 10)) {
   data.frame(cut = x, .facet_person = factor("Mean"))
 }
 
+percentage_text_grobs_idm <- function(grob) {
+  if (inherits(grob, "text")) return(list(grob))
+  children <- c(grob$grobs, as.list(grob$children))
+  unlist(lapply(children, percentage_text_grobs_idm), recursive = FALSE)
+}
+
 test_that("percentages average weighted PV shares, assigning equality upwards", {
   result <- .population_percentages_idm(percentage_data_fixture_idm(), percentage_cut_table_idm())$values
   expect_equal(result$.percentage, c(15, 30, 55, 35, 45, 20))
@@ -97,15 +103,19 @@ test_that("both plot types show the same percentages and can hide them", {
     hidden <- do.call(fun, c(args, list(show_percentages = FALSE)))
     shown_built <- ggplot2::ggplot_build(shown)
     hidden_built <- ggplot2::ggplot_build(hidden)
-    expect_equal(head(shown_built$data, -1), hidden_built$data)
-    labels <- tail(shown_built$data, 1)[[1]]
-    expect_true(any(grepl("%", labels$label, fixed = TRUE)))
+    expect_equal(shown_built$data, hidden_built$data)
+    labels <- shown$facet$percentage_labels$.percentage_label
+    expect_true(any(grepl("%", labels, fixed = TRUE)))
     expect_match(shown$labels$caption, "weighted PV estimates")
     expect_equal(shown_built$layout$panel_scales_y[[1]]$range$range,
                  hidden_built$layout$panel_scales_y[[1]]$range$range)
+    axes <- function(p) list(p$x.range, p$y.range, p$x$breaks, p$y$breaks)
+    expect_equal(lapply(shown_built$layout$panel_params, axes),
+                 lapply(hidden_built$layout$panel_params, axes))
     expect_true(length(stats::na.omit(shown_built$layout$panel_params[[1]]$y$breaks)) > 0)
-    if (identical(fun, plotPopulationCutsIDM)) population_labels <- labels$label else
-      expect_equal(labels$label, population_labels)
+    if (identical(fun, plotPopulationCutsIDM)) population_labels <- labels else
+      expect_equal(labels, population_labels)
+    expect_null(hidden$facet$percentage_labels)
   }
 })
 
@@ -118,8 +128,8 @@ test_that("percentages are independent of smoothing, cut rounding, and silhouett
     changed <- c(args, list(density_adjust = 2, cut_value_digits = 5))
     if (identical(fun, plotCutsIDM)) changed$population_height <- 0.8
     second <- do.call(fun, changed)
-    expect_equal(tail(first$layers, 1)[[1]]$data$.percentage_label,
-                 tail(second$layers, 1)[[1]]$data$.percentage_label)
+    expect_equal(first$facet$percentage_labels$.percentage_label,
+                 second$facet$percentage_labels$.percentage_label)
   }
 })
 
@@ -131,14 +141,21 @@ test_that("percentage labels use population colors, precision and size, only in 
                    show_aggregate = TRUE, show_residuals = TRUE,
                    percentage_digits = 2, percentage_size = 4)
   built <- ggplot2::ggplot_build(p)
-  labels <- tail(built$data, 1)[[1]]
-  values <- labels[grepl("%", labels$label, fixed = TRUE), ]
-  expect_true(all(grepl("^[0-9]+\\.[0-9]{2}%$", values$label)))
-  expect_true(all(values$size == 4))
-  expect_setequal(unique(values$colour), c("blue", "orange"))
+  labels <- p$facet$percentage_labels
+  values <- labels[grepl("%", labels$.percentage_label, fixed = TRUE), ]
+  expect_true(all(grepl("^[0-9]+\\.[0-9]{2}%$", values$.percentage_label)))
+  expect_setequal(unique(values$.percentage_color), c("blue", "orange"))
+  grDevices::pdf(file = NULL)
+  on.exit(grDevices::dev.off())
+  grob <- ggplot2::ggplotGrob(p)
+  bands <- grob$layout[grepl("^population-percentages-", grob$layout$name), ]
   layout <- built$layout$layout
-  expect_setequal(as.character(unique(labels$PANEL)),
+  expect_setequal(sub("^population-percentages-", "", bands$name),
                    as.character(layout$PANEL[layout$.panel == "Ratings"]))
+  texts <- unlist(lapply(grob$grobs[grepl("^population-percentages-", grob$layout$name)],
+                         percentage_text_grobs_idm), recursive = FALSE)
+  expect_setequal(vapply(texts, function(x) x$gp$col, character(1)), c("blue", "orange"))
+  expect_true(all(vapply(texts, function(x) x$gp$fontsize, numeric(1)) == 4 * 72.27 / 25.4))
   expect_match(p$labels$caption, "does not represent rating stages")
 })
 
@@ -147,7 +164,7 @@ test_that("incomplete cut panels show an explanation instead of partial percenta
   res$cuts_summary[1, res$cut_labels[1]] <- NA_real_
   expect_warning(p <- plotPopulationCutsIDM(res, data.frame(PV1 = c(0, 1, 2)), pv_cols = "PV1"),
                  "incomplete cuts: Mean")
-  labels <- tail(p$layers, 1)[[1]]$data$.percentage_label
+  labels <- p$facet$percentage_labels$.percentage_label
   expect_match(labels, "Percentages unavailable")
   expect_false(any(grepl("%", labels, fixed = TRUE)))
 })
@@ -161,4 +178,92 @@ test_that("percentages without PV input do not change the rating plot", {
   }
   for (bad in list(-1, 1.5, NA, 11)) expect_error(plotCutsIDM(res, percentage_digits = bad))
   for (bad in list(-1, Inf, NA, c(2, 3))) expect_error(plotCutsIDM(res, percentage_size = bad))
+})
+
+test_that("percentage tables stay outside data panels when figures are resized", {
+  items <- data.frame(est = seq(-2, 2, length.out = 8),
+                       Rater1 = c(1, 1, 2, 2, 3, 3, 4, 5),
+                       Rater2 = c(1, 2, 2, 3, 3, 4, 4, 5))
+  for (i in 3:5) items[[paste0("Rater", i)]] <- items$Rater1
+  res <- computeCutsIDM(items, boundaries = c(1.5, 2.5, 3.5))
+  pop <- percentage_population_fixture_idm()
+  p <- plotPopulationCutsIDM(res, pop, pv_cols = c("PV1", "PV2"),
+                             population_col = "population", cut_selection = "both")
+  render <- function(height) {
+    grDevices::pdf(file = NULL, width = 8, height = height)
+    on.exit(grDevices::dev.off())
+    grob <- ggplot2::ggplotGrob(p)
+    grid::grid.draw(grob)
+    bands <- grob$layout[grepl("^population-percentages-", grob$layout$name), ]
+    panels <- grob$layout[grepl("^panel(-|$)", grob$layout$name), ]
+    expect_equal(nrow(bands), 6L)
+    for (i in seq_len(nrow(bands))) {
+      band <- bands[i, ]
+      expect_true(all(band$b < panels$t | band$t > panels$b))
+      expect_true(any(panels$t == band$b + 1 & panels$l == band$l & panels$r == band$r))
+    }
+    heights <- grid::convertHeight(grob$heights[unique(bands$t)], "mm", valueOnly = TRUE)
+    expect_true(all(heights > 0))
+    heights
+  }
+  expect_equal(render(6), render(4))
+})
+
+test_that("table bands grow with text size and population rows", {
+  res <- percentage_cuts_fixture_idm()
+  pop <- percentage_population_fixture_idm()
+  extra <- pop[pop$population == "A", ]
+  extra$population <- "C"
+  grDevices::pdf(file = NULL, width = 7, height = 5)
+  on.exit(grDevices::dev.off())
+  height <- function(pop, size) {
+    p <- plotPopulationCutsIDM(res, pop, pv_cols = c("PV1", "PV2"),
+                               population_col = "population", percentage_size = size)
+    grob <- ggplot2::ggplotGrob(p)
+    grid::grid.newpage()
+    grid::grid.draw(grob)
+    row <- grob$layout$t[grepl("^population-percentages-", grob$layout$name)]
+    grid::convertHeight(grob$heights[row], "mm", valueOnly = TRUE)
+  }
+  normal <- height(pop, 3)
+  expect_gt(height(pop, 6), normal)
+  expect_gt(height(rbind(pop, extra), 3), normal)
+})
+
+test_that("incomplete panels render a separate explanation band", {
+  res <- percentage_cuts_fixture_idm()
+  res$cuts_summary[1, res$cut_labels[1]] <- NA_real_
+  expect_warning(p <- plotPopulationCutsIDM(res, percentage_population_fixture_idm(),
+                                             pv_cols = c("PV1", "PV2"), cut_selection = "both"),
+                 "incomplete cuts: Mean")
+  grDevices::pdf(file = NULL)
+  on.exit(grDevices::dev.off())
+  grob <- ggplot2::ggplotGrob(p)
+  bands <- grob$grobs[grepl("^population-percentages-", grob$layout$name)]
+  texts <- unlist(lapply(bands, percentage_text_grobs_idm), recursive = FALSE)
+  labels <- unlist(lapply(texts, function(x) as.character(x$label)))
+  expect_equal(sum(grepl("Percentages unavailable", labels)), 1L)
+  expect_true(any(grepl("%", labels, fixed = TRUE)))
+  expect_length(bands, 3L)
+})
+
+test_that("percentage columns follow reversed score axes", {
+  p <- plotPopulationCutsIDM(percentage_cuts_fixture_idm(),
+                             percentage_population_fixture_idm(), pv_cols = c("PV1", "PV2"))
+  grDevices::pdf(file = NULL)
+  on.exit(grDevices::dev.off())
+  column_labels <- function(plot) {
+    grob <- ggplot2::ggplotGrob(plot)
+    band <- grob$grobs[[which(grepl("^population-percentages-", grob$layout$name))[1]]]
+    cells <- band$grobs[order(band$layout$l)]
+    vapply(cells, function(cell) percentage_text_grobs_idm(cell)[[1]]$label, character(1))
+  }
+  normal <- column_labels(p)
+  expect_false(identical(normal, rev(normal)))
+  expect_equal(column_labels(p + ggplot2::scale_x_reverse()), rev(normal))
+  if ("reverse" %in% names(formals(ggplot2::coord_cartesian))) {
+    expect_equal(column_labels(p + ggplot2::coord_cartesian(reverse = "x")), rev(normal))
+    expect_equal(column_labels(p + ggplot2::scale_x_reverse() +
+                                 ggplot2::coord_cartesian(reverse = "x")), normal)
+  }
 })
