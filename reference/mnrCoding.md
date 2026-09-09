@@ -106,7 +106,7 @@ prepDat <- automateDataPreparation (inputList = inputList,
     datList = inputDat, readSpss = FALSE, checkData=FALSE, 
     mergeData = TRUE, recodeData=TRUE, aggregateData=FALSE, 
     scoreData= FALSE, writeSpss=FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-08-31 14:49:25.658864
+#> Starting automateDataPreparation 2026-09-09 18:56:25.277546
 #> 
 #> Check has been skipped.
 #> 
@@ -134,7 +134,7 @@ prepDat <- automateDataPreparation (inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-08-31 14:49:25.757377
+#> automateDataPreparation terminated successfully! 2026-09-09 18:56:25.387255
        
 prepDat2 <- mergeData("ID", list(prepDat, inputList$rotation))       
 #> Start merging of dataset 1.

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1137,7 +1137,7 @@ the final data preparation step.</p>
 <span>    recodeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeMnr <span class="op">=</span> <span class="cn">TRUE</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
 <span>    aggregateData <span class="op">=</span> <span class="cn">TRUE</span>, scoreData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    writeSpss <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting automateDataPreparation 2026-08-31 14:49:39.760889</span></span>
+<span><span class="co">#&gt; Starting automateDataPreparation 2026-09-09 18:56:56.164055</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Check data...</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1213,7 +1213,7 @@ the final data preparation step.</p>
 <span><span class="co">#&gt; No SPSS-File has been written.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Missings are UNcollapsed.</span></span>
-<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-08-31 14:49:40.015683</span></span></code></pre></div>
+<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-09-09 18:56:56.423096</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-diagnostics-and-rater-tools">Additional Diagnostics and Rater Tools<a class="anchor" aria-label="anchor" href="#additional-diagnostics-and-rater-tools"></a>
@@ -1569,16 +1569,33 @@ examples show cut labels with two digits after the decimal point.</p>
 curves together with the mean cuts. In this panel, rater curves are
 drawn in rater-specific colors and labelled by rater name by default.
 When several curves end at similar values, the labels are shifted
-slightly along the y-axis so that all names remain visible. The legend
-remains restricted to the cut score labels. The vertical cut lines are
-the means from <code>cuts$cuts_summary</code>, not newly estimated cuts
-from a pooled rating curve.</p>
+slightly along the y-axis so that all names remain visible. The color
+legend remains restricted to the cut score labels. The vertical cut
+lines are the means from <code>cuts$cuts_summary</code>, not newly
+estimated cuts from a pooled rating curve.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cuts</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>, cut_value_digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="main_functions_files/figure-html/idm%20aggregate%20plot%20example-1.png" class="r-plt" alt="" width="672"></p>
+<p>Adjust the text sizes inside the graph with
+<code>item_number_size</code> (item positions),
+<code>cut_value_size</code> (numeric cuts), and
+<code>aggregate_label_size</code> (rater names in the aggregate panel).
+Sizes are in millimetres, with defaults of <code>2</code>,
+<code>2.6</code>, and <code>3</code>, respectively. These settings also
+apply when residual panels are shown.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  item_number_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  cut_value_size <span class="op">=</span> <span class="fl">3.5</span>,</span>
+<span>  aggregate_label_size <span class="op">=</span> <span class="fl">4</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20label%20sizes%20example-1.png" class="r-plt" alt="" width="672"></p>
 <p>Set <code>show_aggregate_labels = FALSE</code> if the direct labels
 make the aggregate panel too dense.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -1589,7 +1606,7 @@ make the aggregate panel too dense.</p>
 <p>Residual panels can be added to inspect local deviations between raw
 ratings and the smoothed moving average. They can also be combined with
 the aggregate panel.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  show_residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -1597,6 +1614,703 @@ the aggregate panel.</p>
 <span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="main_functions_files/figure-html/idm%20residual%20plot%20example-1.png" class="r-plt" alt="" width="768"></p>
+</div>
+<div class="section level3">
+<h3 id="population-distributions-and-idm-cuts">Population Distributions and IDM Cuts<a class="anchor" aria-label="anchor" href="#population-distributions-and-idm-cuts"></a>
+</h3>
+<p>There are two ways to display a population distribution from
+plausible values (PVs):</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Purpose</th>
+<th align="left">Function</th>
+<th align="left">Meaning of the vertical axis</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Inspect where the cuts divide the population
+distribution</td>
+<td align="left"><code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code></td>
+<td align="left">Population density</td>
+</tr>
+<tr class="even">
+<td align="left">Inspect the population alongside the rater curves</td>
+<td align="left"><code>plotCutsIDM(..., pv_data = ...)</code></td>
+<td align="left">Rating stages; the background silhouette shows
+<strong>distribution shape only</strong>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The background silhouette’s height does not represent rating
+stages or density-axis values.</strong> Its height is scaled for
+display. Use the standalone population plot when you need a density
+axis. Set <code>show_caption = TRUE</code> to include this explanation
+below the plot; explanatory captions are hidden by default in both plot
+functions.</p>
+<div class="section level4">
+<h4 id="prepare-population-pvs-on-the-cut-score-metric">Prepare population PVs on the cut-score metric<a class="anchor" aria-label="anchor" href="#prepare-population-pvs-on-the-cut-score-metric"></a>
+</h4>
+<p>Pass a data frame for one domain, optionally with a
+<code>population_col</code> identifying several populations. The PVs
+must already be on the same metric as the item estimates and cuts: these
+plotting functions do not transform scores or check that different
+scales have been linked. Population respondents are distinct from the
+raters and items used to calculate the cuts; no respondent-to-rater join
+is performed.</p>
+<p>The following synthetic data illustrate five PV columns and sampling
+weights on the compact metric used by <code>cuts</code> above. In an
+analysis, use the PVs and weights supplied with your population
+data.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">population</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  student <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">300</span><span class="op">)</span>,</span>
+<span>  weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">population_location</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">300</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
+<span><span class="va">pv_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">population</span><span class="op">[</span><span class="va">pv_names</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span></span>
+<span>  <span class="fl">5</span>, <span class="va">population_location</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">300</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   student    weight        PV1        PV2         PV3        PV4         PV5</span></span>
+<span><span class="co">#&gt; 1       1 1.8722091 -0.4257400 -0.5170118  0.03337537 -0.1559848 -0.01061738</span></span>
+<span><span class="co">#&gt; 2       2 1.9056131 -1.3940874 -1.9037482 -1.19232003 -1.3625439 -1.78668443</span></span>
+<span><span class="co">#&gt; 3       3 0.9292093  1.0433963  0.8898841  0.99354550  1.2079340  0.94064473</span></span>
+<span><span class="co">#&gt; 4       4 1.7456714 -0.3536391 -0.1801812 -0.04690367 -0.3799261 -0.35818097</span></span>
+<span><span class="co">#&gt; 5       5 1.4626183 -0.3662707 -1.0810018 -0.26832834 -0.2548810 -0.25028248</span></span>
+<span><span class="co">#&gt; 6       6 1.2786439 -1.1481787 -0.9653571 -0.88502077 -0.8805684 -1.21188301</span></span></code></pre></div>
+<p>Wide input has one row per respondent. Select PV columns explicitly
+with <code>pv_cols</code> so that numeric IDs, weights, or PVs from
+other domains cannot be included accidentally.
+<code>respondent_id_col</code> is optional for wide input; when
+supplied, its values must be unique. <code>weight_col = NULL</code>, the
+default, gives every respondent equal weight. Supplied sampling weights
+must be finite, non-missing and non-negative; zero-weight respondents
+are excluded.</p>
+</div>
+<div class="section level4">
+<h4 id="standalone-density-with-mean-or-individual-cuts">Standalone density with mean or individual cuts<a class="anchor" aria-label="anchor" href="#standalone-density-with-mean-or-individual-cuts"></a>
+</h4>
+<p>The default standalone plot draws the mean cuts from
+<code>cuts$cuts_summary</code> over a lightly filled population density.
+The vertical axis is density, and the cut lines use the supplied
+difficulty-scale values without re-estimation.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">population</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20population%20mean%20plot-1.png" class="r-plt" alt="" width="672"></p>
+<p>Use <code>cut_selection = "individual"</code> for one facet per
+rater, or <code>"both"</code> to include the mean-cut facet as well.
+Every facet uses the <strong>same population distribution and fixed
+axes</strong>; the distribution is not conditional on a rater. Use
+<code>population_fill</code> and <code>population_alpha</code> for
+appearance, and <code>cut_value_size</code>,
+<code>cut_value_digits</code>, or <code>show_cut_values = FALSE</code>
+for cut labels.</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">population</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  cut_selection <span class="op">=</span> <span class="st">"both"</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  cut_value_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  population_fill <span class="op">=</span> <span class="st">"steelblue"</span>,</span>
+<span>  population_alpha <span class="op">=</span> <span class="fl">0.2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20population%20individual%20plot-1.png" class="r-plt" alt="" width="768"></p>
+</div>
+<div class="section level4">
+<h4 id="equivalent-long-format-input">Equivalent long-format input<a class="anchor" aria-label="anchor" href="#equivalent-long-format-input"></a>
+</h4>
+<p>Long input has one row per respondent and PV, with explicit
+respondent ID, PV identifier, and numeric value columns. A respondent
+must have the same sampling weight across all PV rows. Duplicate
+respondent-PV rows cause an error. <code>input_format = "auto"</code>
+selects long format when <code>pv_id_col</code> or
+<code>pv_value_col</code> is supplied; explicit <code>"wide"</code> and
+<code>"long"</code> are also supported.</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">population_long</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
+<span>  <span class="va">population</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">pv_names</span><span class="op">)</span>,</span>
+<span>  names_to <span class="op">=</span> <span class="st">"pv"</span>,</span>
+<span>  values_to <span class="op">=</span> <span class="st">"score"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># This gives the same distribution and mean cuts as the wide-input example.</span></span>
+<span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">population_long</span>,</span>
+<span>  respondent_id_col <span class="op">=</span> <span class="st">"student"</span>,</span>
+<span>  pv_id_col <span class="op">=</span> <span class="st">"pv"</span>,</span>
+<span>  pv_value_col <span class="op">=</span> <span class="st">"score"</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20population%20long%20input-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level4">
+<h4 id="how-pvs-weights-and-smoothing-are-combined">How PVs, weights, and smoothing are combined<a class="anchor" aria-label="anchor" href="#how-pvs-weights-and-smoothing-are-combined"></a>
+</h4>
+<p>Both functions estimate a Gaussian kernel density separately for each
+PV, normalizing the available sampling weights to sum to one within each
+PV. They then average the densities with equal weight across PVs on a
+common grid with at least 512 points. The grid becomes finer when needed
+to resolve narrow distributions or small bandwidths. If the requested
+smoothing needs excessive grid resolution, increase
+<code>density_bw</code> or <code>density_adjust</code> as indicated by
+the error message. <strong>Do not average a respondent’s PVs
+first</strong>: the distribution of respondent averages would discard
+within-respondent PV variation. This follows the principle of computing
+population estimates separately for each PV and averaging those
+estimates, described in the <a href="https://www.oecd.org/en/about/programmes/pisa/how-to-prepare-and-analyse-the-pisa-database.html" class="external-link">OECD
+PISA analysis guidance</a>.</p>
+<p>By default, the common bandwidth is the mean of
+<code><a href="https://rdrr.io/r/stats/bandwidth.html" class="external-link">stats::bw.nrd0()</a></code> bandwidths calculated separately for each
+PV after exclusions. This avoids treating stacked PVs as additional
+independently sampled respondents when selecting the bandwidth. The
+automatic bandwidth rule is unweighted; sampling weights enter the
+density calculation itself. Supply a positive <code>density_bw</code> in
+score units to choose the bandwidth explicitly.
+<code>density_adjust</code> multiplies that bandwidth: values above one
+smooth more, and values below one smooth less. For example, add
+<code>density_adjust = 1.2</code> to either plotting call. The grid
+extends three effective bandwidths beyond the observed PV range; all
+finite plotted cuts are included in the displayed x-range.</p>
+<p>These are descriptive population estimates. The plots do not compute
+uncertainty intervals or replicate-weight variances. Percentage tables
+are shown by default and are computed directly from PV observations, as
+explained below. A density height is not itself a percentage of
+respondents.</p>
+</div>
+<div class="section level4">
+<h4 id="missing-values-and-incomplete-long-input">Missing values and incomplete long input<a class="anchor" aria-label="anchor" href="#missing-values-and-incomplete-long-input"></a>
+</h4>
+<p>The default <code>pv_missing = "error"</code> rejects missing PV
+values, including respondent-PV combinations omitted from long input.
+With <code>pv_missing = "drop"</code>, such values are omitted with a
+warning, and weights are renormalized within each PV. Consequently,
+different PVs can use different respondent subsets. Each PV must retain
+at least two observed respondents with positive weights. Infinite PV
+values and invalid or missing weights always cause an error.</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">population_incomplete</span> <span class="op">&lt;-</span> <span class="va">population</span></span>
+<span><span class="va">population_incomplete</span><span class="op">$</span><span class="va">PV1</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA_real_</span></span>
+<span></span>
+<span><span class="co"># Explicit omission produces a warning reporting the missing respondent-PV value.</span></span>
+<span><span class="va">population_plot_incomplete</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">population_incomplete</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  pv_missing <span class="op">=</span> <span class="st">"drop"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Include every intended PV identifier in long input. A PV that is
+entirely absent from the supplied data cannot be detected. The functions
+do not impute missing PVs.</p>
+</div>
+<div class="section level4">
+<h4 id="population-silhouette-behind-rater-curves">Population silhouette behind rater curves<a class="anchor" aria-label="anchor" href="#population-silhouette-behind-rater-curves"></a>
+</h4>
+<p>Supply <code>pv_data</code> to <code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> to add the
+population background. The PV input, weighting, and smoothing arguments
+are identical to the standalone function. <code>pv_data = NULL</code>
+preserves the existing plot.</p>
+<p><strong>Read the silhouette horizontally to locate the population
+relative to the cuts. Its height communicates distribution shape only
+and does not represent rating stages or density-axis values.</strong>
+<code>population_height = 0.25</code> places its peak at one quarter of
+the rating range above the lower rating limit; this is a display choice,
+not a statistical value. Changing <code>population_height</code> changes
+neither the estimated density nor the cuts.</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">population</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  population_height <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  population_fill <span class="op">=</span> <span class="st">"steelblue"</span>,</span>
+<span>  population_alpha <span class="op">=</span> <span class="fl">0.15</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="main_functions_files/figure-html/idm%20population%20silhouette%20plot-1.png" class="r-plt" alt="The population silhouette shows distribution shape only. Its height does not represent rating stages or density-axis values." width="768"><p class="caption">
+The population silhouette shows distribution shape only. Its height does
+not represent rating stages or density-axis values.
+</p>
+</div>
+<p>The same silhouette and height scaling are repeated in every rating
+facet, including the aggregate panel. The rating axis, rater curves, cut
+labels, and cut values keep their existing meaning. The shared x-range
+expands to include the population distribution, so the item curves may
+occupy a smaller part of the horizontal space. The explanatory plot
+caption can be enabled with <code>show_caption = TRUE</code>.</p>
+<p>Residual panels stay clear of the silhouette. The following example
+also demonstrates long-format input for the combined view.</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">population_long</span>,</span>
+<span>  respondent_id_col <span class="op">=</span> <span class="st">"student"</span>,</span>
+<span>  pv_id_col <span class="op">=</span> <span class="st">"pv"</span>,</span>
+<span>  pv_value_col <span class="op">=</span> <span class="st">"score"</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  population_height <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  population_alpha <span class="op">=</span> <span class="fl">0.15</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="main_functions_files/figure-html/idm%20population%20silhouette%20residuals-1.png" class="r-plt" alt="Only rating panels contain the population silhouette. Silhouette height shows distribution shape, not rating stages or density-axis values." width="960"><p class="caption">
+Only rating panels contain the population silhouette. Silhouette height
+shows distribution shape, not rating stages or density-axis values.
+</p>
+</div>
+</div>
+<div class="section level4">
+<h4 id="compare-two-populations-with-overlapping-distributions">Compare two populations with overlapping distributions<a class="anchor" aria-label="anchor" href="#compare-two-populations-with-overlapping-distributions"></a>
+</h4>
+<p>Both functions accept <code>population_col</code>, the name of a
+grouping column in the same wide or long PV data frame. Omitting it
+preserves the single-population plots above. Group labels must be
+non-missing and non-empty. Their order of first appearance determines
+the drawing order and population legend; unused factor levels are
+ignored.</p>
+<p>Here we create a second synthetic population with fewer respondents,
+a higher location, and more dispersion. The student IDs deliberately
+repeat across populations. IDs must be unique <strong>within each
+population</strong> for wide input, and respondent-PV combinations must
+be unique within each population for long input. A respondent’s weight
+must be constant across PV rows within that population, but may differ
+between populations.</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">population_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">population</span>, cohort <span class="op">=</span> <span class="st">"Population A"</span><span class="op">)</span></span>
+<span><span class="va">population_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">population</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">220</span><span class="op">)</span>, <span class="op">]</span>, cohort <span class="op">=</span> <span class="st">"Population B"</span><span class="op">)</span></span>
+<span><span class="va">population_b</span><span class="op">[</span><span class="va">pv_names</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1.35</span> <span class="op">*</span> <span class="va">population_b</span><span class="op">[</span><span class="va">pv_names</span><span class="op">]</span> <span class="op">+</span> <span class="fl">0.7</span></span>
+<span><span class="va">populations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">population_a</span>, <span class="va">population_b</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">population_colors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Population A"</span> <span class="op">=</span> <span class="st">"#0072B2"</span>,</span>
+<span>  <span class="st">"Population B"</span> <span class="op">=</span> <span class="st">"#E69F00"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>For each population, the functions average the densities estimated
+from its own PVs and normalize weights within each PV. <strong>Each
+population density has total area one.</strong> A larger sample or a
+larger total sampling weight does not give that population a
+proportionally larger curve. With <code>pv_missing = "drop"</code>,
+exclusions and weight renormalization occur separately within each
+population and PV; diagnostic messages identify the affected population.
+A PV entirely absent from a population’s long data cannot be
+detected.</p>
+<p>All populations share one bandwidth and one grid spanning their
+combined observed PV range. The automatic bandwidth averages the per-PV
+bandwidths within each population, then averages these population means
+with equal weight. This also supports different numbers of PVs between
+populations in long input. An explicit <code>density_bw</code> and
+<code>density_adjust</code> apply to every population. Thus each
+distribution can be compared under the same smoothing choice.</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  respondent_id_col <span class="op">=</span> <span class="st">"student"</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  population_alpha <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  cut_selection <span class="op">=</span> <span class="st">"both"</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20two%20populations%20density-1.png" class="r-plt" alt="" width="768"></p>
+<p>The filled densities overlap without stacking. Their outlines and a
+separate <strong>Population</strong> legend identify the groups; the
+<strong>Cut Score</strong> colors and legend keep their existing
+meaning. Blue and orange are the defaults for two populations.
+<code>population_colors</code> overrides these with a named color vector
+containing exactly one entry for each observed population label. Reuse
+that vector across figures for consistent colors. More than two groups
+are supported, with a qualitative default palette.</p>
+<p>Alternatively, set <code>population_fill</code> in either plot
+function. An explicitly supplied single color, such as
+<code>population_fill = "grey50"</code>, colors <strong>all populations
+alike</strong>. A vector with exactly one color per population follows
+the order of first appearance in the data, which is also the legend
+order; names on this vector are ignored. Grouped percentage rows, legend
+keys, and density outlines follow the same colors. If you supply too
+many or too few colors (except the single-color case), the plot warns
+and uses its default palette. An empty vector also triggers this
+fallback. Without grouping, the fallback is grey. Omitting
+<code>population_fill</code> preserves the automatic colors; an
+explicitly supplied <code>population_colors</code> takes precedence over
+<code>population_fill</code>.</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>, pv_data <span class="op">=</span> <span class="va">populations</span>, pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>, population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#009E73"</span>, <span class="st">"#CC79A7"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20population%20fill%20vector-1.png" class="r-plt" alt="" width="768"></p>
+<p>The same single color can be used for both populations in the rater
+background. Their names and statistics still appear separately in the
+legend. <strong>Silhouette height shows distribution shape only and does
+not represent rating stages.</strong></p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>, pv_data <span class="op">=</span> <span class="va">populations</span>, pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>, population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_fill <span class="op">=</span> <span class="st">"grey50"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="main_functions_files/figure-html/idm%20population%20fill%20single%20color-1.png" class="r-plt" alt="Both populations use the same color. Silhouette height shows distribution shape only and does not represent rating stages." width="768"><p class="caption">
+Both populations use the same color. Silhouette height shows
+distribution shape only and does not represent rating stages.
+</p>
+</div>
+<p>For these two populations,
+<code>population_fill = c("red", "blue", "green")</code> would warn and
+restore the default blue/orange palette.</p>
+<p>For the rater background, all silhouettes use <strong>one shared
+height factor</strong>. The highest density peak across all populations
+occupies <code>population_height</code> times the rating range above its
+lower limit. The other peaks retain their relative heights; the curves
+are neither stacked nor individually stretched to the same peak. This
+preserves visible differences in concentration.</p>
+<p><strong>The silhouettes still show distribution shape only. Their
+shared display height does not represent rating stages or readable
+density-axis values.</strong> Use <code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code>
+when a density axis is needed. Use <code>show_caption = TRUE</code> to
+include the silhouette explanation in the rater plot.</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  respondent_id_col <span class="op">=</span> <span class="st">"student"</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  population_height <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>  population_alpha <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="main_functions_files/figure-html/idm%20two%20populations%20silhouettes-1.png" class="r-plt" alt="Both population silhouettes share a display-height factor. Their height shows distribution shape only, not rating stages or density-axis values." width="768"><p class="caption">
+Both population silhouettes share a display-height factor. Their height
+shows distribution shape only, not rating stages or density-axis values.
+</p>
+</div>
+<p>All populations repeat in every rating and aggregate panel, while
+residual panels stay clear. The same grouped input can be supplied in
+long format to either function:</p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">populations_long</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
+<span>  <span class="va">populations</span>, cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">pv_names</span><span class="op">)</span>,</span>
+<span>  names_to <span class="op">=</span> <span class="st">"pv"</span>, values_to <span class="op">=</span> <span class="st">"score"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations_long</span>,</span>
+<span>  respondent_id_col <span class="op">=</span> <span class="st">"student"</span>,</span>
+<span>  pv_id_col <span class="op">=</span> <span class="st">"pv"</span>,</span>
+<span>  pv_value_col <span class="op">=</span> <span class="st">"score"</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  population_alpha <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="main_functions_files/figure-html/idm%20two%20populations%20long%20residuals-1.png" class="r-plt" alt="Population silhouettes appear only in rating panels. Their shared height scale communicates distribution shape and does not represent rating stages or density-axis values." width="960"><p class="caption">
+Population silhouettes appear only in rating panels. Their shared height
+scale communicates distribution shape and does not represent rating
+stages or density-axis values.
+</p>
+</div>
+</div>
+<div class="section level4">
+<h4 id="population-means-and-standard-deviations">Population means and standard deviations<a class="anchor" aria-label="anchor" href="#population-means-and-standard-deviations"></a>
+</h4>
+<p>Both <code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code> and
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> display <strong>M</strong> (mean) and
+<strong>SD</strong> (standard deviation) below each population name in
+the legend when PV data are supplied. With one ungrouped population,
+these statistics appear in the subtitle. They use the supplied score
+metric and describe the whole population, so one set of statistics
+applies to all rater and mean-cut panels.</p>
+<p>Means and variances are estimated separately for each PV and
+population using the supplied sampling weights. The final M is the
+average of the PV means; the final SD is the square root of the average
+PV variance. For
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
+plausible values:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>D</mi><mo>=</mo><msqrt><mrow><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mi>S</mi><msubsup><mi>D</mi><mi>j</mi><mn>2</mn></msubsup></mrow></msqrt><mi>.</mi></mrow><annotation encoding="application/x-tex">SD = \sqrt{\frac{1}{m}\sum_{j=1}^{m} SD_j^2}.</annotation></semantics></math></p>
+<p>Every PV contributes equally. Respondents’ PVs are never averaged
+before estimating their population spread, and no variance component for
+differences between PV means is added.</p>
+<p>Within a PV, the weighted mean squared deviation from that PV’s
+weighted mean is multiplied by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mi>j</mi></msub><mi>/</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">n_j/(n_j-1)</annotation></semantics></math>
+before taking the square root. Weights are normalized to sum to one, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mi>j</mi></msub><annotation encoding="application/x-tex">n_j</annotation></semantics></math>
+counts observed respondents with positive weights in that PV and
+population after missing-data handling. The correction is applied
+separately for every PV, so different numbers of available respondents
+receive different correction factors. SD describes population spread; it
+is not a standard error. For example, with weights <code>c(1, 3)</code>,
+PV1 values <code>c(0, 4)</code> have M = 3 and corrected variance = 6,
+while PV2 values <code>c(18, 10)</code> have M = 12 and corrected
+variance = 24. Here each PV has two respondents, so each variance is
+multiplied by 2. The displayed estimates are therefore M = 7.50 and SD =
+sqrt((6 + 24) / 2) = 3.87.</p>
+<p>With <code>pv_missing = "drop"</code>, each PV uses its available
+observations and renormalized weights; zero-weight observations are
+excluded. Changing cuts, zoom, or density smoothing does not change M or
+SD. These estimates are calculated directly from the PV observations
+before smoothing.</p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  cut_selection <span class="op">=</span> <span class="st">"both"</span>,</span>
+<span>  population_stats_digits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  show_caption <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20population%20means%20and%20SDs-1.png" class="r-plt" alt="" width="864"></p>
+<p>The same statistics are available with long-format population data in
+the rater view, including plots with residual panels:</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations_long</span>,</span>
+<span>  respondent_id_col <span class="op">=</span> <span class="st">"student"</span>,</span>
+<span>  pv_id_col <span class="op">=</span> <span class="st">"pv"</span>,</span>
+<span>  pv_value_col <span class="op">=</span> <span class="st">"score"</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  population_stats_digits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  show_caption <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="main_functions_files/figure-html/idm%20rater%20population%20means%20and%20SDs-1.png" class="r-plt" alt="M and SD describe populations on the supplied score metric. Silhouette height communicates distribution shape only and does not represent rating stages." width="960"><p class="caption">
+M and SD describe populations on the supplied score metric. Silhouette
+height communicates distribution shape only and does not represent
+rating stages.
+</p>
+</div>
+<p>Set <code>show_population_stats = FALSE</code> in either plot
+function to hide M and SD. This is independent of
+<code>show_percentages</code>, which controls the interval percentages.
+<code>population_stats_digits</code> sets the decimal places (default
+2); legend text size can be changed with
+<code>ggplot2::theme(legend.text = ggplot2::element_text(size = 10))</code>,
+or <code>plot.subtitle</code> for the ungrouped view. Explanatory
+captions are hidden by default (<code>show_caption = FALSE</code>); the
+two examples above explicitly enable them. This switch only controls
+explanations below the plot and leaves M/SD in the legend or subtitle
+and percentage labels unchanged. Without <code>pv_data</code>, the rater
+plot is unchanged. <strong>Silhouette height in
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> continues to communicate distribution shape
+only and does not represent rating stages.</strong></p>
+</div>
+<div class="section level4">
+<h4 id="population-percentages-within-the-cut-intervals">Population percentages within the cut intervals<a class="anchor" aria-label="anchor" href="#population-percentages-within-the-cut-intervals"></a>
+</h4>
+<p>Both plot functions now show population percentages by default when
+PV data are supplied. Each panel has a small table above its data, with
+a separate colored row for each population in legend order. Percentages
+follow the cut intervals from left to right. For one ungrouped
+population, the table has a single neutral row.</p>
+<p><strong>The percentage labels are estimated population shares.
+Silhouette height still communicates distribution shape only and does
+not represent rating stages or density-axis values.</strong> These
+meanings are also explained in the optional plot captions
+(<code>show_caption = TRUE</code>).</p>
+<p>In general, there is one more interval than there are cuts. A value
+<strong>exactly on a cut belongs to the upper interval</strong>. The
+outer intervals extend to minus and plus infinity, so all available PV
+observations contribute, even when they fall outside a displayed x-axis
+window. The actual, unrounded cuts determine interval membership.
+Identical adjacent cuts create an empty interval with 0%; they are not
+merged.</p>
+<p>Percentage labels are positioned midway between their visible cut
+boundaries. For the two outer intervals, they sit midway between the
+outermost cut and the corresponding visible panel edge. Both population
+rows use the same horizontal positions. When close or identical cuts
+would cause labels to overlap, the labels shift only as far as needed
+while preserving interval order. Thin connection lines point from
+shifted columns to their interval midpoints.</p>
+<p>Placement uses the actual text widths when drawing, so it adapts to
+resizing, zooming, and reversed score axes. Intervals wholly outside a
+zoomed view are anchored at the nearest edge, while their estimated
+shares still include all available PV observations. With many cuts or a
+narrow plot, increase the figure width or reduce
+<code>percentage_size</code>. If all labels together are wider than the
+entire panel, text and padding are reduced together to keep them inside
+it.</p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  cut_selection <span class="op">=</span> <span class="st">"both"</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  show_percentages <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  percentage_digits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  percentage_size <span class="op">=</span> <span class="fl">3</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20population%20percentages-1.png" class="r-plt" alt="" width="864"></p>
+<p>Each individual panel computes the shares using that rater’s cuts.
+The mean panel computes them using the mean cuts. <strong>Percentages at
+mean cuts are not averages of the raters’ percentages.</strong> The same
+panel cuts are applied separately to both populations so that their
+shares can be compared directly.</p>
+<p>The following example deliberately uses unevenly spaced item
+estimates, producing cuts that are close together. The short connection
+lines identify intervals whose percentage labels need extra room. The
+same positioning is used in <code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code>.</p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">uneven_items</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">1.9</span>, <span class="op">-</span><span class="fl">1.8</span>, <span class="op">-</span><span class="fl">1.7</span>, <span class="op">-</span><span class="fl">1.6</span>, <span class="op">-</span><span class="fl">1.5</span>, <span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  Rater1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">uneven_cuts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDM.html">computeCutsIDM</a></span><span class="op">(</span><span class="va">uneven_items</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">uneven_cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20percentages%20uneven%20cuts-1.png" class="r-plt" alt="" width="768"></p>
+<p>The calculation first obtains a weighted percentage within each PV:
+the sum of weights in an interval divided by the total available weight,
+multiplied by 100. It then averages those percentages equally across
+PVs, separately for each population. Without <code>weight_col</code>,
+this reduces to ordinary observed proportions within each PV.
+Respondents’ PVs are never averaged before assigning values to
+intervals.</p>
+<p>For a hand-checkable illustration, suppose a panel has cuts at 0 and
+10:</p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">toy_pvs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  PV1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">10</span>, <span class="fl">11</span><span class="op">)</span>,</span>
+<span>  PV2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">9</span>, <span class="fl">10</span><span class="op">)</span>,</span>
+<span>  weight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">shares_at_0_and_10</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">w</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="va">x</span> <span class="op">&lt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">x</span> <span class="op">&lt;</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w</span><span class="op">[</span><span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">10</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">per_pv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  PV1 <span class="op">=</span> <span class="fu">shares_at_0_and_10</span><span class="op">(</span><span class="va">toy_pvs</span><span class="op">$</span><span class="va">PV1</span>, <span class="va">toy_pvs</span><span class="op">$</span><span class="va">weight</span><span class="op">)</span>,</span>
+<span>  PV2 <span class="op">=</span> <span class="fu">shares_at_0_and_10</span><span class="op">(</span><span class="va">toy_pvs</span><span class="op">$</span><span class="va">PV2</span>, <span class="va">toy_pvs</span><span class="op">$</span><span class="va">weight</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">per_pv</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Below 0"</span>, <span class="st">"0 to below 10"</span>, <span class="st">"10 and above"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">per_pv</span>, Mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">per_pv</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      Below 0 0 to below 10 10 and above</span></span>
+<span><span class="co">#&gt; PV1       10            20           70</span></span>
+<span><span class="co">#&gt; PV2       20            40           40</span></span>
+<span><span class="co">#&gt; Mean      15            30           55</span></span>
+<span><span class="co"># PV1: 10%, 20%, 70%; PV2: 20%, 40%, 40%; displayed estimate: 15%, 30%, 55%.</span></span></code></pre></div>
+<p>With <code>pv_missing = "drop"</code>, each population and PV uses
+its own available observations and weight denominator after exclusions.
+The previously documented checks for weights, IDs, and duplicate rows
+still apply. Changing <code>density_bw</code>,
+<code>density_adjust</code>, <code>population_height</code>, or
+<code>cut_value_digits</code> cannot change percentage estimates: these
+settings affect smoothing, silhouette display, or cut-label formatting,
+not the underlying PV classifications.</p>
+<p>The same percentage table is available in the combined rater view,
+including with long-format population data. It appears in rating and
+mean panels, never in residual panels:</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations_long</span>,</span>
+<span>  respondent_id_col <span class="op">=</span> <span class="st">"student"</span>,</span>
+<span>  pv_id_col <span class="op">=</span> <span class="st">"pv"</span>,</span>
+<span>  pv_value_col <span class="op">=</span> <span class="st">"score"</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  population_colors <span class="op">=</span> <span class="va">population_colors</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  percentage_digits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  percentage_size <span class="op">=</span> <span class="fl">3</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="main_functions_files/figure-html/idm%20rating%20percentages-1.png" class="r-plt" alt="Numeric percentage labels estimate population shares. Silhouette height shows distribution shape only and does not represent rating stages or density-axis values." width="960"><p class="caption">
+Numeric percentage labels estimate population shares. Silhouette height
+shows distribution shape only and does not represent rating stages or
+density-axis values.
+</p>
+</div>
+<p><code>percentage_digits</code> controls displayed decimal places
+(default 1, supported range 0 to 10); <code>percentage_size</code>
+controls text size in millimetres (default 3). Tables reserve their own
+space above each rating panel, so they remain clear of curves and cut
+labels when the figure is resized. Increase figure height for many
+raters or populations and figure width for many intervals. Percentages
+are not adjusted to force rounded labels to total exactly 100%. Small
+rounding differences are therefore possible. To hide the tables while
+retaining distributions and numeric cut labels, set
+<code>show_percentages = FALSE</code> in either function:</p>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cuts</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cut_value_digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  show_percentages <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/idm%20hide%20population%20percentages-1.png" class="r-plt" alt="" width="768"></p>
+<p>If a panel contains any missing or infinite cut, its percentage table
+is replaced with an explanatory message and a warning identifies the
+affected panel. Complete panels still show their percentages. Descending
+cut sequences cause an error when percentage computation is enabled. The
+estimates are descriptive point estimates; uncertainty intervals are not
+computed.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="visual-subset-recoding">Visual Subset Recoding<a class="anchor" aria-label="anchor" href="#visual-subset-recoding"></a>
@@ -1607,7 +2321,7 @@ affected by a technical issue, you can display the relevant responses
 and decide whether to recode them to a value such as <code>mci</code>.
 Because the function opens an interactive review flow, it is not
 evaluated in this vignette.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsetInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person100"</span>, <span class="st">"person101"</span>, <span class="st">"person102"</span><span class="op">)</span>,</span>
 <span>  datCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I01"</span>, <span class="st">"I02"</span>, <span class="st">"I03"</span><span class="op">)</span></span>
@@ -1641,7 +2355,7 @@ character missings should be converted to <code>0</code> or
 <code>NA</code>. It has default settings, but you can adapt them if
 needed. Type <code><a href="../reference/collapseMissings.html">?collapseMissings</a></code> into your console to learn
 more.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datColMis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMissings.html">collapseMissings</a></span><span class="op">(</span><span class="va">datRec</span><span class="op">)</span></span></code></pre></div>
 <p>After doing that you should have a data frame that you can now use
 for further processing with the <code>eatModel</code> package.</p>
@@ -1657,7 +2371,7 @@ frames <code>dat</code>, <code>values</code>, <code>subunits</code> and
 where to save those new files.</p>
 <p>The function creates and saves those files, but the actual return
 values for this function is <code>NULL</code>.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/writeSpss.html">writeSpss</a></span><span class="op">(</span><span class="va">dat</span>, <span class="va">values</span>, <span class="va">subunits</span>, <span class="va">units</span>,</span>
 <span>    filedat <span class="op">=</span> <span class="st">"mydata.txt"</span>, filesps <span class="op">=</span> <span class="st">"readmydata.sps"</span>,</span>
 <span>    missing.rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mvi <span class="op">=</span> <span class="fl">0</span>, mnr <span class="op">=</span> <span class="fl">0</span>, mci <span class="op">=</span> <span class="cn">NA</span>, mbd <span class="op">=</span> <span class="cn">NA</span>, mir <span class="op">=</span> <span class="fl">0</span>, mbi <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
@@ -1676,7 +2390,7 @@ example exports scored data (<code>trafoType</code> = “scored”), which
 usually has 0/1 values and mistypes like mbi/mbo etc. The second example
 exports the raw data (<code>trafoType</code> = “raw”), including the
 original values and subunits.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputDat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputList</span><span class="op">)</span></span>
 <span></span>
@@ -1690,7 +2404,7 @@ original values and subunits.</p>
 <span>                                      readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      recodeData<span class="op">=</span><span class="cn">FALSE</span>, aggregateData<span class="op">=</span><span class="cn">FALSE</span>, scoreData<span class="op">=</span><span class="cn">FALSE</span>,</span>
 <span>                                      writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GADSobj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prep2gads.html">prep2GADS</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDatScored</span>, inputList <span class="op">=</span> <span class="va">inputList</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, trafoType <span class="op">=</span> <span class="st">"scored"</span>,</span>
 <span>                      verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>

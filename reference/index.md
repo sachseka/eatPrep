@@ -66,6 +66,9 @@
 - [`plotCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md)
   : Plot Raw Values, Moving Average, and Monotonized Moving Average
 
+- [`plotPopulationCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCutsIDM.md)
+  : Plot Population Distributions from Plausible Values with IDM Cuts
+
 - [`prep2GADS()`](https://sachseka.github.io/eatPrep/reference/prep2gads.md)
   :
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,27 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.12" id="eatprep-1012">eatPrep 1.0.12<a class="anchor" aria-label="anchor" href="#eatprep-1012"></a></h2>
+<ul><li>
+<code>population_fill</code> now also colors grouped populations in both plot functions: one explicit color applies to all groups, or a vector supplies one color per group in legend order. An incorrect number of colors warns and restores the default palette. Omitting the argument preserves existing defaults; named <code>population_colors</code> takes precedence. Fills, density outlines, legend keys, and grouped percentage labels use the same colors.</li>
+<li>Population SDs in both plot functions now apply the variance correction <code>n/(n-1)</code> separately within each PV and population, counting available respondents with positive weights. Corrected PV variances are averaged before taking the square root.</li>
+<li>Both <code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code> and <code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> now display M and SD for each population in the legend (or the subtitle for ungrouped input). Weighted means and descriptive population variances are estimated separately per PV, then averaged across PVs; SD is the square root of the average variance. Use <code>show_population_stats = FALSE</code> to hide them and <code>population_stats_digits</code> to set decimal places. In the rater view, PV data are required.</li>
+<li>Explanatory captions are now hidden by default in both plot functions. Set <code>show_caption = TRUE</code> to display the explanations of densities/silhouettes, percentages, and M/SD. This does not hide the statistics or percentage labels themselves.</li>
+<li>Population percentages now align with the visible cut intervals in both plot views. Crowded labels shift minimally with thin connection lines, while population rows stay aligned. Placement adapts to figure size, zoom, and reversed score axes.</li>
+<li>Population preparation preserves distinct large numeric respondent, PV, and population identifiers, including during missing-data checks.</li>
+<li>Population density grids adapt to the bandwidth so narrow, separated distributions remain accurately resolved. Smoothing settings requiring excessive grid resolution produce an informative error.</li>
+<li>Percentage tables reserve space above each rating panel based on their rendered text height, keeping percentages clear of curves and cut labels when figures are resized.</li>
+<li>The package now requires ggplot2 3.5.0 or newer for independent population and cut colors.</li>
+<li>Both population views now show per-population percentages for each panel’s cut intervals. Shares are computed from weighted PV observations and averaged across PVs, independently of density smoothing; equality belongs to the upper interval. Use <code>show_percentages = FALSE</code> to hide the tables, and <code>percentage_digits</code> / <code>percentage_size</code> to format them. Incomplete cut panels show an explanatory message. Silhouette height remains a display of distribution shape, not rating stages.</li>
+<li>Both population plot views gain <code>population_col</code> to overlay multiple populations and <code>population_colors</code> for named colors. Densities use a common bandwidth and grid, with independent weight normalization and a separate population legend. Background silhouettes share one height factor and continue to show distribution shape only, not rating stages.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> gains <code>item_number_size</code>, <code>cut_value_size</code>, and <code>aggregate_label_size</code> to adjust text sizes inside the graph, including plots with residual panels. Defaults preserve the existing sizes.</li>
+<li>New <code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code> displays a population density estimated from wide- or long-format plausible values, with optional sampling weights and mean, individual, or both sets of IDM cuts.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> gains an optional population background through <code>pv_data</code>. The silhouette communicates <strong>distribution shape only</strong>: its height <strong>does not represent rating stages</strong> or density-axis values. Enable its explanatory caption with <code>show_caption = TRUE</code>; residual panels stay clear.</li>
+<li>Both population views share per-PV density estimation, a common bandwidth and grid, explicit missing-data handling, and adjustable smoothing and appearance. Help examples and the main-functions vignette demonstrate both input layouts and both plot purposes.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.11" id="eatprep-1011">eatPrep 1.0.11<a class="anchor" aria-label="anchor" href="#eatprep-1011"></a></h2>
 <div class="section level3">
