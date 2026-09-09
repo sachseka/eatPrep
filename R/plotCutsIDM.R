@@ -172,7 +172,8 @@ plotCutsIDM <- function(res_list, est_col = NULL,
                         pv_missing = c("error", "drop"),
                         density_bw = NULL, density_adjust = 1,
                         population_height = 0.25,
-                        population_fill = "grey50", population_alpha = 0.15) {
+                        population_fill = "grey50", population_alpha = 0.15,
+                        population_col = NULL, population_colors = NULL) {
 
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
@@ -195,14 +196,16 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   cut_value_digits <- as.integer(cut_value_digits)
 
   population_density <- NULL
+  colors <- NULL
   if (!is.null(pv_data)) {
     checkmate::assert_number(population_height, lower = 0, upper = 1, finite = TRUE)
     .validate_population_style_idm(population_fill, population_alpha)
     population_data <- .prepare_population_idm(
       pv_data, pv_cols, respondent_id_col, pv_id_col, pv_value_col,
-      weight_col, input_format, pv_missing
+      weight_col, input_format, pv_missing, population_col
     )
     population_density <- .population_density_idm(population_data, density_bw, density_adjust)
+    colors <- .population_colors_idm(population_density, population_colors)
   }
 
   # Determine axis limits dynamically
@@ -333,8 +336,8 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     if (!is.null(population_density)) {
       pp <- pp + .population_background_idm(
         population_density, y_limits, TRUE,
-        population_height, population_fill, population_alpha
-      ) + ggplot2::labs(caption = .population_shape_caption_idm())
+        population_height, population_fill, population_alpha, colors
+      ) + ggplot2::labs(caption = .population_shape_caption_idm(length(colors) > 1L))
     }
 
     if (show_raw) {
@@ -587,8 +590,8 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   if (!is.null(population_density)) {
     pp <- pp + .population_background_idm(
       population_density, y_limits, FALSE,
-      population_height, population_fill, population_alpha
-    ) + ggplot2::labs(caption = .population_shape_caption_idm())
+      population_height, population_fill, population_alpha, colors
+    ) + ggplot2::labs(caption = .population_shape_caption_idm(length(colors) > 1L))
   }
 
   if (show_raw) {

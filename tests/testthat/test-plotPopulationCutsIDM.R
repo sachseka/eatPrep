@@ -278,3 +278,188 @@ test_that("appearance controls are validated", {
   }
   expect_error(plotPopulationCutsIDM(res, pop, pv_cols = "PV1", population_fill = "bad color"), "valid color")
 })
+
+population_groups_fixture_idm <- function() {
+  a <- population_fixture_idm()
+  a$population <- "A"
+  b <- a
+  b$population <- "B"
+  b[c("PV1", "PV2")] <- 2 * b[c("PV1", "PV2")] + 4
+  b$weight <- rev(b$weight) + 1
+  rbind(a, b)
+}
+
+prepare_population_groups_idm <- function(pop, pv_missing = "error") {
+  .prepare_population_idm(pop, c("PV1", "PV2"), respondent_id_col = "student",
+                          weight_col = "weight", pv_missing = pv_missing,
+                          population_col = "population")
+}
+
+test_that("population groups keep respondent IDs and weights separate in both layouts", {
+  pop <- population_groups_fixture_idm()
+  long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
+  wide_dat <- prepare_population_groups_idm(pop)
+  long_dat <- .prepare_population_idm(
+    long, respondent_id_col = "student", pv_id_col = "pv", pv_value_col = "score",
+    weight_col = "weight", population_col = "population"
+  )
+  expect_equal(nrow(wide_dat), 32L)
+  expect_equal(.population_density_idm(wide_dat), .population_density_idm(long_dat))
+  expect_error(prepare_population_groups_idm(rbind(pop, pop[1, ])), "Population 'A'.*one row")
+  expect_error(.prepare_population_idm(
+    rbind(long, long[1, ]), respondent_id_col = "student", pv_id_col = "pv",
+    pv_value_col = "score", population_col = "population"
+  ), "Population 'A'.*at most one row")
+  long$weight[2] <- 10
+  expect_error(.prepare_population_idm(
+    long, respondent_id_col = "student", pv_id_col = "pv", pv_value_col = "score",
+    weight_col = "weight", population_col = "population"
+  ), "Population 'A'.*same weight")
+})
+
+test_that("each population has its own unit-area PV average on a common grid", {
+  dat <- prepare_population_groups_idm(population_groups_fixture_idm())
+  den <- .population_density_idm(dat, density_bw = 0.7)
+  for (label in c("A", "B")) {
+    group <- den[den$.population == label, ]
+    source <- dat[dat$.population == label, ]
+    reference <- lapply(split(source, source$.pv), function(d) {
+      stats::density(d$.value, weights = d$.weight / sum(d$.weight), bw = 0.7,
+                     from = min(den$.population_x), to = max(den$.population_x), n = 512)$y
+    })
+    expect_equal(group$.population_density, (reference[[1]] + reference[[2]]) / 2)
+    area <- sum(diff(group$.population_x) *
+                  (head(group$.population_density, -1) + tail(group$.population_density, -1)) / 2)
+    expect_equal(area, 1, tolerance = 0.005)
+  }
+  expect_equal(den$.population_x[den$.population == "A"], den$.population_x[den$.population == "B"])
+  dat$.weight[dat$.population == "B"] <- dat$.weight[dat$.population == "B"] * 100
+  expect_equal(den, .population_density_idm(dat, density_bw = 0.7))
+  # Repeating an entire sample cannot increase its density area or height.
+  expect_equal(den, .population_density_idm(rbind(dat, dat[dat$.population == "B", ]), density_bw = 0.7))
+})
+
+test_that("automatic bandwidth treats populations equally even with different PV counts", {
+  dat <- prepare_population_groups_idm(population_groups_fixture_idm())
+  dat <- dat[!(dat$.population == "B" & dat$.pv == "PV2"), ]
+  a <- dat[dat$.population == "A", ]
+  b <- dat[dat$.population == "B", ]
+  bw <- (mean(c(stats::bw.nrd0(a$.value[a$.pv == "PV1"]),
+                stats::bw.nrd0(a$.value[a$.pv == "PV2"]))) + stats::bw.nrd0(b$.value)) / 2
+  expect_equal(.population_density_idm(dat), .population_density_idm(dat, density_bw = bw))
+})
+
+test_that("missing PVs and insufficient observations are handled within population", {
+  pop <- population_groups_fixture_idm()
+  pop$PV1[1] <- NA_real_
+  expect_error(prepare_population_groups_idm(pop), "Population 'A'.*Missing PV")
+  expect_warning(dat <- prepare_population_groups_idm(pop, "drop"), "Population 'A': Omitting 1")
+  long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
+  long <- long[!is.na(long$score), ]
+  expect_warning(long_dat <- .prepare_population_idm(
+    long, respondent_id_col = "student", pv_id_col = "pv", pv_value_col = "score",
+    weight_col = "weight", pv_missing = "drop", population_col = "population"
+  ), "Population 'A': Omitting 1")
+  expect_equal(.population_density_idm(dat), .population_density_idm(long_dat))
+  pop$weight[pop$population == "B"] <- 0
+  expect_error(suppressWarnings(prepare_population_groups_idm(pop, "drop")), "Population 'B'.*at least two")
+})
+
+test_that("population labels and named colors are validated", {
+  pop <- population_groups_fixture_idm()
+  for (bad in list(NA_character_, "", "  ")) {
+    invalid <- pop
+    invalid$population[1] <- bad
+    expect_error(prepare_population_groups_idm(invalid), "Population labels")
+  }
+  expect_error(.prepare_population_idm(pop, "PV1", population_col = "PV1"), "distinct")
+  expect_error(.prepare_population_idm(pop, "PV1", population_col = "unknown"))
+  den <- .population_density_idm(prepare_population_groups_idm(pop))
+  expect_equal(.population_colors_idm(den), c(A = "#0072B2", B = "#E69F00"))
+  expect_equal(.population_colors_idm(den, c(B = "orange", A = "blue")), c(A = "blue", B = "orange"))
+  for (bad in list(c("blue", "orange"), c(A = "blue"), c(A = "blue", C = "orange"),
+                   c(A = "blue", A = "orange"), c(A = "blue", B = "bad color"))) {
+    expect_error(.population_colors_idm(den, bad))
+  }
+  expect_error(.population_colors_idm(den[setdiff(names(den), ".population")], c(A = "blue")),
+               "requires population_col")
+})
+
+test_that("grouping a single population preserves its estimated density", {
+  pop <- population_fixture_idm()
+  pop$population <- "A"
+  grouped <- .population_density_idm(prepare_population_groups_idm(pop))
+  ungrouped <- .population_density_idm(.prepare_population_idm(pop, c("PV1", "PV2"), weight_col = "weight"))
+  expect_equal(grouped[setdiff(names(grouped), ".population")], ungrouped)
+})
+
+test_that("population plots overlay groups with an independent fill legend and unchanged cuts", {
+  pop <- population_groups_fixture_idm()
+  res <- cuts_fixture_idm()
+  colors <- c(A = "#3366CC", B = "#EE9900")
+  p <- plotPopulationCutsIDM(res, pop, pv_cols = c("PV1", "PV2"), weight_col = "weight",
+                             population_col = "population", population_colors = colors,
+                             cut_selection = "both", population_alpha = 0.3)
+  built <- ggplot2::ggplot_build(p)
+  baseline <- ggplot2::ggplot_build(plotPopulationCutsIDM(
+    res, pop, pv_cols = c("PV1", "PV2"), weight_col = "weight", cut_selection = "both"
+  ))
+  expect_equal(built$data[[3]], baseline$data[[3]])
+  expect_equal(built$plot$scales$get_scales("colour")$get_limits(), res$cut_labels)
+  expect_equal(built$plot$scales$get_scales("fill")$name, "Population")
+  expect_equal(built$plot$scales$get_scales("fill")$get_limits(), c("A", "B"))
+  expect_true(all(built$data[[1]]$alpha == 0.3))
+  for (panel in levels(built$data[[1]]$PANEL)) {
+    layer <- built$data[[1]][built$data[[1]]$PANEL == panel, ]
+    expect_equal(length(unique(layer$group)), 2L)
+    expect_setequal(unique(layer$fill), unname(colors))
+    expect_true(all(layer$ymin == 0))
+  }
+  expect_s3_class(render_population_plot_idm(p), "gtable")
+})
+
+test_that("multiple silhouettes share a height factor and stay out of residual panels", {
+  pop <- population_groups_fixture_idm()
+  res <- cuts_fixture_idm()
+  den <- .population_density_idm(prepare_population_groups_idm(pop))
+  peaks <- vapply(split(den$.population_density, den$.population), max, numeric(1))
+  expect_gt(abs(diff(peaks)), 0.01)
+  for (residuals in c(FALSE, TRUE)) {
+    p <- plotCutsIDM(res, pv_data = pop, pv_cols = c("PV1", "PV2"), weight_col = "weight",
+                     population_col = "population", show_residuals = residuals,
+                     show_aggregate = TRUE, population_height = 0.4)
+    built <- ggplot2::ggplot_build(p)
+    base <- ggplot2::ggplot_build(plotCutsIDM(res, show_residuals = residuals, show_aggregate = TRUE))
+    expect_equal(built$data[-1], base$data)
+    expect_match(p$labels$caption, "distribution shape only")
+    expect_match(p$labels$caption, "does not represent rating stages")
+    shape <- built$data[[1]]
+    layout <- built$layout$layout
+    panels <- if (residuals) layout$PANEL[layout$.panel == "Ratings"] else layout$PANEL
+    expect_setequal(as.character(unique(shape$PANEL)), as.character(panels))
+    for (panel in panels) {
+      layer <- shape[shape$PANEL == panel, ]
+      heights <- vapply(split(layer$ymax - layer$ymin, layer$group), max, numeric(1))
+      expect_equal(unname(heights), unname(4 * 0.4 * peaks / max(peaks)))
+      expect_true(all(layer$ymin == 1))
+    }
+    expect_equal(built$plot$scales$get_scales("colour")$get_limits(), res$cut_labels)
+    expect_s3_class(render_population_plot_idm(p), "gtable")
+  }
+})
+
+test_that("grouped long data and more than two populations render", {
+  pop <- population_groups_fixture_idm()
+  c <- pop[pop$population == "A", ]
+  c$population <- "C"
+  pop <- rbind(pop, c)
+  long <- tidyr::pivot_longer(pop, c("PV1", "PV2"), names_to = "pv", values_to = "score")
+  res <- cuts_fixture_idm()
+  for (fun in list(plotPopulationCutsIDM, plotCutsIDM)) {
+    p <- fun(res, pv_data = long, respondent_id_col = "student", pv_id_col = "pv",
+              pv_value_col = "score", weight_col = "weight", population_col = "population")
+    built <- ggplot2::ggplot_build(p)
+    expect_equal(length(unique(built$data[[1]]$group)), 3L)
+    expect_s3_class(render_population_plot_idm(p), "gtable")
+  }
+})

@@ -3,10 +3,48 @@
                                     pv_id_col = NULL, pv_value_col = NULL,
                                     weight_col = NULL,
                                     input_format = c("auto", "long", "wide"),
-                                    pv_missing = c("error", "drop")) {
+                                    pv_missing = c("error", "drop"),
+                                    population_col = NULL) {
   checkmate::assert_data_frame(pv_data, min.rows = 1)
   input_format <- match.arg(input_format)
   pv_missing <- match.arg(pv_missing)
+  checkmate::assert_string(population_col, null.ok = TRUE)
+  if (!is.null(population_col)) {
+    checkmate::assert_names(population_col, subset.of = names(pv_data))
+    if (population_col %in% c(pv_cols, respondent_id_col, pv_id_col, pv_value_col, weight_col)) {
+      stop("population_col must be distinct from PV, respondent ID, and weight columns.", call. = FALSE)
+    }
+    population <- pv_data[[population_col]]
+    if (!(is.character(population) || is.factor(population) || is.numeric(population)) ||
+        anyNA(population) || any(!nzchar(trimws(as.character(population)))) ||
+        (is.numeric(population) && any(!is.finite(population)))) {
+      stop("Population labels must be non-missing, non-empty finite identifiers.", call. = FALSE)
+    }
+    population <- as.character(population)
+    population_names <- unique(population)
+    groups <- lapply(population_names, function(label) {
+      # Validate IDs, PV completeness, and weights within each population.
+      prepared <- tryCatch(
+        withCallingHandlers(
+          .prepare_population_idm(
+            pv_data[population == label, , drop = FALSE], pv_cols,
+            respondent_id_col, pv_id_col, pv_value_col, weight_col,
+            input_format, pv_missing
+          ),
+          warning = function(w) {
+            warning(sprintf("Population '%s': %s", label, conditionMessage(w)), call. = FALSE)
+            invokeRestart("muffleWarning")
+          }
+        ),
+        error = function(e) {
+          stop(sprintf("Population '%s': %s", label, conditionMessage(e)), call. = FALSE)
+        }
+      )
+      prepared$.population <- factor(label, levels = population_names)
+      prepared
+    })
+    return(do.call(rbind, groups))
+  }
   checkmate::assert_character(pv_cols, min.len = 1, any.missing = FALSE,
                              unique = TRUE, null.ok = TRUE)
   for (col in list(respondent_id_col, pv_id_col, pv_value_col, weight_col)) {
@@ -102,22 +140,63 @@
   if ((!is.null(density_bw) && density_bw == 0) || density_adjust == 0) {
     stop("density_bw and density_adjust must be positive.", call. = FALSE)
   }
-  draws <- split(dat, dat$.pv)
+  grouped <- ".population" %in% names(dat)
+  population_names <- if (grouped) unique(as.character(dat$.population)) else "Population"
+  populations <- if (grouped) lapply(population_names, function(label) {
+    dat[as.character(dat$.population) == label, , drop = FALSE]
+  }) else list(dat)
+  draws <- lapply(populations, function(d) split(d, d$.pv))
   # Choose bandwidths per imputation, never using the stacked PV sample size.
   # bw.nrd0 is unweighted; sampling weights enter the density estimates below.
   if (is.null(density_bw)) {
-    density_bw <- mean(vapply(draws, function(d) stats::bw.nrd0(d$.value), numeric(1)))
+    # Equal weight for populations, and then for PVs within each population.
+    density_bw <- mean(vapply(draws, function(population) {
+      mean(vapply(population, function(d) stats::bw.nrd0(d$.value), numeric(1)))
+    }, numeric(1)))
   }
   bw <- density_bw * density_adjust
   checkmate::assert_number(bw, lower = .Machine$double.xmin, finite = TRUE)
   limits <- range(dat$.value) + c(-3, 3) * bw
-  densities <- lapply(draws, function(d) {
-    w <- d$.weight / max(d$.weight)
-    stats::density(d$.value, weights = w / sum(w), bw = bw,
-                   from = limits[1], to = limits[2], n = 512)
+  out <- lapply(seq_along(draws), function(i) {
+    densities <- lapply(draws[[i]], function(d) {
+      w <- d$.weight / max(d$.weight)
+      stats::density(d$.value, weights = w / sum(w), bw = bw,
+                     from = limits[1], to = limits[2], n = 512)
+    })
+    result <- data.frame(
+      .population_x = densities[[1]]$x,
+      .population_density = Reduce(`+`, lapply(densities, `[[`, "y")) / length(densities)
+    )
+    if (grouped) result$.population <- factor(population_names[i], levels = population_names)
+    result
   })
-  data.frame(.population_x = densities[[1]]$x,
-             .population_density = Reduce(`+`, lapply(densities, `[[`, "y")) / length(densities))
+  do.call(rbind, out)
+}
+
+.population_colors_idm <- function(density, population_colors = NULL) {
+  if (!".population" %in% names(density)) {
+    if (!is.null(population_colors)) {
+      stop("population_colors requires population_col.", call. = FALSE)
+    }
+    return(NULL)
+  }
+  labels <- unique(as.character(density$.population))
+  if (is.null(population_colors)) {
+    colors <- if (length(labels) <= 2L) c("#0072B2", "#E69F00")[seq_along(labels)] else
+      grDevices::hcl.colors(length(labels), palette = "Dark 3")
+    return(stats::setNames(colors, labels))
+  }
+  checkmate::assert_character(population_colors, any.missing = FALSE)
+  checkmate::assert_names(names(population_colors), permutation.of = labels)
+  tryCatch(grDevices::col2rgb(population_colors), error = function(e) {
+    stop("population_colors must contain valid colors.", call. = FALSE)
+  })
+  population_colors[labels]
+}
+
+.population_fill_scale_idm <- function(colors) {
+  ggplot2::scale_fill_manual(name = "Population", values = colors,
+                             limits = names(colors), breaks = names(colors))
 }
 
 .validate_population_style_idm <- function(population_fill, population_alpha) {
@@ -131,9 +210,9 @@
 
 .population_background_idm <- function(density, y_limits, show_residuals,
                                        population_height, population_fill,
-                                       population_alpha) {
+                                       population_alpha, population_colors = NULL) {
   # ggplot2 evaluates these names within the layer data.
-  .population_x <- .population_base <- .population_top <- NULL
+  .population_x <- .population_base <- .population_top <- .population <- NULL
   density$.population_base <- y_limits[1]
   density$.population_top <- y_limits[1] + diff(y_limits) * population_height *
     density$.population_density / max(density$.population_density)
@@ -141,6 +220,17 @@
     density$.panel <- factor("Ratings", levels = c("Ratings", "Residuals"))
   }
   # No rater facet column: ggplot repeats the same silhouette in every rating facet.
+  if (!is.null(population_colors)) {
+    return(list(
+      ggplot2::geom_ribbon(
+        data = density,
+        ggplot2::aes(x = .population_x, ymin = .population_base, ymax = .population_top,
+                     fill = .population, group = .population),
+        alpha = population_alpha, colour = NA, inherit.aes = FALSE
+      ),
+      .population_fill_scale_idm(population_colors)
+    ))
+  }
   ggplot2::geom_ribbon(
     data = density,
     ggplot2::aes(x = .population_x, ymin = .population_base, ymax = .population_top),
@@ -149,7 +239,11 @@
   )
 }
 
-.population_shape_caption_idm <- function() {
+.population_shape_caption_idm <- function(multiple = FALSE) {
+  if (multiple) {
+    return(paste0("Population silhouettes show distribution shape only.\n",
+                  "Their shared display height does not represent rating stages or density-axis values."))
+  }
   paste0("Population silhouette shows distribution shape only.\n",
          "Its height is scaled for display and does not represent rating stages or density-axis values.")
 }
@@ -164,9 +258,11 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
                                   cut_selection = c("mean", "individual", "both"),
                                   est_col = NULL, show_cut_values = TRUE,
                                   cut_value_digits = 0L, cut_value_size = 2.6,
-                                  population_fill = "grey50", population_alpha = 0.25) {
+                                  population_fill = "grey50", population_alpha = 0.25,
+                                  population_col = NULL, population_colors = NULL) {
   # ggplot2 evaluates these names within the layer data.
   .population_x <- .population_density <- cut_type <- .cut_value_y <- .cut_value_label <- NULL
+  .population <- .population_color <- NULL
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
   checkmate::assert_flag(show_cut_values)
@@ -176,9 +272,10 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
   cut_selection <- match.arg(cut_selection)
   dat <- .prepare_population_idm(
     pv_data, pv_cols, respondent_id_col, pv_id_col, pv_value_col,
-    weight_col, input_format, pv_missing
+    weight_col, input_format, pv_missing, population_col
   )
   density <- .population_density_idm(dat, density_bw, density_adjust)
+  colors <- .population_colors_idm(density, population_colors)
   persons <- as.character(res_list$cuts_per_person$person)
   mean_label <- .aggregate_panel_label_idm(persons)
   cut_tables <- list()
@@ -196,17 +293,37 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
   if (is.null(x_label)) x_label <- res_list$est_col
   if (is.null(x_label)) x_label <- "est"
 
-  pp <- ggplot2::ggplot() +
-    ggplot2::geom_ribbon(
-      data = density,
-      ggplot2::aes(x = .population_x, ymin = 0, ymax = .population_density),
-      fill = population_fill, alpha = population_alpha, colour = NA,
-      show.legend = FALSE
-    ) +
-    ggplot2::geom_line(
-      data = density, ggplot2::aes(x = .population_x, y = .population_density),
-      colour = population_fill, linewidth = 0.4, show.legend = FALSE
-    ) +
+  pp <- ggplot2::ggplot()
+  if (!is.null(colors)) {
+    density$.population_color <- unname(colors[as.character(density$.population)])
+    pp <- pp +
+      ggplot2::geom_ribbon(
+        data = density,
+        ggplot2::aes(x = .population_x, ymin = 0, ymax = .population_density,
+                     fill = .population, group = .population),
+        alpha = population_alpha, colour = NA
+      ) +
+      ggplot2::geom_line(
+        data = density,
+        ggplot2::aes(x = .population_x, y = .population_density, group = .population,
+                     colour = I(.population_color)),
+        linewidth = 0.4, show.legend = FALSE
+      ) +
+      .population_fill_scale_idm(colors)
+  } else {
+    pp <- pp +
+      ggplot2::geom_ribbon(
+        data = density,
+        ggplot2::aes(x = .population_x, ymin = 0, ymax = .population_density),
+        fill = population_fill, alpha = population_alpha, colour = NA,
+        show.legend = FALSE
+      ) +
+      ggplot2::geom_line(
+        data = density, ggplot2::aes(x = .population_x, y = .population_density),
+        colour = population_fill, linewidth = 0.4, show.legend = FALSE
+      )
+  }
+  pp <- pp +
     ggplot2::geom_vline(
       data = cuts, ggplot2::aes(xintercept = cut, color = cut_type),
       linewidth = 0.8, na.rm = TRUE
@@ -226,7 +343,11 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05))) +
     ggplot2::labs(
       x = paste0("Score (", x_label, ")"), y = "Population density", color = "Cut Score",
-      caption = "Population density averaged across plausible values; descriptive estimate."
+      caption = if (is.null(colors)) {
+        "Population density averaged across plausible values; descriptive estimate."
+      } else {
+        "Densities averaged across plausible values within each population; each density has total area one."
+      }
     ) +
     ggplot2::theme_minimal()
 }

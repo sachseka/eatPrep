@@ -3,7 +3,7 @@
 \title{Plot Raw Values, Moving Average, and Monotonized Moving Average}
 \description{
 Visualizes the IDM rating process for each rater, showing raw ratings, smoothed moving averages, the final isotonic regression line used to determine cut scores, and optionally filter residuals.
-An optional population silhouette shows distribution shape only; its height does not represent rating stages or density-axis values.
+Optional population silhouettes show distribution shape only; their height does not represent rating stages or density-axis values. Multiple populations can overlap with transparent fills.
 }
 \usage{
 plotCutsIDM(
@@ -32,7 +32,9 @@ plotCutsIDM(
   density_adjust = 1,
   population_height = 0.25,
   population_fill = "grey50",
-  population_alpha = 0.15
+  population_alpha = 0.15,
+  population_col = NULL,
+  population_colors = NULL
 )
 }
 \arguments{
@@ -49,19 +51,21 @@ plotCutsIDM(
   \item{item_number_size}{Finite non-negative numeric scalar. Text size in millimetres for item position numbers next to raw points. Default is \code{2}. Only used when \code{show_raw = TRUE} and \code{show_item_numbers = TRUE}.}
   \item{cut_value_size}{Finite non-negative numeric scalar. Text size in millimetres for numeric cut value labels in individual and aggregate panels. Default is \code{2.6}. Only used when \code{show_cut_values = TRUE}.}
   \item{aggregate_label_size}{Finite non-negative numeric scalar. Text size in millimetres for rater names in the aggregate panel. Default is \code{3}. Only used when \code{show_aggregate = TRUE} and \code{show_aggregate_labels = TRUE}.}
-  \item{pv_data}{Optional wide- or long-format data frame of plausible values for one population and domain, already on the same metric as the item estimates and cuts. Supplying it adds a background silhouette to rating panels. Default \code{NULL} leaves the plot unchanged. The silhouette shows \strong{distribution shape only}; its height \strong{does not represent rating stages} or density-axis values.}
+  \item{pv_data}{Optional wide- or long-format data frame of plausible values for one domain, optionally grouped into populations by \code{population_col}, already on the same metric as the item estimates and cuts. Supplying it adds background silhouettes to rating panels. Default \code{NULL} leaves the plot unchanged. Silhouettes show \strong{distribution shape only}; their height \strong{does not represent rating stages} or density-axis values.}
   \item{pv_cols}{Character vector of PV column names, required for wide input. Wide input has one row per respondent. Other numeric columns are never selected automatically.}
-  \item{respondent_id_col}{Optional unique respondent ID column for wide input; required for long input. These are population respondent IDs, not rater IDs.}
-  \item{pv_id_col}{PV identifier column for long input. Required together with \code{pv_value_col} and \code{respondent_id_col}. Each respondent-PV combination must be unique.}
+  \item{respondent_id_col}{Optional respondent ID column, unique within each population for wide input; required for long input. IDs may repeat between populations. These are population respondent IDs, not rater IDs.}
+  \item{pv_id_col}{PV identifier column for long input. Required together with \code{pv_value_col} and \code{respondent_id_col}. Each respondent-PV combination must be unique within its population.}
   \item{pv_value_col}{Numeric PV value column for long input.}
-  \item{weight_col}{Optional sampling-weight column. Default \code{NULL} uses equal weights. Weights must be finite, non-missing, non-negative, and constant across PVs for each respondent. Zero-weight observations are excluded.}
+  \item{weight_col}{Optional sampling-weight column. Default \code{NULL} uses equal weights. Weights must be finite, non-missing, non-negative, and constant across PVs for each respondent within its population. Zero-weight observations are excluded.}
   \item{input_format}{PV input layout. \code{"auto"} selects long format when \code{pv_id_col} or \code{pv_value_col} is supplied, and wide format otherwise.}
   \item{pv_missing}{Default \code{"error"} rejects missing PVs and omitted respondent-PV rows. \code{"drop"} omits them with a warning and renormalizes weights within each PV. Infinite PVs and invalid weights always cause an error. Every PV must retain at least two observed respondents with positive weights.}
-  \item{density_bw}{Optional positive finite bandwidth in score units. Default \code{NULL} uses the mean of the unweighted \code{stats::bw.nrd0()} bandwidths computed separately for each PV after exclusions. Sampling weights affect the density estimates, not automatic bandwidth selection.}
+  \item{density_bw}{Optional positive finite bandwidth in score units. Default \code{NULL} averages unweighted \code{stats::bw.nrd0()} bandwidths across PVs within each population, then averages those population means. All populations and PVs share this bandwidth. Sampling weights affect the density estimates, not automatic bandwidth selection.}
   \item{density_adjust}{Positive finite multiplier for the common density bandwidth. Default \code{1}.}
-  \item{population_height}{Finite fraction between zero and one of the rating-axis range occupied by the silhouette at its peak. Default \code{0.25}. This is a display setting for \strong{distribution shape only}; the silhouette height \strong{does not represent rating stages} or density-axis values.}
-  \item{population_fill}{Silhouette fill color. Default \code{"grey50"}.}
+  \item{population_height}{Finite fraction between zero and one of the rating-axis range occupied by the highest silhouette peak across all populations. Default \code{0.25}. All silhouettes use the same height factor. This is a display setting for \strong{distribution shape only}; silhouette height \strong{does not represent rating stages} or density-axis values.}
+  \item{population_fill}{Silhouette fill color when \code{population_col = NULL}. Default \code{"grey50"}. With grouping, use \code{population_colors} instead.}
   \item{population_alpha}{Finite silhouette opacity between zero and one. Default \code{0.15}.}
+  \item{population_col}{Optional population grouping column in wide or long PV input. Labels must be non-missing and non-empty. Groups are drawn and listed in their order of first appearance; unused factor levels are ignored. Default \code{NULL} treats all rows as one population.}
+  \item{population_colors}{Optional named character vector with exactly one color per observed population label. Requires \code{population_col}. Default \code{NULL} uses blue and orange for two groups or a qualitative palette for more groups. A separate population fill legend is added.}
 }
 \details{
 One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. If \code{show_raw = TRUE}, grey points and a thin grey line show the original rater assignments after ordering items by difficulty. If \code{show_smoothed = TRUE}, a thin dashed blue line shows the moving average before monotonization. The red line represents the monotonized isotonic curve used to find the vertical intercepts. If the smoothed curve is already non-decreasing, the blue dashed line lies directly on top of the red line. Vertical cut lines are drawn at the cut scores stored by \code{computeCutsIDM()}, which are linearly interpolated boundary crossings of the monotonized curve.
@@ -70,7 +74,7 @@ By default, the vertical cut lines are labelled with their numeric difficulty-sc
 
 Technically, the plot is constructed from \code{res_list$plot_data}. For each rater facet, the x-axis is the item difficulty column stored as \code{est}; the y-values are the raw rating stage \code{stage_raw}, the smoothed moving average \code{stage_sm}, and the monotonized isotonic fit \code{stage_iso}. Horizontal lines are drawn at \code{res_list$boundaries}. Vertical lines are drawn at the difficulty-scale cuts in \code{res_list$cuts_per_person}; therefore the plotted cut positions are on the same x-axis scale as the item difficulties. Interpolated item positions, if needed for tabular summaries, are stored separately in \code{res_list$cut_positions_per_person}.
 
-With \code{show_aggregate = TRUE}, the plot adds an aggregate panel labelled \code{Mean}. This panel overlays the monotonized rater curves from the individual panels as thin colored lines and draws vertical lines at the mean difficulty-scale cuts in \code{res_list$cuts_summary}. With \code{show_aggregate_labels = TRUE}, the colored curves are labelled by rater name near their right-hand end. Label positions are adjusted vertically when several rater curves end at similar values. These mean cuts correspond to the cut scores reported by \code{summary(res_list)}. The legend is reserved for cut score labels; aggregate rater colors are not added to the legend.
+With \code{show_aggregate = TRUE}, the plot adds an aggregate panel labelled \code{Mean}. This panel overlays the monotonized rater curves from the individual panels as thin colored lines and draws vertical lines at the mean difficulty-scale cuts in \code{res_list$cuts_summary}. With \code{show_aggregate_labels = TRUE}, the colored curves are labelled by rater name near their right-hand end. Label positions are adjusted vertically when several rater curves end at similar values. These mean cuts correspond to the cut scores reported by \code{summary(res_list)}. The color legend is reserved for cut score labels; aggregate rater colors are not added to the legend.
 
 With \code{show_residuals = TRUE}, the plot uses an additional row of facets. The residual in item \eqn{i} is \eqn{e_i = r_i - z_i}, where \eqn{r_i} is the raw rating and \eqn{z_i} is the smoothed moving average. Residuals are drawn as vertical segments from zero to \eqn{e_i}. The cut lines are repeated in the residual panel so that large local deviations can be inspected relative to the final cut locations.
 
@@ -91,6 +95,17 @@ are used in every rating panel. Gaussian densities are estimated separately for
 each PV using normalized sampling weights and then averaged on a common grid
 with a common bandwidth. Respondents' PVs are not averaged first. Population
 arguments are used only when \code{pv_data} is supplied.
+
+With \code{population_col}, several silhouettes overlap transparently behind the
+same cuts and rater curves. Each population's density is computed and normalized
+separately using its own PVs and weights. All populations share one bandwidth
+and grid; weights and missing-data checks are handled within populations.
+Silhouettes are not stacked or separately stretched to equal peak heights.
+Instead, the largest density peak across all populations determines one shared
+display scaling factor, preserving relative differences in concentration.
+Their height shows \strong{distribution shape only} and \strong{does not
+represent rating stages} or density-axis values. Every rating and aggregate
+panel repeats all populations with the same scaling; residual panels stay clear.
 
 See \code{\link{plotPopulationCutsIDM}} for the same distribution with a real
 density axis, full details of PV processing, and wide- and long-format examples.
@@ -163,4 +178,25 @@ plotCutsIDM(res, pv_data = population_long,
 ## Use a standalone plot when the density axis is needed.
 plotPopulationCutsIDM(res, population, pv_cols = c("PV1", "PV2"),
                       weight_col = "weight")
+
+## Two populations with a shared silhouette-height factor, not rating values.
+population$group <- "A"
+population_b <- population
+population_b$group <- "B"
+population_b[c("PV1", "PV2")] <- 450 +
+  1.3 * (population_b[c("PV1", "PV2")] - 450) + 80
+populations <- rbind(population, population_b)
+plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
+            respondent_id_col = "student", weight_col = "weight",
+            population_col = "group",
+            population_colors = c(A = "#0072B2", B = "#E69F00"),
+            population_alpha = 0.2, show_aggregate = TRUE)
+
+## Long input and residuals: silhouettes still show distribution shape only.
+populations_long <- tidyr::pivot_longer(
+  populations, cols = c("PV1", "PV2"), names_to = "pv", values_to = "score"
+)
+plotCutsIDM(res, pv_data = populations_long, respondent_id_col = "student",
+            pv_id_col = "pv", pv_value_col = "score", weight_col = "weight",
+            population_col = "group", show_aggregate = TRUE, show_residuals = TRUE)
 }

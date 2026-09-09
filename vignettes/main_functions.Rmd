@@ -522,7 +522,7 @@ The kappa diagnostics use the same wide raw rating matrix. `kappa_pairwise` cont
 plotCutsIDM(cuts, cut_value_digits = 2)
 ```
 
-An aggregate panel can be added to inspect all monotonized rater curves together with the mean cuts. In this panel, rater curves are drawn in rater-specific colors and labelled by rater name by default. When several curves end at similar values, the labels are shifted slightly along the y-axis so that all names remain visible. The legend remains restricted to the cut score labels. The vertical cut lines are the means from `cuts$cuts_summary`, not newly estimated cuts from a pooled rating curve.
+An aggregate panel can be added to inspect all monotonized rater curves together with the mean cuts. In this panel, rater curves are drawn in rater-specific colors and labelled by rater name by default. When several curves end at similar values, the labels are shifted slightly along the y-axis so that all names remain visible. The color legend remains restricted to the cut score labels. The vertical cut lines are the means from `cuts$cuts_summary`, not newly estimated cuts from a pooled rating curve.
 
 ```{r idm aggregate plot example, fig.width=7, fig.height=5}
 plotCutsIDM(cuts, show_aggregate = TRUE, cut_value_digits = 2)
@@ -576,7 +576,7 @@ There are two ways to display a population distribution from plausible values (P
 
 #### Prepare population PVs on the cut-score metric
 
-Pass a data frame for one population and one domain. The PVs must already be on the same metric as the item estimates and cuts: these plotting functions do not transform scores or check that different scales have been linked. Population respondents are distinct from the raters and items used to calculate the cuts; no respondent-to-rater join is performed.
+Pass a data frame for one domain, optionally with a `population_col` identifying several populations. The PVs must already be on the same metric as the item estimates and cuts: these plotting functions do not transform scores or check that different scales have been linked. Population respondents are distinct from the raters and items used to calculate the cuts; no respondent-to-rater join is performed.
 
 The following synthetic data illustrate five PV columns and sampling weights on the compact metric used by `cuts` above. In an analysis, use the PVs and weights supplied with your population data.
 
@@ -715,6 +715,88 @@ plotCutsIDM(
   cut_value_digits = 2,
   population_height = 0.25,
   population_alpha = 0.15
+)
+```
+
+#### Compare two populations with overlapping distributions
+
+Both functions accept `population_col`, the name of a grouping column in the same wide or long PV data frame. Omitting it preserves the single-population plots above. Group labels must be non-missing and non-empty. Their order of first appearance determines the drawing order and population legend; unused factor levels are ignored.
+
+Here we create a second synthetic population with fewer respondents, a higher location, and more dispersion. The student IDs deliberately repeat across populations. IDs must be unique **within each population** for wide input, and respondent-PV combinations must be unique within each population for long input. A respondent's weight must be constant across PV rows within that population, but may differ between populations.
+
+```{r idm two populations data}
+population_a <- transform(population, cohort = "Population A")
+population_b <- transform(population[seq_len(220), ], cohort = "Population B")
+population_b[pv_names] <- 1.35 * population_b[pv_names] + 0.7
+populations <- rbind(population_a, population_b)
+
+population_colors <- c(
+  "Population A" = "#0072B2",
+  "Population B" = "#E69F00"
+)
+```
+
+For each population, the functions average the densities estimated from its own PVs and normalize weights within each PV. **Each population density has total area one.** A larger sample or a larger total sampling weight does not give that population a proportionally larger curve. With `pv_missing = "drop"`, exclusions and weight renormalization occur separately within each population and PV; diagnostic messages identify the affected population. A PV entirely absent from a population's long data cannot be detected.
+
+All populations share one bandwidth and one grid spanning their combined observed PV range. The automatic bandwidth averages the per-PV bandwidths within each population, then averages these population means with equal weight. This also supports different numbers of PVs between populations in long input. An explicit `density_bw` and `density_adjust` apply to every population. Thus each distribution can be compared under the same smoothing choice.
+
+```{r idm two populations density, fig.width=8, fig.height=6}
+plotPopulationCutsIDM(
+  cuts,
+  pv_data = populations,
+  pv_cols = pv_names,
+  respondent_id_col = "student",
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  population_alpha = 0.25,
+  cut_selection = "both",
+  cut_value_digits = 2
+)
+```
+
+The filled densities overlap without stacking. Their outlines and a separate **Population** legend identify the groups; the **Cut Score** colors and legend keep their existing meaning. Blue and orange are the defaults for two populations. `population_colors` overrides these with a named color vector containing exactly one entry for each observed population label. Reuse that vector across figures for consistent colors. `population_fill` applies only when `population_col = NULL`. More than two groups are supported, with a qualitative default palette.
+
+For the rater background, all silhouettes use **one shared height factor**. The highest density peak across all populations occupies `population_height` times the rating range above its lower limit. The other peaks retain their relative heights; the curves are neither stacked nor individually stretched to the same peak. This preserves visible differences in concentration.
+
+**The silhouettes still show distribution shape only. Their shared display height does not represent rating stages or readable density-axis values.** Use `plotPopulationCutsIDM()` when a density axis is needed, and retain the explanatory caption when sharing the rater plot.
+
+```{r idm two populations silhouettes, fig.width=8, fig.height=6, fig.cap="Both population silhouettes share a display-height factor. Their height shows distribution shape only, not rating stages or density-axis values."}
+plotCutsIDM(
+  cuts,
+  pv_data = populations,
+  pv_cols = pv_names,
+  respondent_id_col = "student",
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  population_height = 0.3,
+  population_alpha = 0.2,
+  show_aggregate = TRUE,
+  cut_value_digits = 2
+)
+```
+
+All populations repeat in every rating and aggregate panel, while residual panels stay clear. The same grouped input can be supplied in long format to either function:
+
+```{r idm two populations long residuals, fig.width=10, fig.height=6, fig.cap="Population silhouettes appear only in rating panels. Their shared height scale communicates distribution shape and does not represent rating stages or density-axis values."}
+populations_long <- tidyr::pivot_longer(
+  populations, cols = dplyr::all_of(pv_names),
+  names_to = "pv", values_to = "score"
+)
+plotCutsIDM(
+  cuts,
+  pv_data = populations_long,
+  respondent_id_col = "student",
+  pv_id_col = "pv",
+  pv_value_col = "score",
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  population_alpha = 0.2,
+  show_aggregate = TRUE,
+  show_residuals = TRUE,
+  cut_value_digits = 2
 )
 ```
 

@@ -1,9 +1,10 @@
 \name{plotPopulationCutsIDM}
 \alias{plotPopulationCutsIDM}
-\title{Plot a Population Distribution from Plausible Values with IDM Cuts}
+\title{Plot Population Distributions from Plausible Values with IDM Cuts}
 \description{
 Estimates a population density from wide- or long-format plausible values (PVs)
-and draws IDM cut scores over it. The y-axis represents population density.
+and draws IDM cut scores over it. An optional grouping column overlays multiple
+population densities with transparent fills. The y-axis represents population density.
 For a distribution-shape silhouette behind rater curves, use \code{\link{plotCutsIDM}}.
 }
 \usage{
@@ -25,28 +26,32 @@ plotPopulationCutsIDM(
   cut_value_digits = 0L,
   cut_value_size = 2.6,
   population_fill = "grey50",
-  population_alpha = 0.25
+  population_alpha = 0.25,
+  population_col = NULL,
+  population_colors = NULL
 )
 }
 \arguments{
   \item{res_list}{A list returned by \code{\link{computeCutsIDM}}. Cut scores are used as stored, without re-estimation.}
-  \item{pv_data}{A data frame of plausible values for one population and one domain. PVs must already use the same metric as the item estimates and cuts. No scale conversion is performed.}
+  \item{pv_data}{A data frame of plausible values for one domain, optionally containing several populations identified by \code{population_col}. PVs must already use the same metric as the item estimates and cuts. No scale conversion is performed.}
   \item{pv_cols}{Character vector of PV column names for wide input, with one row per respondent. Required for wide input; other numeric columns are never selected automatically.}
-  \item{respondent_id_col}{Optional respondent ID column for wide input; required for long input. Wide IDs must be unique. IDs are population respondent identifiers, not rater or item identifiers.}
-  \item{pv_id_col}{PV identifier column for long input, for example a column containing \code{"PV1"}, \code{"PV2"}, and so on. Required together with \code{pv_value_col} and \code{respondent_id_col}. Each respondent-PV combination must be unique.}
+  \item{respondent_id_col}{Optional respondent ID column for wide input; required for long input. Wide IDs must be unique within each population. The same ID may occur in different populations. IDs are population respondent identifiers, not rater or item identifiers.}
+  \item{pv_id_col}{PV identifier column for long input, for example a column containing \code{"PV1"}, \code{"PV2"}, and so on. Required together with \code{pv_value_col} and \code{respondent_id_col}. Each respondent-PV combination must be unique within its population.}
   \item{pv_value_col}{Numeric PV value column for long input.}
-  \item{weight_col}{Optional numeric sampling-weight column. Default \code{NULL} uses equal weights. Weights must be finite, non-missing, non-negative, and constant across PVs for each respondent. Zero-weight observations are excluded.}
+  \item{weight_col}{Optional numeric sampling-weight column. Default \code{NULL} uses equal weights. Weights must be finite, non-missing, non-negative, and constant across PVs for each respondent within a population. Zero-weight observations are excluded.}
   \item{input_format}{Input layout. \code{"auto"} selects long format when \code{pv_id_col} or \code{pv_value_col} is supplied, and wide format otherwise. Supply only the column selectors for the chosen layout.}
   \item{pv_missing}{Missing-PV policy. Default \code{"error"} rejects \code{NA}/\code{NaN} values and omitted respondent-PV rows. \code{"drop"} omits these with a warning and renormalizes weights separately within each PV. Infinite PVs and missing or invalid weights always cause an error. Every PV must retain at least two observed respondents with positive weights.}
-  \item{density_bw}{Optional positive finite numeric bandwidth in score units. When \code{NULL}, use the mean of the unweighted \code{stats::bw.nrd0()} bandwidths calculated separately for each PV after exclusions. This common bandwidth is used for every PV; automatic bandwidth selection does not account for sampling weights.}
+  \item{density_bw}{Optional positive finite numeric bandwidth in score units. When \code{NULL}, average the unweighted \code{stats::bw.nrd0()} bandwidths across PVs within each population after exclusions, then average those population means. This common bandwidth is used for every population and PV; automatic bandwidth selection does not account for sampling weights.}
   \item{density_adjust}{Positive finite multiplier for the common bandwidth. Values above one produce more smoothing; values below one produce less.}
   \item{cut_selection}{\code{"mean"} (default) draws cuts from \code{res_list$cuts_summary}. \code{"individual"} creates one facet per rater with cuts from \code{res_list$cuts_per_person}. \code{"both"} adds a mean-cut facet to the individual facets. All facets show the same population density on fixed axes.}
   \item{est_col}{Optional x-axis metric label. Defaults to \code{res_list$est_col}, or \code{"est"} if unavailable. This changes the label only.}
   \item{show_cut_values}{Logical scalar. Show numeric labels next to finite cut lines.}
   \item{cut_value_digits}{Non-negative integer scalar. Digits after the decimal point for rounding cut labels; trailing zeros are removed. Default \code{0L}.}
   \item{cut_value_size}{Finite non-negative cut-label text size in millimetres. Default \code{2.6}.}
-  \item{population_fill}{Color for the density fill and outline. Default \code{"grey50"}.}
+  \item{population_fill}{Color for the density fill and outline when \code{population_col = NULL}. Default \code{"grey50"}. With grouping, use \code{population_colors} instead.}
   \item{population_alpha}{Finite fill opacity between zero and one. Default \code{0.25}.}
+  \item{population_col}{Optional grouping column identifying populations in wide or long input. Labels must be non-missing and non-empty. Groups are drawn and listed in their order of first appearance; unused factor levels are ignored. Default \code{NULL} treats all rows as one population and preserves the ungrouped plot.}
+  \item{population_colors}{Optional named character vector of colors, with exactly one name matching each observed population label. Requires \code{population_col}. Default \code{NULL} selects blue and orange for two groups, or a qualitative palette for more groups. A separate fill legend identifies populations; cut colors keep their existing meaning.}
 }
 \details{
 A Gaussian kernel density is estimated separately for each PV, using sampling
@@ -56,6 +61,22 @@ with equal weight across PVs. All estimates use a common bandwidth and a shared
 Respondents' PVs are never averaged before estimating the distribution. The
 automatic bandwidth is based on the respondent count within each PV, not on the
 number of stacked PV observations.
+
+With \code{population_col}, PV preparation, missing-data checks, and weight
+normalization are performed separately within each population. Each population's
+density averages its own PV densities and has total area one; the plotted height
+is not proportional to population sample size or the sum of its weights. All
+populations share the same bandwidth and grid spanning their combined PV range.
+The automatic bandwidth gives equal weight to each population's mean PV
+bandwidth, including when populations have different numbers of PVs in long
+input. Missing-data requirements apply within each population; a PV identifier
+entirely absent from a population's long input cannot be detected.
+
+Filled densities overlap without stacking, with separate colored outlines.
+\code{population_alpha} controls their transparency. Named colors can be reused
+in both plotting functions to keep the population colors consistent. Cut lines
+are drawn over the densities, and all selected rater/mean facets repeat the same
+set of distributions on fixed axes.
 
 This is a descriptive density estimate. It does not compute confidence intervals,
 replicate-weight variances, or the proportions between cuts. Sampling weights
@@ -126,4 +147,25 @@ plotPopulationCutsIDM(cuts, population_long,
 plotCutsIDM(cuts, pv_data = population, pv_cols = c("PV1", "PV2"),
             weight_col = "weight", show_aggregate = TRUE,
             population_height = 0.25, population_alpha = 0.15)
+
+## Compare two populations; student IDs may repeat between populations.
+population$group <- "A"
+population_b <- population
+population_b$group <- "B"
+population_b[c("PV1", "PV2")] <- 450 +
+  1.3 * (population_b[c("PV1", "PV2")] - 450) + 80
+populations <- rbind(population, population_b)
+colors <- c(A = "#0072B2", B = "#E69F00")
+plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
+                      respondent_id_col = "student", weight_col = "weight",
+                      population_col = "group", population_colors = colors,
+                      population_alpha = 0.3, cut_selection = "both")
+
+## Equivalent grouped long input.
+populations_long <- tidyr::pivot_longer(
+  populations, cols = c("PV1", "PV2"), names_to = "pv", values_to = "score"
+)
+plotPopulationCutsIDM(cuts, populations_long, respondent_id_col = "student",
+                      pv_id_col = "pv", pv_value_col = "score", weight_col = "weight",
+                      population_col = "group", population_colors = colors)
 }

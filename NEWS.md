@@ -1,5 +1,6 @@
 # eatPrep 1.0.12
 
+* Both population plot views gain `population_col` to overlay multiple populations and `population_colors` for named colors. Densities use a common bandwidth and grid, with independent weight normalization and a separate population legend. Background silhouettes share one height factor and continue to show distribution shape only, not rating stages.
 * `plotCutsIDM()` gains `item_number_size`, `cut_value_size`, and `aggregate_label_size` to adjust text sizes inside the graph, including plots with residual panels. Defaults preserve the existing sizes.
 * New `plotPopulationCutsIDM()` displays a population density estimated from wide- or long-format plausible values, with optional sampling weights and mean, individual, or both sets of IDM cuts.
 * `plotCutsIDM()` gains an optional population background through `pv_data`. The silhouette communicates **distribution shape only**: its height **does not represent rating stages** or density-axis values. Every plot using the background includes an explanatory caption; residual panels stay clear.
