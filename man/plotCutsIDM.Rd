@@ -37,7 +37,10 @@ plotCutsIDM(
   population_colors = NULL,
   show_percentages = TRUE,
   percentage_digits = 1L,
-  percentage_size = 3
+  percentage_size = 3,
+  show_population_stats = TRUE,
+  population_stats_digits = 2L,
+  show_caption = FALSE
 )
 }
 \arguments{
@@ -72,6 +75,9 @@ plotCutsIDM(
   \item{show_percentages}{Logical scalar. Default \code{TRUE} adds percentage tables to rating panels when \code{pv_data} is supplied, with one colored row per population in legend order. Residual panels have no percentage labels. \code{FALSE} hides the tables and their additional caption. Has no plotting effect without \code{pv_data}.}
   \item{percentage_digits}{Integer scalar from zero to ten. Decimal places in percentage labels. Default \code{1L}. Displayed totals can differ slightly from 100 percent because of rounding.}
   \item{percentage_size}{Finite non-negative percentage-table text size in millimetres. Default \code{3}. Reduce this size or increase figure width for many intervals or small panels.}
+  \item{show_population_stats}{Logical scalar. Default \code{TRUE} displays M and SD below each population name in the fill legend when \code{pv_data} is supplied. For ungrouped PV input they appear in the subtitle. \code{FALSE} hides these statistics and their caption line independently of \code{show_percentages}. Has no plotting effect without \code{pv_data}.}
+  \item{population_stats_digits}{Integer scalar from zero to ten. Decimal places in displayed M and SD values. Default \code{2L}. Use \code{ggplot2::theme()} to adjust \code{legend.text} or \code{plot.subtitle} text size.}
+  \item{show_caption}{Logical scalar. Default \code{FALSE} hides explanatory plot captions. Set to \code{TRUE} to explain the population silhouette and, when displayed, percentages and M/SD below the plot. Does not affect statistics, percentage labels, or the subtitle. Has no plotting effect without \code{pv_data}.}
 }
 \details{
 One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. If \code{show_raw = TRUE}, grey points and a thin grey line show the original rater assignments after ordering items by difficulty. If \code{show_smoothed = TRUE}, a thin dashed blue line shows the moving average before monotonization. The red line represents the monotonized isotonic curve used to find the vertical intercepts. If the smoothed curve is already non-decreasing, the blue dashed line lies directly on top of the red line. Vertical cut lines are drawn at the cut scores stored by \code{computeCutsIDM()}, which are linearly interpolated boundary crossings of the monotonized curve.
@@ -89,9 +95,9 @@ If \code{computeCutsIDM()} stored ordinal rating labels in \code{res_list}, thes
 With \code{pv_data}, a population silhouette is drawn behind the rating curves and
 cut lines in every individual and aggregate rating panel. It shows
 \strong{distribution shape only}: its height is scaled for display and
-\strong{does not represent rating stages} or density-axis values. A plot caption
-states this distinction. Keep that explanation when presenting or customizing
-the plot. The rating axis, curves, and cut calculations are unchanged; residual
+\strong{does not represent rating stages} or density-axis values. An optional
+plot caption states this distinction when \code{show_caption = TRUE}; captions
+are hidden by default. The rating axis, curves, and cut calculations are unchanged; residual
 panels have no silhouette. The shared x-range expands to include the population
 density grid, so item curves may occupy a smaller portion of the plot.
 
@@ -144,11 +150,21 @@ cause an error when percentages are enabled.
 
 \strong{Percentage labels are estimated population shares. Silhouette height
 still shows distribution shape only and does not represent rating stages or
-density-axis values.} Preserve the explanatory caption when sharing the plot.
+density-axis values.} Set \code{show_caption = TRUE} to include this explanation.
 
 See \code{\link{plotPopulationCutsIDM}} for the same distribution with a real
 density axis, full details of PV processing, and wide- and long-format examples.
 Both views are descriptive estimates and do not calculate uncertainty intervals.
+
+With population data, M and SD are shown by default using the same computation
+as \code{plotPopulationCutsIDM()}: M averages the weighted PV means, and SD is
+the square root of the average weighted PV variance. See its details for the
+formula and weighting convention.
+The statistics describe each whole population on the supplied score metric and
+are shared across rating and mean panels, including plots with residual panels.
+They are independent of cuts, density smoothing, and silhouette height.
+\strong{Silhouette height still communicates distribution shape only and does
+not represent rating stages or density-axis values.}
 }
 \value{
 A \code{ggplot2} object.
@@ -199,7 +215,7 @@ population <- data.frame(
 )
 
 ## Silhouette = distribution shape only; height does NOT represent rating stages.
-## Keep the explanatory caption when sharing the plot.
+## Use show_caption = TRUE to include the silhouette explanation below the plot.
 plotCutsIDM(res, pv_data = population, pv_cols = c("PV1", "PV2"),
             weight_col = "weight", show_aggregate = TRUE,
             population_height = 0.25, population_alpha = 0.15)
@@ -247,4 +263,13 @@ plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
 ## Keep silhouettes and cut labels, but hide the percentage tables.
 plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
             weight_col = "weight", population_col = "group", show_percentages = FALSE)
+
+## M and SD use the same population legend as plotPopulationCutsIDM().
+plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
+            weight_col = "weight", population_col = "group",
+            show_residuals = TRUE, population_stats_digits = 1, show_caption = TRUE)
+
+## Hide M and SD independently of interval percentages.
+plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
+            weight_col = "weight", population_col = "group", show_population_stats = FALSE)
 }

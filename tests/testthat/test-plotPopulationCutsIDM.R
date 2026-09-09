@@ -297,7 +297,8 @@ test_that("background adds only a shape layer to rating facets and preserves exi
       args <- list(res_list = res, show_residuals = residuals, show_aggregate = aggregate)
       original <- do.call(plotCutsIDM, args)
       p <- do.call(plotCutsIDM, c(args, list(pv_data = pop, pv_cols = c("PV1", "PV2"),
-                                           population_height = 0.4, show_percentages = FALSE)))
+                                           population_height = 0.4, show_percentages = FALSE,
+                                           show_caption = TRUE)))
       before <- ggplot2::ggplot_build(original)
       after <- ggplot2::ggplot_build(p)
       expect_equal(after$data[-1], before$data)
@@ -552,7 +553,8 @@ test_that("multiple silhouettes share a height factor and stay out of residual p
   for (residuals in c(FALSE, TRUE)) {
     p <- plotCutsIDM(res, pv_data = pop, pv_cols = c("PV1", "PV2"), weight_col = "weight",
                      population_col = "population", show_residuals = residuals,
-                     show_aggregate = TRUE, population_height = 0.4, show_percentages = FALSE)
+                     show_aggregate = TRUE, population_height = 0.4, show_percentages = FALSE,
+                     show_caption = TRUE)
     built <- ggplot2::ggplot_build(p)
     base <- ggplot2::ggplot_build(plotCutsIDM(res, show_residuals = residuals, show_aggregate = TRUE))
     expect_equal(built$data[-1], base$data)

@@ -1,5 +1,7 @@
 # eatPrep 1.0.12
 
+* Both `plotPopulationCutsIDM()` and `plotCutsIDM()` now display M and SD for each population in the legend (or the subtitle for ungrouped input). Weighted means and descriptive population variances are estimated separately per PV, then averaged across PVs; SD is the square root of the average variance. Use `show_population_stats = FALSE` to hide them and `population_stats_digits` to set decimal places. In the rater view, PV data are required.
+* Explanatory captions are now hidden by default in both plot functions. Set `show_caption = TRUE` to display the explanations of densities/silhouettes, percentages, and M/SD. This does not hide the statistics or percentage labels themselves.
 * Population percentages now align with the visible cut intervals in both plot views. Crowded labels shift minimally with thin connection lines, while population rows stay aligned. Placement adapts to figure size, zoom, and reversed score axes.
 * Population preparation preserves distinct large numeric respondent, PV, and population identifiers, including during missing-data checks.
 * Population density grids adapt to the bandwidth so narrow, separated distributions remain accurately resolved. Smoothing settings requiring excessive grid resolution produce an informative error.
@@ -9,7 +11,7 @@
 * Both population plot views gain `population_col` to overlay multiple populations and `population_colors` for named colors. Densities use a common bandwidth and grid, with independent weight normalization and a separate population legend. Background silhouettes share one height factor and continue to show distribution shape only, not rating stages.
 * `plotCutsIDM()` gains `item_number_size`, `cut_value_size`, and `aggregate_label_size` to adjust text sizes inside the graph, including plots with residual panels. Defaults preserve the existing sizes.
 * New `plotPopulationCutsIDM()` displays a population density estimated from wide- or long-format plausible values, with optional sampling weights and mean, individual, or both sets of IDM cuts.
-* `plotCutsIDM()` gains an optional population background through `pv_data`. The silhouette communicates **distribution shape only**: its height **does not represent rating stages** or density-axis values. Every plot using the background includes an explanatory caption; residual panels stay clear.
+* `plotCutsIDM()` gains an optional population background through `pv_data`. The silhouette communicates **distribution shape only**: its height **does not represent rating stages** or density-axis values. Enable its explanatory caption with `show_caption = TRUE`; residual panels stay clear.
 * Both population views share per-PV density estimation, a common bandwidth and grid, explicit missing-data handling, and adjustable smoothing and appearance. Help examples and the main-functions vignette demonstrate both input layouts and both plot purposes.
 
 # eatPrep 1.0.11

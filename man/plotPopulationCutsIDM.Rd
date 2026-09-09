@@ -31,7 +31,10 @@ plotPopulationCutsIDM(
   population_colors = NULL,
   show_percentages = TRUE,
   percentage_digits = 1L,
-  percentage_size = 3
+  percentage_size = 3,
+  show_population_stats = TRUE,
+  population_stats_digits = 2L,
+  show_caption = FALSE
 )
 }
 \arguments{
@@ -58,6 +61,9 @@ plotPopulationCutsIDM(
   \item{show_percentages}{Logical scalar. Default \code{TRUE} adds a percentage table at the top of each panel. Each population has a colored row, in population-legend order. \code{FALSE} hides the table and its additional caption.}
   \item{percentage_digits}{Integer scalar from zero to ten. Decimal places shown in percentage labels. Default \code{1L}. Rounding is for display only and can make displayed totals differ slightly from 100 percent.}
   \item{percentage_size}{Finite non-negative text size in millimetres for the percentage table. Default \code{3}. For many intervals or small figures, reduce this size or increase the figure width.}
+  \item{show_population_stats}{Logical scalar. Default \code{TRUE} displays the estimated mean (M) and standard deviation (SD) below each population name in the fill legend. For ungrouped data, they appear in the subtitle. \code{FALSE} hides these statistics and their explanatory caption line independently of \code{show_percentages}.}
+  \item{population_stats_digits}{Integer scalar from zero to ten. Decimal places in displayed M and SD values. Default \code{2L}. Legend and subtitle text sizes can be adjusted with the corresponding \code{ggplot2::theme()} settings.}
+  \item{show_caption}{Logical scalar. Default \code{FALSE} hides explanatory plot captions. Set to \code{TRUE} to explain the density and, when displayed, percentages and M/SD below the plot. Does not affect statistics, percentage labels, or the subtitle.}
 }
 \details{
 A Gaussian kernel density is estimated separately for each PV, using sampling
@@ -86,6 +92,23 @@ Filled densities overlap without stacking, with separate colored outlines.
 in both plotting functions to keep the population colors consistent. Cut lines
 are drawn over the densities, and all selected rater/mean facets repeat the same
 set of distributions on fixed axes.
+
+With \code{show_population_stats = TRUE}, M and SD are calculated from the
+observed PVs and sampling weights, separately within each population and PV.
+For each PV, normalize weights to sum to one, compute its weighted mean, then
+take the square root of the weighted mean squared deviation from that mean.
+The displayed M averages the PV means; the displayed SD is the square root of
+the average PV variance: \eqn{SD = \sqrt{m^{-1}\sum_{j=1}^{m} SD_j^2}}, where
+\eqn{m} is the number of PVs. Every PV has equal weight. No variance component
+for differences between PV means is added. This is a descriptive population SD,
+without an \eqn{n-1} sample-variance correction. It is not a standard error.
+Respondents' PVs are never averaged before computing these statistics.
+With \code{pv_missing = "drop"}, each PV uses its own available observations
+and renormalized weights. Zero-weight observations are excluded.
+Both statistics use the supplied score metric and are independent of cuts,
+zooming, density bandwidth, and cut selection. They are computed before kernel
+smoothing, so SD is not derived from the smoothed density curve. All facets
+share these population statistics; the mean-cut panel does not alter them.
 
 With \code{show_percentages = TRUE}, shares are computed directly from the PV
 observations, independently of density estimation. For each population and PV,
@@ -230,4 +253,13 @@ plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
 plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
                       weight_col = "weight", population_col = "group",
                       show_percentages = FALSE)
+
+## Format M and SD in the population legend, independently of percentages.
+plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
+                      weight_col = "weight", population_col = "group",
+                      population_stats_digits = 1, show_caption = TRUE)
+
+## Hide M and SD while keeping the cut-interval percentages.
+plotPopulationCutsIDM(cuts, population, pv_cols = c("PV1", "PV2"),
+                      weight_col = "weight", show_population_stats = FALSE)
 }

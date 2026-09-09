@@ -572,7 +572,7 @@ There are two ways to display a population distribution from plausible values (P
 | Inspect where the cuts divide the population distribution | `plotPopulationCutsIDM()` | Population density |
 | Inspect the population alongside the rater curves | `plotCutsIDM(..., pv_data = ...)` | Rating stages; the background silhouette shows **distribution shape only** |
 
-**The background silhouette's height does not represent rating stages or density-axis values.** Its height is scaled for display. Use the standalone population plot when you need a density axis. This distinction is also stated in the caption of every `plotCutsIDM()` plot with a population background; retain that caption or an equivalent explanation when sharing the plot.
+**The background silhouette's height does not represent rating stages or density-axis values.** Its height is scaled for display. Use the standalone population plot when you need a density axis. Set `show_caption = TRUE` to include this explanation below the plot; explanatory captions are hidden by default in both plot functions.
 
 #### Prepare population PVs on the cut-score metric
 
@@ -698,7 +698,7 @@ plotCutsIDM(
 )
 ```
 
-The same silhouette and height scaling are repeated in every rating facet, including the aggregate panel. The rating axis, rater curves, cut labels, and cut values keep their existing meaning. The shared x-range expands to include the population distribution, so the item curves may occupy a smaller part of the horizontal space. The explanatory plot caption is part of the default output: keep it when adding titles, changing themes, or exporting figures.
+The same silhouette and height scaling are repeated in every rating facet, including the aggregate panel. The rating axis, rater curves, cut labels, and cut values keep their existing meaning. The shared x-range expands to include the population distribution, so the item curves may occupy a smaller part of the horizontal space. The explanatory plot caption can be enabled with `show_caption = TRUE`.
 
 Residual panels stay clear of the silhouette. The following example also demonstrates long-format input for the combined view.
 
@@ -759,7 +759,7 @@ The filled densities overlap without stacking. Their outlines and a separate **P
 
 For the rater background, all silhouettes use **one shared height factor**. The highest density peak across all populations occupies `population_height` times the rating range above its lower limit. The other peaks retain their relative heights; the curves are neither stacked nor individually stretched to the same peak. This preserves visible differences in concentration.
 
-**The silhouettes still show distribution shape only. Their shared display height does not represent rating stages or readable density-axis values.** Use `plotPopulationCutsIDM()` when a density axis is needed, and retain the explanatory caption when sharing the rater plot.
+**The silhouettes still show distribution shape only. Their shared display height does not represent rating stages or readable density-axis values.** Use `plotPopulationCutsIDM()` when a density axis is needed. Use `show_caption = TRUE` to include the silhouette explanation in the rater plot.
 
 ```{r idm two populations silhouettes, fig.width=8, fig.height=6, fig.cap="Both population silhouettes share a display-height factor. Their height shows distribution shape only, not rating stages or density-axis values."}
 plotCutsIDM(
@@ -800,11 +800,60 @@ plotCutsIDM(
 )
 ```
 
+#### Population means and standard deviations
+
+Both `plotPopulationCutsIDM()` and `plotCutsIDM()` display **M** (mean) and **SD** (standard deviation) below each population name in the legend when PV data are supplied. With one ungrouped population, these statistics appear in the subtitle. They use the supplied score metric and describe the whole population, so one set of statistics applies to all rater and mean-cut panels.
+
+Means and variances are estimated separately for each PV and population using the supplied sampling weights. The final M is the average of the PV means; the final SD is the square root of the average PV variance. For $m$ plausible values:
+
+$$SD = \sqrt{\frac{1}{m}\sum_{j=1}^{m} SD_j^2}.$$
+
+Every PV contributes equally. Respondents' PVs are never averaged before estimating their population spread, and no variance component for differences between PV means is added.
+
+Within a PV, SD is the square root of the weighted mean squared deviation from that PV's weighted mean, with weights normalized to sum to one. This is a descriptive population SD, without an `n - 1` sample-variance correction. SD describes population spread; it is not a standard error. For example, with weights `c(1, 3)`, PV1 values `c(0, 4)` have M = 3 and variance = 3, while PV2 values `c(18, 10)` have M = 12 and variance = 12. The displayed estimates are therefore M = 7.50 and SD = sqrt((3 + 12) / 2) = 2.74.
+
+With `pv_missing = "drop"`, each PV uses its available observations and renormalized weights; zero-weight observations are excluded. Changing cuts, zoom, or density smoothing does not change M or SD. These estimates are calculated directly from the PV observations before smoothing.
+
+```{r idm population means and SDs, fig.width=9, fig.height=6}
+plotPopulationCutsIDM(
+  cuts,
+  pv_data = populations,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  cut_selection = "both",
+  population_stats_digits = 1,
+  show_caption = TRUE
+)
+```
+
+The same statistics are available with long-format population data in the rater view, including plots with residual panels:
+
+```{r idm rater population means and SDs, fig.width=10, fig.height=7, fig.cap="M and SD describe populations on the supplied score metric. Silhouette height communicates distribution shape only and does not represent rating stages."}
+plotCutsIDM(
+  cuts,
+  pv_data = populations_long,
+  respondent_id_col = "student",
+  pv_id_col = "pv",
+  pv_value_col = "score",
+  weight_col = "weight",
+  population_col = "cohort",
+  population_colors = population_colors,
+  show_aggregate = TRUE,
+  show_residuals = TRUE,
+  population_stats_digits = 1,
+  show_caption = TRUE
+)
+```
+
+Set `show_population_stats = FALSE` in either plot function to hide M and SD. This is independent of `show_percentages`, which controls the interval percentages. `population_stats_digits` sets the decimal places (default 2); legend text size can be changed with `ggplot2::theme(legend.text = ggplot2::element_text(size = 10))`, or `plot.subtitle` for the ungrouped view. Explanatory captions are hidden by default (`show_caption = FALSE`); the two examples above explicitly enable them. This switch only controls explanations below the plot and leaves M/SD in the legend or subtitle and percentage labels unchanged. Without `pv_data`, the rater plot is unchanged. **Silhouette height in `plotCutsIDM()` continues to communicate distribution shape only and does not represent rating stages.**
+
 #### Population percentages within the cut intervals
 
 Both plot functions now show population percentages by default when PV data are supplied. Each panel has a small table above its data, with a separate colored row for each population in legend order. Percentages follow the cut intervals from left to right. For one ungrouped population, the table has a single neutral row.
 
-**The percentage labels are estimated population shares. Silhouette height still communicates distribution shape only and does not represent rating stages or density-axis values.** These meanings are also explained in the plot captions.
+**The percentage labels are estimated population shares. Silhouette height still communicates distribution shape only and does not represent rating stages or density-axis values.** These meanings are also explained in the optional plot captions (`show_caption = TRUE`).
 
 In general, there is one more interval than there are cuts. A value **exactly on a cut belongs to the upper interval**. The outer intervals extend to minus and plus infinity, so all available PV observations contribute, even when they fall outside a displayed x-axis window. The actual, unrounded cuts determine interval membership. Identical adjacent cuts create an empty interval with 0%; they are not merged.
 

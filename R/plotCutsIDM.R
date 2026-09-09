@@ -175,10 +175,14 @@ plotCutsIDM <- function(res_list, est_col = NULL,
                         population_fill = "grey50", population_alpha = 0.15,
                         population_col = NULL, population_colors = NULL,
                         show_percentages = TRUE, percentage_digits = 1L,
-                        percentage_size = 3) {
+                        percentage_size = 3,
+                        show_population_stats = TRUE, population_stats_digits = 2L,
+                        show_caption = FALSE) {
 
   checkmate::assert_list(res_list)
   .validate_percentages_idm(show_percentages, percentage_digits, percentage_size)
+  .validate_population_moments_idm(show_population_stats, population_stats_digits)
+  checkmate::assert_flag(show_caption)
   checkmate::assert_string(est_col, null.ok = TRUE)
   checkmate::assert_flag(show_raw)
   checkmate::assert_flag(show_smoothed)
@@ -274,14 +278,21 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       )
   }
 
-  add_percentages <- function(pp) {
-    if (!show_percentages || is.null(population_density)) return(pp)
-    percentage_cuts <- dplyr::bind_rows(cuts_long, mean_cuts_long)
-    .add_population_percentages_idm(
-      pp, population_data, percentage_cuts,
-      population_colors = colors, percentage_digits = percentage_digits,
-      percentage_size = percentage_size, show_residuals = show_residuals
+  add_population_annotations <- function(pp) {
+    if (is.null(population_density)) return(pp)
+    if (show_percentages) {
+      percentage_cuts <- dplyr::bind_rows(cuts_long, mean_cuts_long)
+      pp <- .add_population_percentages_idm(
+        pp, population_data, percentage_cuts,
+        population_colors = colors, percentage_digits = percentage_digits,
+        percentage_size = percentage_size, show_residuals = show_residuals
+      )
+    }
+    pp <- .add_population_moments_idm(
+      pp, population_data, colors, show_population_stats, population_stats_digits
     )
+    if (!show_caption) pp <- pp + ggplot2::labs(caption = NULL)
+    pp
   }
 
   if (show_residuals) {
@@ -560,7 +571,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
       ) +
       ggplot2::theme_minimal()
 
-    return(add_percentages(pp))
+    return(add_population_annotations(pp))
   }
 
   plot_data <- plot_data |>
@@ -787,5 +798,5 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     ) +
     ggplot2::theme_minimal()
 
-  return(add_percentages(pp))
+  return(add_population_annotations(pp))
 }

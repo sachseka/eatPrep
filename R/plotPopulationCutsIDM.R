@@ -295,11 +295,15 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
                                   population_fill = "grey50", population_alpha = 0.25,
                                   population_col = NULL, population_colors = NULL,
                                   show_percentages = TRUE, percentage_digits = 1L,
-                                  percentage_size = 3) {
+                                  percentage_size = 3,
+                                  show_population_stats = TRUE, population_stats_digits = 2L,
+                                  show_caption = FALSE) {
   # ggplot2 evaluates these names within the layer data.
   .population_x <- .population_density <- cut_type <- .cut_value_y <- .cut_value_label <- NULL
   .population <- .population_color <- NULL
   .validate_percentages_idm(show_percentages, percentage_digits, percentage_size)
+  .validate_population_moments_idm(show_population_stats, population_stats_digits)
+  checkmate::assert_flag(show_caption)
   checkmate::assert_list(res_list)
   checkmate::assert_string(est_col, null.ok = TRUE)
   checkmate::assert_flag(show_cut_values)
@@ -394,5 +398,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
       percentage_size = percentage_size
     )
   }
+  pp <- .add_population_moments_idm(pp, dat, colors, show_population_stats, population_stats_digits)
+  if (!show_caption) pp <- pp + ggplot2::labs(caption = NULL)
   pp
 }

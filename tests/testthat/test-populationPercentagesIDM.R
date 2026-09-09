@@ -97,7 +97,7 @@ test_that("both plot types show the same percentages and can hide them", {
   pop <- percentage_population_fixture_idm()
   for (fun in list(plotPopulationCutsIDM, plotCutsIDM)) {
     args <- list(res_list = res, pv_data = pop, pv_cols = c("PV1", "PV2"),
-                 weight_col = "weight", population_col = "population")
+                 weight_col = "weight", population_col = "population", show_caption = TRUE)
     if (identical(fun, plotCutsIDM)) args$show_aggregate <- TRUE else args$cut_selection <- "both"
     shown <- do.call(fun, args)
     hidden <- do.call(fun, c(args, list(show_percentages = FALSE)))
@@ -156,7 +156,7 @@ test_that("percentage labels use population colors, precision and size, only in 
                          percentage_text_grobs_idm), recursive = FALSE)
   expect_setequal(vapply(texts, function(x) x$gp$col, character(1)), c("blue", "orange"))
   expect_true(all(vapply(texts, function(x) x$gp$fontsize, numeric(1)) == 4 * 72.27 / 25.4))
-  expect_match(p$labels$caption, "does not represent rating stages")
+  expect_null(p$labels$caption)
 })
 
 test_that("incomplete cut panels show an explanation instead of partial percentages", {
