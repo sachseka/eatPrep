@@ -1,6 +1,6 @@
 # eatPrep 1.0.14
 
-* R 4.1.3 CI checks use the compatible Hmisc 5.1-3 dependency so eatRep and the
+* R 4.1.3 CI checks use compatible Hmisc 5.1-3 and pbkrtest 0.5.2 dependencies so eatRep and the
   JK2 tests can run without raising eatPrep's minimum R version. Current-R checks
   continue to use current dependencies.
 * `plotPopulationCuts()`, `plotPopulationCutsIDM()`, and `plotCutsIDM()` accept

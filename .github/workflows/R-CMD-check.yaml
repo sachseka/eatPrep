@@ -45,8 +45,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          # eatRep imports Hmisc; newer Hmisc releases require R >= 4.2.
-          # Use a dependency manifest to avoid installing Hmisc's own Suggests.
+          # eatRep needs Hmisc and car/pbkrtest; newer releases require R >= 4.2.
+          # Pin through a manifest to avoid installing their own Suggests.
           # Keep all eatPrep dependencies and JK2 tests on R 4.1.3.
           extra-packages: |
             any::rcmdcheck
