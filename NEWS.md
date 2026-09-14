@@ -3,6 +3,8 @@
 * R 4.1.3 CI checks pin compatible Hmisc, pbkrtest and Matrix versions so eatRep
   and the JK2 tests can run without raising eatPrep's minimum R version.
   Current-R checks continue to use current dependencies.
+* The R 4.1.3 macOS ARM CI job installs the matching official Fortran toolchain
+  required to compile eatRep dependencies from source.
 * `plotPopulationCuts()`, `plotPopulationCutsIDM()`, and `plotCutsIDM()` accept
   `jk2 = list(PSU = "jkzone", repInd = "jkrep")` to estimate cut-interval shares
   and standard errors with optional dependency eatRep. PVs are pooled as multiple
