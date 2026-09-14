@@ -46,10 +46,11 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           # eatRep imports Hmisc; newer Hmisc releases require R >= 4.2.
-          # Keep JK2 tests enabled on our minimum supported R version.
+          # Use a dependency manifest to avoid installing Hmisc's own Suggests.
+          # Keep all eatPrep dependencies and JK2 tests on R 4.1.3.
           extra-packages: |
             any::rcmdcheck
-            ${{ matrix.config.r == '4.1.3' && 'Hmisc@5.1-3' || '' }}
+            ${{ matrix.config.r == '4.1.3' && 'deps::.github/r-4.1.3' || '' }}
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2

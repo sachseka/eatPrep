@@ -1,0 +1,8 @@
+Package: eatPrepCI
+Version: 0.0.0
+Title: Dependency Constraints for R 4.1.3 Checks
+Description: Keep Hmisc compatible with R 4.1.3 while installing only its
+    required dependencies. eatPrep's own suggested packages are still installed
+    by the main dependency setup.
+Imports: Hmisc
+Remotes: Hmisc@5.1-3
