@@ -565,11 +565,12 @@ plotCutsIDM(
 
 ### Population Distributions and IDM Cuts
 
-There are two ways to display a population distribution from plausible values (PVs):
+Population distributions from plausible values (PVs) can be displayed with estimated or supplied cuts:
 
 | Purpose | Function | Meaning of the vertical axis |
 |:--|:--|:--|
 | Inspect where the cuts divide the population distribution | `plotPopulationCutsIDM()` | Population density |
+| Use a numeric cut vector without an IDM result | `plotPopulationCuts()` | Population density |
 | Inspect the population alongside the rater curves | `plotCutsIDM(..., pv_data = ...)` | Rating stages; the background silhouette shows **distribution shape only** |
 
 **The background silhouette's height does not represent rating stages or density-axis values.** Its height is scaled for display. Use the standalone population plot when you need a density axis. Set `show_caption = TRUE` to include this explanation below the plot; explanatory captions are hidden by default in both plot functions.
@@ -595,6 +596,26 @@ head(population)
 ```
 
 Wide input has one row per respondent. Select PV columns explicitly with `pv_cols` so that numeric IDs, weights, or PVs from other domains cannot be included accidentally. `respondent_id_col` is optional for wide input; when supplied, its values must be unique. `weight_col = NULL`, the default, gives every respondent equal weight. Supplied sampling weights must be finite, non-missing and non-negative; zero-weight respondents are excluded.
+
+#### Density with supplied numeric cuts
+
+Use `plotPopulationCuts()` when cut scores are already available as a numeric vector. No IDM object is required. Cuts must be finite and strictly increasing, and PVs must be on the same scale. For example, these synthetic PVs use a score scale centered on 400:
+
+```{r population supplied cuts, fig.width=7, fig.height=4.5}
+score_population <- population
+score_population[pv_names] <- lapply(population[pv_names], function(x) 400 + 100 * x)
+supplied_cut_plot <- plotPopulationCuts(
+  cuts = c(230, 360, 460),
+  pv_data = score_population,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  est_col = "points"
+)
+supplied_cut_plot
+attr(supplied_cut_plot, "population_percentages")
+```
+
+The returned attribute contains unrounded percentages and interval bounds for each population. Values exactly on a cut enter the upper interval. Percentages are computed separately per PV and then averaged; density smoothing does not affect them. `show_percentages = FALSE` hides the labels but retains this table. The function also accepts the long-input selectors, `population_col`, colors, and display options illustrated below. `cut_labels` optionally names the cut lines in their legend order.
 
 #### Standalone density with mean or individual cuts
 

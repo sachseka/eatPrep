@@ -319,9 +319,6 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
                                   percentage_size = 3,
                                   show_population_stats = TRUE, population_stats_digits = 2L,
                                   show_caption = FALSE) {
-  # ggplot2 evaluates these names within the layer data.
-  .population_x <- .population_density <- cut_type <- .cut_value_y <- .cut_value_label <- NULL
-  .population <- .population_color <- NULL
   .validate_percentages_idm(show_percentages, percentage_digits, percentage_size)
   .validate_population_moments_idm(show_population_stats, population_stats_digits)
   checkmate::assert_flag(show_caption)
@@ -359,6 +356,24 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
   if (is.null(x_label)) x_label <- res_list$est_col
   if (is.null(x_label)) x_label <- "est"
 
+  .plot_population_cuts_idm(
+    dat, density, cuts, colors, population_fill, population_alpha,
+    x_label = paste0("Score (", x_label, ")"),
+    show_cut_values, cut_value_digits, cut_value_size,
+    show_percentages, percentage_digits, percentage_size,
+    show_population_stats, population_stats_digits, show_caption
+  )
+}
+
+.plot_population_cuts_idm <- function(dat, density, cuts, colors,
+                                      population_fill, population_alpha, x_label,
+                                      show_cut_values, cut_value_digits, cut_value_size,
+                                      show_percentages, percentage_digits, percentage_size,
+                                      show_population_stats, population_stats_digits,
+                                      show_caption) {
+  # ggplot2 evaluates these names within the layer data.
+  .population_x <- .population_density <- cut_type <- .cut_value_y <- .cut_value_label <- NULL
+  .population <- .population_color <- NULL
   pp <- ggplot2::ggplot()
   if (!is.null(colors)) {
     density$.population_color <- unname(colors[as.character(density$.population)])
@@ -408,7 +423,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
     ggplot2::facet_wrap(~ .facet_person, ncol = 2) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05))) +
     ggplot2::labs(
-      x = paste0("Score (", x_label, ")"), y = "Population density", color = "Cut Score",
+      x = x_label, y = "Population density", color = "Cut Score",
       caption = if (is.null(colors)) {
         "Population density averaged across plausible values; descriptive estimate."
       } else {
