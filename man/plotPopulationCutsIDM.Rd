@@ -6,6 +6,7 @@ Estimates a population density from wide- or long-format plausible values (PVs)
 and draws IDM cut scores over it. An optional grouping column overlays multiple
 population densities with transparent fills. The y-axis represents population density.
 For a distribution-shape silhouette behind rater curves, use \code{\link{plotCutsIDM}}.
+For a supplied numeric cut vector without an IDM object, use \code{\link{plotPopulationCuts}}.
 }
 \usage{
 plotPopulationCutsIDM(
