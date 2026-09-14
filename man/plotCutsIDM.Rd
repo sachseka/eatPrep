@@ -40,10 +40,16 @@ plotCutsIDM(
   percentage_size = 3,
   show_population_stats = TRUE,
   population_stats_digits = 2L,
-  show_caption = FALSE
+  show_caption = FALSE,
+  jk2 = NULL
 )
 }
 \arguments{
+  \item{jk2}{Optional list with exactly \code{PSU} and \code{repInd} column names,
+  for example \code{list(PSU = "jkzone", repInd = "jkrep")}. Enables eatRep JK2
+  estimation of interval percentages and standard errors. Requires \code{pv_data}.
+  See \code{\link{plotPopulationCutsIDM}} for design requirements. Default
+  \code{NULL} preserves the existing descriptive calculation.}
   \item{res_list}{A list returned by \code{computeCutsIDM()} containing the processed data and cut score coordinates.}
   \item{est_col}{Optional character scalar. Label to use for the item difficulty axis. If \code{NULL}, the value stored by \code{computeCutsIDM()} is used.}
   \item{show_raw}{Logical scalar. If \code{TRUE}, raw ratings are shown as points and as a thin line connecting items ordered by difficulty.}
@@ -80,6 +86,16 @@ plotCutsIDM(
   \item{show_caption}{Logical scalar. Default \code{FALSE} hides explanatory plot captions. Set to \code{TRUE} to explain the population silhouette and, when displayed, percentages and M/SD below the plot. Does not affect statistics, percentage labels, or the subtitle. Has no plotting effect without \code{pv_data}.}
 }
 \details{
+With \code{jk2 = list(PSU = "jkzone", repInd = "jkrep")}, interval percentages
+and standard errors are estimated by eatRep using JK2 and pooling across PVs.
+This requires \code{pv_data}. Design columns, missing-value handling, grouping
+and pooling follow \code{\link{plotPopulationCutsIDM}}. Each displayed rater or
+aggregate panel uses its own cut scores, treated as fixed. Results remain
+available when percentage labels are hidden, including with residual panels.
+The option affects interval percentages and their standard errors only.
+The default \code{jk2 = NULL} preserves existing calculations, plots and return
+attributes without requiring eatRep.
+
 One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. If \code{show_raw = TRUE}, grey points and a thin grey line show the original rater assignments after ordering items by difficulty. If \code{show_smoothed = TRUE}, a thin dashed blue line shows the moving average before monotonization. The red line represents the monotonized isotonic curve used to find the vertical intercepts. If the smoothed curve is already non-decreasing, the blue dashed line lies directly on top of the red line. Vertical cut lines are drawn at the cut scores stored by \code{computeCutsIDM()}, which are linearly interpolated boundary crossings of the monotonized curve.
 
 By default, the vertical cut lines are labelled with their numeric difficulty-scale values rounded to whole numbers. The number of digits after the decimal point can be changed with \code{cut_value_digits}. The grey raw-rating points in the individual rater panels are labelled with small item position numbers. These labels can be hidden with \code{show_cut_values = FALSE} and \code{show_item_numbers = FALSE}.
@@ -154,7 +170,8 @@ density-axis values.} Set \code{show_caption = TRUE} to include this explanation
 
 See \code{\link{plotPopulationCutsIDM}} for the same distribution with a real
 density axis, full details of PV processing, and wide- and long-format examples.
-Both views are descriptive estimates and do not calculate uncertainty intervals.
+By default both views show descriptive estimates. Optional JK2 standard errors
+are returned in the percentage table; uncertainty intervals are not drawn.
 
 With population data, M and SD are shown by default using the same computation
 as \code{plotPopulationCutsIDM()}: M averages the weighted PV means, and SD is
@@ -169,6 +186,14 @@ not represent rating stages or density-axis values.}
 }
 \value{
 A \code{ggplot2} object.
+With JK2 enabled, \code{attr(p, "population_percentages")} returns a data frame
+with \code{panel}, \code{population}, \code{interval}, \code{lower}, \code{upper},
+\code{percentage}, and \code{se}, as documented for
+\code{\link{plotPopulationCutsIDM}}. Percentages and standard errors are unrounded
+and expressed in percentage points. The table includes displayed individual and
+aggregate cut panels, even if percentage labels are hidden. Residual panels do
+not add duplicate rows. Extract the attribute before further plot customization.
+The default \code{jk2 = NULL} preserves the existing return attributes.
 }
 \examples{
 dat <- data.frame(
@@ -279,4 +304,15 @@ plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
 ## Hide M and SD independently of interval percentages.
 plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
             weight_col = "weight", population_col = "group", show_population_stats = FALSE)
+
+if (requireNamespace("eatRep", quietly = TRUE)) {
+  population$jkzone <- rep(seq_len(nrow(population) / 4), each = 4)
+  population$jkrep <- rep(c(0, 0, 1, 1), length.out = nrow(population))
+  p_jk2 <- plotCutsIDM(
+    res, pv_data = population, pv_cols = c("PV1", "PV2"),
+    respondent_id_col = "student", weight_col = "weight", show_aggregate = TRUE,
+    jk2 = list(PSU = "jkzone", repInd = "jkrep")
+  )
+  attr(p_jk2, "population_percentages")
+}
 }

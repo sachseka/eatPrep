@@ -35,10 +35,16 @@ plotPopulationCutsIDM(
   percentage_size = 3,
   show_population_stats = TRUE,
   population_stats_digits = 2L,
-  show_caption = FALSE
+  show_caption = FALSE,
+  jk2 = NULL
 )
 }
 \arguments{
+  \item{jk2}{Optional list with exactly \code{PSU} and \code{repInd} column names,
+  for example \code{list(PSU = "jkzone", repInd = "jkrep")}. Enables eatRep JK2
+  estimation of interval percentages and standard errors. Replicate indicators
+  must be numeric 0/1; design columns must be distinct from other input columns.
+  Default \code{NULL} preserves the existing descriptive calculation.}
   \item{res_list}{A list returned by \code{\link{computeCutsIDM}}. Cut scores are used as stored, without re-estimation.}
   \item{pv_data}{A data frame of plausible values for one domain, optionally containing several populations identified by \code{population_col}. PVs must already use the same metric as the item estimates and cuts. No scale conversion is performed.}
   \item{pv_cols}{Character vector of PV column names for wide input, with one row per respondent. Required for wide input; other numeric columns are never selected automatically.}
@@ -67,6 +73,33 @@ plotPopulationCutsIDM(
   \item{show_caption}{Logical scalar. Default \code{FALSE} hides explanatory plot captions. Set to \code{TRUE} to explain the density and, when displayed, percentages and M/SD below the plot. Does not affect statistics, percentage labels, or the subtitle.}
 }
 \details{
+\strong{Optional JK2 estimation:} Supply
+\code{jk2 = list(PSU = "jkzone", repInd = "jkrep")} to calculate interval
+percentages and standard errors with \code{eatRep::repTable(type = "JK2")}
+using the survey engine. eatRep is required only for this option. The existing
+respondent-ID and weight arguments are reused; omitted IDs in wide input are
+generated from row positions, and omitted weights are one. Design columns are
+preserved in both input formats. Zone identifiers must be non-missing, non-empty
+and finite; replicate indicators must be numeric 0/1. Both must remain constant
+within a respondent across PVs. Each retained PV must contain both replicate
+indicators in every observed zone. If missing-value dropping or zero weights
+remove one half of a zone, estimation stops with an explanatory error.
+
+PVs are passed as multiple imputations and pooled by eatRep using Rubin's rules.
+For a single PV, only sampling uncertainty is estimated. Population groups share
+the replication design; zone labels referring to independent designs must be
+made unique across those designs before calling the function. Respondent IDs may
+repeat across populations. Cut scores are treated as fixed: uncertainty in the
+estimated cuts is not included. Missing PVs follow \code{pv_missing}; eatRep may
+add a warning about unequal numbers of observations across imputations.
+
+The JK2 table is returned even when \code{show_percentages = FALSE}. Displayed
+labels use its percentages; standard errors are available in the table without
+adding uncertainty intervals to the plot. Empty intervals are retained. Density
+smoothing, population means and SDs are unaffected by this option. Omitting
+\code{jk2}, or supplying \code{NULL}, preserves existing calculations and return
+attributes and does not load eatRep.
+
 A Gaussian kernel density is estimated separately for each PV, using sampling
 weights normalized to sum to one within that PV. These densities are averaged
 with equal weight across PVs. All estimates use a common bandwidth and a shared
@@ -155,8 +188,8 @@ Percentage labels are estimated population shares. Unlike these numeric labels,
 silhouette height in \code{plotCutsIDM()} communicates distribution shape only,
 not rating stages or readable density-axis values.
 
-These are descriptive point estimates without confidence intervals or
-replicate-weight variances. Sampling weights
+With \code{jk2 = NULL}, these are descriptive point estimates without confidence
+intervals or replicate-weight variances. Sampling weights
 affect the estimated density, but not the automatic bandwidth rule. An explicit
 \code{density_bw} can be supplied when a different smoothing choice is needed.
 With \code{pv_missing = "drop"}, different PVs may use different respondent
@@ -175,6 +208,14 @@ Both functions use the same population preparation and density calculation.
 }
 \value{
 A \code{ggplot2} object that can be customized with standard ggplot layers and themes.
+With JK2 enabled, its \code{"population_percentages"} attribute contains a data
+frame with \code{panel}, \code{population}, \code{interval} (starting at one),
+\code{lower}, \code{upper}, \code{percentage} and \code{se}. Percentages and
+standard errors are unrounded and expressed in percentage points. Outer bounds
+are infinite. Panels with incomplete cuts are omitted from the table. Extract it
+with \code{attr(p, "population_percentages")} before further plot customization.
+This attribute is returned even if percentage labels are hidden. With
+\code{jk2 = NULL}, the return attributes are unchanged.
 }
 \seealso{
 \code{\link{computeCutsIDM}}, \code{\link{plotCutsIDM}}, \code{\link[stats]{density}}.
@@ -272,4 +313,14 @@ plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
 ## Hide M and SD while keeping the cut-interval percentages.
 plotPopulationCutsIDM(cuts, population, pv_cols = c("PV1", "PV2"),
                       weight_col = "weight", show_population_stats = FALSE)
+
+if (requireNamespace("eatRep", quietly = TRUE)) {
+  population$jkzone <- rep(seq_len(nrow(population) / 4), each = 4)
+  population$jkrep <- rep(c(0, 0, 1, 1), length.out = nrow(population))
+  p_jk2 <- plotPopulationCutsIDM(
+    cuts, population, pv_cols = c("PV1", "PV2"), respondent_id_col = "student",
+    weight_col = "weight", jk2 = list(PSU = "jkzone", repInd = "jkrep")
+  )
+  attr(p_jk2, "population_percentages")
+}
 }

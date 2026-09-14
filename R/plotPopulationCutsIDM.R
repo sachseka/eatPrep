@@ -23,8 +23,11 @@
                                     weight_col = NULL,
                                     input_format = c("auto", "long", "wide"),
                                     pv_missing = c("error", "drop"),
-                                    population_col = NULL) {
+                                    population_col = NULL, jk2 = NULL) {
   checkmate::assert_data_frame(pv_data, min.rows = 1)
+  .validate_population_jk2_idm(
+    jk2, pv_data, c(pv_cols, respondent_id_col, pv_id_col, pv_value_col, weight_col, population_col)
+  )
   input_format <- match.arg(input_format)
   pv_missing <- match.arg(pv_missing)
   checkmate::assert_string(population_col, null.ok = TRUE)
@@ -48,7 +51,7 @@
           .prepare_population_idm(
             pv_data[population == label, , drop = FALSE], pv_cols,
             respondent_id_col, pv_id_col, pv_value_col, weight_col,
-            input_format, pv_missing
+            input_format, pv_missing, jk2 = jk2
           ),
           warning = function(w) {
             warning(sprintf("Population '%s': %s", label, conditionMessage(w)), call. = FALSE)
@@ -133,6 +136,17 @@
     }, logical(1))
     if (any(inconsistent)) {
       stop("Each respondent must have the same weight across PVs.", call. = FALSE)
+    }
+  }
+  if (!is.null(jk2)) {
+    dat$.jk_zone <- rep(.population_identifier_labels_idm(pv_data[[jk2$PSU]]),
+                        length.out = nrow(dat))
+    dat$.jk_rep <- rep(pv_data[[jk2$repInd]], length.out = nrow(dat))
+    inconsistent <- vapply(split(dat[c(".jk_zone", ".jk_rep")], dat$.id), function(x) {
+      nrow(unique(x)) != 1L
+    }, logical(1))
+    if (any(inconsistent)) {
+      stop("Each respondent must have the same JK2 zone and repInd across PVs.", call. = FALSE)
     }
   }
   pv_names <- unique(dat$.pv)
@@ -318,7 +332,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
                                   show_percentages = TRUE, percentage_digits = 1L,
                                   percentage_size = 3,
                                   show_population_stats = TRUE, population_stats_digits = 2L,
-                                  show_caption = FALSE) {
+                                  show_caption = FALSE, jk2 = NULL) {
   .validate_percentages_idm(show_percentages, percentage_digits, percentage_size)
   .validate_population_moments_idm(show_population_stats, population_stats_digits)
   checkmate::assert_flag(show_caption)
@@ -331,7 +345,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
   cut_selection <- match.arg(cut_selection)
   dat <- .prepare_population_idm(
     pv_data, pv_cols, respondent_id_col, pv_id_col, pv_value_col,
-    weight_col, input_format, pv_missing, population_col
+    weight_col, input_format, pv_missing, population_col, jk2
   )
   density <- .population_density_idm(dat, density_bw, density_adjust)
   style <- .population_style_idm(
@@ -361,7 +375,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
     x_label = paste0("Score (", x_label, ")"),
     show_cut_values, cut_value_digits, cut_value_size,
     show_percentages, percentage_digits, percentage_size,
-    show_population_stats, population_stats_digits, show_caption
+    show_population_stats, population_stats_digits, show_caption, jk2
   )
 }
 
@@ -370,7 +384,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
                                       show_cut_values, cut_value_digits, cut_value_size,
                                       show_percentages, percentage_digits, percentage_size,
                                       show_population_stats, population_stats_digits,
-                                      show_caption) {
+                                      show_caption, jk2 = NULL) {
   # ggplot2 evaluates these names within the layer data.
   .population_x <- .population_density <- cut_type <- .cut_value_y <- .cut_value_label <- NULL
   .population <- .population_color <- NULL
@@ -431,14 +445,18 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
       }
     ) +
     ggplot2::theme_minimal()
+  percentage_summary <- if (!is.null(jk2)) .population_percentages_idm(dat, cuts, jk2) else NULL
   if (show_percentages) {
     pp <- .add_population_percentages_idm(
       pp, dat, cuts,
       population_colors = colors, percentage_digits = percentage_digits,
-      percentage_size = percentage_size
+      percentage_size = percentage_size, summary = percentage_summary
     )
   }
   pp <- .add_population_moments_idm(pp, dat, colors, show_population_stats, population_stats_digits)
   if (!show_caption) pp <- pp + ggplot2::labs(caption = NULL)
+  if (!is.null(percentage_summary)) {
+    attr(pp, "population_percentages") <- .population_percentage_attribute_idm(percentage_summary$values)
+  }
   pp
 }

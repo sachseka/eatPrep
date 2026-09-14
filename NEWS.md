@@ -1,3 +1,17 @@
+# eatPrep (development version)
+
+* `plotPopulationCuts()`, `plotPopulationCutsIDM()`, and `plotCutsIDM()` accept
+  `jk2 = list(PSU = "jkzone", repInd = "jkrep")` to estimate cut-interval shares
+  and standard errors with optional dependency eatRep. PVs are pooled as multiple
+  imputations. With JK2 enabled, `attr(plot, "population_percentages")` includes
+  unrounded percentages and `se` in percentage points, even when labels are hidden;
+  IDM tables also identify the cut panel. Design columns must be constant per
+  respondent across PVs, with numeric 0/1 replicate indicators.
+* The new argument is appended to each function's existing arguments. The default
+  `jk2 = NULL` preserves existing positional calls, calculations, plot appearance,
+  and return attributes, and does not require eatRep. Density and M/SD calculations
+  are unchanged when JK2 is enabled.
+
 # eatPrep 1.0.13
 
 * New `plotPopulationCuts()` plots PV distributions with a supplied numeric cut vector, without an IDM object. It supports wide/long PVs, weights, population groups, and the existing density and annotation options. Unrounded interval percentages are available through `attr(plot, "population_percentages")`, including when percentage labels are hidden.

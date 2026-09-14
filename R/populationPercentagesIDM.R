@@ -5,7 +5,7 @@
   checkmate::assert_number(percentage_size, lower = 0, finite = TRUE)
 }
 
-.population_percentages_idm <- function(dat, cuts) {
+.population_percentages_idm <- function(dat, cuts, jk2 = NULL) {
   if (!".population" %in% names(dat)) dat$.population <- "Population"
   panels <- unique(as.character(cuts$.facet_person))
   populations <- unique(as.character(dat$.population))
@@ -22,9 +22,10 @@
            call. = FALSE)
     }
     n_intervals <- length(boundaries) + 1L
+    jk2_values <- if (!is.null(jk2)) .population_jk2_panel_idm(dat, boundaries, populations) else NULL
     for (population in populations) {
       sample <- dat[as.character(dat$.population) == population, , drop = FALSE]
-      per_pv <- lapply(split(sample, sample$.pv), function(draw) {
+      per_pv <- if (is.null(jk2)) lapply(split(sample, sample$.pv), function(draw) {
         # findInterval assigns equality to the upper interval, including tied cuts.
         interval <- findInterval(draw$.value, boundaries) + 1L
         w <- draw$.weight / max(draw$.weight)
@@ -32,12 +33,17 @@
           100 * sum(w[interval == i]) / sum(w)
         }, numeric(1))
       })
-      rows[[length(rows) + 1L]] <- data.frame(
+      row <- data.frame(
         .facet_person = panel, .population = population,
         .interval = seq_len(n_intervals),
         .lower = c(-Inf, boundaries), .upper = c(boundaries, Inf),
-        .percentage = Reduce(`+`, per_pv) / length(per_pv)
+        .percentage = if (is.null(jk2)) Reduce(`+`, per_pv) / length(per_pv) else
+          jk2_values$.percentage[(match(population, populations) - 1L) * n_intervals + seq_len(n_intervals)]
       )
+      if (!is.null(jk2)) {
+        row$.se <- jk2_values$.se[(match(population, populations) - 1L) * n_intervals + seq_len(n_intervals)]
+      }
+      rows[[length(rows) + 1L]] <- row
     }
   }
   result <- if (length(rows)) do.call(rbind, rows) else data.frame(
@@ -46,6 +52,7 @@
   )
   result$.facet_person <- factor(result$.facet_person, levels = levels(cuts$.facet_person))
   result$.population <- factor(result$.population, levels = populations)
+  if (!is.null(jk2) && !".se" %in% names(result)) result$.se <- numeric(nrow(result))
   list(values = result, incomplete = incomplete, populations = populations)
 }
 
@@ -243,8 +250,9 @@ makeContent.population_percentage_band <- function(x) {
                                              population_colors = NULL,
                                              percentage_digits = 1L,
                                              percentage_size = 3,
-                                             show_residuals = FALSE) {
-  summary <- .population_percentages_idm(dat, cuts)
+                                             show_residuals = FALSE,
+                                             summary = NULL) {
+  if (is.null(summary)) summary <- .population_percentages_idm(dat, cuts)
   values <- summary$values
   text_rows <- list()
   for (panel in unique(as.character(values$.facet_person))) {
@@ -282,7 +290,8 @@ makeContent.population_percentage_band <- function(x) {
     pp$facet, labels, percentage_size, show_residuals
   )
   caption <- pp$labels$caption
-  explanation <- paste0("Percentages: weighted PV estimates.\n",
+  explanation <- paste0(if (".se" %in% names(values)) "Percentages: eatRep JK2 PV estimates.\n" else
+                          "Percentages: weighted PV estimates.\n",
                          "Values on a cut enter the upper interval; rounding may affect totals.")
   pp + ggplot2::labs(caption = paste(c(caption, explanation), collapse = "\n"))
 }

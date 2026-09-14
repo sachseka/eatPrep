@@ -177,7 +177,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
                         show_percentages = TRUE, percentage_digits = 1L,
                         percentage_size = 3,
                         show_population_stats = TRUE, population_stats_digits = 2L,
-                        show_caption = FALSE) {
+                        show_caption = FALSE, jk2 = NULL) {
 
   checkmate::assert_list(res_list)
   .validate_percentages_idm(show_percentages, percentage_digits, percentage_size)
@@ -204,12 +204,15 @@ plotCutsIDM <- function(res_list, est_col = NULL,
 
   population_density <- NULL
   colors <- NULL
+  if (!is.null(jk2) && is.null(pv_data)) {
+    stop("pv_data is required when jk2 is supplied.", call. = FALSE)
+  }
   if (!is.null(pv_data)) {
     checkmate::assert_number(population_height, lower = 0, upper = 1, finite = TRUE)
     .validate_population_style_idm(population_fill, population_alpha)
     population_data <- .prepare_population_idm(
       pv_data, pv_cols, respondent_id_col, pv_id_col, pv_value_col,
-      weight_col, input_format, pv_missing, population_col
+      weight_col, input_format, pv_missing, population_col, jk2
     )
     population_density <- .population_density_idm(population_data, density_bw, density_adjust)
     style <- .population_style_idm(
@@ -284,18 +287,25 @@ plotCutsIDM <- function(res_list, est_col = NULL,
 
   add_population_annotations <- function(pp) {
     if (is.null(population_density)) return(pp)
+    percentage_cuts <- dplyr::bind_rows(cuts_long, mean_cuts_long)
+    percentage_summary <- if (!is.null(jk2)) {
+      .population_percentages_idm(population_data, percentage_cuts, jk2)
+    } else NULL
     if (show_percentages) {
-      percentage_cuts <- dplyr::bind_rows(cuts_long, mean_cuts_long)
       pp <- .add_population_percentages_idm(
         pp, population_data, percentage_cuts,
         population_colors = colors, percentage_digits = percentage_digits,
-        percentage_size = percentage_size, show_residuals = show_residuals
+        percentage_size = percentage_size, show_residuals = show_residuals,
+        summary = percentage_summary
       )
     }
     pp <- .add_population_moments_idm(
       pp, population_data, colors, show_population_stats, population_stats_digits
     )
     if (!show_caption) pp <- pp + ggplot2::labs(caption = NULL)
+    if (!is.null(percentage_summary)) {
+      attr(pp, "population_percentages") <- .population_percentage_attribute_idm(percentage_summary$values)
+    }
     pp
   }
 

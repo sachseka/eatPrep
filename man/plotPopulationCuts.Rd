@@ -24,7 +24,7 @@ plotPopulationCuts(
   show_percentages = TRUE, percentage_digits = 1L,
   percentage_size = 3,
   show_population_stats = TRUE, population_stats_digits = 2L,
-  show_caption = FALSE
+  show_caption = FALSE, jk2 = NULL
 )
 }
 \arguments{
@@ -82,6 +82,13 @@ plotPopulationCuts(
   \item{population_stats_digits}{Integer from zero to ten specifying decimal
   places in displayed mean and SD.}
   \item{show_caption}{Show explanatory captions. Defaults to \code{FALSE}.}
+  \item{jk2}{Optional list with exactly two column names, for example
+  \code{list(PSU = "jkzone", repInd = "jkrep")}, enabling eatRep JK2 estimation
+  of interval percentages and standard errors. \code{PSU} identifies the JK zone;
+  \code{repInd} must be numeric 0/1. Both must be non-missing and constant across
+  each respondent's PVs, and distinct from other input columns. Default
+  \code{NULL} preserves the descriptive calculation without requiring eatRep.
+  See \code{\link{plotPopulationCutsIDM}} for design and pooling details.}
 }
 \details{
 Gaussian kernel densities are estimated separately for each PV using normalized
@@ -111,7 +118,10 @@ data frame with columns \code{population}, \code{interval} (starting at one),
 Outer bounds are infinite. Ungrouped input uses the population label
 \code{"Population"}. The table is calculated even if \code{show_percentages = FALSE}.
 Extract it with \code{attr(p, "population_percentages")} before further plot
-customization. These are descriptive shares, without standard errors.
+customization. With \code{jk2 = NULL}, these are descriptive shares without
+standard errors, and the table retains its original five columns. With JK2
+enabled, an additional \code{se} column contains the pooled standard error in
+percentage points. Densities and population M/SD remain descriptive estimates.
 }
 \examples{
 pvs <- data.frame(
@@ -125,6 +135,20 @@ p <- plotPopulationCuts(
 )
 p
 attr(p, "population_percentages")
+
+if (requireNamespace("eatRep", quietly = TRUE)) {
+  jk_pvs <- data.frame(
+    id = 1:12, PV1 = rep(c(100, 300, 400, 500), 3),
+    PV2 = rep(c(300, 100, 500, 400), 3), weight = rep(1:3, 4),
+    jkzone = rep(1:3, each = 4), jkrep = rep(c(0, 0, 1, 1), 3)
+  )
+  p_jk2 <- plotPopulationCuts(
+    c(230, 360, 460), jk_pvs, pv_cols = c("PV1", "PV2"),
+    respondent_id_col = "id", weight_col = "weight",
+    jk2 = list(PSU = "jkzone", repInd = "jkrep")
+  )
+  attr(p_jk2, "population_percentages")
+}
 
 long_pvs <- data.frame(
   id = rep(1:4, times = 2), pv = rep(c("PV1", "PV2"), each = 4),

@@ -13,7 +13,7 @@ plotPopulationCuts <- function(cuts, pv_data, pv_cols = NULL,
                                show_percentages = TRUE, percentage_digits = 1L,
                                percentage_size = 3,
                                show_population_stats = TRUE, population_stats_digits = 2L,
-                               show_caption = FALSE) {
+                               show_caption = FALSE, jk2 = NULL) {
   checkmate::assert_numeric(cuts, min.len = 1, finite = TRUE, any.missing = FALSE)
   if (!is.null(dim(cuts))) {
     stop("cuts must be a numeric vector.", call. = FALSE)
@@ -38,7 +38,7 @@ plotPopulationCuts <- function(cuts, pv_data, pv_cols = NULL,
 
   dat <- .prepare_population_idm(
     pv_data, pv_cols, respondent_id_col, pv_id_col, pv_value_col,
-    weight_col, input_format, pv_missing, population_col
+    weight_col, input_format, pv_missing, population_col, jk2
   )
   density <- .population_density_idm(dat, density_bw, density_adjust)
   style <- .population_style_idm(
@@ -53,15 +53,16 @@ plotPopulationCuts <- function(cuts, pv_data, pv_cols = NULL,
     x_label = if (is.null(est_col)) "Score" else paste0("Score (", est_col, ")"),
     show_cut_values, cut_value_digits, cut_value_size,
     show_percentages, percentage_digits, percentage_size,
-    show_population_stats, population_stats_digits, show_caption
+    show_population_stats, population_stats_digits, show_caption, jk2
   ) + ggplot2::theme(strip.text = ggplot2::element_blank(),
                      strip.background = ggplot2::element_blank())
 
   # Keep unrounded estimates accessible even when their display is switched off.
-  values <- .population_percentages_idm(dat, cut_table)$values
-  attr(pp, "population_percentages") <- data.frame(
-    population = as.character(values$.population), interval = values$.interval,
-    lower = values$.lower, upper = values$.upper, percentage = values$.percentage
-  )
+  if (is.null(jk2)) {
+    values <- .population_percentages_idm(dat, cut_table)$values
+    attr(pp, "population_percentages") <- .population_percentage_attribute_idm(values, include_panel = FALSE)
+  } else {
+    attr(pp, "population_percentages")$panel <- NULL
+  }
   pp
 }
