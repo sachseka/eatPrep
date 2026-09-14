@@ -1,5 +1,8 @@
 # eatPrep 1.0.14
 
+* R 4.1.3 CI checks use the compatible Hmisc 5.1-3 dependency so eatRep and the
+  JK2 tests can run without raising eatPrep's minimum R version. Current-R checks
+  continue to use current dependencies.
 * `plotPopulationCuts()`, `plotPopulationCutsIDM()`, and `plotCutsIDM()` accept
   `jk2 = list(PSU = "jkzone", repInd = "jkrep")` to estimate cut-interval shares
   and standard errors with optional dependency eatRep. PVs are pooled as multiple
