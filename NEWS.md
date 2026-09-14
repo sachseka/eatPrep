@@ -1,4 +1,4 @@
-# eatPrep (development version)
+# eatPrep 1.0.14
 
 * `plotPopulationCuts()`, `plotPopulationCutsIDM()`, and `plotCutsIDM()` accept
   `jk2 = list(PSU = "jkzone", repInd = "jkrep")` to estimate cut-interval shares
@@ -11,6 +11,10 @@
   `jk2 = NULL` preserves existing positional calls, calculations, plot appearance,
   and return attributes, and does not require eatRep. Density and M/SD calculations
   are unchanged when JK2 is enabled.
+* Tests cover direct eatRep comparisons, independent JK2 variance and PV pooling
+  calculations, wide/long input, multiple populations, missing PVs, empty intervals,
+  and invalid design data. Existing plot behavior was also checked against the
+  previous version. Help pages include JK2 usage and result extraction examples.
 
 # eatPrep 1.0.13
 
