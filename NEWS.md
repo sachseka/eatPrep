@@ -1,6 +1,6 @@
 # eatPrep 1.0.14
 
-* R 4.1.3 CI checks pin compatible Hmisc, pbkrtest and Matrix versions so eatRep
+* R 4.1.3 CI checks pin compatible Hmisc, pbkrtest, Matrix and BIFIEsurvey versions so eatRep
   and the JK2 tests can run without raising eatPrep's minimum R version.
   Current-R checks continue to use current dependencies.
 * The R 4.1.3 macOS ARM CI job installs the matching official Fortran toolchain

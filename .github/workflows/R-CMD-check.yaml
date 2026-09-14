@@ -61,7 +61,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          # eatRep needs Hmisc, pbkrtest and Matrix versions compatible with R 4.1.
+          # Keep eatRep's dependencies compatible with R 4.1, including
+          # BIFIEsurvey's compiled code (newer releases use Rf_asBool).
           # Pin through a manifest to avoid installing their own Suggests.
           # Keep all eatPrep dependencies and JK2 tests on R 4.1.3.
           extra-packages: |
