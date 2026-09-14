@@ -1,6 +1,11 @@
-# eatPrep 1.0.12
+# eatPrep 1.0.13
 
 * New `plotPopulationCuts()` plots PV distributions with a supplied numeric cut vector, without an IDM object. It supports wide/long PVs, weights, population groups, and the existing density and annotation options. Unrounded interval percentages are available through `attr(plot, "population_percentages")`, including when percentage labels are hidden.
+* Supplied cuts must be finite and strictly increasing. Interval shares are calculated from weighted observations separately for each PV, then averaged across PVs; values exactly on a cut enter the upper interval. Density smoothing and display rounding do not change these shares.
+* `plotPopulationCutsIDM()` now shares its internal drawing code with `plotPopulationCuts()`. Its public arguments, IDM cut selection, calculations, and plot appearance are unchanged. The new function has help examples and regression tests covering weighted percentages, cut boundaries, wide/long input, population groups, missing PVs, and rendering.
+
+# eatPrep 1.0.12
+
 * `population_fill` now also colors grouped populations in both plot functions: one explicit color applies to all groups, or a vector supplies one color per group in legend order. An incorrect number of colors warns and restores the default palette. Omitting the argument preserves existing defaults; named `population_colors` takes precedence. Fills, density outlines, legend keys, and grouped percentage labels use the same colors.
 * Population SDs in both plot functions now apply the variance correction `n/(n-1)` separately within each PV and population, counting available respondents with positive weights. Corrected PV variances are averaged before taking the square root.
 * Both `plotPopulationCutsIDM()` and `plotCutsIDM()` now display M and SD for each population in the legend (or the subtitle for ungrouped input). Weighted means and descriptive population variances are estimated separately per PV, then averaged across PVs; SD is the square root of the average variance. Use `show_population_stats = FALSE` to hide them and `population_stats_digits` to set decimal places. In the rater view, PV data are required.
