@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.13</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,13 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.13" id="eatprep-1013">eatPrep 1.0.13<a class="anchor" aria-label="anchor" href="#eatprep-1013"></a></h2>
+<ul><li>New <code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code> plots PV distributions with a supplied numeric cut vector, without an IDM object. It supports wide/long PVs, weights, population groups, and the existing density and annotation options. Unrounded interval percentages are available through <code>attr(plot, "population_percentages")</code>, including when percentage labels are hidden.</li>
+<li>Supplied cuts must be finite and strictly increasing. Interval shares are calculated from weighted observations separately for each PV, then averaged across PVs; values exactly on a cut enter the upper interval. Density smoothing and display rounding do not change these shares.</li>
+<li>
+<code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code> now shares its internal drawing code with <code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code>. Its public arguments, IDM cut selection, calculations, and plot appearance are unchanged. The new function has help examples and regression tests covering weighted percentages, cut boundaries, wide/long input, population groups, missing PVs, and rendering.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.12" id="eatprep-1012">eatPrep 1.0.12<a class="anchor" aria-label="anchor" href="#eatprep-1012"></a></h2>
 <ul><li>

@@ -6,6 +6,8 @@ column overlays multiple population densities with transparent fills.
 The y-axis represents population density. For a distribution-shape
 silhouette behind rater curves, use
 [`plotCutsIDM`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md).
+For a supplied numeric cut vector without an IDM object, use
+[`plotPopulationCuts`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md).
 
 ## Usage
 

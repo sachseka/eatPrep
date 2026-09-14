@@ -231,7 +231,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-09 18:56:16.17052
+#> Starting automateDataPreparation 2026-09-14 08:19:51.590182
 #> 
 #> Check data...
 #> 
@@ -294,7 +294,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> 
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 #> 
 #> Start aggregating
 #> Since inputList$aggrMiss exists, this will be used instead of default.
@@ -308,5 +308,5 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-09 18:56:16.433604
+#> automateDataPreparation terminated successfully! 2026-09-14 08:19:51.835612
 ```

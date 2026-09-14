@@ -840,7 +840,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 ```
 
 Type
@@ -883,7 +883,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-09 18:56:56.164055
+#> Starting automateDataPreparation 2026-09-14 08:20:30.235527
 #> 
 #> Check data...
 #> 
@@ -959,7 +959,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-09 18:56:56.423096
+#> automateDataPreparation terminated successfully! 2026-09-14 08:20:30.483416
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -1404,12 +1404,13 @@ plotCutsIDM(
 
 ### Population Distributions and IDM Cuts
 
-There are two ways to display a population distribution from plausible
-values (PVs):
+Population distributions from plausible values (PVs) can be displayed
+with estimated or supplied cuts:
 
 | Purpose | Function | Meaning of the vertical axis |
 |:---|:---|:---|
 | Inspect where the cuts divide the population distribution | [`plotPopulationCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCutsIDM.md) | Population density |
+| Use a numeric cut vector without an IDM result | [`plotPopulationCuts()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md) | Population density |
 | Inspect the population alongside the rater curves | `plotCutsIDM(..., pv_data = ...)` | Rating stages; the background silhouette shows **distribution shape only** |
 
 **The background silhouette’s height does not represent rating stages or
@@ -1460,6 +1461,50 @@ input; when supplied, its values must be unique. `weight_col = NULL`,
 the default, gives every respondent equal weight. Supplied sampling
 weights must be finite, non-missing and non-negative; zero-weight
 respondents are excluded.
+
+#### Density with supplied numeric cuts
+
+Use
+[`plotPopulationCuts()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md)
+when cut scores are already available as a numeric vector. No IDM object
+is required. Cuts must be finite and strictly increasing, and PVs must
+be on the same scale. For example, these synthetic PVs use a score scale
+centered on 400:
+
+``` r
+
+score_population <- population
+score_population[pv_names] <- lapply(population[pv_names], function(x) 400 + 100 * x)
+supplied_cut_plot <- plotPopulationCuts(
+  cuts = c(230, 360, 460),
+  pv_data = score_population,
+  pv_cols = pv_names,
+  weight_col = "weight",
+  est_col = "points"
+)
+supplied_cut_plot
+```
+
+![](main_functions_files/figure-html/population%20supplied%20cuts-1.png)
+
+``` r
+
+attr(supplied_cut_plot, "population_percentages")
+#>   population interval lower upper percentage
+#> 1 Population        1  -Inf   230   2.602241
+#> 2 Population        2   230   360  31.460002
+#> 3 Population        3   360   460  41.280927
+#> 4 Population        4   460   Inf  24.656831
+```
+
+The returned attribute contains unrounded percentages and interval
+bounds for each population. Values exactly on a cut enter the upper
+interval. Percentages are computed separately per PV and then averaged;
+density smoothing does not affect them. `show_percentages = FALSE` hides
+the labels but retains this table. The function also accepts the
+long-input selectors, `population_col`, colors, and display options
+illustrated below. `cut_labels` optionally names the cut lines in their
+legend order.
 
 #### Standalone density with mean or individual cuts
 

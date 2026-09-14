@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.13</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1067,7 +1067,7 @@ create the data frame <code>dat</code> for <code><a href="../reference/mnrCoding
 <span><span class="co">#&gt; 6 booklet3               3   31</span></span>
 <span><span class="co">#&gt; start recoding (item-wise)</span></span>
 <span><span class="co">#&gt; done</span></span>
-<span><span class="co">#&gt; elapsed time: 0.1 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; elapsed time: 0.0 secs</span></span></code></pre></div>
 <p>Type <code><a href="../reference/mnrCoding.html">?mnrCoding</a></code> into your console to learn more.</p>
 </div>
 </div>
@@ -1137,7 +1137,7 @@ the final data preparation step.</p>
 <span>    recodeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeMnr <span class="op">=</span> <span class="cn">TRUE</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
 <span>    aggregateData <span class="op">=</span> <span class="cn">TRUE</span>, scoreData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    writeSpss <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting automateDataPreparation 2026-09-09 18:56:56.164055</span></span>
+<span><span class="co">#&gt; Starting automateDataPreparation 2026-09-14 08:20:30.235527</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Check data...</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1213,7 +1213,7 @@ the final data preparation step.</p>
 <span><span class="co">#&gt; No SPSS-File has been written.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Missings are UNcollapsed.</span></span>
-<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-09-09 18:56:56.423096</span></span></code></pre></div>
+<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-09-14 08:20:30.483416</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-diagnostics-and-rater-tools">Additional Diagnostics and Rater Tools<a class="anchor" aria-label="anchor" href="#additional-diagnostics-and-rater-tools"></a>
@@ -1618,8 +1618,8 @@ the aggregate panel.</p>
 <div class="section level3">
 <h3 id="population-distributions-and-idm-cuts">Population Distributions and IDM Cuts<a class="anchor" aria-label="anchor" href="#population-distributions-and-idm-cuts"></a>
 </h3>
-<p>There are two ways to display a population distribution from
-plausible values (PVs):</p>
+<p>Population distributions from plausible values (PVs) can be displayed
+with estimated or supplied cuts:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -1639,6 +1639,11 @@ distribution</td>
 <td align="left">Population density</td>
 </tr>
 <tr class="even">
+<td align="left">Use a numeric cut vector without an IDM result</td>
+<td align="left"><code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code></td>
+<td align="left">Population density</td>
+</tr>
+<tr class="odd">
 <td align="left">Inspect the population alongside the rater curves</td>
 <td align="left"><code>plotCutsIDM(..., pv_data = ...)</code></td>
 <td align="left">Rating stages; the background silhouette shows
@@ -1696,13 +1701,49 @@ must be finite, non-missing and non-negative; zero-weight respondents
 are excluded.</p>
 </div>
 <div class="section level4">
+<h4 id="density-with-supplied-numeric-cuts">Density with supplied numeric cuts<a class="anchor" aria-label="anchor" href="#density-with-supplied-numeric-cuts"></a>
+</h4>
+<p>Use <code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code> when cut scores are already
+available as a numeric vector. No IDM object is required. Cuts must be
+finite and strictly increasing, and PVs must be on the same scale. For
+example, these synthetic PVs use a score scale centered on 400:</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">score_population</span> <span class="op">&lt;-</span> <span class="va">population</span></span>
+<span><span class="va">score_population</span><span class="op">[</span><span class="va">pv_names</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">population</span><span class="op">[</span><span class="va">pv_names</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">400</span> <span class="op">+</span> <span class="fl">100</span> <span class="op">*</span> <span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">supplied_cut_plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotPopulationCuts.html">plotPopulationCuts</a></span><span class="op">(</span></span>
+<span>  cuts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">230</span>, <span class="fl">360</span>, <span class="fl">460</span><span class="op">)</span>,</span>
+<span>  pv_data <span class="op">=</span> <span class="va">score_population</span>,</span>
+<span>  pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
+<span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>  est_col <span class="op">=</span> <span class="st">"points"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">supplied_cut_plot</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/population%20supplied%20cuts-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">supplied_cut_plot</span>, <span class="st">"population_percentages"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   population interval lower upper percentage</span></span>
+<span><span class="co">#&gt; 1 Population        1  -Inf   230   2.602241</span></span>
+<span><span class="co">#&gt; 2 Population        2   230   360  31.460002</span></span>
+<span><span class="co">#&gt; 3 Population        3   360   460  41.280927</span></span>
+<span><span class="co">#&gt; 4 Population        4   460   Inf  24.656831</span></span></code></pre></div>
+<p>The returned attribute contains unrounded percentages and interval
+bounds for each population. Values exactly on a cut enter the upper
+interval. Percentages are computed separately per PV and then averaged;
+density smoothing does not affect them.
+<code>show_percentages = FALSE</code> hides the labels but retains this
+table. The function also accepts the long-input selectors,
+<code>population_col</code>, colors, and display options illustrated
+below. <code>cut_labels</code> optionally names the cut lines in their
+legend order.</p>
+</div>
+<div class="section level4">
 <h4 id="standalone-density-with-mean-or-individual-cuts">Standalone density with mean or individual cuts<a class="anchor" aria-label="anchor" href="#standalone-density-with-mean-or-individual-cuts"></a>
 </h4>
 <p>The default standalone plot draws the mean cuts from
 <code>cuts$cuts_summary</code> over a lightly filled population density.
 The vertical axis is density, and the cut lines use the supplied
 difficulty-scale values without re-estimation.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">population</span>,</span>
@@ -1719,7 +1760,7 @@ axes</strong>; the distribution is not conditional on a rater. Use
 appearance, and <code>cut_value_size</code>,
 <code>cut_value_digits</code>, or <code>show_cut_values = FALSE</code>
 for cut labels.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">population</span>,</span>
@@ -1743,7 +1784,7 @@ respondent-PV rows cause an error. <code>input_format = "auto"</code>
 selects long format when <code>pv_id_col</code> or
 <code>pv_value_col</code> is supplied; explicit <code>"wide"</code> and
 <code>"long"</code> are also supported.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">population_long</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>  <span class="va">population</span>,</span>
 <span>  cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">pv_names</span><span class="op">)</span>,</span>
@@ -1807,7 +1848,7 @@ warning, and weights are renormalized within each PV. Consequently,
 different PVs can use different respondent subsets. Each PV must retain
 at least two observed respondents with positive weights. Infinite PV
 values and invalid or missing weights always cause an error.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">population_incomplete</span> <span class="op">&lt;-</span> <span class="va">population</span></span>
 <span><span class="va">population_incomplete</span><span class="op">$</span><span class="va">PV1</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA_real_</span></span>
 <span></span>
@@ -1837,7 +1878,7 @@ and does not represent rating stages or density-axis values.</strong>
 the rating range above the lower rating limit; this is a display choice,
 not a statistical value. Changing <code>population_height</code> changes
 neither the estimated density nor the cuts.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -1863,7 +1904,7 @@ occupy a smaller part of the horizontal space. The explanatory plot
 caption can be enabled with <code>show_caption = TRUE</code>.</p>
 <p>Residual panels stay clear of the silhouette. The following example
 also demonstrates long-format input for the combined view.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -1900,7 +1941,7 @@ population</strong> for wide input, and respondent-PV combinations must
 be unique within each population for long input. A respondent’s weight
 must be constant across PV rows within that population, but may differ
 between populations.</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">population_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">population</span>, cohort <span class="op">=</span> <span class="st">"Population A"</span><span class="op">)</span></span>
 <span><span class="va">population_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">population</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">220</span><span class="op">)</span>, <span class="op">]</span>, cohort <span class="op">=</span> <span class="st">"Population B"</span><span class="op">)</span></span>
 <span><span class="va">population_b</span><span class="op">[</span><span class="va">pv_names</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1.35</span> <span class="op">*</span> <span class="va">population_b</span><span class="op">[</span><span class="va">pv_names</span><span class="op">]</span> <span class="op">+</span> <span class="fl">0.7</span></span>
@@ -1926,7 +1967,7 @@ with equal weight. This also supports different numbers of PVs between
 populations in long input. An explicit <code>density_bw</code> and
 <code>density_adjust</code> apply to every population. Thus each
 distribution can be compared under the same smoothing choice.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
@@ -1961,7 +2002,7 @@ fallback. Without grouping, the fallback is grey. Omitting
 <code>population_fill</code> preserves the automatic colors; an
 explicitly supplied <code>population_colors</code> takes precedence over
 <code>population_fill</code>.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>, pv_data <span class="op">=</span> <span class="va">populations</span>, pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
 <span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>, population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
@@ -1972,7 +2013,7 @@ explicitly supplied <code>population_colors</code> takes precedence over
 background. Their names and statistics still appear separately in the
 legend. <strong>Silhouette height shows distribution shape only and does
 not represent rating stages.</strong></p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>, pv_data <span class="op">=</span> <span class="va">populations</span>, pv_cols <span class="op">=</span> <span class="va">pv_names</span>,</span>
 <span>  weight_col <span class="op">=</span> <span class="st">"weight"</span>, population_col <span class="op">=</span> <span class="st">"cohort"</span>,</span>
@@ -1998,7 +2039,7 @@ shared display height does not represent rating stages or readable
 density-axis values.</strong> Use <code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code>
 when a density axis is needed. Use <code>show_caption = TRUE</code> to
 include the silhouette explanation in the rater plot.</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
@@ -2021,7 +2062,7 @@ shows distribution shape only, not rating stages or density-axis values.
 <p>All populations repeat in every rating and aggregate panel, while
 residual panels stay clear. The same grouped input can be supplied in
 long format to either function:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">populations_long</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>  <span class="va">populations</span>, cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">pv_names</span><span class="op">)</span>,</span>
 <span>  names_to <span class="op">=</span> <span class="st">"pv"</span>, values_to <span class="op">=</span> <span class="st">"score"</span></span>
@@ -2088,7 +2129,7 @@ observations and renormalized weights; zero-weight observations are
 excluded. Changing cuts, zoom, or density smoothing does not change M or
 SD. These estimates are calculated directly from the PV observations
 before smoothing.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
@@ -2103,7 +2144,7 @@ before smoothing.</p>
 <p><img src="main_functions_files/figure-html/idm%20population%20means%20and%20SDs-1.png" class="r-plt" alt="" width="864"></p>
 <p>The same statistics are available with long-format population data in
 the rater view, including plots with residual panels:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">populations_long</span>,</span>
@@ -2175,7 +2216,7 @@ narrow plot, increase the figure width or reduce
 <code>percentage_size</code>. If all labels together are wider than the
 entire panel, text and padding are reduced together to keep them inside
 it.</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
@@ -2199,7 +2240,7 @@ shares can be compared directly.</p>
 estimates, producing cuts that are close together. The short connection
 lines identify intervals whose percentage labels need extra room. The
 same positioning is used in <code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code>.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">uneven_items</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">1.9</span>, <span class="op">-</span><span class="fl">1.8</span>, <span class="op">-</span><span class="fl">1.7</span>, <span class="op">-</span><span class="fl">1.6</span>, <span class="op">-</span><span class="fl">1.5</span>, <span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  Rater1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span></span>
@@ -2224,7 +2265,7 @@ Respondents’ PVs are never averaged before assigning values to
 intervals.</p>
 <p>For a hand-checkable illustration, suppose a panel has cuts at 0 and
 10:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">toy_pvs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  PV1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">10</span>, <span class="fl">11</span><span class="op">)</span>,</span>
 <span>  PV2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">9</span>, <span class="fl">10</span><span class="op">)</span>,</span>
@@ -2259,7 +2300,7 @@ not the underlying PV classifications.</p>
 <p>The same percentage table is available in the combined rater view,
 including with long-format population data. It appears in rating and
 mean panels, never in residual panels:</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">populations_long</span>,</span>
@@ -2292,7 +2333,7 @@ are not adjusted to force rounded labels to total exactly 100%. Small
 rounding differences are therefore possible. To hide the tables while
 retaining distributions and numeric cut labels, set
 <code>show_percentages = FALSE</code> in either function:</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span></span>
 <span>  <span class="va">cuts</span>,</span>
 <span>  pv_data <span class="op">=</span> <span class="va">populations</span>,</span>
@@ -2321,7 +2362,7 @@ affected by a technical issue, you can display the relevant responses
 and decide whether to recode them to a value such as <code>mci</code>.
 Because the function opens an interactive review flow, it is not
 evaluated in this vignette.</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsetInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person100"</span>, <span class="st">"person101"</span>, <span class="st">"person102"</span><span class="op">)</span>,</span>
 <span>  datCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I01"</span>, <span class="st">"I02"</span>, <span class="st">"I03"</span><span class="op">)</span></span>
@@ -2355,7 +2396,7 @@ character missings should be converted to <code>0</code> or
 <code>NA</code>. It has default settings, but you can adapt them if
 needed. Type <code><a href="../reference/collapseMissings.html">?collapseMissings</a></code> into your console to learn
 more.</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datColMis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMissings.html">collapseMissings</a></span><span class="op">(</span><span class="va">datRec</span><span class="op">)</span></span></code></pre></div>
 <p>After doing that you should have a data frame that you can now use
 for further processing with the <code>eatModel</code> package.</p>
@@ -2371,7 +2412,7 @@ frames <code>dat</code>, <code>values</code>, <code>subunits</code> and
 where to save those new files.</p>
 <p>The function creates and saves those files, but the actual return
 values for this function is <code>NULL</code>.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/writeSpss.html">writeSpss</a></span><span class="op">(</span><span class="va">dat</span>, <span class="va">values</span>, <span class="va">subunits</span>, <span class="va">units</span>,</span>
 <span>    filedat <span class="op">=</span> <span class="st">"mydata.txt"</span>, filesps <span class="op">=</span> <span class="st">"readmydata.sps"</span>,</span>
 <span>    missing.rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mvi <span class="op">=</span> <span class="fl">0</span>, mnr <span class="op">=</span> <span class="fl">0</span>, mci <span class="op">=</span> <span class="cn">NA</span>, mbd <span class="op">=</span> <span class="cn">NA</span>, mir <span class="op">=</span> <span class="fl">0</span>, mbi <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
@@ -2390,7 +2431,7 @@ example exports scored data (<code>trafoType</code> = “scored”), which
 usually has 0/1 values and mistypes like mbi/mbo etc. The second example
 exports the raw data (<code>trafoType</code> = “raw”), including the
 original values and subunits.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputDat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputList</span><span class="op">)</span></span>
 <span></span>
@@ -2404,7 +2445,7 @@ original values and subunits.</p>
 <span>                                      readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      recodeData<span class="op">=</span><span class="cn">FALSE</span>, aggregateData<span class="op">=</span><span class="cn">FALSE</span>, scoreData<span class="op">=</span><span class="cn">FALSE</span>,</span>
 <span>                                      writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GADSobj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prep2gads.html">prep2GADS</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDatScored</span>, inputList <span class="op">=</span> <span class="va">inputList</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, trafoType <span class="op">=</span> <span class="st">"scored"</span>,</span>
 <span>                      verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
