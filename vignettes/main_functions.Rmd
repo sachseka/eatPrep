@@ -1008,17 +1008,63 @@ If a panel contains any missing or infinite cut, its percentage table is replace
 
 ### Visual Subset Recoding
 
-`visualSubsetRecode()` supports interactive inspection and recoding of flagged subsets. For example, if a group of students was affected by a technical issue, you can display the relevant responses and decide whether to recode them to a value such as `mci`. Because the function opens an interactive review flow, it is not evaluated in this vignette.
+Use `prepareSubsetInfo()` to describe incidents at person or class level. Each
+report has a unique `issueId`, a `level` (`person` or `class`), the corresponding
+`targetId`, and a task selection: `scope` is `item`, `block`, or `blockPosition`,
+with its name or position in `target`. Missing comments are allowed.
+
+This small example includes different booklets within one class and overlapping
+class and individual reports:
+
+```{r prepareSubsetInfo example}
+reviewData <- data.frame(ID = c("P1", "P2"), I1 = c(1, 0), I2 = c(0, 1))
+persons <- data.frame(ID = c("P1", "P2"), classId = "K1")
+booklets <- data.frame(booklet = c("X", "Y"),
+                       block1 = c("A", "B"), block2 = c("B", "A"))
+blocks <- data.frame(subunit = c("I1", "I2"), block = c("A", "B"),
+                     subunitBlockPosition = 1)
+rotation <- data.frame(ID = c("P1", "P2"), booklet = c("X", "Y"))
+issues <- data.frame(
+  issueId = c("V1", "V2"), level = c("class", "person"),
+  targetId = c("K1", "P1"), scope = c("blockPosition", "item"),
+  target = c("1", "I1"), comment = c("Audio failure", NA)
+)
+subsetInfo <- prepareSubsetInfo(
+  reviewData, issues, persons = persons,
+  booklets = booklets, blocks = blocks, rotation = rotation
+)
+summary(subsetInfo)
+subsetInfo
+```
+
+The class report selects `P1/I1` and `P2/I2`: block position 1 is resolved using
+each person's booklet. The individual report separately selects `P1/I1`. The
+summary counts persons, items, cells (including missing responses), and cells
+shared with other incidents. For a named block, use `scope = "block"`. For
+item-only reports the three design tables can be omitted. Existing projects can
+pass `inputList$booklets`, `inputList$blocks`, `inputList$rotation`, and, for renamed
+items, `inputList$subunits`. Class membership is supplied separately in `persons`.
+Class IDs must be unique across schools.
+
+Unknown persons, unresolved items and targets absent from a person's booklet
+produce an error before review. Inspect and correct these reports instead of
+silently losing class members. Each report currently selects one target.
 
 ```{r visualSubsetRecode example, eval=FALSE}
-subsetInfo <- data.frame(
-  ID = c("person100", "person101", "person102"),
-  datCols = c("I01", "I02", "I03")
-)
-
-datVisRec <- visualSubsetRecode(dat = preparedData, subsetInfo = subsetInfo,
-    ID = "ID", toRecodeVal = "mci")
+# Prepared selections automatically enable incident grouping and available metadata.
+datVisRec <- visualSubsetRecode(reviewData, subsetInfo, toRecodeVal = "mci")
+datVisRec$dat
+datVisRec$subsetInfo
 ```
+
+Only marked person-item pairs are changed. Reviewing or resetting one incident
+does not alter another incident's selection. Reset retains a recoding if another
+incident still requires it; neither class nor individual reports take precedence.
+All recodings preserve `NA` responses. A normal exit returns completed changes;
+saving/resuming sessions and explicit person exceptions are future work.
+
+Manually prepared tables with `ID` and `datCols` remain accepted. For these,
+set `useGroups`, `positions`, and `comments` explicitly when needed.
 
 
 ## Export
