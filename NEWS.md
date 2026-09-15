@@ -1,3 +1,9 @@
+# eatPrep (development)
+
+* New `prepareSubsetInfo()` expands person and class incident reports into exact person-item selections. It resolves named blocks or block positions per booklet, supports recoded item names, preserves incident provenance, and provides counts and overlaps through `summary()`.
+* `visualSubsetRecode()` accepts prepared selections directly and reviews each incident separately. Group recoding and reset now affect only explicitly selected cells; reset retains recodings required by other incidents. Single-item layouts and optional missing comments are supported, and invalid required inputs fail before review instead of being omitted.
+* Review menus now handle cancellation and declined exits consistently. Results have names (`dat`, `subsetInfo`) while retaining positional access. New scripted review tests cover group boundaries, overlaps, reset, block selection, and missing responses.
+
 # eatPrep 1.0.13
 
 * New `plotPopulationCuts()` plots PV distributions with a supplied numeric cut vector, without an IDM object. It supports wide/long PVs, weights, population groups, and the existing density and annotation options. Unrounded interval percentages are available through `attr(plot, "population_percentages")`, including when percentage labels are hidden.
