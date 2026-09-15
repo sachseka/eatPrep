@@ -1,4 +1,4 @@
-# eatPrep (development)
+# eatPrep 1.0.15
 
 * New `prepareSubsetInfo()` expands person and class incident reports into exact person-item selections. It resolves named blocks or block positions per booklet, supports recoded item names, preserves incident provenance, and provides counts and overlaps through `summary()`.
 * `visualSubsetRecode()` accepts prepared selections directly and reviews each incident separately. Group recoding and reset now affect only explicitly selected cells; reset retains recodings required by other incidents. Single-item layouts and optional missing comments are supported, and invalid required inputs fail before review instead of being omitted.
