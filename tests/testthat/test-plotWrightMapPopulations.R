@@ -80,6 +80,7 @@ test_that("population colours and legends remain separate from common cuts and i
     expect_equal(unique(built$data[[1]]$alpha), 0.1)
     expect_true(all(built$data[[6]]$colour == "brown"))
     expect_equal(built$data[[6]]$y, c(1, 3))
+    expect_true(all(built$data[[6]]$x == -1.05 & built$data[[6]]$xend == 0))
     expect_equal(nrow(attr(p, "wright_data")$items), 2L)
     expect_no_error(grid::grid.draw(ggplot2::ggplotGrob(p)))
   }

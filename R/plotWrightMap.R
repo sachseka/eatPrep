@@ -223,10 +223,20 @@ makeContent.wright_item_labels <- function(x) {
         gp = grid::gpar(col = x$line_colour, lwd = 0.65), name = paste0("bracket-", i))
     }
     for (j in seq_along(block)) {
-      children[[length(children) + 1L]] <- grid::textGrob(block[j],
+      text <- grid::textGrob(block[j],
         x = grid::unit(left + if (j == 1L) 0 else fitted$indent, "mm"),
         y = grid::unit(ys[j], "mm"), just = c("left", "centre"), gp = fitted$gp,
         name = paste0("item-", i, "-", j))
+      if (!is.null(x$label_fill)) {
+        # Mask the line only beneath the text so labels remain readable over densities.
+        children[[length(children) + 1L]] <- grid::rectGrob(
+          x = text$x - grid::unit(0.25 * shrink, "mm"), y = text$y,
+          width = grid::grobWidth(text) + grid::unit(0.5 * shrink, "mm"),
+          height = grid::grobHeight(text) + grid::unit(0.5 * shrink, "mm"),
+          just = c("left", "centre"),
+          gp = grid::gpar(fill = x$label_fill, col = NA), name = paste0("background-", i, "-", j))
+      }
+      children[[length(children) + 1L]] <- text
     }
   }
   x$block_centres <- centres
@@ -240,7 +250,7 @@ makeContent.wright_item_labels <- function(x) {
     required_aes = c("x", "y", "label"),
     draw_panel = function(data, panel_params, coord, label_size = 3, family = "",
                            colour = "#293B44", line_colour = "#A7B5BD",
-                           right_edge = NULL, anchor_x = 0) {
+                           right_edge = NULL, anchor_x = 0, label_fill = NULL) {
       coords <- coord$transform(data, panel_params)
       coords <- coords[is.finite(coords$y) & coords$y >= 0 & coords$y <= 1, , drop = FALSE]
       if (!nrow(coords)) return(grid::nullGrob())
@@ -250,7 +260,8 @@ makeContent.wright_item_labels <- function(x) {
       grid::gTree(labels = coords$label, left = max(coords$x), y = coords$y,
         right = right,
         anchor = rep(anchor, nrow(coords)), fontsize = label_size * 72.27 / 25.4,
-        family = family, colour = colour, line_colour = line_colour, cl = "wright_item_labels")
+        family = family, colour = colour, line_colour = line_colour,
+        label_fill = label_fill, cl = "wright_item_labels")
     }
   )
 }
@@ -374,38 +385,35 @@ plotWrightMap <- function(items, pv_data, item_col = "item", difficulty_col = "d
   if (is.null(score_limits)) score_limits <- limits + c(-1, 1) * max(diff(limits), 1) * 0.04
   if (any(!is.finite(score_limits))) stop("The score limits must be finite.", call. = FALSE)
   right <- (1 - person_prop) / person_prop
-  item_right <- if (is.null(cut_data)) right else right * 0.72
   item_labels$x <- 0.03 / person_prop
   pp <- pp +
     ggplot2::geom_vline(xintercept = 0, colour = line_colour, linewidth = 0.4) +
     ggplot2::layer(data = item_labels, mapping = ggplot2::aes(x = x, y = stage, label = label),
       stat = "identity", geom = .wright_label_geom(), position = "identity",
       inherit.aes = FALSE, params = list(label_size = item_size, family = font_family,
-        colour = item_colour, line_colour = line_colour,
-        right_edge = if (is.null(cut_data)) NULL else item_right)) +
+        colour = item_colour, line_colour = line_colour)) +
     ggplot2::geom_point(data = item_labels, ggplot2::aes(x = 0, y = stage),
                          colour = person_colour, size = 1.4)
   if (!is.null(cut_data)) {
     positions <- unique(cut_data$cut)
-    cut_drawing <- data.frame(cut = positions, x = right * 0.83,
+    cut_drawing <- data.frame(cut = positions, x = -0.98,
       label = vapply(positions, function(value) {
         text <- paste(cut_data$label[cut_data$cut == value], collapse = " | ")
         if (show_cut_values) paste0(text, ": ", formatC(value, format = "f", digits = cut_value_digits)) else text
       }, character(1)))
     pp <- pp + ggplot2::geom_segment(data = cut_drawing,
-      ggplot2::aes(y = cut, yend = cut), x = right * 0.75, xend = right * 0.80,
+      ggplot2::aes(y = cut, yend = cut), x = -1.05, xend = 0,
       colour = cut_colour, linewidth = 0.8) +
       ggplot2::layer(data = cut_drawing, mapping = ggplot2::aes(x = x, y = cut, label = label),
         stat = "identity", geom = .wright_label_geom(), position = "identity", inherit.aes = FALSE,
         params = list(label_size = cut_value_size, family = font_family, colour = cut_colour,
-                      line_colour = cut_colour, anchor_x = right * 0.80))
+                      line_colour = cut_colour, anchor_x = -1.05,
+                      right_edge = -0.04, label_fill = "white"))
   }
   pp <- pp +
-    ggplot2::scale_x_continuous(breaks = c(-0.5, item_right / 2,
-                                          if (!is.null(cut_data)) right * 0.87),
+    ggplot2::scale_x_continuous(breaks = c(-0.5, right / 2),
       labels = c(if (is.null(person_label)) "" else person_label,
-                 if (is.null(item_label)) "" else item_label,
-                 if (!is.null(cut_data)) "Cuts"), position = "top") +
+                 if (is.null(item_label)) "" else item_label), position = "top") +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.04)) +
     ggplot2::coord_cartesian(xlim = c(-1.05, right), ylim = score_limits, expand = FALSE) +
     ggplot2::labs(x = NULL, y = score_label, title = title) +

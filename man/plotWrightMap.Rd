@@ -127,7 +127,7 @@ plotWrightMap(
   \item{cut_value_digits}{Number of decimal places displayed for cut values,
   from zero to ten. Rounding never changes mark positions or stored values.}
   \item{cut_value_size}{Maximum cut-label size in millimetres. Labels fit their
-  column using the same wrapping and collision handling as item names.}
+  space on the person side using the same wrapping and collision handling as item names.}
   \item{cut_colour}{Colour of cut marks, labels, and their leaders.}
   \item{population_col}{Optional grouping column in \code{pv_data}. Population
   identifiers must be non-missing, non-empty character, factor, or finite numeric
@@ -149,9 +149,11 @@ shows its shape, normalized to a maximum panel width; it does not represent
 sample counts. There is no fixed aspect ratio, so either portrait or landscape
 output can be used.
 
-When cuts are supplied, a narrow column headed \code{Cuts} is reserved on the
-far right. Horizontal marks show their exact values and never extend into the
-person distribution or item text. Automatic score limits include all cuts;
+When cuts are supplied, horizontal lines at their exact scores cross the
+person densities or histograms and stop at the divider before the item names.
+All populations share these lines. Cut labels appear on the person side with
+white backgrounds for readability; no extra column is reserved.
+Automatic score limits include all cuts;
 explicit \code{score_limits} only zoom the display. Item stages and population
 estimates are independent of cuts. Cut labels can move to avoid overlap, with
 leaders pointing back to their fixed marks. All inputs must already use the
@@ -219,7 +221,7 @@ p <- plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
 p
 attr(p, "wright_data")$items
 
-# Optional mean cuts in a separate column on the right.
+# Optional mean cuts across the person distribution.
 plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
               cuts = c(cut12 = -0.8, cut23 = 0.3, cut34 = 1.2),
               cut_value_digits = 1)
