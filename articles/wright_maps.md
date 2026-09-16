@@ -145,6 +145,72 @@ plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
               item_colour = "grey20", line_colour = "grey65")
 ```
 
+Multiple populations can be overlaid on the person side using
+`population_col`, with the same grouping and colour conventions as
+[`plotPopulationCuts()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md).
+Distributions are computed separately within populations and PVs, with a
+common bandwidth and score grid (or common histogram bins). A shared
+horizontal scaling factor makes shapes comparable; widths do not
+represent population sample sizes. Respondent IDs may recur across
+populations. Items and mean cuts remain common.
+
+``` r
+
+group_a <- transform(persons, population = "Group A")
+group_b <- transform(persons, population = "Group B", PV1 = PV1 + 0.8,
+                     PV2 = PV2 + 0.8, PV3 = PV3 + 0.8)
+both <- rbind(group_a, group_b)
+plotWrightMap(items, both, pv_cols = paste0("PV", 1:3), weight_col = "weight",
+              respondent_id_col = "id", population_col = "population",
+              population_colors = c("Group A" = "#327D83", "Group B" = "#8C6BB1"),
+              cuts = c(cut12 = -0.8, cut23 = 0.3, cut34 = 1.2),
+              cut_value_digits = 1)
+```
+
+![](wright_maps_files/figure-html/populations-1.png)
+
+Grouped fills are transparent by default, with opaque outlines and a
+legend. Use `population_alpha` to change fill opacity.
+`population_colors` sets both fill and outline colours. The returned
+distribution table includes a `population` column. The same grouping
+also works with `person_geom = "histogram"` and with long-format PV
+input.
+
+Mean cuts can be added in a dedicated column on the far right. Their
+horizontal marks retain the exact scores and do not cross the item
+labels. Pass the same numeric cut vector used by
+[`plotPopulationCuts()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md),
+a one-row `cuts_summary` table, or a complete
+[`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+result. For an IDM result, only `cuts_summary` is used, corresponding to
+`cut_selection = "mean"` in
+[`plotPopulationCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCutsIDM.md).
+
+``` r
+
+plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
+              weight_col = "weight", item_step = 0.25,
+              cuts = c(cut12 = -0.8, cut23 = 0.3, cut34 = 1.2),
+              cut_value_digits = 1)
+```
+
+![](wright_maps_files/figure-html/mean-cuts-1.png)
+
+``` r
+
+plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3), cuts = idm_result)
+# Equivalently: cuts = idm_result$cuts_summary
+```
+
+Use `cut_labels` to override names, `show_cut_values = FALSE` to show
+names without numbers, and `cut_colour` / `cut_value_size` for styling.
+Equal cuts share a mark; nearby labels avoid overlap and remain
+connected to their marks. Display rounding does not affect the exact
+values, which remain accessible as `attr(plot, "wright_data")$cuts`.
+Adding cuts does not change the estimated population distribution or
+item stages. Cuts must already share the score metric; missing mean cuts
+must be resolved before plotting.
+
 The return value is a `ggplot` object. For example:
 
 ``` r

@@ -24,7 +24,11 @@ plotWrightMap(
   person_label = "Persons", item_label = "Items", title = NULL,
   category_col = "category", person_fill = "#DDECEB",
   person_colour = "#327D83", item_colour = "#293B44",
-  line_colour = "#A7B5BD"
+  line_colour = "#A7B5BD", cuts = NULL, cut_labels = NULL,
+  show_cut_values = TRUE, cut_value_digits = 0L,
+  cut_value_size = 2.6, cut_colour = "#B26A3C",
+  population_col = NULL, population_colors = NULL,
+  population_alpha = NULL
 )
 ```
 
@@ -41,9 +45,9 @@ plotWrightMap(
 
 - pv_data:
 
-  Data frame containing plausible values for one population and one
-  dimension. PVs and item difficulties must already be on the same
-  scale; this cannot be verified from numeric values alone.
+  Data frame containing plausible values for one dimension, optionally
+  with multiple populations. PVs and item difficulties must already be
+  on the same scale; this cannot be verified from numeric values alone.
 
 - item_col, difficulty_col:
 
@@ -94,7 +98,8 @@ plotWrightMap(
   `"error"` rejects missing PV values or respondent-PV rows. `"drop"`
   omits them with a warning and renormalizes weights within each PV.
   Each PV requires at least two observed respondents with positive
-  weights. Infinite scores and invalid weights always cause errors.
+  weights within every population. Infinite scores and invalid weights
+  always cause errors.
 
 - person_geom:
 
@@ -105,7 +110,8 @@ plotWrightMap(
 
   Optional positive common bandwidth in score units, used only for
   density plots. The default averages unweighted `bw.nrd0` bandwidths
-  across PVs; sampling weights enter the density estimates.
+  across PVs within populations, then equally across populations;
+  sampling weights enter the density estimates.
 
 - density_adjust:
 
@@ -193,12 +199,92 @@ plotWrightMap(
   Colour of the divider, item leaders, and grouping brackets. All four
   colour arguments accept a single valid R colour.
 
+- cuts:
+
+  Optional mean cuts on the same metric as the PVs and item
+  difficulties. Accepts a finite non-decreasing numeric vector, a
+  one-row `cuts_summary` data frame with numeric columns starting with
+  `cut`, or a result of
+  [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md).
+  For the latter, only `cuts_summary` is used; individual rater cuts are
+  never drawn. Missing cuts are rejected. Equal cuts share one mark and
+  a combined label. `NULL` (default) leaves the original two-sided
+  layout unchanged.
+
+- cut_labels:
+
+  Optional unique non-empty names for the supplied cuts, in their
+  original order. Defaults to vector names or summary column names, or
+  `cut1`, `cut2`, etc. for unnamed vectors. Tabs, newlines, and `|` are
+  not allowed. Requires `cuts`.
+
+- show_cut_values:
+
+  Append numeric values to the cut names. Defaults to `TRUE`. Hiding
+  values does not hide the cut marks or names.
+
+- cut_value_digits:
+
+  Number of decimal places displayed for cut values, from zero to ten.
+  Rounding never changes mark positions or stored values.
+
+- cut_value_size:
+
+  Maximum cut-label size in millimetres. Labels fit their column using
+  the same wrapping and collision handling as item names.
+
+- cut_colour:
+
+  Colour of cut marks, labels, and their leaders.
+
+- population_col:
+
+  Optional grouping column in `pv_data`. Population identifiers must be
+  non-missing, non-empty character, factor, or finite numeric values.
+  Groups appear in order of first occurrence. Respondent IDs must be
+  unique within each population in wide input; IDs may recur in
+  different populations. Weights and missing PVs are validated
+  separately within groups.
+
+- population_colors:
+
+  Optional named vector of R colours, with exactly one entry per
+  population. Requires `population_col`. The automatic palette matches
+  [`plotPopulationCuts`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md).
+  Group fills and outlines use these colours; `person_fill` and
+  `person_colour` style the ungrouped distribution, while
+  `person_colour` still sets item markers.
+
+- population_alpha:
+
+  Opacity between zero and one. `NULL` uses 0.25 for grouped fills and 1
+  for an ungrouped distribution. Group outlines remain opaque. In the
+  ungrouped case this applies to both fill and outline.
+
 ## Details
 
 The vertical scale increases upwards. The horizontal size of the
 distribution shows its shape, normalized to a maximum panel width; it
 does not represent sample counts. There is no fixed aspect ratio, so
 either portrait or landscape output can be used.
+
+When cuts are supplied, a narrow column headed `Cuts` is reserved on the
+far right. Horizontal marks show their exact values and never extend
+into the person distribution or item text. Automatic score limits
+include all cuts; explicit `score_limits` only zoom the display. Item
+stages and population estimates are independent of cuts. Cut labels can
+move to avoid overlap, with leaders pointing back to their fixed marks.
+All inputs must already use the same metric; no rescaling is performed.
+
+With `population_col`, distributions are overlaid on the person side
+with a legend. Each population is normalized separately within each PV,
+then averaged over its PVs. Densities share one score grid and
+bandwidth; histogram bins are common to all groups. One horizontal
+scaling factor (the largest density across all groups) preserves
+relative density heights. Widths compare distribution shape, not group
+sample size. Items and supplied mean cuts are common to all groups.
+Population calculations and colour validation are shared with the other
+population plot functions.
 
 Densities are estimated separately for each PV with normalized sampling
 weights on a common grid and bandwidth, then averaged with equal weight
@@ -240,7 +326,13 @@ Its `"wright_data"` attribute is a list containing:
   For density plots, `score` and mean `density`. For histograms,
   `lower`, `upper`, mean bin `proportion`, and `density` (proportion
   divided by bin width). These values precede horizontal scaling for
-  display.
+  display. With grouped input, a `population` factor identifies the
+  population for each row.
+
+- cuts:
+
+  When supplied, a data frame of unrounded `cut` values and their
+  `label`, including separate entries for equal values.
 
 - person_geom, item_step, item_origin, binwidth:
 
@@ -277,6 +369,15 @@ attr(p, "wright_data")$items
 #> 3 Item_03_cat1 Item_03        1       0.02  0.00
 #> 4 Item_03_cat2 Item_03        2       0.85  0.75
 #> 5      Item_04 Item_04     <NA>       0.95  1.00
+
+# Optional mean cuts in a separate column on the right.
+plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
+              cuts = c(cut12 = -0.8, cut23 = 0.3, cut34 = 1.2),
+              cut_value_digits = 1)
+
+
+# An IDM result can be passed directly; only cuts_summary is used:
+# plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3), cuts = idm_result)
 
 # Named vector and optional histogram.
 plotWrightMap(c(A = -1, B = 0, C = 1), persons,

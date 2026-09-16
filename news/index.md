@@ -2,6 +2,23 @@
 
 ## eatPrep 1.0.14
 
+- [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
+  supports multiple populations through `population_col`, named
+  `population_colors`, and `population_alpha`. Weighted PV distributions
+  are estimated separately per group and overlaid with transparent
+  fills, opaque outlines, and a legend. Densities share a grid and
+  bandwidth; histograms share bins. A common width scale preserves
+  relative density heights, while items and mean cuts remain shared.
+
+- [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
+  gains optional mean cuts in a separate column on the right. Supply a
+  numeric vector, a one-row `cuts_summary` table, or a
+  [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+  result (only its mean cuts are used). Short horizontal marks retain
+  exact scores, while labels avoid overlap. Cut names, value display,
+  rounding, text size, and colour are configurable. Unrounded values
+  remain available in `attr(plot, "wright_data")$cuts`.
+
 - New
   [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
   displays a vertical PV distribution to the left of a continuous
@@ -11,12 +28,14 @@
   separated by `|` and wrap with hanging indents and grouping brackets.
   Collision-free text blocks connect to exact stage markers through
   leaders; text is reduced only when needed to fit the panel.
+
 - Repeated item identifiers are disambiguated by `category_col` (default
   `"category"`). Only repeated identifiers receive `_cat<category>`
   suffixes. Duplicate identifier/category pairs, missing categories on
   repeated identifiers, and conflicting display names are rejected.
   Original identifiers and categories remain available with the plotted
   item data.
+
 - Wright maps accept named item difficulty vectors or item tables, and
   wide/long PVs with optional sampling weights. Distributions are
   estimated separately for each PV and averaged. Item stages, smoothing,

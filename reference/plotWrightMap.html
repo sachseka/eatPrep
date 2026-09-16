@@ -70,7 +70,11 @@ All supplied scores must already share one metric and dimension.</p>
 <span>  person_label <span class="op">=</span> <span class="st">"Persons"</span>, item_label <span class="op">=</span> <span class="st">"Items"</span>, title <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  category_col <span class="op">=</span> <span class="st">"category"</span>, person_fill <span class="op">=</span> <span class="st">"#DDECEB"</span>,</span>
 <span>  person_colour <span class="op">=</span> <span class="st">"#327D83"</span>, item_colour <span class="op">=</span> <span class="st">"#293B44"</span>,</span>
-<span>  line_colour <span class="op">=</span> <span class="st">"#A7B5BD"</span></span>
+<span>  line_colour <span class="op">=</span> <span class="st">"#A7B5BD"</span>, cuts <span class="op">=</span> <span class="cn">NULL</span>, cut_labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  show_cut_values <span class="op">=</span> <span class="cn">TRUE</span>, cut_value_digits <span class="op">=</span> <span class="fl">0L</span>,</span>
+<span>  cut_value_size <span class="op">=</span> <span class="fl">2.6</span>, cut_colour <span class="op">=</span> <span class="st">"#B26A3C"</span>,</span>
+<span>  population_col <span class="op">=</span> <span class="cn">NULL</span>, population_colors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  population_alpha <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,8 +90,8 @@ All supplied scores must already share one metric and dimension.</p>
   conversion is performed.</p></dd>
 
   <dt id="arg-pv-data">pv_data<a class="anchor" aria-label="anchor" href="#arg-pv-data"></a></dt>
-<dd><p>Data frame containing plausible values for one population and
-  one dimension. PVs and item difficulties must already be on the same scale;
+<dd><p>Data frame containing plausible values for one dimension,
+  optionally with multiple populations. PVs and item difficulties must already be on the same scale;
   this cannot be verified from numeric values alone.</p></dd>
 
   <dt id="arg-item-col-difficulty-col">item_col, difficulty_col<a class="anchor" aria-label="anchor" href="#arg-item-col-difficulty-col"></a></dt>
@@ -131,7 +135,7 @@ All supplied scores must already share one metric and dimension.</p>
 <dd><p><code>"error"</code> rejects missing PV values or respondent-PV
   rows. <code>"drop"</code> omits them with a warning and renormalizes weights
   within each PV. Each PV requires at least two observed respondents with
-  positive weights. Infinite scores and invalid weights always cause errors.</p></dd>
+  positive weights within every population. Infinite scores and invalid weights always cause errors.</p></dd>
 
   <dt id="arg-person-geom">person_geom<a class="anchor" aria-label="anchor" href="#arg-person-geom"></a></dt>
 <dd><p>Person distribution: <code>"density"</code> (default) or
@@ -140,7 +144,8 @@ All supplied scores must already share one metric and dimension.</p>
   <dt id="arg-density-bw">density_bw<a class="anchor" aria-label="anchor" href="#arg-density-bw"></a></dt>
 <dd><p>Optional positive common bandwidth in score units, used
   only for density plots. The default averages unweighted <code>bw.nrd0</code>
-  bandwidths across PVs; sampling weights enter the density estimates.</p></dd>
+  bandwidths across PVs within populations, then equally across populations;
+  sampling weights enter the density estimates.</p></dd>
 
   <dt id="arg-density-adjust">density_adjust<a class="anchor" aria-label="anchor" href="#arg-density-adjust"></a></dt>
 <dd><p>Positive multiplier for the density bandwidth.</p></dd>
@@ -210,6 +215,55 @@ All supplied scores must already share one metric and dimension.</p>
 <dd><p>Colour of the divider, item leaders, and grouping brackets.
   All four colour arguments accept a single valid R colour.</p></dd>
 
+  <dt id="arg-cuts">cuts<a class="anchor" aria-label="anchor" href="#arg-cuts"></a></dt>
+<dd><p>Optional mean cuts on the same metric as the PVs and item
+  difficulties. Accepts a finite non-decreasing numeric vector, a one-row
+  <code>cuts_summary</code> data frame with numeric columns starting with <code>cut</code>,
+  or a result of <code><a href="computeCutsIDM.html">computeCutsIDM</a></code>. For the latter, only
+  <code>cuts_summary</code> is used; individual rater cuts are never drawn. Missing
+  cuts are rejected. Equal cuts share one mark and a combined label.
+  <code>NULL</code> (default) leaves the original two-sided layout unchanged.</p></dd>
+
+  <dt id="arg-cut-labels">cut_labels<a class="anchor" aria-label="anchor" href="#arg-cut-labels"></a></dt>
+<dd><p>Optional unique non-empty names for the supplied cuts,
+  in their original order. Defaults to vector names or summary column names,
+  or <code>cut1</code>, <code>cut2</code>, etc. for unnamed vectors. Tabs, newlines, and
+  <code>|</code> are not allowed. Requires <code>cuts</code>.</p></dd>
+
+  <dt id="arg-show-cut-values">show_cut_values<a class="anchor" aria-label="anchor" href="#arg-show-cut-values"></a></dt>
+<dd><p>Append numeric values to the cut names. Defaults to
+  <code>TRUE</code>. Hiding values does not hide the cut marks or names.</p></dd>
+
+  <dt id="arg-cut-value-digits">cut_value_digits<a class="anchor" aria-label="anchor" href="#arg-cut-value-digits"></a></dt>
+<dd><p>Number of decimal places displayed for cut values,
+  from zero to ten. Rounding never changes mark positions or stored values.</p></dd>
+
+  <dt id="arg-cut-value-size">cut_value_size<a class="anchor" aria-label="anchor" href="#arg-cut-value-size"></a></dt>
+<dd><p>Maximum cut-label size in millimetres. Labels fit their
+  column using the same wrapping and collision handling as item names.</p></dd>
+
+  <dt id="arg-cut-colour">cut_colour<a class="anchor" aria-label="anchor" href="#arg-cut-colour"></a></dt>
+<dd><p>Colour of cut marks, labels, and their leaders.</p></dd>
+
+  <dt id="arg-population-col">population_col<a class="anchor" aria-label="anchor" href="#arg-population-col"></a></dt>
+<dd><p>Optional grouping column in <code>pv_data</code>. Population
+  identifiers must be non-missing, non-empty character, factor, or finite numeric
+  values. Groups appear in order of first occurrence. Respondent IDs must be
+  unique within each population in wide input; IDs may recur in different
+  populations. Weights and missing PVs are validated separately within groups.</p></dd>
+
+  <dt id="arg-population-colors">population_colors<a class="anchor" aria-label="anchor" href="#arg-population-colors"></a></dt>
+<dd><p>Optional named vector of R colours, with exactly
+  one entry per population. Requires <code>population_col</code>. The automatic
+  palette matches <code><a href="plotPopulationCuts.html">plotPopulationCuts</a></code>. Group fills and outlines
+  use these colours; <code>person_fill</code> and <code>person_colour</code> style the
+  ungrouped distribution, while <code>person_colour</code> still sets item markers.</p></dd>
+
+  <dt id="arg-population-alpha">population_alpha<a class="anchor" aria-label="anchor" href="#arg-population-alpha"></a></dt>
+<dd><p>Opacity between zero and one. <code>NULL</code> uses
+  0.25 for grouped fills and 1 for an ungrouped distribution. Group outlines
+  remain opaque. In the ungrouped case this applies to both fill and outline.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -217,6 +271,21 @@ All supplied scores must already share one metric and dimension.</p>
 shows its shape, normalized to a maximum panel width; it does not represent
 sample counts. There is no fixed aspect ratio, so either portrait or landscape
 output can be used.</p>
+<p>When cuts are supplied, a narrow column headed <code>Cuts</code> is reserved on the
+far right. Horizontal marks show their exact values and never extend into the
+person distribution or item text. Automatic score limits include all cuts;
+explicit <code>score_limits</code> only zoom the display. Item stages and population
+estimates are independent of cuts. Cut labels can move to avoid overlap, with
+leaders pointing back to their fixed marks. All inputs must already use the
+same metric; no rescaling is performed.</p>
+<p>With <code>population_col</code>, distributions are overlaid on the person side
+with a legend. Each population is normalized separately within each PV, then
+averaged over its PVs. Densities share one score grid and bandwidth; histogram
+bins are common to all groups. One horizontal scaling factor (the largest
+density across all groups) preserves relative density heights. Widths compare
+distribution shape, not group sample size. Items and supplied mean cuts are
+common to all groups. Population calculations and colour validation are shared
+with the other population plot functions.</p>
 <p>Densities are estimated separately for each PV with normalized sampling weights
 on a common grid and bandwidth, then averaged with equal weight for each PV.
 Histograms likewise average per-PV weighted relative frequencies on common bins.
@@ -247,7 +316,12 @@ their stage markers and the population distribution retain their score positions
 <dd><p>For density plots, <code>score</code> and mean <code>density</code>.
   For histograms, <code>lower</code>, <code>upper</code>, mean bin <code>proportion</code>, and
   <code>density</code> (proportion divided by bin width). These values precede
-  horizontal scaling for display.</p></dd>
+  horizontal scaling for display. With grouped input, a <code>population</code>
+  factor identifies the population for each row.</p></dd>
+
+  <dt>cuts</dt>
+<dd><p>When supplied, a data frame of unrounded <code>cut</code> values and
+  their <code>label</code>, including separate entries for equal values.</p></dd>
 
   <dt>person_geom, item_step, item_origin, binwidth</dt>
 <dd><p>Resolved plotting
@@ -286,18 +360,27 @@ their stage markers and the population distribution retain their score positions
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 Item_03_cat2 Item_03        2       0.85  0.75</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5      Item_04 Item_04     &lt;NA&gt;       0.95  1.00</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Optional mean cuts in a separate column on the right.</span></span></span>
+<span class="r-in"><span><span class="fu">plotWrightMap</span><span class="op">(</span><span class="va">items</span>, <span class="va">persons</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              cuts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>cut12 <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, cut23 <span class="op">=</span> <span class="fl">0.3</span>, cut34 <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              cut_value_digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plotWrightMap-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># An IDM result can be passed directly; only cuts_summary is used:</span></span></span>
+<span class="r-in"><span><span class="co"># plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3), cuts = idm_result)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Named vector and optional histogram.</span></span></span>
 <span class="r-in"><span><span class="fu">plotWrightMap</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>A <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, B <span class="op">=</span> <span class="fl">0</span>, C <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">persons</span>,</span></span>
 <span class="r-in"><span>              pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, person_geom <span class="op">=</span> <span class="st">"histogram"</span>,</span></span>
 <span class="r-in"><span>              binwidth <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plotWrightMap-2.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="plotWrightMap-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The equivalent long PV layout.</span></span></span>
 <span class="r-in"><span><span class="va">long</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="va">persons</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PV1"</span>, <span class="st">"PV2"</span>, <span class="st">"PV3"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                            names_to <span class="op">=</span> <span class="st">"pv"</span>, values_to <span class="op">=</span> <span class="st">"score"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">plotWrightMap</span><span class="op">(</span><span class="va">items</span>, <span class="va">long</span>, respondent_id_col <span class="op">=</span> <span class="st">"id"</span>,</span></span>
 <span class="r-in"><span>              pv_id_col <span class="op">=</span> <span class="st">"pv"</span>, pv_value_col <span class="op">=</span> <span class="st">"score"</span>, weight_col <span class="op">=</span> <span class="st">"weight"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plotWrightMap-3.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="plotWrightMap-4.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

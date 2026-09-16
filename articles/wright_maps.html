@@ -185,8 +185,59 @@ zooms the display without changing the estimates or stages.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotWrightMap.html">plotWrightMap</a></span><span class="op">(</span><span class="va">items</span>, <span class="va">persons</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,</span>
 <span>              person_fill <span class="op">=</span> <span class="st">"grey92"</span>, person_colour <span class="op">=</span> <span class="st">"grey30"</span>,</span>
 <span>              item_colour <span class="op">=</span> <span class="st">"grey20"</span>, line_colour <span class="op">=</span> <span class="st">"grey65"</span><span class="op">)</span></span></code></pre></div>
-<p>The return value is a <code>ggplot</code> object. For example:</p>
+<p>Multiple populations can be overlaid on the person side using
+<code>population_col</code>, with the same grouping and colour
+conventions as <code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code>. Distributions are
+computed separately within populations and PVs, with a common bandwidth
+and score grid (or common histogram bins). A shared horizontal scaling
+factor makes shapes comparable; widths do not represent population
+sample sizes. Respondent IDs may recur across populations. Items and
+mean cuts remain common.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">group_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">persons</span>, population <span class="op">=</span> <span class="st">"Group A"</span><span class="op">)</span></span>
+<span><span class="va">group_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">persons</span>, population <span class="op">=</span> <span class="st">"Group B"</span>, PV1 <span class="op">=</span> <span class="va">PV1</span> <span class="op">+</span> <span class="fl">0.8</span>,</span>
+<span>                     PV2 <span class="op">=</span> <span class="va">PV2</span> <span class="op">+</span> <span class="fl">0.8</span>, PV3 <span class="op">=</span> <span class="va">PV3</span> <span class="op">+</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">both</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">group_a</span>, <span class="va">group_b</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plotWrightMap.html">plotWrightMap</a></span><span class="op">(</span><span class="va">items</span>, <span class="va">both</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, weight_col <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>              respondent_id_col <span class="op">=</span> <span class="st">"id"</span>, population_col <span class="op">=</span> <span class="st">"population"</span>,</span>
+<span>              population_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Group A"</span> <span class="op">=</span> <span class="st">"#327D83"</span>, <span class="st">"Group B"</span> <span class="op">=</span> <span class="st">"#8C6BB1"</span><span class="op">)</span>,</span>
+<span>              cuts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>cut12 <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, cut23 <span class="op">=</span> <span class="fl">0.3</span>, cut34 <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,</span>
+<span>              cut_value_digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="wright_maps_files/figure-html/populations-1.png" class="r-plt" alt="" width="864"></p>
+<p>Grouped fills are transparent by default, with opaque outlines and a
+legend. Use <code>population_alpha</code> to change fill opacity.
+<code>population_colors</code> sets both fill and outline colours. The
+returned distribution table includes a <code>population</code> column.
+The same grouping also works with <code>person_geom = "histogram"</code>
+and with long-format PV input.</p>
+<p>Mean cuts can be added in a dedicated column on the far right. Their
+horizontal marks retain the exact scores and do not cross the item
+labels. Pass the same numeric cut vector used by
+<code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code>, a one-row <code>cuts_summary</code>
+table, or a complete <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> result. For an IDM
+result, only <code>cuts_summary</code> is used, corresponding to
+<code>cut_selection = "mean"</code> in
+<code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code>.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotWrightMap.html">plotWrightMap</a></span><span class="op">(</span><span class="va">items</span>, <span class="va">persons</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,</span>
+<span>              weight_col <span class="op">=</span> <span class="st">"weight"</span>, item_step <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>              cuts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>cut12 <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, cut23 <span class="op">=</span> <span class="fl">0.3</span>, cut34 <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,</span>
+<span>              cut_value_digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="wright_maps_files/figure-html/mean-cuts-1.png" class="r-plt" alt="" width="864"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotWrightMap.html">plotWrightMap</a></span><span class="op">(</span><span class="va">items</span>, <span class="va">persons</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, cuts <span class="op">=</span> <span class="va">idm_result</span><span class="op">)</span></span>
+<span><span class="co"># Equivalently: cuts = idm_result$cuts_summary</span></span></code></pre></div>
+<p>Use <code>cut_labels</code> to override names,
+<code>show_cut_values = FALSE</code> to show names without numbers, and
+<code>cut_colour</code> / <code>cut_value_size</code> for styling. Equal
+cuts share a mark; nearby labels avoid overlap and remain connected to
+their marks. Display rounding does not affect the exact values, which
+remain accessible as <code>attr(plot, "wright_data")$cuts</code>. Adding
+cuts does not change the estimated population distribution or item
+stages. Cuts must already share the score metric; missing mean cuts must
+be resolved before plotting.</p>
+<p>The return value is a <code>ggplot</code> object. For example:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Wright map"</span><span class="op">)</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"wright-map.pdf"</span>, <span class="va">p</span>, width <span class="op">=</span> <span class="fl">8</span>, height <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
   </main>

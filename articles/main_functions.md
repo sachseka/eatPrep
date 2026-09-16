@@ -883,7 +883,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-16 08:12:11.718469
+#> Starting automateDataPreparation 2026-09-16 09:31:16.759225
 #> 
 #> Check data...
 #> 
@@ -959,7 +959,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-16 08:12:11.983518
+#> automateDataPreparation terminated successfully! 2026-09-16 09:31:17.014296
 ```
 
 ## Additional Diagnostics and Rater Tools
