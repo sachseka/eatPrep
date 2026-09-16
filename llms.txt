@@ -88,6 +88,10 @@ remotes::install_github("sachseka/eatPrep")
 - [`plotPopulationCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCutsIDM.md)
   : Plot Population Distributions from Plausible Values with IDM Cuts
 
+- [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
+  : Plot a Classical Wright Map from Item Difficulties and Plausible
+  Values
+
 - [`prep2GADS()`](https://sachseka.github.io/eatPrep/reference/prep2gads.md)
   :
 
@@ -133,3 +137,5 @@ remotes::install_github("sachseka/eatPrep")
   Functions](https://sachseka.github.io/eatPrep/articles/main_functions.md):
 - [Workshop
   Slides](https://sachseka.github.io/eatPrep/articles/workshop-slides.md):
+- [Wright
+  Maps](https://sachseka.github.io/eatPrep/articles/wright_maps.md):

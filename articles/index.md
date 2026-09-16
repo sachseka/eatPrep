@@ -8,3 +8,5 @@
   Functions](https://sachseka.github.io/eatPrep/articles/main_functions.md):
 - [Workshop
   Slides](https://sachseka.github.io/eatPrep/articles/workshop-slides.md):
+- [Wright
+  Maps](https://sachseka.github.io/eatPrep/articles/wright_maps.md):

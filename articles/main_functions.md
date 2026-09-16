@@ -840,7 +840,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.0 secs
+#> elapsed time: 0.1 secs
 ```
 
 Type
@@ -883,7 +883,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-14 08:20:30.235527
+#> Starting automateDataPreparation 2026-09-16 08:12:11.718469
 #> 
 #> Check data...
 #> 
@@ -959,7 +959,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-14 08:20:30.483416
+#> automateDataPreparation terminated successfully! 2026-09-16 08:12:11.983518
 ```
 
 ## Additional Diagnostics and Rater Tools

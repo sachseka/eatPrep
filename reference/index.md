@@ -72,6 +72,10 @@
 - [`plotPopulationCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCutsIDM.md)
   : Plot Population Distributions from Plausible Values with IDM Cuts
 
+- [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
+  : Plot a Classical Wright Map from Item Difficulties and Plausible
+  Values
+
 - [`prep2GADS()`](https://sachseka.github.io/eatPrep/reference/prep2gads.md)
   :
 

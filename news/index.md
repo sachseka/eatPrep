@@ -1,5 +1,29 @@
 # Changelog
 
+## eatPrep 1.0.14
+
+- New
+  [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
+  displays a vertical PV distribution to the left of a continuous
+  divider and item names to the right, using a soft teal fill, subtle
+  guides, and configurable colours on white. Density is the default; a
+  weighted histogram is optional. Names on the same display stage are
+  separated by `|` and wrap with hanging indents and grouping brackets.
+  Collision-free text blocks connect to exact stage markers through
+  leaders; text is reduced only when needed to fit the panel.
+- Repeated item identifiers are disambiguated by `category_col` (default
+  `"category"`). Only repeated identifiers receive `_cat<category>`
+  suffixes. Duplicate identifier/category pairs, missing categories on
+  repeated identifiers, and conflicting display names are rejected.
+  Original identifiers and categories remain available with the plotted
+  item data.
+- Wright maps accept named item difficulty vectors or item tables, and
+  wide/long PVs with optional sampling weights. Distributions are
+  estimated separately for each PV and averaged. Item stages, smoothing,
+  histogram bins, labels, and panel proportions are configurable.
+  Original item parameters, display stages, and population estimates are
+  available in `attr(plot, "wright_data")`.
+
 ## eatPrep 1.0.13
 
 - New
