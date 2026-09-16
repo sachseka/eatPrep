@@ -23,7 +23,11 @@ plotWrightMap(
   person_label = "Persons", item_label = "Items", title = NULL,
   category_col = "category", person_fill = "#DDECEB",
   person_colour = "#327D83", item_colour = "#293B44",
-  line_colour = "#A7B5BD"
+  line_colour = "#A7B5BD", cuts = NULL, cut_labels = NULL,
+  show_cut_values = TRUE, cut_value_digits = 0L,
+  cut_value_size = 2.6, cut_colour = "#B26A3C",
+  population_col = NULL, population_colors = NULL,
+  population_alpha = NULL
 )
 }
 \arguments{
@@ -33,8 +37,8 @@ plotWrightMap(
   Vector names must be unique. Repeated identifiers in a table are disambiguated
   using \code{category_col}. Factor name columns are accepted. No item parameter
   conversion is performed.}
-  \item{pv_data}{Data frame containing plausible values for one population and
-  one dimension. PVs and item difficulties must already be on the same scale;
+  \item{pv_data}{Data frame containing plausible values for one dimension,
+  optionally with multiple populations. PVs and item difficulties must already be on the same scale;
   this cannot be verified from numeric values alone.}
   \item{item_col, difficulty_col}{Distinct column names for item names and
   difficulties when \code{items} is a data frame. Ignored for a named vector.}
@@ -62,12 +66,13 @@ plotWrightMap(
   \item{pv_missing}{\code{"error"} rejects missing PV values or respondent-PV
   rows. \code{"drop"} omits them with a warning and renormalizes weights
   within each PV. Each PV requires at least two observed respondents with
-  positive weights. Infinite scores and invalid weights always cause errors.}
+  positive weights within every population. Infinite scores and invalid weights always cause errors.}
   \item{person_geom}{Person distribution: \code{"density"} (default) or
   \code{"histogram"}. Both grow to the left from the central divider.}
   \item{density_bw}{Optional positive common bandwidth in score units, used
   only for density plots. The default averages unweighted \code{bw.nrd0}
-  bandwidths across PVs; sampling weights enter the density estimates.}
+  bandwidths across PVs within populations, then equally across populations;
+  sampling weights enter the density estimates.}
   \item{density_adjust}{Positive multiplier for the density bandwidth.}
   \item{binwidth}{Positive histogram bin width in score units. Defaults to a
   pretty step targeting approximately 30 bins across the observed PV range.
@@ -106,12 +111,60 @@ plotWrightMap(
   \item{item_colour}{Item text and heading colour.}
   \item{line_colour}{Colour of the divider, item leaders, and grouping brackets.
   All four colour arguments accept a single valid R colour.}
+  \item{cuts}{Optional mean cuts on the same metric as the PVs and item
+  difficulties. Accepts a finite non-decreasing numeric vector, a one-row
+  \code{cuts_summary} data frame with numeric columns starting with \code{cut},
+  or a result of \code{\link{computeCutsIDM}}. For the latter, only
+  \code{cuts_summary} is used; individual rater cuts are never drawn. Missing
+  cuts are rejected. Equal cuts share one mark and a combined label.
+  \code{NULL} (default) leaves the original two-sided layout unchanged.}
+  \item{cut_labels}{Optional unique non-empty names for the supplied cuts,
+  in their original order. Defaults to vector names or summary column names,
+  or \code{cut1}, \code{cut2}, etc. for unnamed vectors. Tabs, newlines, and
+  \code{|} are not allowed. Requires \code{cuts}.}
+  \item{show_cut_values}{Append numeric values to the cut names. Defaults to
+  \code{TRUE}. Hiding values does not hide the cut marks or names.}
+  \item{cut_value_digits}{Number of decimal places displayed for cut values,
+  from zero to ten. Rounding never changes mark positions or stored values.}
+  \item{cut_value_size}{Maximum cut-label size in millimetres. Labels fit their
+  column using the same wrapping and collision handling as item names.}
+  \item{cut_colour}{Colour of cut marks, labels, and their leaders.}
+  \item{population_col}{Optional grouping column in \code{pv_data}. Population
+  identifiers must be non-missing, non-empty character, factor, or finite numeric
+  values. Groups appear in order of first occurrence. Respondent IDs must be
+  unique within each population in wide input; IDs may recur in different
+  populations. Weights and missing PVs are validated separately within groups.}
+  \item{population_colors}{Optional named vector of R colours, with exactly
+  one entry per population. Requires \code{population_col}. The automatic
+  palette matches \code{\link{plotPopulationCuts}}. Group fills and outlines
+  use these colours; \code{person_fill} and \code{person_colour} style the
+  ungrouped distribution, while \code{person_colour} still sets item markers.}
+  \item{population_alpha}{Opacity between zero and one. \code{NULL} uses
+  0.25 for grouped fills and 1 for an ungrouped distribution. Group outlines
+  remain opaque. In the ungrouped case this applies to both fill and outline.}
 }
 \details{
 The vertical scale increases upwards. The horizontal size of the distribution
 shows its shape, normalized to a maximum panel width; it does not represent
 sample counts. There is no fixed aspect ratio, so either portrait or landscape
 output can be used.
+
+When cuts are supplied, a narrow column headed \code{Cuts} is reserved on the
+far right. Horizontal marks show their exact values and never extend into the
+person distribution or item text. Automatic score limits include all cuts;
+explicit \code{score_limits} only zoom the display. Item stages and population
+estimates are independent of cuts. Cut labels can move to avoid overlap, with
+leaders pointing back to their fixed marks. All inputs must already use the
+same metric; no rescaling is performed.
+
+With \code{population_col}, distributions are overlaid on the person side
+with a legend. Each population is normalized separately within each PV, then
+averaged over its PVs. Densities share one score grid and bandwidth; histogram
+bins are common to all groups. One horizontal scaling factor (the largest
+density across all groups) preserves relative density heights. Widths compare
+distribution shape, not group sample size. Items and supplied mean cuts are
+common to all groups. Population calculations and colour validation are shared
+with the other population plot functions.
 
 Densities are estimated separately for each PV with normalized sampling weights
 on a common grid and bandwidth, then averaged with equal weight for each PV.
@@ -140,7 +193,10 @@ A \code{ggplot} object that can be customized and saved with
   \item{population}{For density plots, \code{score} and mean \code{density}.
   For histograms, \code{lower}, \code{upper}, mean bin \code{proportion}, and
   \code{density} (proportion divided by bin width). These values precede
-  horizontal scaling for display.}
+  horizontal scaling for display. With grouped input, a \code{population}
+  factor identifies the population for each row.}
+  \item{cuts}{When supplied, a data frame of unrounded \code{cut} values and
+  their \code{label}, including separate entries for equal values.}
   \item{person_geom, item_step, item_origin, binwidth}{Resolved plotting
   settings; \code{binwidth} is \code{NULL} for density plots.}
 }
@@ -162,6 +218,14 @@ p <- plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
                    weight_col = "weight", item_step = 0.25)
 p
 attr(p, "wright_data")$items
+
+# Optional mean cuts in a separate column on the right.
+plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
+              cuts = c(cut12 = -0.8, cut23 = 0.3, cut34 = 1.2),
+              cut_value_digits = 1)
+
+# An IDM result can be passed directly; only cuts_summary is used:
+# plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3), cuts = idm_result)
 
 # Named vector and optional histogram.
 plotWrightMap(c(A = -1, B = 0, C = 1), persons,
