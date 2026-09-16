@@ -11,11 +11,13 @@
   relative density heights, while items and mean cuts remain shared.
 
 - [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
-  gains optional mean cuts in a separate column on the right. Supply a
-  numeric vector, a one-row `cuts_summary` table, or a
+  gains optional mean cuts drawn as horizontal lines through the person
+  densities or histograms, shared across populations and ending at the
+  item divider. Labels avoid overlap and use white backgrounds on the
+  person side; the item side keeps its full width. Supply a numeric
+  vector, a one-row `cuts_summary` table, or a
   [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
-  result (only its mean cuts are used). Short horizontal marks retain
-  exact scores, while labels avoid overlap. Cut names, value display,
+  result (only its mean cuts are used). Cut names, value display,
   rounding, text size, and colour are configurable. Unrounded values
   remain available in `attr(plot, "wright_data")$cuts`.
 

@@ -73,7 +73,7 @@ data(inputList)
 prepDatScored <- automateDataPreparation(inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=TRUE,
     aggregateData=TRUE, scoreData=TRUE, writeSpss=FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-16 09:31:06.732328
+#> Starting automateDataPreparation 2026-09-16 09:56:40.116693
 #> 
 #> Check has been skipped.
 #> 
@@ -106,7 +106,7 @@ prepDatScored <- automateDataPreparation(inputList = inputList, datList = inputD
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-16 09:31:06.87337
+#> automateDataPreparation terminated successfully! 2026-09-16 09:56:40.266961
 
 GADSobj1 <- prep2GADS(dat = prepDatScored, inputList = inputList[1:3], trafoType = "scored",
                                 verbose=TRUE)
@@ -118,7 +118,7 @@ GADSobj1 <- prep2GADS(dat = prepDatScored, inputList = inputList[1:3], trafoType
 prepDatRaw <- automateDataPreparation(inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData=FALSE, mergeData = TRUE, recodeData=FALSE,
     aggregateData=FALSE, scoreData=FALSE, writeSpss=FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-16 09:31:06.916155
+#> Starting automateDataPreparation 2026-09-16 09:56:40.311526
 #> 
 #> Check has been skipped.
 #> 
@@ -139,7 +139,7 @@ prepDatRaw <- automateDataPreparation(inputList = inputList, datList = inputDat,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-16 09:31:06.965931
+#> automateDataPreparation terminated successfully! 2026-09-16 09:56:40.362004
 
 GADSobj2 <- prep2GADS(dat = prepDatRaw, inputList = inputList[1:3], trafoType = "raw",
                                 verbose=TRUE)

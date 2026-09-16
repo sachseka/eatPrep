@@ -230,8 +230,9 @@ plotWrightMap(
 
 - cut_value_size:
 
-  Maximum cut-label size in millimetres. Labels fit their column using
-  the same wrapping and collision handling as item names.
+  Maximum cut-label size in millimetres. Labels fit their space on the
+  person side using the same wrapping and collision handling as item
+  names.
 
 - cut_colour:
 
@@ -268,13 +269,15 @@ distribution shows its shape, normalized to a maximum panel width; it
 does not represent sample counts. There is no fixed aspect ratio, so
 either portrait or landscape output can be used.
 
-When cuts are supplied, a narrow column headed `Cuts` is reserved on the
-far right. Horizontal marks show their exact values and never extend
-into the person distribution or item text. Automatic score limits
-include all cuts; explicit `score_limits` only zoom the display. Item
-stages and population estimates are independent of cuts. Cut labels can
-move to avoid overlap, with leaders pointing back to their fixed marks.
-All inputs must already use the same metric; no rescaling is performed.
+When cuts are supplied, horizontal lines at their exact scores cross the
+person densities or histograms and stop at the divider before the item
+names. All populations share these lines. Cut labels appear on the
+person side with white backgrounds for readability; no extra column is
+reserved. Automatic score limits include all cuts; explicit
+`score_limits` only zoom the display. Item stages and population
+estimates are independent of cuts. Cut labels can move to avoid overlap,
+with leaders pointing back to their fixed marks. All inputs must already
+use the same metric; no rescaling is performed.
 
 With `population_col`, distributions are overlaid on the person side
 with a legend. Each population is normalized separately within each PV,
@@ -370,7 +373,7 @@ attr(p, "wright_data")$items
 #> 4 Item_03_cat2 Item_03        2       0.85  0.75
 #> 5      Item_04 Item_04     <NA>       0.95  1.00
 
-# Optional mean cuts in a separate column on the right.
+# Optional mean cuts across the person distribution.
 plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3),
               cuts = c(cut12 = -0.8, cut23 = 0.3, cut34 = 1.2),
               cut_value_digits = 1)

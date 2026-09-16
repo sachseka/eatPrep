@@ -240,7 +240,7 @@ All supplied scores must already share one metric and dimension.</p>
 
   <dt id="arg-cut-value-size">cut_value_size<a class="anchor" aria-label="anchor" href="#arg-cut-value-size"></a></dt>
 <dd><p>Maximum cut-label size in millimetres. Labels fit their
-  column using the same wrapping and collision handling as item names.</p></dd>
+  space on the person side using the same wrapping and collision handling as item names.</p></dd>
 
   <dt id="arg-cut-colour">cut_colour<a class="anchor" aria-label="anchor" href="#arg-cut-colour"></a></dt>
 <dd><p>Colour of cut marks, labels, and their leaders.</p></dd>
@@ -271,9 +271,11 @@ All supplied scores must already share one metric and dimension.</p>
 shows its shape, normalized to a maximum panel width; it does not represent
 sample counts. There is no fixed aspect ratio, so either portrait or landscape
 output can be used.</p>
-<p>When cuts are supplied, a narrow column headed <code>Cuts</code> is reserved on the
-far right. Horizontal marks show their exact values and never extend into the
-person distribution or item text. Automatic score limits include all cuts;
+<p>When cuts are supplied, horizontal lines at their exact scores cross the
+person densities or histograms and stop at the divider before the item names.
+All populations share these lines. Cut labels appear on the person side with
+white backgrounds for readability; no extra column is reserved.
+Automatic score limits include all cuts;
 explicit <code>score_limits</code> only zoom the display. Item stages and population
 estimates are independent of cuts. Cut labels can move to avoid overlap, with
 leaders pointing back to their fixed marks. All inputs must already use the
@@ -360,7 +362,7 @@ their stage markers and the population distribution retain their score positions
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 Item_03_cat2 Item_03        2       0.85  0.75</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5      Item_04 Item_04     &lt;NA&gt;       0.95  1.00</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Optional mean cuts in a separate column on the right.</span></span></span>
+<span class="r-in"><span><span class="co"># Optional mean cuts across the person distribution.</span></span></span>
 <span class="r-in"><span><span class="fu">plotWrightMap</span><span class="op">(</span><span class="va">items</span>, <span class="va">persons</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"PV"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>              cuts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>cut12 <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, cut23 <span class="op">=</span> <span class="fl">0.3</span>, cut34 <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>              cut_value_digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>

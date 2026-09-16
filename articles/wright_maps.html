@@ -210,12 +210,14 @@ legend. Use <code>population_alpha</code> to change fill opacity.
 returned distribution table includes a <code>population</code> column.
 The same grouping also works with <code>person_geom = "histogram"</code>
 and with long-format PV input.</p>
-<p>Mean cuts can be added in a dedicated column on the far right. Their
-horizontal marks retain the exact scores and do not cross the item
-labels. Pass the same numeric cut vector used by
-<code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code>, a one-row <code>cuts_summary</code>
-table, or a complete <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> result. For an IDM
-result, only <code>cuts_summary</code> is used, corresponding to
+<p>Mean cuts appear as horizontal lines through the person densities (or
+histograms), ending at the divider before the item names. All
+populations share the same lines at the exact cut scores. The right side
+remains fully available for item names. Pass the same numeric cut vector
+used by <code><a href="../reference/plotPopulationCuts.html">plotPopulationCuts()</a></code>, a one-row
+<code>cuts_summary</code> table, or a complete
+<code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code> result. For an IDM result, only
+<code>cuts_summary</code> is used, corresponding to
 <code>cut_selection = "mean"</code> in
 <code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -230,12 +232,14 @@ result, only <code>cuts_summary</code> is used, corresponding to
 <p>Use <code>cut_labels</code> to override names,
 <code>show_cut_values = FALSE</code> to show names without numbers, and
 <code>cut_colour</code> / <code>cut_value_size</code> for styling. Equal
-cuts share a mark; nearby labels avoid overlap and remain connected to
-their marks. Display rounding does not affect the exact values, which
-remain accessible as <code>attr(plot, "wright_data")$cuts</code>. Adding
-cuts does not change the estimated population distribution or item
-stages. Cuts must already share the score metric; missing mean cuts must
-be resolved before plotting.</p>
+cuts share a line; nearby labels avoid overlap and remain connected to
+their lines. Labels sit on the person side with white backgrounds to
+remain readable over the distributions. Display rounding does not affect
+the exact values, which remain accessible as
+<code>attr(plot, "wright_data")$cuts</code>. Adding cuts does not change
+the estimated population distribution or item stages. Cuts must already
+share the score metric; missing mean cuts must be resolved before
+plotting.</p>
 <p>The return value is a <code>ggplot</code> object. For example:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Wright map"</span><span class="op">)</span></span>

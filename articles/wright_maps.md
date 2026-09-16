@@ -176,9 +176,11 @@ distribution table includes a `population` column. The same grouping
 also works with `person_geom = "histogram"` and with long-format PV
 input.
 
-Mean cuts can be added in a dedicated column on the far right. Their
-horizontal marks retain the exact scores and do not cross the item
-labels. Pass the same numeric cut vector used by
+Mean cuts appear as horizontal lines through the person densities (or
+histograms), ending at the divider before the item names. All
+populations share the same lines at the exact cut scores. The right side
+remains fully available for item names. Pass the same numeric cut vector
+used by
 [`plotPopulationCuts()`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md),
 a one-row `cuts_summary` table, or a complete
 [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
@@ -204,12 +206,14 @@ plotWrightMap(items, persons, pv_cols = paste0("PV", 1:3), cuts = idm_result)
 
 Use `cut_labels` to override names, `show_cut_values = FALSE` to show
 names without numbers, and `cut_colour` / `cut_value_size` for styling.
-Equal cuts share a mark; nearby labels avoid overlap and remain
-connected to their marks. Display rounding does not affect the exact
-values, which remain accessible as `attr(plot, "wright_data")$cuts`.
-Adding cuts does not change the estimated population distribution or
-item stages. Cuts must already share the score metric; missing mean cuts
-must be resolved before plotting.
+Equal cuts share a line; nearby labels avoid overlap and remain
+connected to their lines. Labels sit on the person side with white
+backgrounds to remain readable over the distributions. Display rounding
+does not affect the exact values, which remain accessible as
+`attr(plot, "wright_data")$cuts`. Adding cuts does not change the
+estimated population distribution or item stages. Cuts must already
+share the score metric; missing mean cuts must be resolved before
+plotting.
 
 The return value is a `ggplot` object. For example:
 
