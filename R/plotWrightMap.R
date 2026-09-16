@@ -88,20 +88,56 @@
   if (any(!is.finite(breaks)) || any(diff(breaks) <= 0)) {
     stop("binwidth must define distinct finite histogram boundaries.", call. = FALSE)
   }
-  shares <- lapply(split(dat, dat$.pv), function(draw) {
-    bin <- findInterval(draw$.value, breaks)
-    if (any(bin < 1L | bin > n)) {
-      stop("Histogram boundaries cannot resolve these scores; increase binwidth.", call. = FALSE)
-    }
-    w <- draw$.weight / max(draw$.weight)
-    sums <- rowsum(w / sum(w), bin, reorder = FALSE)
-    result <- numeric(n)
-    result[as.integer(rownames(sums))] <- sums[, 1L]
+  estimate <- function(sample) {
+    shares <- lapply(split(sample, sample$.pv), function(draw) {
+      bin <- findInterval(draw$.value, breaks)
+      if (any(bin < 1L | bin > n)) {
+        stop("Histogram boundaries cannot resolve these scores; increase binwidth.", call. = FALSE)
+      }
+      w <- draw$.weight / max(draw$.weight)
+      sums <- rowsum(w / sum(w), bin, reorder = FALSE)
+      result <- numeric(n)
+      result[as.integer(rownames(sums))] <- sums[, 1L]
+      result
+    })
+    proportion <- Reduce(`+`, shares) / length(shares)
+    data.frame(lower = utils::head(breaks, -1), upper = utils::tail(breaks, -1),
+               proportion = proportion, density = proportion / diff(breaks))
+  }
+  if (!".population" %in% names(dat)) return(estimate(dat))
+  groups <- levels(dat$.population)
+  do.call(rbind, lapply(groups, function(group) {
+    result <- estimate(dat[dat$.population == group, , drop = FALSE])
+    result$.population <- factor(group, levels = groups)
     result
-  })
-  proportion <- Reduce(`+`, shares) / length(shares)
-  data.frame(lower = utils::head(breaks, -1), upper = utils::tail(breaks, -1),
-             proportion = proportion, density = proportion / diff(breaks))
+  }))
+}
+
+.wright_cuts <- function(cuts, cut_labels) {
+  if (is.null(cuts)) {
+    if (!is.null(cut_labels)) stop("cut_labels requires cuts.", call. = FALSE)
+    return(NULL)
+  }
+  if (inherits(cuts, "cutsIDM")) cuts <- cuts$cuts_summary
+  if (is.data.frame(cuts)) {
+    if (nrow(cuts) != 1L) stop("Supply a one-row mean cuts_summary table.", call. = FALSE)
+    cols <- names(cuts)[startsWith(names(cuts), "cut")]
+    if (!length(cols) || !all(vapply(cuts[cols], is.numeric, logical(1)))) {
+      stop("The mean-cut table must contain numeric columns beginning with 'cut'.", call. = FALSE)
+    }
+    cuts <- unlist(cuts[cols], use.names = TRUE)
+  }
+  checkmate::assert_numeric(cuts, min.len = 1, finite = TRUE, any.missing = FALSE)
+  if (!is.null(dim(cuts))) stop("cuts must be a numeric vector or a mean-cut result.", call. = FALSE)
+  if (is.unsorted(cuts)) stop("cuts must be non-decreasing.", call. = FALSE)
+  if (is.null(cut_labels)) {
+    cut_labels <- if (is.null(names(cuts))) paste0("cut", seq_along(cuts)) else names(cuts)
+  }
+  checkmate::assert_character(cut_labels, len = length(cuts), any.missing = FALSE, unique = TRUE)
+  if (any(!nzchar(trimws(cut_labels))) || any(grepl("[\r\n\t|]", cut_labels))) {
+    stop("Cut labels must be non-empty and contain no tabs, newlines, or '|'.", call. = FALSE)
+  }
+  data.frame(cut = unname(cuts), label = cut_labels)
 }
 
 # Wrap at item boundaries, preserving complete identifiers and the separators.
@@ -138,7 +174,7 @@
 makeContent.wright_item_labels <- function(x) {
   panel_width <- grid::convertWidth(grid::unit(1, "npc"), "mm", valueOnly = TRUE)
   panel_height <- grid::convertHeight(grid::unit(1, "npc"), "mm", valueOnly = TRUE)
-  width <- max(0.01, (1 - x$left - 0.02) * panel_width)
+  width <- max(0.01, (x$right - x$left - min(0.02, (x$right - x$left) * 0.1)) * panel_width)
   tokens <- strsplit(x$labels, " | ", fixed = TRUE)
   layout <- function(shrink) {
     gp <- grid::gpar(col = x$colour, fontsize = x$fontsize * shrink, fontfamily = x$family)
@@ -203,12 +239,16 @@ makeContent.wright_item_labels <- function(x) {
   ggplot2::ggproto("GeomWrightLabels", ggplot2::Geom,
     required_aes = c("x", "y", "label"),
     draw_panel = function(data, panel_params, coord, label_size = 3, family = "",
-                           colour = "#293B44", line_colour = "#A7B5BD") {
+                           colour = "#293B44", line_colour = "#A7B5BD",
+                           right_edge = NULL, anchor_x = 0) {
       coords <- coord$transform(data, panel_params)
       coords <- coords[is.finite(coords$y) & coords$y >= 0 & coords$y <= 1, , drop = FALSE]
       if (!nrow(coords)) return(grid::nullGrob())
-      anchor <- coord$transform(data.frame(x = 0, y = 0), panel_params)$x
+      anchor <- coord$transform(data.frame(x = anchor_x, y = 0), panel_params)$x
+      right <- if (is.null(right_edge)) 1 else
+        coord$transform(data.frame(x = right_edge, y = 0), panel_params)$x
       grid::gTree(labels = coords$label, left = max(coords$x), y = coords$y,
+        right = right,
         anchor = rep(anchor, nrow(coords)), fontsize = label_size * 72.27 / 25.4,
         family = family, colour = colour, line_colour = line_colour, cl = "wright_item_labels")
     }
@@ -228,8 +268,12 @@ plotWrightMap <- function(items, pv_data, item_col = "item", difficulty_col = "d
                           person_label = "Persons", item_label = "Items", title = NULL,
                           category_col = "category", person_fill = "#DDECEB",
                           person_colour = "#327D83", item_colour = "#293B44",
-                          line_colour = "#A7B5BD") {
-  x <- y <- xmin <- xmax <- ymin <- ymax <- stage <- label <- NULL
+                          line_colour = "#A7B5BD", cuts = NULL, cut_labels = NULL,
+                          show_cut_values = TRUE, cut_value_digits = 0L,
+                          cut_value_size = 2.6, cut_colour = "#B26A3C",
+                          population_col = NULL, population_colors = NULL,
+                          population_alpha = NULL) {
+  x <- y <- xmin <- xmax <- ymin <- ymax <- stage <- label <- cut <- .population <- NULL
   person_geom <- match.arg(person_geom)
   checkmate::assert_number(item_step, lower = 0, finite = TRUE, null.ok = TRUE)
   checkmate::assert_number(item_origin, finite = TRUE)
@@ -239,7 +283,12 @@ plotWrightMap <- function(items, pv_data, item_col = "item", difficulty_col = "d
   checkmate::assert_number(base_size, lower = .Machine$double.xmin, finite = TRUE)
   checkmate::assert_string(font_family)
   checkmate::assert_string(category_col, null.ok = TRUE)
-  for (color in list(person_fill, person_colour, item_colour, line_colour)) {
+  checkmate::assert_flag(show_cut_values)
+  checkmate::assert_integerish(cut_value_digits, len = 1, lower = 0, upper = 10, any.missing = FALSE)
+  checkmate::assert_number(cut_value_size, lower = .Machine$double.xmin, finite = TRUE)
+  checkmate::assert_number(population_alpha, lower = 0, upper = 1, finite = TRUE, null.ok = TRUE)
+  cut_data <- .wright_cuts(cuts, cut_labels)
+  for (color in list(person_fill, person_colour, item_colour, line_colour, cut_colour)) {
     checkmate::assert_string(color)
     tryCatch(grDevices::col2rgb(color), error = function(e) {
       stop("Plot colours must be valid R colours.", call. = FALSE)
@@ -256,7 +305,10 @@ plotWrightMap <- function(items, pv_data, item_col = "item", difficulty_col = "d
   }
   item_data <- .wright_items(items, item_col, difficulty_col, 0, item_origin, category_col)
   dat <- .prepare_population_idm(pv_data, pv_cols, respondent_id_col,
-    pv_id_col, pv_value_col, weight_col, input_format, pv_missing)
+    pv_id_col, pv_value_col, weight_col, input_format, pv_missing, population_col)
+  colors <- .population_colors_idm(dat, population_colors)
+  grouped <- !is.null(colors)
+  if (is.null(population_alpha)) population_alpha <- if (grouped) 0.25 else 1
   if (is.null(item_step)) item_step <- .wright_step(c(item_data$difficulty, dat$.value))
   item_data <- .wright_items(items, item_col, difficulty_col, item_step, item_origin, category_col)
   stages <- sort(unique(item_data$stage))
@@ -268,39 +320,92 @@ plotWrightMap <- function(items, pv_data, item_col = "item", difficulty_col = "d
   if (person_geom == "density") {
     density <- .population_density_idm(dat, density_bw, density_adjust)
     population <- data.frame(score = density$.population_x, density = density$.population_density)
-    drawing <- data.frame(x = -population$density / max(population$density), y = population$score)
-    drawing <- rbind(data.frame(x = 0, y = min(population$score)), drawing,
-                      data.frame(x = 0, y = max(population$score)))
-    pp <- pp + ggplot2::geom_polygon(data = drawing, ggplot2::aes(x = x, y = y),
-      fill = person_fill, colour = person_colour, linewidth = 0.6)
+    make_polygon <- function(d) {
+      drawing <- data.frame(x = -d$density / max(population$density), y = d$score)
+      rbind(data.frame(x = 0, y = min(d$score)), drawing,
+              data.frame(x = 0, y = max(d$score)))
+    }
+    if (grouped) {
+      population$population <- density$.population
+      drawing <- do.call(rbind, lapply(names(colors), function(group) {
+        result <- make_polygon(population[population$population == group, , drop = FALSE])
+        result$.population <- factor(group, levels = names(colors))
+        result
+      }))
+      pp <- pp + ggplot2::geom_polygon(data = drawing,
+        ggplot2::aes(x = x, y = y, fill = .population, group = .population),
+        colour = NA, alpha = population_alpha) +
+        ggplot2::geom_path(data = drawing,
+          ggplot2::aes(x = x, y = y, colour = .population, group = .population),
+          linewidth = 0.6, show.legend = FALSE)
+    } else {
+      pp <- pp + ggplot2::geom_polygon(data = make_polygon(population), ggplot2::aes(x = x, y = y),
+        fill = person_fill, colour = person_colour, linewidth = 0.6, alpha = population_alpha)
+    }
     population_range <- range(population$score)
   } else {
     if (is.null(binwidth)) binwidth <- .wright_step(dat$.value)
     population <- .wright_histogram(dat, binwidth)
     drawing <- data.frame(xmin = -population$density / max(population$density), xmax = 0,
                            ymin = population$lower, ymax = population$upper)
-    pp <- pp + ggplot2::geom_rect(data = drawing,
-      ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-      fill = person_fill, colour = person_colour, linewidth = 0.3)
+    if (grouped) {
+      drawing$.population <- population$.population
+      names(population)[names(population) == ".population"] <- "population"
+      pp <- pp + ggplot2::geom_rect(data = drawing,
+        ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = .population),
+        colour = NA, alpha = population_alpha) +
+        ggplot2::geom_rect(data = drawing,
+          ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, colour = .population),
+          fill = NA, linewidth = 0.3, show.legend = FALSE)
+    } else {
+      pp <- pp + ggplot2::geom_rect(data = drawing,
+        ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+        fill = person_fill, colour = person_colour, linewidth = 0.3, alpha = population_alpha)
+    }
     population_range <- range(population$lower, population$upper)
   }
-  limits <- range(population_range, item_data$difficulty, item_data$stage)
+  if (grouped) {
+    pp <- pp + .population_fill_scale_idm(colors) +
+      ggplot2::scale_colour_manual(values = colors, limits = names(colors), guide = "none") +
+      ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(alpha = 1)))
+  }
+  limits <- range(population_range, item_data$difficulty, item_data$stage, cut_data$cut)
   if (!is.finite(diff(limits))) stop("The combined score range must be finite.", call. = FALSE)
   if (is.null(score_limits)) score_limits <- limits + c(-1, 1) * max(diff(limits), 1) * 0.04
   if (any(!is.finite(score_limits))) stop("The score limits must be finite.", call. = FALSE)
   right <- (1 - person_prop) / person_prop
+  item_right <- if (is.null(cut_data)) right else right * 0.72
   item_labels$x <- 0.03 / person_prop
   pp <- pp +
     ggplot2::geom_vline(xintercept = 0, colour = line_colour, linewidth = 0.4) +
     ggplot2::layer(data = item_labels, mapping = ggplot2::aes(x = x, y = stage, label = label),
       stat = "identity", geom = .wright_label_geom(), position = "identity",
       inherit.aes = FALSE, params = list(label_size = item_size, family = font_family,
-                                        colour = item_colour, line_colour = line_colour)) +
+        colour = item_colour, line_colour = line_colour,
+        right_edge = if (is.null(cut_data)) NULL else item_right)) +
     ggplot2::geom_point(data = item_labels, ggplot2::aes(x = 0, y = stage),
-                         colour = person_colour, size = 1.4) +
-    ggplot2::scale_x_continuous(breaks = c(-0.5, right / 2),
+                         colour = person_colour, size = 1.4)
+  if (!is.null(cut_data)) {
+    positions <- unique(cut_data$cut)
+    cut_drawing <- data.frame(cut = positions, x = right * 0.83,
+      label = vapply(positions, function(value) {
+        text <- paste(cut_data$label[cut_data$cut == value], collapse = " | ")
+        if (show_cut_values) paste0(text, ": ", formatC(value, format = "f", digits = cut_value_digits)) else text
+      }, character(1)))
+    pp <- pp + ggplot2::geom_segment(data = cut_drawing,
+      ggplot2::aes(y = cut, yend = cut), x = right * 0.75, xend = right * 0.80,
+      colour = cut_colour, linewidth = 0.8) +
+      ggplot2::layer(data = cut_drawing, mapping = ggplot2::aes(x = x, y = cut, label = label),
+        stat = "identity", geom = .wright_label_geom(), position = "identity", inherit.aes = FALSE,
+        params = list(label_size = cut_value_size, family = font_family, colour = cut_colour,
+                      line_colour = cut_colour, anchor_x = right * 0.80))
+  }
+  pp <- pp +
+    ggplot2::scale_x_continuous(breaks = c(-0.5, item_right / 2,
+                                          if (!is.null(cut_data)) right * 0.87),
       labels = c(if (is.null(person_label)) "" else person_label,
-                 if (is.null(item_label)) "" else item_label), position = "top") +
+                 if (is.null(item_label)) "" else item_label,
+                 if (!is.null(cut_data)) "Cuts"), position = "top") +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.04)) +
     ggplot2::coord_cartesian(xlim = c(-1.05, right), ylim = score_limits, expand = FALSE) +
     ggplot2::labs(x = NULL, y = score_label, title = title) +
@@ -321,8 +426,10 @@ plotWrightMap <- function(items, pv_data, item_col = "item", difficulty_col = "d
       panel.background = ggplot2::element_rect(fill = "white", colour = NA),
       plot.background = ggplot2::element_rect(fill = "white", colour = NA)
     )
+  if (grouped) pp <- pp + ggplot2::theme(legend.position = "bottom")
   attr(pp, "wright_data") <- list(items = item_data, item_labels = item_labels[c("stage", "label")],
     population = population, person_geom = person_geom, item_step = item_step,
     item_origin = item_origin, binwidth = if (person_geom == "histogram") binwidth else NULL)
+  if (!is.null(cut_data)) attr(pp, "wright_data")$cuts <- cut_data
   pp
 }
