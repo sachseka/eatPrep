@@ -2,6 +2,7 @@
 
 * Reference-page formulas now render with MathJax instead of appearing as raw LaTeX.
 * The `computeCutsIDM()` reference and vignette now describe the implemented padding, missing-rating and short-sequence behavior, isotonic fitting, boundary interpolation, cut summaries, and agreement diagnostics more precisely. Eight regression tests verify these details against hand-calculated examples and missing-data cases.
+* The `computeCutsIDM()` return-value documentation now specifies how each statistic is calculated, including the `irr` functions and settings, Cohen/Fleiss kappa and ICC formulas, missing-data rules, and the identical-ratings convention in `meanKappa()`.
 
 # eatPrep 1.0.14
 

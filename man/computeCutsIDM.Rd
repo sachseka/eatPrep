@@ -109,22 +109,44 @@ In \code{plot_data}, the residual is \eqn{r_i - z_i}, the raw rating minus its m
 }
 \value{
 A \code{cutsIDM} object, i.e. a named list with:
-\itemize{
-  \item \code{cuts_per_person}: one row per rater and one difficulty-scale cut column per boundary.
-  \item \code{cut_positions_per_person}: one row per rater and one interpolated item-position column per boundary.
-  \item \code{cuts_summary}: mean difficulty-scale cuts across raters.
-  \item \code{cut_statistics}: mean, standard deviation, and standard error for item-position and difficulty-scale cuts.
-  \item \code{level_statistics}: item difficulty intervals implied by \code{cuts_summary}, with item counts and item difficulty summaries.
-  \item \code{modal_values}: item-wise modal raw rating stages and labels, including tie indicators.
-  \item \code{rater_modal_correlations}: correlations of each rater's raw ratings with all-rater and leave-one-rater-out modal values.
-  \item \code{kappa_pairwise}: pairwise Cohen's kappa values returned by \code{\link{meanKappa}}.
-  \item \code{kappa_summary}: mean and sample standard deviation of finite pairwise Cohen's kappa values.
-  \item \code{rater_kappa_statistics}: per-rater mean and sample standard deviation of pairwise Cohen's kappa values.
-  \item \code{fleiss_kappa}: Fleiss kappa based on complete item rows.
-  \item \code{icc_statistics}: two-way single-measure ICC estimates for agreement and consistency based on complete item rows.
-  \item \code{plot_data}: long-format item identifiers, raw, smoothed, monotonized, and residual rating data used by \code{plotCutsIDM()}.
-  \item \code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{item_id_col}, \code{rater_cols}, and further metadata used by \code{plotCutsIDM()}.
+\describe{
+  \item{\code{cuts_per_person}}{One row per rater and one difficulty-scale cut column per boundary. Each cut is the first boundary crossing of that rater's smoothed, isotonic rating series, with linear interpolation on the difficulty scale as specified in Details. Unreached boundaries and raters with fewer than two finite smoothed values yield \code{NA}.}
+
+  \item{\code{cut_positions_per_person}}{The same crossings expressed as positions in the full difficulty-ordered item list. The interpolation factor used for the difficulty cut is applied to the two surrounding item positions; missing items retain their positions in this list. Columns are named \code{page_*}.}
+
+  \item{\code{cuts_summary}}{One row of unweighted arithmetic means of the finite rater-specific difficulty cuts, computed separately for each boundary. A boundary with no available cuts has mean \code{NA}.}
+
+  \item{\code{cut_statistics}}{Rows \code{Mean}, \code{SD}, and \code{SE} for item-position cuts (\code{page_*}) and difficulty cuts (\code{diff_*}). For each column, \eqn{m} finite cuts contribute to the arithmetic mean, the sample SD from \code{\link[stats]{sd}} (denominator \eqn{m-1}), and \eqn{SE = SD / \sqrt{m}}. SD and SE are \code{NA} for \eqn{m < 2}; all three statistics are \code{NA} for \eqn{m = 0}.}
+
+  \item{\code{level_statistics}}{Intervals formed from the minimum item difficulty, the finite mean cuts in boundary order, and the maximum item difficulty. For each interval, \code{n_items} counts distinct items, and \code{mean_itemdiff} and \code{sd_itemdiff} are their arithmetic mean and sample SD. Items at a cut enter the interval starting at that cut; the final interval also includes its upper endpoint. Empty intervals have \code{NA} means and SDs, and one-item intervals have \code{NA} SDs.}
+
+  \item{\code{modal_values}}{Item-wise modes of the available raw internal rating stages. \code{n_ratings} counts available ratings, \code{modal_n} is the highest category count, and \code{modal_prop = modal_n / n_ratings}. A unique mode is returned in \code{modal_stage} and \code{modal_label}. Ties set these two fields to \code{NA}, while \code{modal_stages}, \code{modal_labels}, and \code{tie} retain the tied modes. Items without ratings have \code{n_ratings = 0}, missing mode fields and proportions, and \code{tie = FALSE}.}
+
+  \item{\code{rater_modal_correlations}}{Pearson correlations computed with \code{\link[stats:cor]{stats::cor}} between each rater's raw numeric stages and the unique item modes. \code{cor_modal_all} uses modes from all raters; \code{cor_modal_leave_one_out} recomputes each mode without the evaluated rater. Each correlation uses only items with both a finite rating and a unique mode; the corresponding \code{n_items_*} column gives that count. Fewer than two usable items or zero variance in either series yields \code{NA}.}
+
+  \item{\code{kappa_pairwise}}{One row per available rater pair, with \code{Coder1}, \code{Coder2}, the number \code{N} of jointly rated items, and \code{kappa}. The call \code{meanKappa(ratings, weight.mean = FALSE)} uses \code{\link[irr:kappa2]{irr::kappa2}} with \code{weight = "unweighted"} on each pair's complete raw ratings. Thus
+  \deqn{\kappa = \frac{p_o - p_e}{1 - p_e}, \qquad p_e = \sum_k p_{1k}p_{2k}.}{kappa = (p_o - p_e) / (1 - p_e); p_e = sum_k p_1k * p_2k.}
+  Here \eqn{p_o} is the proportion of exact agreements and \eqn{p_{1k}, p_{2k}} are the two raters' marginal proportions for category \eqn{k} on those items. All disagreements receive the same weight. Pairs without jointly rated items are omitted. As a special convention in \code{\link{meanKappa}}, an undefined kappa is replaced by 1 when the two retained rating vectors are identical. Fewer than two raters, no available pairs, or an error in the \code{meanKappa()} call yields an empty table.}
+
+  \item{\code{kappa_summary}}{\code{mean_kappa} and \code{sd_kappa} are the arithmetic mean and sample SD of the finite entries in \code{kappa_pairwise$kappa}, with \code{n_pairs} giving their count. Every pair has equal weight, regardless of \code{N}. \code{mean_n_items} averages \code{N} over all returned pair rows, including rows with non-finite kappa. With no finite kappas, mean and SD are \code{NA}; with one finite kappa, SD is \code{NA}.}
+
+  \item{\code{rater_kappa_statistics}}{The same calculations as in \code{kappa_summary}, restricted to pairs involving the respective rater. \code{n_pairs} counts finite kappas; \code{mean_n_items} averages item counts over all returned pairs involving that rater.}
+
+  \item{\code{fleiss_kappa}}{One row from \code{\link[irr:kappam.fleiss]{irr::kappam.fleiss}} on raw-rating rows complete across all raters, using the defaults \code{exact = FALSE} and \code{detail = FALSE}. For \eqn{n} complete items, \eqn{J} raters, and category counts \eqn{n_{ik}} within item \eqn{i},
+  \deqn{P_i = \frac{\sum_k n_{ik}(n_{ik}-1)}{J(J-1)}, \quad p_k = \frac{\sum_i n_{ik}}{nJ}, \quad \kappa = \frac{\bar P - \sum_k p_k^2}{1 - \sum_k p_k^2}.}{P_i = sum_k n_ik * (n_ik - 1) / (J * (J - 1)); p_k = sum_i n_ik / (n * J); kappa = (mean(P_i) - sum_k p_k^2) / (1 - sum_k p_k^2).}
+  Here \eqn{\bar P} is the mean of \eqn{P_i}. This uses pooled category proportions. \code{kappa}, \code{statistic}, and \code{p_value} contain the coefficient, the z statistic, and its two-sided p-value for zero kappa returned by \code{irr}. \code{n_items} and \code{n_raters} record the matrix dimensions. Fewer than two complete items or raters yields \code{NA} estimates; calculation errors or non-finite results also yield \code{NA}.}
+
+  \item{\code{icc_statistics}}{Two rows from \code{\link[irr:icc]{irr::icc}} on raw-rating rows complete across all raters: \code{model = "twoway"}, \code{unit = "single"}, and \code{type = "agreement"} or \code{"consistency"}. These give \code{ICC(A,1)} and \code{ICC(C,1)}. With \eqn{n} complete items, \eqn{J} raters, and two-way ANOVA mean squares \eqn{MS_I} (items), \eqn{MS_R} (raters), and \eqn{MS_E} (residual error),
+  \deqn{ICC(A,1) = \frac{MS_I-MS_E}{MS_I+(J-1)MS_E+\frac{J}{n}(MS_R-MS_E)},}{ICC(A,1) = (MS_I - MS_E) / (MS_I + (J - 1) * MS_E + (J / n) * (MS_R - MS_E)),}
+  \deqn{ICC(C,1) = \frac{MS_I-MS_E}{MS_I+(J-1)MS_E}.}{ICC(C,1) = (MS_I - MS_E) / (MS_I + (J - 1) * MS_E).}
+  Agreement includes systematic differences between raters' means; consistency removes that component. The returned \code{f_value}, \code{df1}, \code{df2}, and \code{p_value} come from \code{irr}'s F-test with default \code{r0 = 0}; \code{conf_level}, \code{lbound}, and \code{ubound} describe its default 95\% confidence interval. \code{n_items} and \code{n_raters} record the matrix dimensions. Fewer than two complete items or raters, calculation errors, and non-finite results yield \code{NA} in the corresponding estimate fields.}
+
+  \item{\code{plot_data}}{Long-format item identifiers and positions, raw internal stages (\code{stage_raw}), moving averages (\code{stage_sm}), isotonic fits (\code{stage_iso}), and residuals \code{stage_resid = stage_raw - stage_sm}, used by \code{plotCutsIDM()}. The smoothing and fitting steps are defined in Details.}
+
+  \item{Metadata}{\code{boundaries}, \code{cut_labels}, \code{min_val}, \code{max_val}, \code{est_col}, \code{item_id_col}, \code{rater_cols}, and further input settings used by \code{plotCutsIDM()}. \code{min_val} and \code{max_val} are the shared padding values defined in Details.}
 }
+All modal, correlation, kappa, and ICC results use raw internal rating stages; smoothing does not impute missing ratings for these diagnostics.
+
 \code{summary()} can be used to print the main cut score, boundary, and level-statistic tables in a compact form.
 }
 \examples{
