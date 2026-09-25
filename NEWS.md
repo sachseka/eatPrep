@@ -1,3 +1,8 @@
+# eatPrep 1.0.15
+
+* Reference-page formulas now render with MathJax instead of appearing as raw LaTeX.
+* The `computeCutsIDM()` reference and vignette now describe the implemented padding, missing-rating and short-sequence behavior, isotonic fitting, boundary interpolation, cut summaries, and agreement diagnostics more precisely. Eight regression tests verify these details against hand-calculated examples and missing-data cases.
+
 # eatPrep 1.0.14
 
 * `plotWrightMap()` supports multiple populations through `population_col`, named `population_colors`, and `population_alpha`. Weighted PV distributions are estimated separately per group and overlaid with transparent fills, opaque outlines, and a legend. Densities share a grid and bandwidth; histograms share bins. A common width scale preserves relative density heights, while items and mean cuts remain shared.

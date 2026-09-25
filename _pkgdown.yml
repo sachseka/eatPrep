@@ -1,4 +1,5 @@
 url: https://sachseka.github.io/eatPrep/
 template:
   bootstrap: 5
+  math-rendering: mathjax
 
