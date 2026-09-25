@@ -1,5 +1,29 @@
 # Changelog
 
+## eatPrep 1.0.15
+
+- Reference-page formulas now render with MathJax instead of appearing
+  as raw LaTeX.
+- The
+  [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+  reference and vignette now describe the implemented padding,
+  missing-rating and short-sequence behavior, isotonic fitting, boundary
+  interpolation, cut summaries, and agreement diagnostics more
+  precisely. Eight regression tests verify these details against
+  hand-calculated examples and missing-data cases.
+- The
+  [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+  return-value documentation now specifies how each statistic is
+  calculated, including the `irr` functions and settings, Cohen/Fleiss
+  kappa and ICC formulas, missing-data rules, and the identical-ratings
+  convention in
+  [`meanKappa()`](https://sachseka.github.io/eatPrep/reference/meanKappa.md).
+- The returned Fleiss kappa and ICC tests now have documented null
+  hypotheses, test directions, and interpretations of significant
+  results. The reference also clarifies which outputs do not include
+  p-values and why the two ICC p-values coincide at the default null
+  value.
+
 ## eatPrep 1.0.14
 
 - [`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)

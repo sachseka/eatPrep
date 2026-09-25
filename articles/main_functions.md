@@ -840,7 +840,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 ```
 
 Type
@@ -883,7 +883,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-16 09:56:49.97575
+#> Starting automateDataPreparation 2026-09-25 08:04:16.742413
 #> 
 #> Check data...
 #> 
@@ -945,7 +945,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 #> 
 #> Start aggregating
 #> Since inputList$aggrMiss exists, this will be used instead of default.
@@ -959,7 +959,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-16 09:56:50.240977
+#> automateDataPreparation terminated successfully! 2026-09-25 08:04:16.945799
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -1267,34 +1267,48 @@ summary(cuts)
 #>        0       0.95   0.84   0.99
 ```
 
-Internally, ordinal ratings are mapped to stage scores `1`, `2`, …, `K`
-in the order given by `rating_levels`. For each rater, items are ordered
-by their difficulty estimate. The raw stage sequence is smoothed by a
-centered three-point moving average, using the minimum and maximum stage
-as boundary anchors at the two ends. The smoothed sequence is then
-monotonized with isotonic regression, because IDM assumes that expected
-rating stages should not decrease as item difficulty increases.
+When `rating_levels` is supplied, ratings are mapped to stage scores
+`1`, `2`, …, `K` in the specified order; otherwise numeric ratings are
+used unchanged. For each rater, items are ordered by difficulty,
+retaining their first input order for ties. The raw stage sequence is
+smoothed by a centered three-point moving average. Its lower padding
+value is the minimum of all observed stages across raters and
+`floor(min(boundaries))`; its upper padding value is the maximum of all
+observed stages and `ceiling(max(boundaries))`. Sequences with fewer
+than three entries are left unsmoothed. The smoothed sequence is then
+monotonized with equally weighted isotonic regression, because IDM
+assumes that expected rating stages should not decrease as item
+difficulty increases. Tied difficulties receive the same fitted value.
 
-Missing ratings are dropped from smoothing and cut computation by
-default. In long-format input, omitted item-rater rows are completed
-internally and treated like explicit missing ratings. Use `item_id_col`
-whenever item identities should be preserved explicitly, especially when
-different items can have the same difficulty estimate. Use
-`missing = "smooth"` for the previous smoothing behavior with
-`na.rm = TRUE`, or `missing = "error"` to reject incomplete ratings. The
-`boundaries` argument determines the requested cut scores. Canonical
-boundaries such as `1.5` and `2.5` describe cuts between adjacent
-levels; non-canonical boundaries are included in the generated cut
-labels.
+By default, missing ratings are removed before smoothing the remaining
+sequence, so neighboring available ratings can span missing items;
+missing rows stay missing in the output series. In long-format input,
+omitted item-rater rows are completed internally and treated like
+explicit missing ratings. Use `item_id_col` whenever item identities
+should be preserved explicitly, especially when different items can have
+the same difficulty estimate. With `missing = "smooth"`, windows retain
+their original item positions and ignore missing entries, potentially
+producing smoothed values at missing ratings; an empty window remains
+missing. With this option, the short-sequence rule counts all items,
+whereas the default counts available ratings. Use `missing = "error"` to
+reject incomplete ratings. The `boundaries` argument determines the
+requested cut scores. Canonical boundaries such as `1.5` and `2.5`
+describe cuts between adjacent levels; non-canonical boundaries are
+included in the generated cut labels.
 
 Cut scores are interpolated boundary crossings of the monotonized
 curves. For example, the default boundary `2.5` is the transition
-between the second and third ordinal stage, here labelled `cut_1b_2`.
-`cuts_per_person` and `cuts_summary` report these cuts on the item
-difficulty scale. `cut_positions_per_person` stores the corresponding
-interpolated item positions, while `cut_statistics` and
-`level_statistics` summarize cuts and item difficulty intervals in the
-style often used in IDM documentation.
+between the second and third ordinal stage, here labelled `cut_1b_2`. A
+boundary at or below the first fitted value uses the first retained
+item; an unreached boundary yields `NA`. With fewer than two finite
+smoothed values, all cuts for that rater are `NA`. `cuts_per_person`
+reports cuts on the item difficulty scale, and `cuts_summary` averages
+the available rater-specific cuts separately for each boundary.
+`cut_positions_per_person` stores interpolated positions in the full
+ordered item list, while `cut_statistics` and `level_statistics`
+summarize cuts and item difficulty intervals. See the [function
+reference](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.html#details)
+for the formulas and edge cases.
 
 Additional agreement diagnostics are computed on the raw internal rating
 stages, after long- and wide-format input have been normalized to the
@@ -1926,19 +1940,17 @@ of statistics applies to all rater and mean-cut panels.
 Means and variances are estimated separately for each PV and population
 using the supplied sampling weights. The final M is the average of the
 PV means; the final SD is the square root of the average PV variance.
-For $`m`$ plausible values:
+For \\m\\ plausible values:
 
-``` math
-SD = \sqrt{\frac{1}{m}\sum_{j=1}^{m} SD_j^2}.
-```
+\\SD = \sqrt{\frac{1}{m}\sum\_{j=1}^{m} SD_j^2}.\\
 
 Every PV contributes equally. Respondents’ PVs are never averaged before
 estimating their population spread, and no variance component for
 differences between PV means is added.
 
 Within a PV, the weighted mean squared deviation from that PV’s weighted
-mean is multiplied by $`n_j/(n_j-1)`$ before taking the square root.
-Weights are normalized to sum to one, and $`n_j`$ counts observed
+mean is multiplied by \\n_j/(n_j-1)\\ before taking the square root.
+Weights are normalized to sum to one, and \\n_j\\ counts observed
 respondents with positive weights in that PV and population after
 missing-data handling. The correction is applied separately for every
 PV, so different numbers of available respondents receive different
