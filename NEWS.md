@@ -1,3 +1,9 @@
+# eatPrep (development)
+
+## new features
+
+* Added `computeCutsIDMMAPT()` for comparison with existing IDM cuts using pooled binary logistic regressions at each level boundary. Supports long and wide ratings, ordered category labels, auxiliary per-rater fits, and fit diagnostics. Implements the MAPT logistic calculation without automatic rating trimming.
+
 # eatPrep 1.0.15
 
 * Reference-page formulas now render with MathJax instead of appearing as raw LaTeX.

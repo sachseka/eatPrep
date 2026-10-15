@@ -80,13 +80,14 @@ rater2 <- c("[meanKappa()](#rater-agreement)", "calculates mean pairwise kappa a
 rater3 <- c("[make.pseudo()](#pseudo-raters)", "reduces multiple real raters to a smaller number of pseudo raters.")
 idm1 <- c("[computeCutsIDM()](#idm-cut-scores)", "computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages.")
 idm2 <- c("[plotCutsIDM()](#idm-cut-scores)", "plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from `computeCutsIDM()`.")
+idm3 <- c("[computeCutsIDMMAPT()](#logistic-idm-cut-scores)", "computes pooled logistic IDM cuts for comparison with the moving-average method.")
 visual1 <- c("[visualSubsetRecode()](#visual-subset-recoding)", "supports interactive visual inspection and recoding of flagged subsets.")
 
 outline <- rbind.data.frame(head1, read1, read2, read3,
                             head2, check1, check2, check3,
                             head3, merge1, recode1, aggregate1, score1, score2,
                             head4, wrap1,
-                            head5, pbc1, pbc2, rater1, rater2, rater3, idm1, idm2, visual1,
+                            head5, pbc1, pbc2, rater1, rater2, rater3, idm1, idm2, idm3, visual1,
                             head6, export1, export2, export3)
 names(outline) <- c("Function", "Explanation")
 kable(outline, caption = "**Functions Overview**")
@@ -1005,6 +1006,61 @@ plotCutsIDM(
 ```
 
 If a panel contains any missing or infinite cut, its percentage table is replaced with an explanatory message and a warning identifies the affected panel. Complete panels still show their percentages. Descending cut sequences cause an error when percentage computation is enabled. The estimates are descriptive point estimates; uncertainty intervals are not computed.
+
+### Logistic IDM Cut Scores
+
+`computeCutsIDMMAPT()` provides a logistic comparison using the same item
+difficulties and ratings. At each boundary it models whether a rating is above
+that boundary, pooling the observed ratings. Its cut is the difficulty where
+the fitted probability is 0.5. This is a probability of a level assignment,
+not of a correct item response. The calculation follows the regression step
+in the [MAPT Technical Manual (2006), pp. 54--55](https://bpb-us-e2.wpmucdn.com/websites.umass.edu/dist/5/40195/files/2021/03/MAPT_TechnicalManualv1.pdf),
+without the report's rating trimming.
+
+This example includes overlapping ratings so each logistic fit has information
+on both sides of the transition:
+
+```{r logistic idm example}
+idmCompare <- data.frame(
+  item = paste0("I", 1:15),
+  est = seq(300, 650, length.out = 15),
+  Rater1 = c(1, 2, 1, 3, 2, 4, 3, 2, 5, 3, 4, 5, 4, 5, 4),
+  Rater2 = c(2, 1, 3, 1, 2, 3, 4, 3, 4, 5, 3, 4, 5, 4, 5)
+)
+cutsMA <- computeCutsIDM(idmCompare)
+cutsMAPT <- computeCutsIDMMAPT(idmCompare, item_id_col = "item")
+data.frame(
+  method = c("moving_average", "logistic"),
+  rbind(cutsMA$cuts_summary, cutsMAPT$cuts_summary)
+)
+cutsMAPT$cut_diagnostics
+```
+
+The main result, `cuts_summary`, contains the pooled cuts. The separate
+`cuts_per_person` and `cuts_summary_per_person` are auxiliary rater results;
+their average is not the pooled estimate. Set `per_rater = FALSE` to omit them.
+
+For long input and named categories, supply the item and rater identifiers,
+the rating column, and the category order:
+
+```{r logistic idm long example, eval=FALSE}
+cutsMAPT <- computeCutsIDMMAPT(
+  dat, item_id_col = "item_cat", est_col = "est",
+  rater_id_col = "Name", rating_col = "Kategorie", input_format = "long",
+  rating_levels = c("1a", "1b", "2", "3", "4"), missing = "drop"
+)
+cutsMAPT$cuts_summary
+cutsMAPT$cut_diagnostics
+```
+
+When comparing difficulty estimates, use exactly the same item--rater
+observations for both inputs; otherwise missing values can also change the
+comparison. Equal difficulties are allowed and no moving average is used.
+Check the diagnostics: separated, unidentifiable, non-converged, or
+non-positive-slope fits have `NA` cuts; extrapolated cuts are retained and
+flagged. Independently fitted cuts can cross and are not rearranged.
+The function does not provide uncertainty intervals for the cuts.
+`plotCutsIDM()` supports the moving-average output only.
 
 ### Visual Subset Recoding
 
