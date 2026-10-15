@@ -1,8 +1,10 @@
-# eatPrep (development)
+# eatPrep 1.0.16
 
 ## new features
 
-* Added `computeCutsIDMMAPT()` for comparison with existing IDM cuts using pooled binary logistic regressions at each level boundary. Supports long and wide ratings, ordered category labels, auxiliary per-rater fits, and fit diagnostics. Implements the MAPT logistic calculation without automatic rating trimming.
+* Added `computeCutsIDMMAPT()` for comparison with existing IDM cuts. It fits pooled binary logistic regressions at each level boundary and calculates cuts at probability 0.5, following the MAPT logistic calculation without automatic rating trimming.
+* The new function supports long and wide ratings and ordered category labels. It returns pooled cuts, auxiliary per-rater cuts and their means, and model diagnostics. Unusable fits return `NA`; extrapolated or unordered cuts are flagged.
+* Documentation and comparison examples accompany regression tests for agreement with direct logistic fits, invariance to row order and ties, input formats, missing ratings, separation, and rescaling of item difficulties.
 
 # eatPrep 1.0.15
 
