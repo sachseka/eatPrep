@@ -3,7 +3,8 @@
 \title{Plot Population Distributions from Plausible Values with IDM Cuts}
 \description{
 Estimates a population density from wide- or long-format plausible values (PVs)
-and draws IDM cut scores over it. An optional grouping column overlays multiple
+and draws cut scores from \code{computeCutsIDM()} or \code{computeCutsIDMMAPT()}
+over it. An optional grouping column overlays multiple
 population densities with transparent fills. The y-axis represents population density.
 For a distribution-shape silhouette behind rater curves, use \code{\link{plotCutsIDM}}.
 For a supplied numeric cut vector without an IDM object, use \code{\link{plotPopulationCuts}}.
@@ -39,7 +40,9 @@ plotPopulationCutsIDM(
 )
 }
 \arguments{
-  \item{res_list}{A list returned by \code{\link{computeCutsIDM}}. Cut scores are used as stored, without re-estimation.}
+  \item{res_list}{A result returned by \code{\link{computeCutsIDM}} or
+  \code{\link{computeCutsIDMMAPT}}. Cut scores and custom cut labels are used
+  as stored, without re-estimation.}
   \item{pv_data}{A data frame of plausible values for one domain, optionally containing several populations identified by \code{population_col}. PVs must already use the same metric as the item estimates and cuts. No scale conversion is performed.}
   \item{pv_cols}{Character vector of PV column names for wide input, with one row per respondent. Required for wide input; other numeric columns are never selected automatically.}
   \item{respondent_id_col}{Optional respondent ID column for wide input; required for long input. Wide IDs must be unique within each population. The same ID may occur in different populations. IDs are population respondent identifiers, not rater or item identifiers.}
@@ -50,7 +53,16 @@ plotPopulationCutsIDM(
   \item{pv_missing}{Missing-PV policy. Default \code{"error"} rejects \code{NA}/\code{NaN} values and omitted respondent-PV rows. \code{"drop"} omits these with a warning and renormalizes weights separately within each PV. Infinite PVs and missing or invalid weights always cause an error. Every PV must retain at least two observed respondents with positive weights.}
   \item{density_bw}{Optional positive finite numeric bandwidth in score units. When \code{NULL}, average the unweighted \code{stats::bw.nrd0()} bandwidths across PVs within each population after exclusions, then average those population means. This common bandwidth is used for every population and PV; automatic bandwidth selection does not account for sampling weights.}
   \item{density_adjust}{Positive finite multiplier for the common bandwidth. Values above one produce more smoothing; values below one produce less.}
-  \item{cut_selection}{\code{"mean"} (default) draws cuts from \code{res_list$cuts_summary}. \code{"individual"} creates one facet per rater with cuts from \code{res_list$cuts_per_person}. \code{"both"} adds a mean-cut facet to the individual facets. All facets show the same population density on fixed axes.}
+  \item{cut_selection}{\code{"mean"} (default) draws cuts from
+  \code{res_list$cuts_summary}. For MAPT, this option retains its name for
+  compatibility but displays jointly estimated pooled cuts in a
+  \code{Pooled (MAPT)} panel, not the mean of rater cuts.
+  \code{"individual"} creates one facet per rater using
+  \code{res_list$cuts_per_person}. \code{"both"} adds the mean-cut or pooled
+  facet to the individual facets. If a MAPT result has
+  \code{per_rater = FALSE}, \code{"mean"} and \code{"both"} show only the
+  pooled panel, while \code{"individual"} gives an error. All facets show the
+  same population density on fixed axes.}
   \item{est_col}{Optional x-axis metric label. Defaults to \code{res_list$est_col}, or \code{"est"} if unavailable. This changes the label only.}
   \item{show_cut_values}{Logical scalar. Show numeric labels next to finite cut lines.}
   \item{cut_value_digits}{Non-negative integer scalar. Digits after the decimal point for rounding cut labels; trailing zeros are removed. Default \code{0L}.}
@@ -128,8 +140,8 @@ the upper interval. Identical adjacent cuts create an empty interval with zero
 percent. All observed PVs are included, including values outside the visible
 plot range. Actual unrounded cuts determine membership: changing cut-label
 rounding or density smoothing does not change percentages. Individual panels
-use their rater's cuts. The mean panel recomputes shares at the mean cuts; it
-does not average rater percentages.
+use their rater's cuts. The mean panel recomputes shares at the mean cuts; the
+MAPT pooled panel uses its pooled cuts. Neither averages rater percentages.
 
 Percentage labels are horizontally centered between the visible cut positions.
 For outer intervals, the midpoint between the outermost cut and the visible
@@ -177,7 +189,8 @@ Both functions use the same population preparation and density calculation.
 A \code{ggplot2} object that can be customized with standard ggplot layers and themes.
 }
 \seealso{
-\code{\link{computeCutsIDM}}, \code{\link{plotCutsIDM}}, \code{\link[stats]{density}}.
+\code{\link{computeCutsIDM}}, \code{\link{computeCutsIDMMAPT}},
+\code{\link{plotCutsIDM}}, \code{\link[stats]{density}}.
 }
 \references{
 OECD, \emph{PISA Research Documentation: How to prepare and analyse the PISA database}.
@@ -272,4 +285,14 @@ plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
 ## Hide M and SD while keeping the cut-interval percentages.
 plotPopulationCutsIDM(cuts, population, pv_cols = c("PV1", "PV2"),
                       weight_col = "weight", show_population_stats = FALSE)
+
+## MAPT: cut_selection = "mean" selects pooled logistic cuts.
+mapt_items <- data.frame(
+  est = seq(300, 650, length.out = 15),
+  Rater1 = c(1, 2, 1, 3, 2, 4, 3, 2, 5, 3, 4, 5, 4, 5, 4),
+  Rater2 = c(2, 1, 3, 1, 2, 3, 4, 3, 4, 5, 3, 4, 5, 4, 5)
+)
+mapt <- computeCutsIDMMAPT(mapt_items)
+plotPopulationCutsIDM(mapt, population, pv_cols = c("PV1", "PV2"),
+                      weight_col = "weight", cut_selection = "both")
 }

@@ -1,9 +1,14 @@
 \name{plotCutsIDM}
 \alias{plotCutsIDM}
-\title{Plot Raw Values, Moving Average, and Monotonized Moving Average}
+\title{Plot IDM Cut Scores and Fitted Rating Functions}
 \description{
-Visualizes the IDM rating process for each rater, showing raw ratings, smoothed moving averages, the final isotonic regression line used to determine cut scores, and optionally filter residuals.
-Optional population silhouettes show distribution shape only; their height does not represent rating stages or density-axis values. Multiple populations can overlap with transparent fills.
+Visualizes results from \code{computeCutsIDM()} or \code{computeCutsIDMMAPT()}.
+The moving-average view shows raw ratings, smoothed ratings, and isotonic curves.
+The MAPT view shows binary logistic probability curves for each level boundary
+and optionally the pooled model. Both views support cut labels and residuals.
+Optional population silhouettes show distribution shape only; their height
+does not represent rating stages, rating probabilities, or density-axis values.
+Multiple populations can overlap with transparent fills.
 }
 \usage{
 plotCutsIDM(
@@ -44,20 +49,40 @@ plotCutsIDM(
 )
 }
 \arguments{
-  \item{res_list}{A list returned by \code{computeCutsIDM()} containing the processed data and cut score coordinates.}
-  \item{est_col}{Optional character scalar. Label to use for the item difficulty axis. If \code{NULL}, the value stored by \code{computeCutsIDM()} is used.}
-  \item{show_raw}{Logical scalar. If \code{TRUE}, raw ratings are shown as points and as a thin line connecting items ordered by difficulty.}
-  \item{show_smoothed}{Logical scalar. If \code{TRUE}, the non-monotonized moving average is shown as a thin dashed blue line.}
-  \item{show_residuals}{Logical scalar. If \code{TRUE}, an additional residual panel is shown for each rater. Residuals are computed as raw rating minus smoothed moving average.}
-  \item{show_aggregate}{Logical scalar. If \code{TRUE}, an additional aggregate panel is shown. It overlays the monotonized rater curves in rater-specific colors and draws the mean cut scores from \code{res_list$cuts_summary}.}
-  \item{show_aggregate_labels}{Logical scalar. If \code{TRUE}, rater names are shown near the right-hand end of the monotonized curves in the aggregate panel. Only used when \code{show_aggregate = TRUE}.}
+  \item{res_list}{A result from \code{computeCutsIDM()} or
+  \code{computeCutsIDMMAPT()}. The result's class selects the appropriate view.}
+  \item{est_col}{Optional character scalar. Label to use for the item difficulty axis. If \code{NULL}, the value stored in \code{res_list} is used.}
+  \item{show_raw}{Logical scalar. For moving-average IDM, shows raw ratings as
+  points and a thin line connecting items ordered by difficulty. For MAPT,
+  shows the empirical proportion of ratings above each boundary at each
+  observed difficulty, within the relevant rater or pooled panel.}
+  \item{show_smoothed}{Logical scalar. Shows the non-monotonized moving
+  average as a thin dashed blue line. Has no effect for MAPT results, whose
+  logistic curves are always shown.}
+  \item{show_residuals}{Logical scalar. Adds a residual row. For moving-average
+  IDM, residuals are raw ratings minus smoothed moving averages. For MAPT,
+  they are empirical proportions above each boundary minus the corresponding
+  model probabilities at the same difficulties.}
+  \item{show_aggregate}{Logical scalar. Adds a \code{Mean} panel for
+  moving-average IDM, overlaying the monotonized rater curves and their mean
+  cuts. For MAPT, adds a \code{Pooled (MAPT)} panel with the jointly fitted
+  logistic curves and pooled cuts from \code{res_list$cuts_summary}. This is
+  not a mean of the rater-specific cuts. If the MAPT result was computed with
+  \code{per_rater = FALSE}, only the pooled panel is shown regardless of this
+  option.}
+  \item{show_aggregate_labels}{Logical scalar. Shows rater names near the
+  right-hand end of monotonized curves in the \code{Mean} panel. Only used
+  for moving-average IDM when \code{show_aggregate = TRUE}; has no effect
+  for MAPT results.}
   \item{show_cut_values}{Logical scalar. If \code{TRUE}, numeric cut values are shown next to the vertical cut lines in individual panels and, when requested, in the aggregate panel.}
-  \item{show_item_numbers}{Logical scalar. If \code{TRUE}, item position numbers are shown next to the raw grey points in the individual rater panels. Only used when \code{show_raw = TRUE}.}
+  \item{show_item_numbers}{Logical scalar. Shows item position numbers next
+  to raw grey points in the individual moving-average IDM panels. Only used
+  when \code{show_raw = TRUE}; has no effect for MAPT results.}
   \item{cut_value_digits}{Non-negative integer scalar. Number of digits after the decimal point used for rounding cut value labels. The default \code{0L} shows rounded whole-number cut values.}
-  \item{item_number_size}{Finite non-negative numeric scalar. Text size in millimetres for item position numbers next to raw points. Default is \code{2}. Only used when \code{show_raw = TRUE} and \code{show_item_numbers = TRUE}.}
+  \item{item_number_size}{Finite non-negative numeric scalar. Text size in millimetres for item position numbers next to raw points. Default is \code{2}. Only used for moving-average IDM when \code{show_raw = TRUE} and \code{show_item_numbers = TRUE}.}
   \item{cut_value_size}{Finite non-negative numeric scalar. Text size in millimetres for numeric cut value labels in individual and aggregate panels. Default is \code{2.6}. Only used when \code{show_cut_values = TRUE}.}
-  \item{aggregate_label_size}{Finite non-negative numeric scalar. Text size in millimetres for rater names in the aggregate panel. Default is \code{3}. Only used when \code{show_aggregate = TRUE} and \code{show_aggregate_labels = TRUE}.}
-  \item{pv_data}{Optional wide- or long-format data frame of plausible values for one domain, optionally grouped into populations by \code{population_col}, already on the same metric as the item estimates and cuts. Supplying it adds background silhouettes to rating panels. Default \code{NULL} leaves the plot unchanged. Silhouettes show \strong{distribution shape only}; their height \strong{does not represent rating stages} or density-axis values.}
+  \item{aggregate_label_size}{Finite non-negative numeric scalar. Text size in millimetres for rater names in the aggregate panel. Default is \code{3}. Only used for moving-average IDM when \code{show_aggregate = TRUE} and \code{show_aggregate_labels = TRUE}.}
+  \item{pv_data}{Optional wide- or long-format data frame of plausible values for one domain, optionally grouped into populations by \code{population_col}, already on the same metric as the item estimates and cuts. Supplying it adds background silhouettes to rating or MAPT probability panels. Default \code{NULL} leaves the plot unchanged. Silhouettes show \strong{distribution shape only}; their height \strong{does not represent rating stages, rating probabilities, or density-axis values}.}
   \item{pv_cols}{Character vector of PV column names, required for wide input. Wide input has one row per respondent. Other numeric columns are never selected automatically.}
   \item{respondent_id_col}{Optional respondent ID column, unique within each population for wide input; required for long input. IDs may repeat between populations. These are population respondent IDs, not rater IDs.}
   \item{pv_id_col}{PV identifier column for long input. Required together with \code{pv_value_col} and \code{respondent_id_col}. Each respondent-PV combination must be unique within its population.}
@@ -67,7 +92,7 @@ plotCutsIDM(
   \item{pv_missing}{Default \code{"error"} rejects missing PVs and omitted respondent-PV rows. \code{"drop"} omits them with a warning and renormalizes weights within each PV. Infinite PVs and invalid weights always cause an error. Every PV must retain at least two observed respondents with positive weights.}
   \item{density_bw}{Optional positive finite bandwidth in score units. Default \code{NULL} averages unweighted \code{stats::bw.nrd0()} bandwidths across PVs within each population, then averages those population means. All populations and PVs share this bandwidth. Sampling weights affect the density estimates, not automatic bandwidth selection.}
   \item{density_adjust}{Positive finite multiplier for the common density bandwidth. Default \code{1}.}
-  \item{population_height}{Finite fraction between zero and one of the rating-axis range occupied by the highest silhouette peak across all populations. Default \code{0.25}. All silhouettes use the same height factor. This is a display setting for \strong{distribution shape only}; silhouette height \strong{does not represent rating stages} or density-axis values.}
+  \item{population_height}{Finite fraction between zero and one of the rating- or probability-axis range occupied by the highest silhouette peak across all populations. Default \code{0.25}. All silhouettes use the same height factor. This is a display setting for \strong{distribution shape only}; silhouette height \strong{does not represent rating stages, rating probabilities, or density-axis values}.}
   \item{population_fill}{Character vector of silhouette fill colors. An explicitly supplied single color applies to all populations. Otherwise supply exactly one color per observed population, in order of first appearance in the data (the population legend order); vector names are ignored. Too few or too many colors, including an empty vector, trigger a warning and restore the default colors. If omitted, ungrouped input uses \code{"grey50"}; grouped input uses the automatic palette described under \code{population_colors}. Explicit \code{population_colors} takes precedence.}
   \item{population_alpha}{Finite silhouette opacity between zero and one. Default \code{0.15}.}
   \item{population_col}{Optional population grouping column in wide or long PV input. Labels must be non-missing and non-empty. Groups are drawn and listed in their order of first appearance; unused factor levels are ignored. Default \code{NULL} treats all rows as one population.}
@@ -80,6 +105,43 @@ plotCutsIDM(
   \item{show_caption}{Logical scalar. Default \code{FALSE} hides explanatory plot captions. Set to \code{TRUE} to explain the population silhouette and, when displayed, percentages and M/SD below the plot. Does not affect statistics, percentage labels, or the subtitle. Has no plotting effect without \code{pv_data}.}
 }
 \details{
+For \code{computeCutsIDMMAPT()} results, each colored curve shows
+\eqn{P(\mathrm{rating\ index} > b)} for one boundary \eqn{b}. The y-axis is a
+probability scale from zero to one, with a horizontal reference at 0.5.
+Individual panels use their own rater models and cuts; the optional
+\code{Pooled (MAPT)} panel uses the models fitted to all ratings together and
+the cuts in \code{cuts_summary}. It does not use
+\code{cuts_summary_per_person}. The probability concerns a rating-level
+assignment, not a correct response to an item.
+
+Curves are solid within the observed difficulty range of their panel and
+dotted outside it to identify extrapolation. Predictions use the stored
+models. For older MAPT results without stored individual models, the same
+logistic curves can be reconstructed from their diagnostic slopes and cuts;
+the plot does not refit the models.
+
+MAPT raw points are empirical proportions for each difficulty and boundary.
+Residuals, when requested, subtract the corresponding fitted probabilities
+from these proportions. Only models with diagnostic status \code{ok} supply
+curves or residuals; unusable fits have no curve or cut line. The fitted
+probabilities remain distinct from the rating-stage and isotonic data used
+by the moving-average method. \code{show_smoothed}, \code{show_item_numbers},
+and \code{show_aggregate_labels} apply only to the moving-average view and
+have no effect for MAPT.
+
+PV silhouettes, population statistics, and percentage tables are also
+available for MAPT. Silhouettes start at zero on the probability axis, but
+their height is only a display scaling of the PV distribution, not a
+rating probability. Each panel's interval percentages use its own cuts;
+the pooled panel uses pooled cuts. Missing cuts produce an explanatory
+message instead of percentages. Descending cuts cause an error when
+percentages are requested; set \code{show_percentages = FALSE} to inspect
+such curves without percentages. Residual panels have no silhouettes or
+percentage tables.
+
+The following rating-stage and smoothing details apply to output from
+\code{computeCutsIDM()}.
+
 One main idea of the IDM method is to account for rater noise by smoothing and monotonizing the relationship between item difficulty and the assigned levels. If \code{show_raw = TRUE}, grey points and a thin grey line show the original rater assignments after ordering items by difficulty. If \code{show_smoothed = TRUE}, a thin dashed blue line shows the moving average before monotonization. The red line represents the monotonized isotonic curve used to find the vertical intercepts. If the smoothed curve is already non-decreasing, the blue dashed line lies directly on top of the red line. Vertical cut lines are drawn at the cut scores stored by \code{computeCutsIDM()}, which are linearly interpolated boundary crossings of the monotonized curve.
 
 By default, the vertical cut lines are labelled with their numeric difficulty-scale values rounded to whole numbers. The number of digits after the decimal point can be changed with \code{cut_value_digits}. The grey raw-rating points in the individual rater panels are labelled with small item position numbers. These labels can be hidden with \code{show_cut_values = FALSE} and \code{show_item_numbers = FALSE}.
@@ -279,4 +341,23 @@ plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
 ## Hide M and SD independently of interval percentages.
 plotCutsIDM(res, pv_data = populations, pv_cols = c("PV1", "PV2"),
             weight_col = "weight", population_col = "group", show_population_stats = FALSE)
+
+## MAPT logistic curves use a probability axis and cuts at probability 0.5.
+## Overlapping ratings avoid perfect separation in this example.
+mapt_dat <- data.frame(
+  est = seq(300, 650, length.out = 15),
+  Rater1 = c(1, 2, 1, 3, 2, 4, 3, 2, 5, 3, 4, 5, 4, 5, 4),
+  Rater2 = c(2, 1, 3, 1, 2, 3, 4, 3, 4, 5, 3, 4, 5, 4, 5)
+)
+mapt <- computeCutsIDMMAPT(mapt_dat)
+plotCutsIDM(mapt, show_aggregate = TRUE)
+
+## Pooled curves/cuts are jointly estimated, not averaged across raters.
+## PV silhouette height shows distribution shape, not rating probability.
+plotCutsIDM(mapt, show_aggregate = TRUE, show_residuals = TRUE,
+            pv_data = population, pv_cols = c("PV1", "PV2"),
+            weight_col = "weight")
+
+## Without individual models, the plot shows only the pooled panel.
+plotCutsIDM(computeCutsIDMMAPT(mapt_dat, per_rater = FALSE))
 }

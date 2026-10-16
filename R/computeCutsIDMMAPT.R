@@ -276,15 +276,18 @@ computeCutsIDMMAPT <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
   pooled <- fit_cuts(long)
   cuts_summary <- cut_row(pooled$diagnostics$cut)
   cuts_per_person <- cuts_summary_per_person <- diagnostics_per_person <- NULL
+  models_per_person <- NULL
   if (per_rater) {
     person_results <- lapply(prepared$persons, function(p) {
-      fit_cuts(long[long$person == p, , drop = FALSE])$diagnostics
+      fit_cuts(long[long$person == p, , drop = FALSE])
     })
+    models_per_person <- stats::setNames(lapply(person_results, `[[`, "models"), prepared$persons)
     cuts_per_person <- tibble::as_tibble(do.call(rbind, lapply(seq_along(prepared$persons), function(i) {
-      cbind(data.frame(person = prepared$persons[i]), as.data.frame(cut_row(person_results[[i]]$cut)))
+      cbind(data.frame(person = prepared$persons[i]),
+            as.data.frame(cut_row(person_results[[i]]$diagnostics$cut)))
     })))
     diagnostics_per_person <- tibble::as_tibble(do.call(rbind, lapply(seq_along(prepared$persons), function(i) {
-      cbind(data.frame(person = prepared$persons[i]), as.data.frame(person_results[[i]]))
+      cbind(data.frame(person = prepared$persons[i]), as.data.frame(person_results[[i]]$diagnostics))
     })))
     cuts_summary_per_person <- cut_row(vapply(cuts_per_person[cut_labels], function(x) {
       if (all(is.na(x))) NA_real_ else mean(x, na.rm = TRUE)
@@ -319,7 +322,8 @@ computeCutsIDMMAPT <- function(dat, boundaries = c(1.5, 2.5, 3.5, 4.5),
     cuts_summary = cuts_summary, cuts_per_person = cuts_per_person,
     cuts_summary_per_person = cuts_summary_per_person,
     cut_diagnostics = pooled$diagnostics, diagnostics_per_person = diagnostics_per_person,
-    models = pooled$models, data_used = tibble::as_tibble(long), n_dropped = n_dropped,
+    models = pooled$models, models_per_person = models_per_person,
+    data_used = tibble::as_tibble(long), n_dropped = n_dropped,
     boundaries = boundaries, rating_levels = rating_levels, cut_labels = cut_labels,
     input_format = prepared$input_format, est_col = est_col, item_id_col = item_id_col,
     rater_id_col = rater_id_col, rating_col = rating_col, missing = missing,

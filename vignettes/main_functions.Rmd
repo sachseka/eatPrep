@@ -1060,7 +1060,50 @@ Check the diagnostics: separated, unidentifiable, non-converged, or
 non-positive-slope fits have `NA` cuts; extrapolated cuts are retained and
 flagged. Independently fitted cuts can cross and are not rearranged.
 The function does not provide uncertainty intervals for the cuts.
-`plotCutsIDM()` supports the moving-average output only.
+
+`plotCutsIDM()` accepts the MAPT result directly:
+
+```{r logistic idm plot, fig.width=8, fig.height=4}
+plotCutsIDM(cutsMAPT, show_aggregate = TRUE)
+```
+
+Each rater panel shows the fitted probability that a rating index exceeds a
+boundary, on a zero-to-one scale. The horizontal line at 0.5 marks the cut
+criterion; vertical lines show the resulting difficulty-scale cuts. The
+curves are solid within each panel's observed difficulty range and dotted
+outside it to identify extrapolation. The
+`Pooled (MAPT)` panel shows the models jointly fitted to all ratings and the
+cuts from `cuts_summary`. It does not average the individual rater cuts.
+With `per_rater = FALSE`, this is the only panel, including when
+`show_aggregate = FALSE`.
+
+Raw points show the empirical proportions above each boundary at each
+difficulty. `show_residuals = TRUE` adds empirical proportions minus fitted
+probabilities. Unusable models supply no curve or cut line. The options
+`show_smoothed`, `show_item_numbers`, and `show_aggregate_labels` concern only
+the moving-average view and have no effect for MAPT results.
+
+The population options also work with MAPT. For example, with PVs on the same
+metric as the item difficulties:
+
+```{r logistic idm population plot, eval=FALSE}
+plotCutsIDM(cutsMAPT, show_aggregate = TRUE,
+            pv_data = population, pv_cols = c("PV1", "PV2"),
+            weight_col = "weight")
+```
+
+Silhouette height shows distribution shape only, not a rating probability.
+Interval percentages use the cuts in their own panel; the pooled panel uses
+pooled cuts. Missing cuts prevent percentage calculation for that panel.
+If fitted cuts cross, set `show_percentages = FALSE` to inspect the curves
+without calculating interval percentages.
+
+For a population distribution with a density axis, use
+`plotPopulationCutsIDM(cutsMAPT, population, pv_cols = c("PV1", "PV2"),
+weight_col = "weight", cut_selection = "both")`. With MAPT input,
+`cut_selection = "mean"` retains its existing argument name but selects the
+pooled cuts. `"both"` shows individual and pooled panels, or only the pooled
+panel when `per_rater = FALSE`.
 
 ### Visual Subset Recoding
 

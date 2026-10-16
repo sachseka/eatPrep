@@ -202,7 +202,7 @@ plotCutsIDM <- function(res_list, est_col = NULL,
   )
   cut_value_digits <- as.integer(cut_value_digits)
 
-  population_density <- NULL
+  population_data <- population_density <- NULL
   colors <- NULL
   if (!is.null(pv_data)) {
     checkmate::assert_number(population_height, lower = 0, upper = 1, finite = TRUE)
@@ -217,6 +217,27 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     )
     population_fill <- style$fill
     colors <- style$colors
+  }
+
+  if (inherits(res_list, "cutsIDMMAPT")) {
+    return(.plot_cuts_mapt(
+      res_list,
+      options = list(
+        est_col = est_col, show_raw = show_raw, show_smoothed = show_smoothed,
+        show_residuals = show_residuals, show_aggregate = show_aggregate,
+        show_aggregate_labels = show_aggregate_labels,
+        show_cut_values = show_cut_values, show_item_numbers = show_item_numbers,
+        cut_value_digits = cut_value_digits, item_number_size = item_number_size,
+        cut_value_size = cut_value_size, aggregate_label_size = aggregate_label_size,
+        population_height = population_height, population_fill = population_fill,
+        population_alpha = population_alpha, show_percentages = show_percentages,
+        percentage_digits = percentage_digits, percentage_size = percentage_size,
+        show_population_stats = show_population_stats,
+        population_stats_digits = population_stats_digits, show_caption = show_caption
+      ),
+      population_data = population_data, population_density = population_density,
+      population_colors = colors
+    ))
   }
 
   # Determine axis limits dynamically

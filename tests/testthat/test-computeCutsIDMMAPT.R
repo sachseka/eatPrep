@@ -90,6 +90,18 @@ test_that("the pooled MAPT estimate is distinguished from a mean of rater cuts",
                unname(colMeans(expected)), tolerance = 1e-7)
   expect_gt(max(abs(unlist(result$cuts_summary) - colMeans(expected))), 0.01)
   expect_equal(nrow(result$diagnostics_per_person), 8L)
+  expect_identical(names(result$models_per_person), result$cuts_per_person$person)
+  for (person in names(result$models_per_person)) {
+    models <- result$models_per_person[[person]]
+    expect_identical(names(models), cut_names)
+    cuts <- unlist(result$cuts_per_person[result$cuts_per_person$person == person, cut_names])
+    at_cuts <- vapply(seq_along(models), function(i) {
+      model <- models[[i]]
+      unname(stats::predict(model, data.frame(difficulty =
+        (cuts[i] - model$est_center) / model$est_scale), type = "response"))
+    }, numeric(1))
+    expect_equal(at_cuts, rep(0.5, length(boundaries)), tolerance = 1e-12)
+  }
 })
 
 test_that("ties and arbitrary row order leave MAPT cuts unchanged", {
@@ -134,6 +146,7 @@ test_that("omitting individual fits leaves the pooled estimate unchanged", {
   expect_null(pooled_only$cuts_per_person)
   expect_null(pooled_only$cuts_summary_per_person)
   expect_null(pooled_only$diagnostics_per_person)
+  expect_null(pooled_only$models_per_person)
 })
 
 test_that("MAPT cuts follow positive affine changes of the difficulty scale", {

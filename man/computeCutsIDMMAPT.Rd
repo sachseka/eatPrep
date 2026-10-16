@@ -86,10 +86,17 @@ and cuts on the original difficulty scale.
 The model objects allow inspection of fitted curves, but their ordinary
 independent-observation standard errors do not account for shared items or
 raters, or for estimated item difficulties. No cut confidence intervals are
-provided. \code{plotCutsIDM()} does not accept this function's output.
+provided.
+
+\code{plotCutsIDM()} accepts this result directly. Its MAPT view shows the
+fitted probability that a rating index exceeds each boundary, with cuts at
+probability 0.5. \code{show_aggregate = TRUE} adds a \code{Pooled (MAPT)} panel
+using the jointly fitted models and \code{cuts_summary}, not the mean of
+rater-specific cuts. When \code{per_rater = FALSE}, only this pooled panel is
+shown, regardless of \code{show_aggregate}.
 }
 \value{
-A list with the following components:
+A list of class \code{cutsIDMMAPT} with the following components:
 \item{cuts_summary}{One-row tibble of pooled cuts, with one column per cut.}
 \item{cuts_per_person}{Auxiliary rater-specific cuts, or \code{NULL} when
 \code{per_rater = FALSE}.}
@@ -106,6 +113,9 @@ is \code{NA} if no finite individual cut is available. \code{NULL} when
 when \code{per_rater = FALSE}.}
 \item{models}{Named list of pooled \code{glm} fits; entries may be \code{NULL}
 when a model cannot be fitted.}
+\item{models_per_person}{Named list of raters, each containing a list of
+\code{glm} fits named by cut. Entries may be \code{NULL} when a model cannot
+be fitted. The whole component is \code{NULL} when \code{per_rater = FALSE}.}
 \item{data_used}{Long-format data used in the models, with columns
 \code{item_id}, \code{person}, \code{est}, \code{stage_raw}, and
 \code{stage_label}.}
@@ -122,7 +132,8 @@ boundary order; \code{NA} if any pooled cut is unavailable.}
 pp. 54--55.
 \url{https://bpb-us-e2.wpmucdn.com/websites.umass.edu/dist/5/40195/files/2021/03/MAPT_TechnicalManualv1.pdf}
 }
-\seealso{\code{\link{computeCutsIDM}}, \code{\link[stats]{glm}}}
+\seealso{\code{\link{computeCutsIDM}}, \code{\link{plotCutsIDM}},
+\code{\link[stats]{glm}}}
 \examples{
 # Ratings overlap along the difficulty scale, avoiding perfect separation.
 dat <- data.frame(
@@ -134,6 +145,7 @@ dat <- data.frame(
 mapt <- computeCutsIDMMAPT(dat, item_id_col = "item")
 mapt$cuts_summary
 mapt$cut_diagnostics
+plotCutsIDM(mapt, show_aggregate = TRUE)
 
 old <- computeCutsIDM(dat)
 data.frame(

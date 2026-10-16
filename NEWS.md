@@ -4,6 +4,9 @@
 
 * Added `computeCutsIDMMAPT()` for comparison with existing IDM cuts. It fits pooled binary logistic regressions at each level boundary and calculates cuts at probability 0.5, following the MAPT logistic calculation without automatic rating trimming.
 * The new function supports long and wide ratings and ordered category labels. It returns pooled cuts, auxiliary per-rater cuts and their means, and model diagnostics. Unusable fits return `NA`; extrapolated or unordered cuts are flagged.
+* `plotCutsIDM()` now accepts `computeCutsIDMMAPT()` results directly, showing binary logistic probability curves and rater-specific cuts. `show_aggregate = TRUE` adds a `Pooled (MAPT)` panel with the jointly estimated curves and pooled cuts. MAPT results retain their own class and now store the individual rater models in `models_per_person`.
+* The MAPT plot supports empirical proportions, model residuals, and PV silhouettes, population statistics, and interval percentages. Probability curves use a zero-to-one axis with a 0.5 reference; silhouettes show distribution shape only. With `per_rater = FALSE`, the plot shows only the pooled panel.
+* `plotPopulationCutsIDM()` also accepts MAPT results. Its existing `cut_selection = "mean"` selects pooled MAPT cuts, while `"both"` adds them to the individual rater panels; custom cut labels are preserved.
 * Documentation and comparison examples accompany regression tests for agreement with direct logistic fits, invariance to row order and ties, input formats, missing ratings, separation, and rescaling of item difficulties.
 
 # eatPrep 1.0.15
