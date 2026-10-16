@@ -8,6 +8,7 @@
 * The MAPT plot supports empirical proportions, model residuals, and PV silhouettes, population statistics, and interval percentages. Probability curves use a zero-to-one axis with a 0.5 reference; silhouettes show distribution shape only. With `per_rater = FALSE`, the plot shows only the pooled panel.
 * `plotPopulationCutsIDM()` also accepts MAPT results. Its existing `cut_selection = "mean"` selects pooled MAPT cuts, while `"both"` adds them to the individual rater panels; custom cut labels are preserved.
 * Documentation and comparison examples accompany regression tests for agreement with direct logistic fits, invariance to row order and ties, input formats, missing ratings, separation, and rescaling of item difficulties.
+* The `computeCutsIDMMAPT()` and `plotCutsIDM()` help pages now explain the calculation and plots step by step, with defined mathematical symbols, worked numerical examples, and runnable labelled-rating examples. They distinguish rating-index boundaries from difficulty-scale cuts, pooled fits from mean rater cuts, boundary-colored points from population colors, and rating probabilities from PV population percentages.
 
 # eatPrep 1.0.15
 
