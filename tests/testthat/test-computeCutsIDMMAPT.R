@@ -35,6 +35,116 @@
   unname(-stats::coef(model)[1] / stats::coef(model)[2])
 }
 
+test_that("large numeric item identifiers remain distinct in both input formats", {
+  wide <- .mapt_test_wide()
+  expected <- .mapt_test_fit_long(.mapt_test_long(wide))
+  wide$item <- 1e15 + seq_len(nrow(wide)) - 1
+  long_result <- .mapt_test_fit_long(.mapt_test_long(wide))
+  wide_result <- suppressWarnings(computeCutsIDMMAPT(wide, item_id_col = "item"))
+  for (result in list(long_result, wide_result)) {
+    expect_equal(length(unique(result$data_used$item_id)), nrow(wide))
+    expect_equal(sort(unique(as.numeric(result$data_used$item_id))), wide$item)
+    expect_equal(result$cuts_summary, expected$cuts_summary)
+    expect_equal(result$cuts_per_person, expected$cuts_per_person)
+  }
+})
+
+test_that("large numeric raters sharing items are not rejected as duplicates", {
+  dat <- .mapt_test_long()
+  expected <- .mapt_test_fit_long(dat)
+  ids <- c(1e15, 1e15 + 1)
+  dat$person <- rep(ids, each = 50)
+  result <- .mapt_test_fit_long(dat)
+  expect_equal(nrow(result$cuts_per_person), 2L)
+  index <- match(ids, as.numeric(result$cuts_per_person$person))
+  expect_false(anyNA(index))
+  expect_equal(result$cuts_per_person[index, result$cut_labels],
+               expected$cuts_per_person[expected$cut_labels])
+  expect_length(result$models_per_person, 2L)
+})
+
+test_that("ambiguous class-specific MAPT identifier labels are rejected", {
+  dat <- .mapt_test_long()
+  # Fractional dates have different underlying values but identical labels.
+  dat$person <- as.Date(rep(c(1, 1.1), each = 50), origin = "1970-01-01")
+  expect_error(.mapt_test_fit_long(dat), "Distinct identifiers")
+})
+
+test_that("large numeric raters with disjoint items are not silently pooled", {
+  dat <- .mapt_test_long()
+  expected <- .mapt_test_fit_long(dat)
+  ids <- c(1e15, 1e15 + 1)
+  dat$item <- seq_len(nrow(dat))
+  dat$person <- rep(ids, each = 50)
+  result <- .mapt_test_fit_long(dat)
+  expect_equal(nrow(result$cuts_per_person), 2L)
+  index <- match(ids, as.numeric(result$cuts_per_person$person))
+  expect_false(anyNA(index))
+  expect_equal(result$cuts_per_person[index, result$cut_labels],
+               expected$cuts_per_person[expected$cut_labels])
+  expect_true(all(result$diagnostics_per_person$n == 50L))
+  expect_equal(length(unique(result$data_used$person)), 2L)
+})
+
+test_that("MAPT summaries expose pooled cuts and diagnostics without model dumps", {
+  result <- .mapt_test_fit_long(.mapt_test_long())
+  overview <- summary(result)
+  expect_s3_class(overview, "summary.cutsIDMMAPT")
+  expect_equal(overview$cuts_summary, result$cuts_summary)
+  expect_equal(overview$cut_diagnostics, result$cut_diagnostics)
+  expect_equal(overview$n_ratings, 100L)
+  expect_equal(overview$n_items, 50L)
+  expect_equal(overview$n_raters, 2L)
+  expect_null(overview$cuts_per_person)
+  expect_false(any(c("models", "data_used") %in% names(overview)))
+  expect_setequal(overview$issues$scope, c("pooled", "rater"))
+  expect_true(all(overview$issues$extrapolated))
+  details <- summary(result, per_rater = TRUE)
+  expect_equal(details$cuts_per_person, result$cuts_per_person)
+  expect_equal(details$diagnostics_per_person, result$diagnostics_per_person)
+  output <- capture.output(returned <- withVisible(print(result)))
+  expect_match(paste(output, collapse = "\n"), "Pooled cuts")
+  expect_match(paste(output, collapse = "\n"), "Flagged fits")
+  expect_false(returned$visible)
+  expect_identical(returned$value, result)
+  expect_output(print(details), "Individual rater cuts")
+  expect_output(print(overview, digits = 1), "-2.3")
+  expect_error(summary(result, per_rater = NA), "per_rater")
+  expect_error(print(result, digits = -1), "digits")
+})
+
+test_that("MAPT summaries explain unavailable fits and missing individual results", {
+  dat <- data.frame(est = 1:8, RaterA = rep(1, 8))
+  result <- suppressWarnings(computeCutsIDMMAPT(dat, boundaries = 1.5, per_rater = FALSE))
+  overview <- summary(result, per_rater = TRUE)
+  expect_equal(overview$issues$status, "one_class")
+  expect_null(overview$cuts_per_person)
+  expect_false(overview$per_rater_available)
+  expect_output(print(overview), "Cut order cannot be checked")
+  expect_output(print(overview), "Individual fits unavailable")
+  invisible(capture.output(returned <- withVisible(print(overview))))
+  expect_identical(returned$value, overview)
+  expect_false(returned$visible)
+
+  valid <- .mapt_test_fit_long(.mapt_test_long(), boundaries = 2.5, per_rater = FALSE)
+  expect_equal(nrow(summary(valid)$issues), 0L)
+  expect_output(print(valid), "No flagged fits")
+  valid$cuts_ordered <- FALSE
+  expect_output(print(valid), "not strictly increasing")
+})
+
+test_that("MAPT summaries retain no-data diagnostics while counting used ratings", {
+  dat <- .mapt_test_long()
+  dat$rating[dat$person == "RaterB"] <- NA
+  result <- .mapt_test_fit_long(dat, boundaries = 2.5)
+  overview <- summary(result)
+  expect_equal(overview$n_dropped, 50L)
+  expect_equal(overview$n_ratings, 50L)
+  expect_equal(overview$n_raters, 1L)
+  expect_equal(overview$issues$person, "RaterB")
+  expect_equal(overview$issues$status, "no_data")
+})
+
 test_that("MAPT cuts reproduce separate pooled binary logistic regressions", {
   dat <- .mapt_test_long()
   result <- .mapt_test_fit_long(dat)

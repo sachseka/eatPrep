@@ -1,4 +1,7 @@
 S3method(print,summary.cutsIDM)
+S3method(print,cutsIDMMAPT)
+S3method(summary,cutsIDMMAPT)
+S3method(print,summary.cutsIDMMAPT)
 S3method(summary,cutsIDM)
 S3method(makeContent,population_percentage_band)
 S3method(makeContent,wright_item_labels)

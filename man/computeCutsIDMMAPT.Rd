@@ -269,6 +269,7 @@ pp. 54--55.
 \url{https://bpb-us-e2.wpmucdn.com/websites.umass.edu/dist/5/40195/files/2021/03/MAPT_TechnicalManualv1.pdf}
 }
 \seealso{\code{\link{computeCutsIDM}}, \code{\link{plotCutsIDM}},
+\code{\link{summary.cutsIDMMAPT}},
 \code{\link[stats]{glm}}}
 \examples{
 # Ratings overlap along the difficulty scale, avoiding perfect separation.
@@ -279,6 +280,8 @@ dat <- data.frame(
   Rater2 = c(2, 1, 3, 1, 2, 3, 4, 3, 4, 5, 3, 4, 5, 4, 5)
 )
 mapt <- computeCutsIDMMAPT(dat, item_id_col = "item")
+print(mapt)
+summary(mapt, per_rater = TRUE)
 # Main result: use the ratings from both raters together.
 mapt$cuts_summary
 mapt$cut_diagnostics[c("cut_name", "cut", "status", "extrapolated")]

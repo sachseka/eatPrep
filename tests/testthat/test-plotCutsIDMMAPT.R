@@ -27,6 +27,55 @@
   as.character(layout$PANEL[as.character(layout$.facet_person) == person])
 }
 
+test_that("custom MAPT cut order gives identical colours in both plot functions", {
+  result <- .mapt_plot_fit(boundaries = c(2.5, 3.5),
+                           cut_labels = c("z lower", "a upper"))
+  rating <- ggplot2::ggplot_build(plotCutsIDM(result, show_aggregate = TRUE))
+  population <- ggplot2::ggplot_build(plotPopulationCutsIDM(
+    result, pv_data = data.frame(PV1 = seq(-4, 5, length.out = 100)),
+    pv_cols = "PV1", cut_selection = "both"
+  ))
+  rating_scale <- rating$plot$scales$get_scales("colour")
+  population_scale <- population$plot$scales$get_scales("colour")
+  expect_equal(population_scale$get_limits(), result$cut_labels)
+  expect_equal(population_scale$map(result$cut_labels),
+               rating_scale$map(result$cut_labels))
+})
+
+test_that("MAPT cut legend draws one horizontal line per cut", {
+  result <- .mapt_plot_fit()
+  for (residuals in c(FALSE, TRUE)) {
+    plot <- plotCutsIDM(result, show_aggregate = TRUE, show_raw = TRUE,
+                        show_residuals = residuals)
+    grob <- ggplot2::ggplotGrob(plot)
+    boxes <- grob$grobs[grepl("guide-box", grob$layout$name)]
+    guides <- unlist(lapply(boxes, function(box) {
+      if (!inherits(box, "gtable")) return(list())
+      box$grobs[box$layout$name == "guides"]
+    }), recursive = FALSE)
+    labels <- function(g) {
+      if (inherits(g, "text")) return(as.character(g$label))
+      unlist(lapply(g$children, labels), use.names = FALSE)
+    }
+    cut_guide <- Filter(function(g) {
+      "Cut Score" %in% unlist(lapply(g$grobs, labels), use.names = FALSE)
+    }, guides)
+    expect_length(cut_guide, 1L)
+    keys <- cut_guide[[1]]$grobs[grepl("^key", cut_guide[[1]]$layout$name)]
+    segments <- function(g) {
+      if (inherits(g, "segments") || inherits(g, "points")) return(list(g))
+      unlist(lapply(g$children, segments), recursive = FALSE)
+    }
+    glyphs <- unlist(lapply(keys, segments), recursive = FALSE)
+    expect_length(glyphs, length(result$cut_labels))
+    for (glyph in glyphs) {
+      expect_s3_class(glyph, "segments")
+      expect_equal(glyph$y0, glyph$y1)
+      expect_equal(glyph$gp$lty, "solid")
+    }
+  }
+})
+
 .mapt_plot_direct_model <- function(wide, boundary, person = NULL) {
   if (is.null(person)) {
     est <- rep(wide$est, 2)

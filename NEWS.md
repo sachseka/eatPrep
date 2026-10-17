@@ -2,6 +2,9 @@
 
 ## new features
 
+* Added compact `print()` and `summary()` methods for MAPT results. They show pooled cuts and flagged fits; `summary(x, per_rater = TRUE)` also includes individual cuts and diagnostics. Models and rating data remain accessible in the original result.
+* MAPT input now preserves distinct large numeric item and rater identifiers and checks for label collisions, preventing false duplicate errors and accidental pooling of different raters.
+* MAPT cut colors now follow the supplied cut order in both plot functions. The cut legend uses a single horizontal line per color, without overlaid vertical lines or points.
 * Added `computeCutsIDMMAPT()` for comparison with existing IDM cuts. It fits pooled binary logistic regressions at each level boundary and calculates cuts at probability 0.5, following the MAPT logistic calculation without automatic rating trimming.
 * The new function supports long and wide ratings and ordered category labels. It returns pooled cuts, auxiliary per-rater cuts and their means, and model diagnostics. Unusable fits return `NA`; extrapolated or unordered cuts are flagged.
 * `plotCutsIDM()` now accepts `computeCutsIDMMAPT()` results directly, showing binary logistic probability curves and rater-specific cuts. `show_aggregate = TRUE` adds a `Pooled (MAPT)` panel with the jointly estimated curves and pooled cuts. MAPT results retain their own class and now store the individual rater models in `models_per_person`.

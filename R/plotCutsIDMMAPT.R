@@ -198,7 +198,7 @@
   if (options$show_raw) {
     pp <- pp + ggplot2::geom_point(
       data = raw_points, ggplot2::aes(x = est, y = empirical, color = cut_type),
-      alpha = 0.4, size = 1.2, na.rm = TRUE
+      alpha = 0.4, size = 1.2, na.rm = TRUE, show.legend = FALSE
     )
   }
   pp <- pp +
@@ -210,7 +210,7 @@
     ) +
     ggplot2::geom_vline(
       data = finite_cuts, ggplot2::aes(xintercept = cut, color = cut_type),
-      linewidth = 0.65, alpha = 0.8, na.rm = TRUE
+      linewidth = 0.65, alpha = 0.8, na.rm = TRUE, show.legend = FALSE
     ) +
     ggplot2::geom_text(
       data = no_cut_labels,
@@ -238,7 +238,7 @@
       ggplot2::geom_segment(
         data = residuals,
         ggplot2::aes(x = est, xend = est, y = 0, yend = residual, color = cut_type),
-        linewidth = 0.35, alpha = 0.7, na.rm = TRUE
+        linewidth = 0.35, alpha = 0.7, na.rm = TRUE, show.legend = FALSE
       ) +
       ggplot2::facet_grid(
         .panel ~ .facet_person, scales = "free_y", drop = FALSE,
@@ -256,6 +256,9 @@
   if (is.null(x_label)) x_label <- "est"
   pp <- pp +
     ggplot2::scale_color_discrete(limits = labels, drop = FALSE) +
+    ggplot2::guides(colour = ggplot2::guide_legend(
+      override.aes = list(linetype = "solid", alpha = 1)
+    )) +
     ggplot2::scale_linetype_manual(
       name = "Modellbereich", values = c("FALSE" = "solid", "TRUE" = "dotted"),
       breaks = c("FALSE", "TRUE"), labels = c("Im Itembereich", "Au\u00dferhalb des Itembereichs"),

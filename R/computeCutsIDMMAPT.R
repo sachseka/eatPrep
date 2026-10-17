@@ -1,12 +1,11 @@
 # The logistic component of MAPT standard setting (Sireci et al., 2006,
 # pp. 54-55). Deliberately does not apply the report's rating trimming.
-# Self-contained so this file can also be sourced alongside older eatPrep builds.
 
 .mapt_ids <- function(x, label) {
   if (!is.atomic(x) || anyNA(x)) {
     stop(label, " must contain non-missing atomic identifiers.", call. = FALSE)
   }
-  out <- as.character(x)
+  out <- .population_identifier_labels_idm(x)
   if (any(!nzchar(out))) {
     stop(label, " must not contain empty identifiers.", call. = FALSE)
   }

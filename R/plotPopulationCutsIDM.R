@@ -358,6 +358,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
   if (is_mapt) {
     cuts <- tidyr::pivot_longer(cuts, dplyr::all_of(res_list$cut_labels),
                                 names_to = "cut_type", values_to = "cut")
+    cuts$cut_type <- factor(cuts$cut_type, levels = res_list$cut_labels)
   } else {
     cuts <- tidyr::pivot_longer(cuts, dplyr::starts_with("cut"),
                                 names_to = "cut_type", values_to = "cut")
