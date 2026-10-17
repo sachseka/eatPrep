@@ -1,3 +1,13 @@
+# eatPrep 1.0.16
+
+## new features
+
+* Added `computeCutsIDMMAPT()` as a logistic alternative to the existing IDM calculation. It fits pooled binary logistic regressions at each level boundary and calculates cuts at probability 0.5, following the MAPT logistic calculation without automatic rating trimming. Long and wide input, ordered category labels, and large numeric item and rater identifiers are supported. Results include pooled cuts, optional individual rater cuts and their means, fitted models, and diagnostics; unusable fits return `NA`, and extrapolated or unordered pooled cuts are flagged.
+* MAPT results have compact `print()` and `summary()` methods showing pooled cuts and flagged fits. `summary(x, per_rater = TRUE)` also includes individual cuts and diagnostics; models and rating data remain accessible in the original result.
+* `plotCutsIDM()` accepts MAPT results and shows individual logistic probability curves, empirical proportions, and cuts, with optional residuals and PV silhouettes, population statistics, and interval percentages. `show_aggregate = TRUE` adds a `Pooled (MAPT)` panel using all raters' ratings jointly; results computed with `per_rater = FALSE` show only this panel. Probability curves use a zero-to-one axis with a 0.5 reference; silhouettes show population distribution shape only.
+* `plotPopulationCutsIDM()` also accepts MAPT results: `cut_selection = "mean"` selects the pooled cuts, and `"both"` adds individual rater panels. Both plot functions preserve custom cut labels and their color order; the MAPT probability plot uses simple line keys for cut colors.
+* Expanded help pages and comparison examples explain the calculations and plots step by step, using mathematical formulas and labelled ratings. They distinguish pooled cuts from mean rater cuts and rating probabilities from population percentages. Regression tests cover logistic fits, input formats and identifiers, ties and row order, missing ratings, separation, rescaling, summaries, and plotting.
+
 # eatPrep 1.0.15
 
 * Reference-page formulas now render with MathJax instead of appearing as raw LaTeX.
