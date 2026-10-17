@@ -50,6 +50,7 @@ You can click on the specific function to jump to its explanation.
 | [make.pseudo()](#pseudo-raters) | reduces multiple real raters to a smaller number of pseudo raters. |
 | [computeCutsIDM()](#idm-cut-scores) | computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages. |
 | [plotCutsIDM()](#idm-cut-scores) | plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md). |
+| [computeCutsIDMMAPT()](#logistic-idm-cut-scores) | computes pooled logistic IDM cuts for comparison with the moving-average method. |
 | [visualSubsetRecode()](#visual-subset-recoding) | supports interactive visual inspection and recoding of flagged subsets. |
 | **Export** |  |
 | [collapseMissings()](#collapsing-data) | recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling. |
@@ -883,7 +884,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-09-25 08:04:16.742413
+#> Starting automateDataPreparation 2026-10-17 09:44:57.411259
 #> 
 #> Check data...
 #> 
@@ -959,7 +960,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-09-25 08:04:16.945799
+#> automateDataPreparation terminated successfully! 2026-10-17 09:44:57.560069
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -2224,6 +2225,128 @@ affected panel. Complete panels still show their percentages. Descending
 cut sequences cause an error when percentage computation is enabled. The
 estimates are descriptive point estimates; uncertainty intervals are not
 computed.
+
+### Logistic IDM Cut Scores
+
+[`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md)
+provides a logistic comparison using the same item difficulties and
+ratings. At each boundary it models whether a rating is above that
+boundary, pooling the observed ratings. Its cut is the difficulty where
+the fitted probability is 0.5. This is a probability of a level
+assignment, not of a correct item response. The calculation follows the
+regression step in the [MAPT Technical Manual (2006),
+pp. 54–55](https://bpb-us-e2.wpmucdn.com/websites.umass.edu/dist/5/40195/files/2021/03/MAPT_TechnicalManualv1.pdf),
+without the report’s rating trimming.
+
+This example includes overlapping ratings so each logistic fit has
+information on both sides of the transition:
+
+``` r
+
+idmCompare <- data.frame(
+  item = paste0("I", 1:15),
+  est = seq(300, 650, length.out = 15),
+  Rater1 = c(1, 2, 1, 3, 2, 4, 3, 2, 5, 3, 4, 5, 4, 5, 4),
+  Rater2 = c(2, 1, 3, 1, 2, 3, 4, 3, 4, 5, 3, 4, 5, 4, 5)
+)
+cutsMA <- computeCutsIDM(idmCompare)
+cutsMAPT <- computeCutsIDMMAPT(idmCompare, item_id_col = "item")
+data.frame(
+  method = c("moving_average", "logistic"),
+  rbind(cutsMA$cuts_summary, cutsMAPT$cuts_summary)
+)
+#>           method    cut12    cut23    cut34    cut45
+#> 1 moving_average 319.7917 400.0000 484.3750 606.2500
+#> 2       logistic 328.0959 398.3559 487.7358 610.1084
+cutsMAPT$cut_diagnostics
+#> # A tibble: 4 × 16
+#>   cut_name boundary   cut     n n_lower n_upper min_est max_est intercept  slope
+#>   <chr>       <dbl> <dbl> <int>   <int>   <int>   <dbl>   <dbl>     <dbl>  <dbl>
+#> 1 cut12         1.5  328.    30       4      26     300     650     -9.38 0.0286
+#> 2 cut23         2.5  398.    30       9      21     300     650    -10.9  0.0274
+#> 3 cut34         3.5  488.    30      16      14     300     650    -12.2  0.0249
+#> 4 cut45         4.5  610.    30      24       6     300     650     -9.61 0.0157
+#> # ℹ 6 more variables: est_center <dbl>, est_scale <dbl>, converged <lgl>,
+#> #   extrapolated <lgl>, status <chr>, warning <chr>
+```
+
+The main result, `cuts_summary`, contains the pooled cuts. The separate
+`cuts_per_person` and `cuts_summary_per_person` are auxiliary rater
+results; their average is not the pooled estimate. Set
+`per_rater = FALSE` to omit them.
+
+For long input and named categories, supply the item and rater
+identifiers, the rating column, and the category order:
+
+``` r
+
+cutsMAPT <- computeCutsIDMMAPT(
+  dat, item_id_col = "item_cat", est_col = "est",
+  rater_id_col = "Name", rating_col = "Kategorie", input_format = "long",
+  rating_levels = c("1a", "1b", "2", "3", "4"), missing = "drop"
+)
+cutsMAPT$cuts_summary
+cutsMAPT$cut_diagnostics
+```
+
+When comparing difficulty estimates, use exactly the same item–rater
+observations for both inputs; otherwise missing values can also change
+the comparison. Equal difficulties are allowed and no moving average is
+used. Check the diagnostics: separated, unidentifiable, non-converged,
+or non-positive-slope fits have `NA` cuts; extrapolated cuts are
+retained and flagged. Independently fitted cuts can cross and are not
+rearranged. The function does not provide uncertainty intervals for the
+cuts.
+
+[`plotCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md)
+accepts the MAPT result directly:
+
+``` r
+
+plotCutsIDM(cutsMAPT, show_aggregate = TRUE)
+```
+
+![](main_functions_files/figure-html/logistic%20idm%20plot-1.png)
+
+Each rater panel shows the fitted probability that a rating index
+exceeds a boundary, on a zero-to-one scale. The horizontal line at 0.5
+marks the cut criterion; vertical lines show the resulting
+difficulty-scale cuts. The curves are solid within each panel’s observed
+difficulty range and dotted outside it to identify extrapolation. The
+`Pooled (MAPT)` panel shows the models jointly fitted to all ratings and
+the cuts from `cuts_summary`. It does not average the individual rater
+cuts. With `per_rater = FALSE`, this is the only panel, including when
+`show_aggregate = FALSE`.
+
+Raw points show the empirical proportions above each boundary at each
+difficulty. `show_residuals = TRUE` adds empirical proportions minus
+fitted probabilities. Unusable models supply no curve or cut line. The
+options `show_smoothed`, `show_item_numbers`, and
+`show_aggregate_labels` concern only the moving-average view and have no
+effect for MAPT results.
+
+The population options also work with MAPT. For example, with PVs on the
+same metric as the item difficulties:
+
+``` r
+
+plotCutsIDM(cutsMAPT, show_aggregate = TRUE,
+            pv_data = population, pv_cols = c("PV1", "PV2"),
+            weight_col = "weight")
+```
+
+Silhouette height shows distribution shape only, not a rating
+probability. Interval percentages use the cuts in their own panel; the
+pooled panel uses pooled cuts. Missing cuts prevent percentage
+calculation for that panel. If fitted cuts cross, set
+`show_percentages = FALSE` to inspect the curves without calculating
+interval percentages.
+
+For a population distribution with a density axis, use
+`plotPopulationCutsIDM(cutsMAPT, population, pv_cols = c("PV1", "PV2"), weight_col = "weight", cut_selection = "both")`.
+With MAPT input, `cut_selection = "mean"` retains its existing argument
+name but selects the pooled cuts. `"both"` shows individual and pooled
+panels, or only the pooled panel when `per_rater = FALSE`.
 
 ### Visual Subset Recoding
 

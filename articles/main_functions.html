@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -234,26 +234,31 @@ curves, optional labelled aggregate or residual panels, and cut scores
 from <code><a href="../reference/computeCutsIDM.html">computeCutsIDM()</a></code>.</td>
 </tr>
 <tr class="odd">
+<td align="left"><a href="#logistic-idm-cut-scores">computeCutsIDMMAPT()</a></td>
+<td align="left">computes pooled logistic IDM cuts for comparison with
+the moving-average method.</td>
+</tr>
+<tr class="even">
 <td align="left"><a href="#visual-subset-recoding">visualSubsetRecode()</a></td>
 <td align="left">supports interactive visual inspection and recoding of
 flagged subsets.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Export</strong></td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="#collapsing-data">collapseMissings()</a></td>
 <td align="left">recodes missing types into predefined scores (usually
 0, 1, and NA). Such a collapsed R data frame can be passed directly to
 eatModel for scaling.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="#export-spss">writeSpss()</a></td>
 <td align="left">produces an SPSS syntax and a .txt data set that can be
 read into SPSS with the syntax including all meta data.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="#prepare-for-eatgads">prep2GADS()</a></td>
 <td align="left">both the raw data sets and the finished, scored data
 sets, including all their meta data, can be exported into a GADSdat
@@ -1144,7 +1149,7 @@ the final data preparation step.</p>
 <span>    recodeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeMnr <span class="op">=</span> <span class="cn">TRUE</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
 <span>    aggregateData <span class="op">=</span> <span class="cn">TRUE</span>, scoreData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    writeSpss <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting automateDataPreparation 2026-09-25 08:04:16.742413</span></span>
+<span><span class="co">#&gt; Starting automateDataPreparation 2026-10-17 09:44:57.411259</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Check data...</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1220,7 +1225,7 @@ the final data preparation step.</p>
 <span><span class="co">#&gt; No SPSS-File has been written.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Missings are UNcollapsed.</span></span>
-<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-09-25 08:04:16.945799</span></span></code></pre></div>
+<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-10-17 09:44:57.560069</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-diagnostics-and-rater-tools">Additional Diagnostics and Rater Tools<a class="anchor" aria-label="anchor" href="#additional-diagnostics-and-rater-tools"></a>
@@ -2374,6 +2379,107 @@ computed.</p>
 </div>
 </div>
 <div class="section level3">
+<h3 id="logistic-idm-cut-scores">Logistic IDM Cut Scores<a class="anchor" aria-label="anchor" href="#logistic-idm-cut-scores"></a>
+</h3>
+<p><code><a href="../reference/computeCutsIDMMAPT.html">computeCutsIDMMAPT()</a></code> provides a logistic comparison
+using the same item difficulties and ratings. At each boundary it models
+whether a rating is above that boundary, pooling the observed ratings.
+Its cut is the difficulty where the fitted probability is 0.5. This is a
+probability of a level assignment, not of a correct item response. The
+calculation follows the regression step in the <a href="https://bpb-us-e2.wpmucdn.com/websites.umass.edu/dist/5/40195/files/2021/03/MAPT_TechnicalManualv1.pdf" class="external-link">MAPT
+Technical Manual (2006), pp. 54–55</a>, without the report’s rating
+trimming.</p>
+<p>This example includes overlapping ratings so each logistic fit has
+information on both sides of the transition:</p>
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">idmCompare</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  item <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"I"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span>,</span>
+<span>  est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">650</span>, length.out <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>,</span>
+<span>  Rater1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  Rater2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">cutsMA</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDM.html">computeCutsIDM</a></span><span class="op">(</span><span class="va">idmCompare</span><span class="op">)</span></span>
+<span><span class="va">cutsMAPT</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></span><span class="op">(</span><span class="va">idmCompare</span>, item_id_col <span class="op">=</span> <span class="st">"item"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"moving_average"</span>, <span class="st">"logistic"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">cutsMA</span><span class="op">$</span><span class="va">cuts_summary</span>, <span class="va">cutsMAPT</span><span class="op">$</span><span class="va">cuts_summary</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;           method    cut12    cut23    cut34    cut45</span></span>
+<span><span class="co">#&gt; 1 moving_average 319.7917 400.0000 484.3750 606.2500</span></span>
+<span><span class="co">#&gt; 2       logistic 328.0959 398.3559 487.7358 610.1084</span></span>
+<span><span class="va">cutsMAPT</span><span class="op">$</span><span class="va">cut_diagnostics</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 16</span></span></span>
+<span><span class="co">#&gt;   cut_name boundary   cut     n n_lower n_upper min_est max_est intercept  slope</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> cut12         1.5  328.    30       4      26     300     650     -<span style="color: #BB0000;">9.38</span> 0.028<span style="text-decoration: underline;">6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> cut23         2.5  398.    30       9      21     300     650    -<span style="color: #BB0000;">10.9</span>  0.027<span style="text-decoration: underline;">4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> cut34         3.5  488.    30      16      14     300     650    -<span style="color: #BB0000;">12.2</span>  0.024<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> cut45         4.5  610.    30      24       6     300     650     -<span style="color: #BB0000;">9.61</span> 0.015<span style="text-decoration: underline;">7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: est_center &lt;dbl&gt;, est_scale &lt;dbl&gt;, converged &lt;lgl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   extrapolated &lt;lgl&gt;, status &lt;chr&gt;, warning &lt;chr&gt;</span></span></span></code></pre></div>
+<p>The main result, <code>cuts_summary</code>, contains the pooled cuts.
+The separate <code>cuts_per_person</code> and
+<code>cuts_summary_per_person</code> are auxiliary rater results; their
+average is not the pooled estimate. Set <code>per_rater = FALSE</code>
+to omit them.</p>
+<p>For long input and named categories, supply the item and rater
+identifiers, the rating column, and the category order:</p>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cutsMAPT</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></span><span class="op">(</span></span>
+<span>  <span class="va">dat</span>, item_id_col <span class="op">=</span> <span class="st">"item_cat"</span>, est_col <span class="op">=</span> <span class="st">"est"</span>,</span>
+<span>  rater_id_col <span class="op">=</span> <span class="st">"Name"</span>, rating_col <span class="op">=</span> <span class="st">"Kategorie"</span>, input_format <span class="op">=</span> <span class="st">"long"</span>,</span>
+<span>  rating_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1a"</span>, <span class="st">"1b"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span><span class="op">)</span>, missing <span class="op">=</span> <span class="st">"drop"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">cutsMAPT</span><span class="op">$</span><span class="va">cuts_summary</span></span>
+<span><span class="va">cutsMAPT</span><span class="op">$</span><span class="va">cut_diagnostics</span></span></code></pre></div>
+<p>When comparing difficulty estimates, use exactly the same item–rater
+observations for both inputs; otherwise missing values can also change
+the comparison. Equal difficulties are allowed and no moving average is
+used. Check the diagnostics: separated, unidentifiable, non-converged,
+or non-positive-slope fits have <code>NA</code> cuts; extrapolated cuts
+are retained and flagged. Independently fitted cuts can cross and are
+not rearranged. The function does not provide uncertainty intervals for
+the cuts.</p>
+<p><code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> accepts the MAPT result directly:</p>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cutsMAPT</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/logistic%20idm%20plot-1.png" class="r-plt" alt="" width="768"></p>
+<p>Each rater panel shows the fitted probability that a rating index
+exceeds a boundary, on a zero-to-one scale. The horizontal line at 0.5
+marks the cut criterion; vertical lines show the resulting
+difficulty-scale cuts. The curves are solid within each panel’s observed
+difficulty range and dotted outside it to identify extrapolation. The
+<code>Pooled (MAPT)</code> panel shows the models jointly fitted to all
+ratings and the cuts from <code>cuts_summary</code>. It does not average
+the individual rater cuts. With <code>per_rater = FALSE</code>, this is
+the only panel, including when <code>show_aggregate = FALSE</code>.</p>
+<p>Raw points show the empirical proportions above each boundary at each
+difficulty. <code>show_residuals = TRUE</code> adds empirical
+proportions minus fitted probabilities. Unusable models supply no curve
+or cut line. The options <code>show_smoothed</code>,
+<code>show_item_numbers</code>, and <code>show_aggregate_labels</code>
+concern only the moving-average view and have no effect for MAPT
+results.</p>
+<p>The population options also work with MAPT. For example, with PVs on
+the same metric as the item difficulties:</p>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cutsMAPT</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>            pv_data <span class="op">=</span> <span class="va">population</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PV1"</span>, <span class="st">"PV2"</span><span class="op">)</span>,</span>
+<span>            weight_col <span class="op">=</span> <span class="st">"weight"</span><span class="op">)</span></span></code></pre></div>
+<p>Silhouette height shows distribution shape only, not a rating
+probability. Interval percentages use the cuts in their own panel; the
+pooled panel uses pooled cuts. Missing cuts prevent percentage
+calculation for that panel. If fitted cuts cross, set
+<code>show_percentages = FALSE</code> to inspect the curves without
+calculating interval percentages.</p>
+<p>For a population distribution with a density axis, use
+<code>plotPopulationCutsIDM(cutsMAPT, population, pv_cols = c("PV1", "PV2"), weight_col = "weight", cut_selection = "both")</code>.
+With MAPT input, <code>cut_selection = "mean"</code> retains its
+existing argument name but selects the pooled cuts. <code>"both"</code>
+shows individual and pooled panels, or only the pooled panel when
+<code>per_rater = FALSE</code>.</p>
+</div>
+<div class="section level3">
 <h3 id="visual-subset-recoding">Visual Subset Recoding<a class="anchor" aria-label="anchor" href="#visual-subset-recoding"></a>
 </h3>
 <p><code><a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a></code> supports interactive inspection and
@@ -2382,7 +2488,7 @@ affected by a technical issue, you can display the relevant responses
 and decide whether to recode them to a value such as <code>mci</code>.
 Because the function opens an interactive review flow, it is not
 evaluated in this vignette.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsetInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person100"</span>, <span class="st">"person101"</span>, <span class="st">"person102"</span><span class="op">)</span>,</span>
 <span>  datCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I01"</span>, <span class="st">"I02"</span>, <span class="st">"I03"</span><span class="op">)</span></span>
@@ -2416,7 +2522,7 @@ character missings should be converted to <code>0</code> or
 <code>NA</code>. It has default settings, but you can adapt them if
 needed. Type <code><a href="../reference/collapseMissings.html">?collapseMissings</a></code> into your console to learn
 more.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datColMis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMissings.html">collapseMissings</a></span><span class="op">(</span><span class="va">datRec</span><span class="op">)</span></span></code></pre></div>
 <p>After doing that you should have a data frame that you can now use
 for further processing with the <code>eatModel</code> package.</p>
@@ -2432,7 +2538,7 @@ frames <code>dat</code>, <code>values</code>, <code>subunits</code> and
 where to save those new files.</p>
 <p>The function creates and saves those files, but the actual return
 values for this function is <code>NULL</code>.</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/writeSpss.html">writeSpss</a></span><span class="op">(</span><span class="va">dat</span>, <span class="va">values</span>, <span class="va">subunits</span>, <span class="va">units</span>,</span>
 <span>    filedat <span class="op">=</span> <span class="st">"mydata.txt"</span>, filesps <span class="op">=</span> <span class="st">"readmydata.sps"</span>,</span>
 <span>    missing.rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mvi <span class="op">=</span> <span class="fl">0</span>, mnr <span class="op">=</span> <span class="fl">0</span>, mci <span class="op">=</span> <span class="cn">NA</span>, mbd <span class="op">=</span> <span class="cn">NA</span>, mir <span class="op">=</span> <span class="fl">0</span>, mbi <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
@@ -2451,7 +2557,7 @@ example exports scored data (<code>trafoType</code> = “scored”), which
 usually has 0/1 values and mistypes like mbi/mbo etc. The second example
 exports the raw data (<code>trafoType</code> = “raw”), including the
 original values and subunits.</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputDat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputList</span><span class="op">)</span></span>
 <span></span>
@@ -2465,7 +2571,7 @@ original values and subunits.</p>
 <span>                                      readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      recodeData<span class="op">=</span><span class="cn">FALSE</span>, aggregateData<span class="op">=</span><span class="cn">FALSE</span>, scoreData<span class="op">=</span><span class="cn">FALSE</span>,</span>
 <span>                                      writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GADSobj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prep2gads.html">prep2GADS</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDatScored</span>, inputList <span class="op">=</span> <span class="va">inputList</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, trafoType <span class="op">=</span> <span class="st">"scored"</span>,</span>
 <span>                      verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>

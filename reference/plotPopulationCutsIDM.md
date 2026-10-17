@@ -1,10 +1,13 @@
 # Plot Population Distributions from Plausible Values with IDM Cuts
 
 Estimates a population density from wide- or long-format plausible
-values (PVs) and draws IDM cut scores over it. An optional grouping
-column overlays multiple population densities with transparent fills.
-The y-axis represents population density. For a distribution-shape
-silhouette behind rater curves, use
+values (PVs) and draws cut scores from
+[`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+or
+[`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md)
+over it. An optional grouping column overlays multiple population
+densities with transparent fills. The y-axis represents population
+density. For a distribution-shape silhouette behind rater curves, use
 [`plotCutsIDM`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md).
 For a supplied numeric cut vector without an IDM object, use
 [`plotPopulationCuts`](https://sachseka.github.io/eatPrep/reference/plotPopulationCuts.md).
@@ -46,9 +49,12 @@ plotPopulationCutsIDM(
 
 - res_list:
 
-  A list returned by
-  [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md).
-  Cut scores are used as stored, without re-estimation.
+  A result returned by
+  [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+  or
+  [`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md).
+  Cut scores and custom cut labels are used as stored, without
+  re-estimation.
 
 - pv_data:
 
@@ -119,11 +125,15 @@ plotPopulationCutsIDM(
 
 - cut_selection:
 
-  `"mean"` (default) draws cuts from `res_list$cuts_summary`.
-  `"individual"` creates one facet per rater with cuts from
-  `res_list$cuts_per_person`. `"both"` adds a mean-cut facet to the
-  individual facets. All facets show the same population density on
-  fixed axes.
+  `"mean"` (default) draws cuts from `res_list$cuts_summary`. For MAPT,
+  this option retains its name for compatibility but displays jointly
+  estimated pooled cuts in a `Pooled (MAPT)` panel, not the mean of
+  rater cuts. `"individual"` creates one facet per rater using
+  `res_list$cuts_per_person`. `"both"` adds the mean-cut or pooled facet
+  to the individual facets. If a MAPT result has `per_rater = FALSE`,
+  `"mean"` and `"both"` show only the pooled panel, while `"individual"`
+  gives an error. All facets show the same population density on fixed
+  axes.
 
 - est_col:
 
@@ -285,8 +295,8 @@ interval with zero percent. All observed PVs are included, including
 values outside the visible plot range. Actual unrounded cuts determine
 membership: changing cut-label rounding or density smoothing does not
 change percentages. Individual panels use their rater's cuts. The mean
-panel recomputes shares at the mean cuts; it does not average rater
-percentages.
+panel recomputes shares at the mean cuts; the MAPT pooled panel uses its
+pooled cuts. Neither averages rater percentages.
 
 Percentage labels are horizontally centered between the visible cut
 positions. For outer intervals, the midpoint between the outermost cut
@@ -346,6 +356,7 @@ and themes.
 ## See also
 
 [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
+[`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md),
 [`plotCutsIDM`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md),
 [`density`](https://rdrr.io/r/stats/density.html).
 
@@ -456,4 +467,15 @@ plotPopulationCutsIDM(cuts, populations, pv_cols = c("PV1", "PV2"),
 ## Hide M and SD while keeping the cut-interval percentages.
 plotPopulationCutsIDM(cuts, population, pv_cols = c("PV1", "PV2"),
                       weight_col = "weight", show_population_stats = FALSE)
+
+
+## MAPT: cut_selection = "mean" selects pooled logistic cuts.
+mapt_items <- data.frame(
+  est = seq(300, 650, length.out = 15),
+  Rater1 = c(1, 2, 1, 3, 2, 4, 3, 2, 5, 3, 4, 5, 4, 5, 4),
+  Rater2 = c(2, 1, 3, 1, 2, 3, 4, 3, 4, 5, 3, 4, 5, 4, 5)
+)
+mapt <- computeCutsIDMMAPT(mapt_items)
+plotPopulationCutsIDM(mapt, population, pv_cols = c("PV1", "PV2"),
+                      weight_col = "weight", cut_selection = "both")
 ```

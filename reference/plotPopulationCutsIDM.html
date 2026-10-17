@@ -6,11 +6,13 @@
     }
   };
 </script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Plot Population Distributions from Plausible Values with IDM Cuts — plotPopulationCutsIDM"><meta name="description" content="Estimates a population density from wide- or long-format plausible values (PVs)
-and draws IDM cut scores over it. An optional grouping column overlays multiple
+and draws cut scores from computeCutsIDM() or computeCutsIDMMAPT()
+over it. An optional grouping column overlays multiple
 population densities with transparent fills. The y-axis represents population density.
 For a distribution-shape silhouette behind rater curves, use plotCutsIDM.
 For a supplied numeric cut vector without an IDM object, use plotPopulationCuts."><meta property="og:description" content="Estimates a population density from wide- or long-format plausible values (PVs)
-and draws IDM cut scores over it. An optional grouping column overlays multiple
+and draws cut scores from computeCutsIDM() or computeCutsIDMMAPT()
+over it. An optional grouping column overlays multiple
 population densities with transparent fills. The y-axis represents population density.
 For a distribution-shape silhouette behind rater curves, use plotCutsIDM.
 For a supplied numeric cut vector without an IDM object, use plotPopulationCuts."><meta property="og:image" content="https://sachseka.github.io/eatPrep/logo.png"></head><body>
@@ -21,7 +23,7 @@ For a supplied numeric cut vector without an IDM object, use plotPopulationCuts.
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +56,8 @@ For a supplied numeric cut vector without an IDM object, use plotPopulationCuts.
 
     <div class="ref-description section level2">
     <p>Estimates a population density from wide- or long-format plausible values (PVs)
-and draws IDM cut scores over it. An optional grouping column overlays multiple
+and draws cut scores from <code><a href="computeCutsIDM.html">computeCutsIDM()</a></code> or <code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT()</a></code>
+over it. An optional grouping column overlays multiple
 population densities with transparent fills. The y-axis represents population density.
 For a distribution-shape silhouette behind rater curves, use <code><a href="plotCutsIDM.html">plotCutsIDM</a></code>.
 For a supplied numeric cut vector without an IDM object, use <code><a href="plotPopulationCuts.html">plotPopulationCuts</a></code>.</p>
@@ -96,7 +99,9 @@ For a supplied numeric cut vector without an IDM object, use <code><a href="plot
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <p></p>
 <dl><dt id="arg-res-list">res_list<a class="anchor" aria-label="anchor" href="#arg-res-list"></a></dt>
-<dd><p>A list returned by <code><a href="computeCutsIDM.html">computeCutsIDM</a></code>. Cut scores are used as stored, without re-estimation.</p></dd>
+<dd><p>A result returned by <code><a href="computeCutsIDM.html">computeCutsIDM</a></code> or
+  <code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></code>. Cut scores and custom cut labels are used
+  as stored, without re-estimation.</p></dd>
 
   <dt id="arg-pv-data">pv_data<a class="anchor" aria-label="anchor" href="#arg-pv-data"></a></dt>
 <dd><p>A data frame of plausible values for one domain, optionally containing several populations identified by <code>population_col</code>. PVs must already use the same metric as the item estimates and cuts. No scale conversion is performed.</p></dd>
@@ -129,7 +134,16 @@ For a supplied numeric cut vector without an IDM object, use <code><a href="plot
 <dd><p>Positive finite multiplier for the common bandwidth. Values above one produce more smoothing; values below one produce less.</p></dd>
 
   <dt id="arg-cut-selection">cut_selection<a class="anchor" aria-label="anchor" href="#arg-cut-selection"></a></dt>
-<dd><p><code>"mean"</code> (default) draws cuts from <code>res_list$cuts_summary</code>. <code>"individual"</code> creates one facet per rater with cuts from <code>res_list$cuts_per_person</code>. <code>"both"</code> adds a mean-cut facet to the individual facets. All facets show the same population density on fixed axes.</p></dd>
+<dd><p><code>"mean"</code> (default) draws cuts from
+  <code>res_list$cuts_summary</code>. For MAPT, this option retains its name for
+  compatibility but displays jointly estimated pooled cuts in a
+  <code>Pooled (MAPT)</code> panel, not the mean of rater cuts.
+  <code>"individual"</code> creates one facet per rater using
+  <code>res_list$cuts_per_person</code>. <code>"both"</code> adds the mean-cut or pooled
+  facet to the individual facets. If a MAPT result has
+  <code>per_rater = FALSE</code>, <code>"mean"</code> and <code>"both"</code> show only the
+  pooled panel, while <code>"individual"</code> gives an error. All facets show the
+  same population density on fixed axes.</p></dd>
 
   <dt id="arg-est-col">est_col<a class="anchor" aria-label="anchor" href="#arg-est-col"></a></dt>
 <dd><p>Optional x-axis metric label. Defaults to <code>res_list$est_col</code>, or <code>"est"</code> if unavailable. This changes the label only.</p></dd>
@@ -232,8 +246,8 @@ the upper interval. Identical adjacent cuts create an empty interval with zero
 percent. All observed PVs are included, including values outside the visible
 plot range. Actual unrounded cuts determine membership: changing cut-label
 rounding or density smoothing does not change percentages. Individual panels
-use their rater's cuts. The mean panel recomputes shares at the mean cuts; it
-does not average rater percentages.</p>
+use their rater's cuts. The mean panel recomputes shares at the mean cuts; the
+MAPT pooled panel uses its pooled cuts. Neither averages rater percentages.</p>
 <p>Percentage labels are horizontally centered between the visible cut positions.
 For outer intervals, the midpoint between the outermost cut and the visible
 panel edge is used. Narrow or empty intervals retain their labels: overlapping
@@ -278,7 +292,8 @@ Both functions use the same population preparation and density calculation.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="computeCutsIDM.html">computeCutsIDM</a></code>, <code><a href="plotCutsIDM.html">plotCutsIDM</a></code>, <code><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></code>.</p></div>
+    <div class="dont-index"><p><code><a href="computeCutsIDM.html">computeCutsIDM</a></code>, <code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></code>,
+<code><a href="plotCutsIDM.html">plotCutsIDM</a></code>, <code><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></code>.</p></div>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -387,6 +402,17 @@ Both functions use the same population preparation and density calculation.</p>
 <span class="r-in"><span><span class="fu">plotPopulationCutsIDM</span><span class="op">(</span><span class="va">cuts</span>, <span class="va">population</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PV1"</span>, <span class="st">"PV2"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                      weight_col <span class="op">=</span> <span class="st">"weight"</span>, show_population_stats <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plotPopulationCutsIDM-11.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## MAPT: cut_selection = "mean" selects pooled logistic cuts.</span></span></span>
+<span class="r-in"><span><span class="va">mapt_items</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">650</span>, length.out <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  Rater1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  Rater2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mapt</span> <span class="op">&lt;-</span> <span class="fu"><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></span><span class="op">(</span><span class="va">mapt_items</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plotPopulationCutsIDM</span><span class="op">(</span><span class="va">mapt</span>, <span class="va">population</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PV1"</span>, <span class="st">"PV2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                      weight_col <span class="op">=</span> <span class="st">"weight"</span>, cut_selection <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plotPopulationCutsIDM-12.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

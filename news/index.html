@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,19 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.16" id="eatprep-1016">eatPrep 1.0.16<a class="anchor" aria-label="anchor" href="#eatprep-1016"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-0-16">new features<a class="anchor" aria-label="anchor" href="#new-features-1-0-16"></a></h3>
+<ul><li>Added <code><a href="../reference/computeCutsIDMMAPT.html">computeCutsIDMMAPT()</a></code> as a logistic alternative to the existing IDM calculation. It fits pooled binary logistic regressions at each level boundary and calculates cuts at probability 0.5, following the MAPT logistic calculation without automatic rating trimming. Long and wide input, ordered category labels, and large numeric item and rater identifiers are supported. Results include pooled cuts, optional individual rater cuts and their means, fitted models, and diagnostics; unusable fits return <code>NA</code>, and extrapolated or unordered pooled cuts are flagged.</li>
+<li>MAPT results have compact <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> methods showing pooled cuts and flagged fits. <code>summary(x, per_rater = TRUE)</code> also includes individual cuts and diagnostics; models and rating data remain accessible in the original result.</li>
+<li>
+<code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> accepts MAPT results and shows individual logistic probability curves, empirical proportions, and cuts, with optional residuals and PV silhouettes, population statistics, and interval percentages. <code>show_aggregate = TRUE</code> adds a <code>Pooled (MAPT)</code> panel using all raters’ ratings jointly; results computed with <code>per_rater = FALSE</code> show only this panel. Probability curves use a zero-to-one axis with a 0.5 reference; silhouettes show population distribution shape only.</li>
+<li>
+<code><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM()</a></code> also accepts MAPT results: <code>cut_selection = "mean"</code> selects the pooled cuts, and <code>"both"</code> adds individual rater panels. Both plot functions preserve custom cut labels and their color order; the MAPT probability plot uses simple line keys for cut colors.</li>
+<li>Expanded help pages and comparison examples explain the calculations and plots step by step, using mathematical formulas and labelled ratings. They distinguish pooled cuts from mean rater cuts and rating probabilities from population percentages. Regression tests cover logistic fits, input formats and identifiers, ties and row order, missing ratings, separation, rescaling, summaries, and plotting.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.15" id="eatprep-1015">eatPrep 1.0.15<a class="anchor" aria-label="anchor" href="#eatprep-1015"></a></h2>
 <ul><li>Reference-page formulas now render with MathJax instead of appearing as raw LaTeX.</li>
