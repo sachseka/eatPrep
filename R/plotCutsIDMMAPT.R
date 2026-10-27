@@ -1,12 +1,11 @@
-.aggregate_panel_label_mapt <- function(persons) {
-  label <- "Pooled (MAPT)"
+.aggregate_panel_label_probability <- function(persons, label) {
   if (!label %in% persons) return(label)
   suffix <- 1L
   while (paste0(label, "_", suffix) %in% persons) suffix <- suffix + 1L
   paste0(label, "_", suffix)
 }
 
-.plot_cuts_mapt <- function(res_list, options, population_data = NULL,
+.plot_cuts_probability_idm <- function(res_list, options, population_data = NULL,
                              population_density = NULL, population_colors = NULL) {
   # plotCutsIDM validates the public options and prepares population inputs.
   # Keep the internal Ratings/Residuals panel names used by the PV helpers.
@@ -18,9 +17,12 @@
   labels <- res_list$cut_labels
   boundaries <- res_list$boundaries
   persons <- as.character(res_list$cuts_per_person$person)
-  pooled_label <- .aggregate_panel_label_mapt(persons)
-  show_pooled <- options$show_aggregate || !length(persons)
-  facet_levels <- c(persons, if (show_pooled) pooled_label)
+  is_ordinal <- inherits(res_list, "cutsIDMOrdinal")
+  aggregate_label <- .aggregate_panel_label_probability(
+    persons, if (is_ordinal) "Reference (ordinal)" else "Pooled (MAPT)"
+  )
+  show_aggregate <- options$show_aggregate || !length(persons)
+  facet_levels <- c(persons, if (show_aggregate) aggregate_label)
   observations <- res_list$data_used
 
   panels <- lapply(persons, function(person) {
@@ -29,15 +31,16 @@
       data = observations[as.character(observations$person) == person, , drop = FALSE],
       diagnostics = res_list$diagnostics_per_person[
         as.character(res_list$diagnostics_per_person$person) == person, , drop = FALSE],
-      models = res_list$models_per_person[[person]],
+      models = if (!is_ordinal) res_list$models_per_person[[person]] else NULL,
       cuts = res_list$cuts_per_person[
         match(person, as.character(res_list$cuts_per_person$person)), labels, drop = FALSE]
     )
   })
-  if (show_pooled) {
+  if (show_aggregate) {
     panels[[length(panels) + 1L]] <- list(
-      person = pooled_label, data = observations,
-      diagnostics = res_list$cut_diagnostics, models = res_list$models,
+      person = aggregate_label, data = observations,
+      diagnostics = res_list$cut_diagnostics,
+      models = if (!is_ordinal) res_list$models else NULL,
       cuts = res_list$cuts_summary[labels]
     )
   }
@@ -75,8 +78,9 @@
         type = "response"
       )))
     }
-    # Earlier saved MAPT results did not retain individual model objects.
-    # Their diagnostic slope and cut define the same fitted logistic curve.
+    # Ordinal reference/rater curves set the item effect to zero. Their
+    # diagnostic slope and cut define the conditional logistic curve exactly.
+    # This also supports saved MAPT results without individual model objects.
     stats::plogis(diagnostic$slope * (x - diagnostic$cut))
   }
 
@@ -242,7 +246,10 @@
       ) +
       ggplot2::facet_grid(
         .panel ~ .facet_person, scales = "free_y", drop = FALSE,
-        labeller = ggplot2::labeller(.panel = c(Ratings = "Wahrscheinlichkeit", Residuals = "Residuum"))
+        labeller = ggplot2::labeller(.panel = c(
+          Ratings = "Wahrscheinlichkeit",
+          Residuals = if (is_ordinal) "Abweichung zur Kurve" else "Residuum"
+        ))
       ) +
       ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.02))
   } else {
@@ -267,7 +274,9 @@
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.05)) +
     ggplot2::labs(
       x = paste0("Itemschwierigkeit (", x_label, ")"),
-      y = if (options$show_residuals) "P(Rating > Grenze) / Residuum" else "P(Rating > Grenze)",
+      y = if (options$show_residuals) {
+        if (is_ordinal) "P(Rating > Grenze) / Abweichung" else "P(Rating > Grenze) / Residuum"
+      } else "P(Rating > Grenze)",
       color = "Cut Score"
     ) + ggplot2::theme_minimal()
 
@@ -283,6 +292,24 @@
       pp, population_data, population_colors, options$show_population_stats,
       options$population_stats_digits
     )
+  }
+  if (is_ordinal) {
+    pp <- pp + ggplot2::labs(subtitle = paste(
+      c(pp$labels$subtitle,
+        "Item effects = 0; the reference also sets the rater effect to 0."),
+      collapse = "\n"
+    ))
+    if (options$show_caption) {
+      explanation <- "Points are empirical proportions. Rater curves retain the fitted rater effect."
+      if (options$show_residuals) {
+        explanation <- paste0(explanation,
+          "\nDeviations are empirical proportions minus the displayed curve,",
+          " not fully conditional model residuals.")
+      }
+      pp <- pp + ggplot2::labs(caption = paste(
+        c(pp$labels$caption, explanation), collapse = "\n"
+      ))
+    }
   }
   if (!options$show_caption) pp <- pp + ggplot2::labs(caption = NULL)
   pp

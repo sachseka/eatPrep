@@ -3,7 +3,8 @@
 \title{Plot Population Distributions from Plausible Values with IDM Cuts}
 \description{
 Estimates a population density from wide- or long-format plausible values (PVs)
-and draws cut scores from \code{computeCutsIDM()} or \code{computeCutsIDMMAPT()}
+and draws cut scores from \code{computeCutsIDM()}, \code{computeCutsIDMMAPT()},
+or \code{computeCutsIDMOrdinal()}
 over it. An optional grouping column overlays multiple
 population densities with transparent fills. The y-axis represents population density.
 For a distribution-shape silhouette behind rater curves, use \code{\link{plotCutsIDM}}.
@@ -40,8 +41,9 @@ plotPopulationCutsIDM(
 )
 }
 \arguments{
-  \item{res_list}{A result returned by \code{\link{computeCutsIDM}} or
-  \code{\link{computeCutsIDMMAPT}}. Cut scores and custom cut labels are used
+  \item{res_list}{A result returned by \code{\link{computeCutsIDM}},
+  \code{\link{computeCutsIDMMAPT}}, or \code{\link{computeCutsIDMOrdinal}}.
+  Cut scores and custom cut labels are used
   as stored, without re-estimation.}
   \item{pv_data}{A data frame of plausible values for one domain, optionally containing several populations identified by \code{population_col}. PVs must already use the same metric as the item estimates and cuts. No scale conversion is performed.}
   \item{pv_cols}{Character vector of PV column names for wide input, with one row per respondent. Required for wide input; other numeric columns are never selected automatically.}
@@ -57,11 +59,15 @@ plotPopulationCutsIDM(
   \code{res_list$cuts_summary}. For MAPT, this option retains its name for
   compatibility but displays jointly estimated pooled cuts in a
   \code{Pooled (MAPT)} panel, not the mean of rater cuts.
+  For ordinal models, it displays \code{Reference (ordinal)} cuts with both
+  random intercepts zero. These are not means of conditional rater cuts.
   \code{"individual"} creates one facet per rater using
-  \code{res_list$cuts_per_person}. \code{"both"} adds the mean-cut or pooled
-  facet to the individual facets. If a MAPT result has
+  \code{res_list$cuts_per_person}. Ordinal rater cuts use the estimated
+  conditional rater effect with the item effect zero. \code{"both"} adds
+  the mean-cut, pooled, or reference facet to the individual facets.
+  If a MAPT or ordinal result has
   \code{per_rater = FALSE}, \code{"mean"} and \code{"both"} show only the
-  pooled panel, while \code{"individual"} gives an error. All facets show the
+  pooled or reference panel, while \code{"individual"} gives an error. All facets show the
   same population density on fixed axes.}
   \item{est_col}{Optional x-axis metric label. Defaults to \code{res_list$est_col}, or \code{"est"} if unavailable. This changes the label only.}
   \item{show_cut_values}{Logical scalar. Show numeric labels next to finite cut lines.}
@@ -141,7 +147,8 @@ percent. All observed PVs are included, including values outside the visible
 plot range. Actual unrounded cuts determine membership: changing cut-label
 rounding or density smoothing does not change percentages. Individual panels
 use their rater's cuts. The mean panel recomputes shares at the mean cuts; the
-MAPT pooled panel uses its pooled cuts. Neither averages rater percentages.
+MAPT pooled panel uses its pooled cuts; the ordinal reference panel uses
+reference cuts. None of these panels averages rater percentages.
 
 Percentage labels are horizontally centered between the visible cut positions.
 For outer intervals, the midpoint between the outermost cut and the visible
@@ -190,6 +197,7 @@ A \code{ggplot2} object that can be customized with standard ggplot layers and t
 }
 \seealso{
 \code{\link{computeCutsIDM}}, \code{\link{computeCutsIDMMAPT}},
+\code{\link{computeCutsIDMOrdinal}},
 \code{\link{plotCutsIDM}}, \code{\link[stats]{density}}.
 }
 \references{

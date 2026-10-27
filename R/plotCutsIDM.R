@@ -219,8 +219,8 @@ plotCutsIDM <- function(res_list, est_col = NULL,
     colors <- style$colors
   }
 
-  if (inherits(res_list, "cutsIDMMAPT")) {
-    return(.plot_cuts_mapt(
+  if (inherits(res_list, c("cutsIDMMAPT", "cutsIDMOrdinal"))) {
+    return(.plot_cuts_probability_idm(
       res_list,
       options = list(
         est_col = est_col, show_raw = show_raw, show_smoothed = show_smoothed,

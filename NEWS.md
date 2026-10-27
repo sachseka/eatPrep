@@ -1,3 +1,10 @@
+# eatPrep 1.0.17
+
+* Added `computeCutsIDMOrdinal()` for joint cumulative-logit IDM cuts, with crossed rater and item random intercepts by default. It accepts the same long/wide column conventions and ordered rating labels as the MAPT function. Random intercepts can be selected individually or omitted for a fixed-effects comparison. All boundaries share a difficulty slope and freely estimated ordered thresholds.
+* Ordinal results distinguish reference cuts with both random intercepts zero from conditional rater cuts obtained from the same joint fit. Results retain the fitted model, rating data, rater and item effects, variance components, and model/cut diagnostics. Invalid or unusable fits yield diagnostic statuses and unavailable cuts; declared categories are never silently merged. Compact `print()` and `summary()` methods expose the main results.
+* `plotCutsIDM()` accepts ordinal results, showing conditional rater curves and an optional `Reference (ordinal)` panel. Displayed curves fix item effects to zero; optional residual panels show deviations from these curves, not residuals from fully conditional predictions. `plotPopulationCutsIDM()` supports reference and conditional rater cuts, and `plotWrightMap()` accepts ordinal and MAPT result objects directly through `cuts`.
+* Added examples and help explaining proportional odds, reference versus marginal probability curves, random-effect shrinkage, fit diagnostics, and comparisons with existing IDM methods. The ordinal reference documents the category probabilities, joint likelihood, derivation of reference and conditional rater cuts, and a worked numerical example. Sources distinguish the established ordinal modelling framework and logistic IDM precedent from this package's specific extension. Cut-score uncertainty intervals and propagation of item-calibration uncertainty are not included.
+
 # eatPrep 1.0.16
 
 ## new features

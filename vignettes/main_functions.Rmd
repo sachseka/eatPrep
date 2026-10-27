@@ -1105,6 +1105,175 @@ weight_col = "weight", cut_selection = "both")`. With MAPT input,
 pooled cuts. `"both"` shows individual and pooled panels, or only the pooled
 panel when `per_rater = FALSE`.
 
+### Ordinal IDM Cut Scores with Rater and Item Effects
+
+`computeCutsIDMOrdinal()` fits one cumulative-logit model to all ordered
+ratings. By default it includes crossed random intercepts for raters and
+items. Rater effects describe systematic differences in level assignments
+between raters. Item effects describe remaining differences between items
+after accounting for their supplied difficulty estimates. The input uses
+the same long/wide column conventions as `computeCutsIDMMAPT()`.
+
+For rating category $R_{ir}$, standardized difficulty
+$z_i=(x_i-\mu)/s$, rater effect $u_r$, and item effect $v_i$, the model is
+
+$$
+\operatorname{logit}\Pr(R_{ir}\leq k\mid x_i,u_r,v_i)
+  = \alpha_k-\beta z_i-u_r-v_i.
+$$
+
+The thresholds $\alpha_k$ are ordered and freely estimated. The common
+positive slope $\beta$ describes how higher difficulty predicts a higher
+rating category. Sharing this slope across boundaries is the
+**proportional-odds assumption**. The random intercepts follow independent
+mean-zero normal distributions, each with its own estimated variance.
+They are assumed independent of the supplied difficulty predictor.
+Mixed models use `ordinal::clmm()` with a Laplace approximation.
+
+The following reproducible example generates five ordered categories from
+60 items rated by 10 raters. The known simulation effects are used only to
+generate the data; the fitting function receives the resulting ratings
+and difficulties.
+
+```{r ordinal idm example}
+set.seed(4721)
+n_items <- 60L
+n_raters <- 10L
+ordinalItems <- expand.grid(
+  item = seq_len(n_items), rater = seq_len(n_raters)
+)
+ordinalItems$est <- seq(-3.5, 3.5, length.out = n_items)[ordinalItems$item]
+rater_shift <- rnorm(n_raters, sd = 0.7)
+item_shift <- rnorm(n_items, sd = 0.65)
+latent <- 1.1 * ordinalItems$est + rater_shift[ordinalItems$rater] +
+  item_shift[ordinalItems$item] + rlogis(nrow(ordinalItems))
+ordinalItems$rating <- findInterval(latent, c(-1.5, -0.5, 0.5, 1.5)) + 1L
+
+cutsOrdinal <- computeCutsIDMOrdinal(
+  ordinalItems,
+  item_id_col = "item", rater_id_col = "rater", rating_col = "rating",
+  rating_levels = 1:5
+)
+cutsOrdinal
+cutsOrdinal$variance_components
+cutsOrdinal$model_diagnostics
+```
+
+`cuts_summary` contains **reference cuts**, at which the probability of a
+rating above the respective boundary is 0.5 with both random intercepts
+set to zero:
+
+$$c_k=\mu+s\frac{\alpha_k}{\beta}.$$
+
+These are neither the mean of individual rater cuts nor cuts obtained by
+averaging predictions over the observed raters and items. The reference
+probability curve sets random intercepts to zero; it does not integrate
+over their distributions.
+
+With the default `per_rater = TRUE`, `cuts_per_person` contains conditional
+rater cuts. They use the rater's estimated conditional random intercept
+$\widehat u_r$, with the item effect still fixed at zero:
+
+$$c_{rk}=\mu+s\frac{\alpha_k-\widehat u_r}{\beta}.$$
+
+A positive rater effect means a tendency to assign higher categories at the
+same difficulty, so the rater's cuts move towards lower difficulties.
+These effects are shrunk towards zero and estimated jointly with all other
+parameters. They are not separate models fitted to each rater.
+
+```{r ordinal idm rater results}
+summary(cutsOrdinal, per_rater = TRUE)
+cutsOrdinal$rater_effects
+head(cutsOrdinal$item_effects)
+```
+
+Set `per_rater = FALSE` to omit individual cut tables while keeping the
+same model and reference cuts. `random_effects = "rater"` or `"item"`
+selects one random-intercept term, and `random_effects = character()`
+fits a cumulative-logit model without random effects via `ordinal::clm()`.
+Requested effects require sufficient observed groups and replication;
+the function does not silently discard an effect when the design is
+insufficient. Item effects do not recalibrate the supplied item estimates
+and do not represent their calibration uncertainty.
+
+Wide input and labelled categories work in the same way as in the MAPT
+function:
+
+```{r ordinal idm wide example}
+ordinalWide <- tidyr::pivot_wider(
+  ordinalItems, id_cols = c(item, est), names_from = rater,
+  values_from = rating, names_prefix = "Rater"
+)
+cutsOrdinalWide <- computeCutsIDMOrdinal(
+  ordinalWide, item_id_col = "item", rating_levels = 1:5
+)
+cutsOrdinalWide$cuts_summary
+```
+
+For labels such as `c("1a", "1b", "2", "3", "4")`, supply those values
+in `rating_levels`, ordered from lowest to highest. The order defines the
+categories, without requiring equal distances between them. When
+`rating_levels` is supplied and `boundaries` is omitted, all adjacent cuts
+are returned. Selecting a subset through `boundaries` does not discard
+other rating categories from the joint fit.
+
+`plotCutsIDM()` accepts the ordinal result directly:
+
+```{r ordinal idm plot, fig.width=10, fig.height=12}
+plotCutsIDM(cutsOrdinal, show_aggregate = TRUE, show_raw = FALSE,
+            cut_value_digits = 2)
+```
+
+Individual panels show conditional rater curves with item effects zero.
+The additional `Reference (ordinal)` panel sets both random intercepts to
+zero. Each boundary has its own color; cuts occur where its curve crosses
+the horizontal 0.5 line. A result computed with `per_rater = FALSE` shows
+only the reference panel, even when `show_aggregate = FALSE`.
+
+With `show_raw = TRUE`, points show observed proportions above each
+boundary. `show_residuals = TRUE` adds their deviations from the displayed
+curves. Because those curves set item effects to zero, these are not
+residuals from fully conditional predictions that include every item's
+estimated effect. They can reflect the omitted item effects as well as
+other discrepancies. Fitted item effects remain in `item_effects`.
+
+Plausible-value plots also accept this result. Here the synthetic PVs use
+the same metric as the example item difficulties:
+
+```{r ordinal idm population plot, fig.width=8, fig.height=4}
+set.seed(4722)
+ordinalPopulation <- data.frame(PV1 = rnorm(500), PV2 = rnorm(500))
+plotPopulationCutsIDM(
+  cutsOrdinal, ordinalPopulation, pv_cols = c("PV1", "PV2"),
+  cut_selection = "mean", cut_value_digits = 2
+)
+```
+
+The legacy name `cut_selection = "mean"` selects the reference cuts for
+ordinal results; `"both"` includes conditional rater cuts. The resulting
+percentages describe respondents' PVs relative to those cuts, independently
+of the rating probabilities on the ordinal curves. `plotWrightMap()` can
+also receive `cuts = cutsOrdinal` and uses its reference cuts.
+
+Before interpreting a result, inspect `model_diagnostics` and
+`cut_diagnostics`. Unusable fits return unavailable cuts with diagnostic
+statuses. Missing declared categories are not silently merged: they give
+`missing_categories` diagnostics and `NA` cuts. Reference cuts outside the
+observed difficulty range are retained but marked as extrapolated. A
+near-zero random-effect variance is flagged, but does not alone invalidate
+an otherwise usable model. Numerical convergence does not check the
+proportional-odds assumption or establish the validity of the descriptors.
+No cut-score confidence intervals or propagation of item-calibration
+uncertainty are computed.
+
+For a methods comparison, hold the item/rater observations and rating
+round fixed. Moving-average IDM crosses a mean numerical stage boundary;
+the ordinal and MAPT models cross a cumulative probability of 0.5. Their
+aggregation also differs: moving-average IDM averages rater cuts, MAPT
+fits pooled binary models, and this ordinal model returns reference cuts
+from a joint model with optional random effects. Differences between these
+outputs do not by themselves identify which method is substantively best.
+
 ### Visual Subset Recoding
 
 `visualSubsetRecode()` supports interactive inspection and recoding of flagged subsets. For example, if a group of students was affected by a technical issue, you can display the relevant responses and decide whether to recode them to a value such as `mci`. Because the function opens an interactive review flow, it is not evaluated in this vignette.
