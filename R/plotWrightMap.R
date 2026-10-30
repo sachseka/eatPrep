@@ -118,7 +118,13 @@
     if (!is.null(cut_labels)) stop("cut_labels requires cuts.", call. = FALSE)
     return(NULL)
   }
-  if (inherits(cuts, "cutsIDM")) cuts <- cuts$cuts_summary
+  if (inherits(cuts, c("cutsIDMMAPT", "cutsIDMOrdinal"))) {
+    # Model results explicitly record their selected boundaries, including
+    # custom names that need not begin with 'cut'.
+    cuts <- unlist(cuts$cuts_summary[cuts$cut_labels], use.names = TRUE)
+  } else if (inherits(cuts, "cutsIDM")) {
+    cuts <- cuts$cuts_summary
+  }
   if (is.data.frame(cuts)) {
     if (nrow(cuts) != 1L) stop("Supply a one-row mean cuts_summary table.", call. = FALSE)
     cols <- names(cuts)[startsWith(names(cuts), "cut")]

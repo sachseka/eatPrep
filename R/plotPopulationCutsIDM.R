@@ -340,11 +340,16 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
   population_fill <- style$fill
   colors <- style$colors
   is_mapt <- inherits(res_list, "cutsIDMMAPT")
+  is_ordinal <- inherits(res_list, "cutsIDMOrdinal")
+  is_probability <- is_mapt || is_ordinal
   persons <- as.character(res_list$cuts_per_person$person)
-  mean_label <- if (is_mapt) .aggregate_panel_label_mapt(persons) else
+  mean_label <- if (is_probability) .aggregate_panel_label_probability(
+    persons, if (is_ordinal) "Reference (ordinal)" else "Pooled (MAPT)"
+  ) else
     .aggregate_panel_label_idm(persons)
-  if (is_mapt && cut_selection == "individual" && !length(persons)) {
-    stop("Individual MAPT cuts require computeCutsIDMMAPT(..., per_rater = TRUE).",
+  if (is_probability && cut_selection == "individual" && !length(persons)) {
+    method <- if (is_ordinal) "computeCutsIDMOrdinal" else "computeCutsIDMMAPT"
+    stop("Individual cuts require ", method, "(..., per_rater = TRUE).",
          call. = FALSE)
   }
   cut_tables <- list()
@@ -355,7 +360,7 @@ plotPopulationCutsIDM <- function(res_list, pv_data, pv_cols = NULL,
     cut_tables[["mean"]] <- dplyr::mutate(res_list$cuts_summary, person = mean_label)
   }
   cuts <- dplyr::bind_rows(cut_tables)
-  if (is_mapt) {
+  if (is_probability) {
     cuts <- tidyr::pivot_longer(cuts, dplyr::all_of(res_list$cut_labels),
                                 names_to = "cut_type", values_to = "cut")
     cuts$cut_type <- factor(cuts$cut_type, levels = res_list$cut_labels)

@@ -3,14 +3,16 @@
 \title{Plot IDM Cut Scores and Fitted Rating Functions}
 \description{
 Shows how item ratings relate to item difficulty, and where the resulting
-cut scores lie. Pass the result of \code{\link{computeCutsIDM}} or
-\code{\link{computeCutsIDMMAPT}} directly to this function.
+cut scores lie. Pass the result of \code{\link{computeCutsIDM}},
+\code{\link{computeCutsIDMMAPT}}, or \code{\link{computeCutsIDMOrdinal}}
+directly to this function.
 Each rater gets a separate panel. \code{show_aggregate = TRUE} adds a
 summary panel: mean cuts for moving-average IDM, or a jointly fitted
-\code{Pooled (MAPT)} model for MAPT.
+\code{Pooled (MAPT)} model for MAPT, or \code{Reference (ordinal)} curves
+with both random intercepts set to zero for ordinal models.
 
 The y-axis depends on the method: rating levels for moving-average IDM,
-probabilities from zero to one for MAPT. Optional plausible values (PVs)
+probabilities from zero to one for MAPT and ordinal models. Optional plausible values (PVs)
 add population distributions in the background and percentage tables above
 the panels. The background height is scaled for display; read population
 shares from the percentage tables, not from that height.
@@ -54,38 +56,46 @@ plotCutsIDM(
 )
 }
 \arguments{
-  \item{res_list}{A result from \code{computeCutsIDM()} or
-  \code{computeCutsIDMMAPT()}. The result's class selects the appropriate view.}
+  \item{res_list}{A result from \code{computeCutsIDM()},
+  \code{computeCutsIDMMAPT()}, or \code{computeCutsIDMOrdinal()}.
+  The result's class selects the appropriate view.}
   \item{est_col}{Optional character scalar. Label to use for the item difficulty axis. If \code{NULL}, the value stored in \code{res_list} is used.}
   \item{show_raw}{Logical scalar. For moving-average IDM, shows raw ratings as
-  points and a thin line connecting items ordered by difficulty. For MAPT,
+  points and a thin line connecting items ordered by difficulty. For MAPT
+  and ordinal models,
   shows the empirical proportion of ratings above each boundary at each
   observed difficulty, within the relevant rater or pooled panel. MAPT points
   have the color of their boundary, matching its curve and cut line; see
   the worked example below. \code{FALSE} hides points but keeps the fitted
-  MAPT curves.}
+  probability curves. Ordinal points are also empirical proportions,
+  whereas the displayed curves set item effects to zero.}
   \item{show_smoothed}{Logical scalar. Shows the non-monotonized moving
-  average as a thin dashed blue line. Has no effect for MAPT results, whose
+  average as a thin dashed blue line. Has no effect for MAPT or ordinal results, whose
   logistic curves are always shown.}
   \item{show_residuals}{Logical scalar. Adds a residual row. For moving-average
   IDM, residuals are raw ratings minus smoothed moving averages. For MAPT,
   they are empirical proportions above each boundary minus the corresponding
-  model probabilities at the same difficulties.}
+  model probabilities at the same difficulties. For ordinal models,
+  they are empirical proportions minus the displayed reference or conditional
+  rater curves, with item effects set to zero; they are not residuals from
+  the fully conditional model.}
   \item{show_aggregate}{Logical scalar. Adds a \code{Mean} panel for
   moving-average IDM, overlaying the monotonized rater curves and their mean
   cuts. For MAPT, adds a \code{Pooled (MAPT)} panel with the jointly fitted
   logistic curves and pooled cuts from \code{res_list$cuts_summary}. This is
   not a mean of the rater-specific cuts. If the MAPT result was computed with
   \code{per_rater = FALSE}, only the pooled panel is shown regardless of this
-  option.}
+  option. For ordinal results, adds \code{Reference (ordinal)} curves and
+  cuts with both random intercepts zero. With \code{per_rater = FALSE},
+  only this reference panel is shown regardless of this option.}
   \item{show_aggregate_labels}{Logical scalar. Shows rater names near the
   right-hand end of monotonized curves in the \code{Mean} panel. Only used
   for moving-average IDM when \code{show_aggregate = TRUE}; has no effect
-  for MAPT results.}
+  for MAPT or ordinal results.}
   \item{show_cut_values}{Logical scalar. If \code{TRUE}, numeric cut values are shown next to the vertical cut lines in individual panels and, when requested, in the aggregate panel.}
   \item{show_item_numbers}{Logical scalar. Shows item position numbers next
   to raw grey points in the individual moving-average IDM panels. Only used
-  when \code{show_raw = TRUE}; has no effect for MAPT results.}
+  when \code{show_raw = TRUE}; has no effect for MAPT or ordinal results.}
   \item{cut_value_digits}{Non-negative integer scalar. Number of digits after the decimal point used for rounding cut value labels. The default \code{0L} shows rounded whole-number cut values.}
   \item{item_number_size}{Finite non-negative numeric scalar. Text size in millimetres for item position numbers next to raw points. Default is \code{2}. Only used for moving-average IDM when \code{show_raw = TRUE} and \code{show_item_numbers = TRUE}.}
   \item{cut_value_size}{Finite non-negative numeric scalar. Text size in millimetres for numeric cut value labels in individual and aggregate panels. Default is \code{2.6}. Only used when \code{show_cut_values = TRUE}.}
@@ -118,6 +128,35 @@ plotCutsIDM(
   \item{show_caption}{Logical scalar. Default \code{FALSE} hides explanatory plot captions. Set to \code{TRUE} to explain the population silhouette and, when displayed, percentages and M/SD below the plot. Does not affect statistics, percentage labels, or the subtitle. Has no plotting effect without \code{pv_data}.}
 }
 \details{
+\subsection{Ordinal models: reference curves and conditional rater curves}{
+Results from \code{\link{computeCutsIDMOrdinal}} use the same zero-to-one
+probability axis as MAPT, with a horizontal line at 0.5. However, all
+boundaries and rater effects come from one joint cumulative-logit model.
+The \code{Reference (ordinal)} panel sets the rater and item random
+intercepts to zero. It is not the average of the individual curves and
+is not a marginal probability curve integrated over random effects.
+
+Individual panels incorporate the estimated conditional rater intercept
+and set the item intercept to zero. Their cuts are the 0.5 crossings of
+these curves. There are no separately fitted rater models. Conditional
+rater effects are shrunk towards zero; a positive effect shifts curves
+and cuts towards lower difficulties. If the fitted model has no rater
+effect, observed raters share the reference curve.
+
+Observed proportions and optional residuals are calculated as in the
+MAPT view, but the ordinal curves omit the fitted item intercepts. The
+resulting discrepancies can therefore reflect item effects as well as
+other lack of fit; they are not fully conditional model residuals.
+The model's item effects remain available in \code{res_list$item_effects}.
+These plotting choices do not refit or remove any effect from the model.
+
+\code{show_aggregate = TRUE} adds the reference panel to the individual
+panels. With \code{per_rater = FALSE}, only the reference panel appears.
+Population silhouettes, statistics, interval percentages, and
+extrapolation markings work as in the MAPT view, using each panel's own
+cuts. \code{show_smoothed}, \code{show_item_numbers}, and
+\code{show_aggregate_labels} have no effect for ordinal results.
+}
 \subsection{MAPT: read the axes and find a cut}{
 This section applies to a result from \code{computeCutsIDMMAPT()}.
 The horizontal axis shows item difficulty on the original \code{est} scale.
@@ -331,8 +370,9 @@ With two cuts \eqn{c_1<c_2}, the three intervals are
 \deqn{(-\infty,c_1),\quad[c_1,c_2),\quad[c_2,\infty).}{below c_1; from c_1 (included) to c_2 (excluded); c_2 and above.}
 For example, with cuts 400 and 500, a score of 500 enters the last interval.
 Each individual panel uses its own rater's cuts. The MAPT pooled panel uses
-the jointly estimated cuts; the moving-average \code{Mean} panel uses mean
-cuts. Both aggregate panels recalculate percentages at their own cuts,
+the jointly estimated cuts; the ordinal reference panel uses reference
+cuts; the moving-average \code{Mean} panel uses mean cuts.
+All aggregate panels recalculate percentages at their own cuts,
 rather than averaging individual raters' percentages.
 
 By default, each rating panel with population data also contains a percentage

@@ -111,11 +111,15 @@ plotWrightMap(
   \item{item_colour}{Item text and heading colour.}
   \item{line_colour}{Colour of the divider, item leaders, and grouping brackets.
   All four colour arguments accept a single valid R colour.}
-  \item{cuts}{Optional mean cuts on the same metric as the PVs and item
+  \item{cuts}{Optional cuts on the same metric as the PVs and item
   difficulties. Accepts a finite non-decreasing numeric vector, a one-row
   \code{cuts_summary} data frame with numeric columns starting with \code{cut},
-  or a result of \code{\link{computeCutsIDM}}. For the latter, only
-  \code{cuts_summary} is used; individual rater cuts are never drawn. Missing
+  or a result of \code{\link{computeCutsIDM}},
+  \code{\link{computeCutsIDMMAPT}}, or \code{\link{computeCutsIDMOrdinal}}.
+  For result objects, only \code{cuts_summary} is used: mean cuts for
+  moving-average IDM, pooled cuts for MAPT, and reference cuts with both
+  random intercepts zero for ordinal models. Individual rater cuts are
+  never drawn. Missing
   cuts are rejected. Equal cuts share one mark and a combined label.
   \code{NULL} (default) leaves the original two-sided layout unchanged.}
   \item{cut_labels}{Optional unique non-empty names for the supplied cuts,
