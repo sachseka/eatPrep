@@ -2,9 +2,10 @@
 
 Estimates a population density from wide- or long-format plausible
 values (PVs) and draws cut scores from
-[`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+[`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
+[`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md),
 or
-[`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md)
+[`computeCutsIDMOrdinal()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md)
 over it. An optional grouping column overlays multiple population
 densities with transparent fills. The y-axis represents population
 density. For a distribution-shape silhouette behind rater curves, use
@@ -50,9 +51,10 @@ plotPopulationCutsIDM(
 - res_list:
 
   A result returned by
-  [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+  [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
+  [`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md),
   or
-  [`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md).
+  [`computeCutsIDMOrdinal`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md).
   Cut scores and custom cut labels are used as stored, without
   re-estimation.
 
@@ -128,12 +130,15 @@ plotPopulationCutsIDM(
   `"mean"` (default) draws cuts from `res_list$cuts_summary`. For MAPT,
   this option retains its name for compatibility but displays jointly
   estimated pooled cuts in a `Pooled (MAPT)` panel, not the mean of
+  rater cuts. For ordinal models, it displays `Reference (ordinal)` cuts
+  with both random intercepts zero. These are not means of conditional
   rater cuts. `"individual"` creates one facet per rater using
-  `res_list$cuts_per_person`. `"both"` adds the mean-cut or pooled facet
-  to the individual facets. If a MAPT result has `per_rater = FALSE`,
-  `"mean"` and `"both"` show only the pooled panel, while `"individual"`
-  gives an error. All facets show the same population density on fixed
-  axes.
+  `res_list$cuts_per_person`. Ordinal rater cuts use the estimated
+  conditional rater effect with the item effect zero. `"both"` adds the
+  mean-cut, pooled, or reference facet to the individual facets. If a
+  MAPT or ordinal result has `per_rater = FALSE`, `"mean"` and `"both"`
+  show only the pooled or reference panel, while `"individual"` gives an
+  error. All facets show the same population density on fixed axes.
 
 - est_col:
 
@@ -296,7 +301,8 @@ values outside the visible plot range. Actual unrounded cuts determine
 membership: changing cut-label rounding or density smoothing does not
 change percentages. Individual panels use their rater's cuts. The mean
 panel recomputes shares at the mean cuts; the MAPT pooled panel uses its
-pooled cuts. Neither averages rater percentages.
+pooled cuts; the ordinal reference panel uses reference cuts. None of
+these panels averages rater percentages.
 
 Percentage labels are horizontally centered between the visible cut
 positions. For outer intervals, the midpoint between the outermost cut
@@ -357,6 +363,7 @@ and themes.
 
 [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
 [`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md),
+[`computeCutsIDMOrdinal`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md),
 [`plotCutsIDM`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md),
 [`density`](https://rdrr.io/r/stats/density.html).
 

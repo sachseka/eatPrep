@@ -17,6 +17,7 @@
 <url><loc>https://sachseka.github.io/eatPrep/reference/collapseMissings.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/computeCutsIDM.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.html</loc></url>
+<url><loc>https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/evalPbc.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/index.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/inputDat.html</loc></url>
@@ -40,6 +41,7 @@
 <url><loc>https://sachseka.github.io/eatPrep/reference/scoreData.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/summary.cutsIDM.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/summary.cutsIDMMAPT.html</loc></url>
+<url><loc>https://sachseka.github.io/eatPrep/reference/summary.cutsIDMOrdinal.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/visualSubsetRecode.html</loc></url>
 <url><loc>https://sachseka.github.io/eatPrep/reference/writeSpss.html</loc></url>
 </urlset>

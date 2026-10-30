@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1079,7 +1079,7 @@ create the data frame <code>dat</code> for <code><a href="../reference/mnrCoding
 <span><span class="co">#&gt; 6 booklet3               3   31</span></span>
 <span><span class="co">#&gt; start recoding (item-wise)</span></span>
 <span><span class="co">#&gt; done</span></span>
-<span><span class="co">#&gt; elapsed time: 0.0 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; elapsed time: 0.1 secs</span></span></code></pre></div>
 <p>Type <code><a href="../reference/mnrCoding.html">?mnrCoding</a></code> into your console to learn more.</p>
 </div>
 </div>
@@ -1149,7 +1149,7 @@ the final data preparation step.</p>
 <span>    recodeData <span class="op">=</span> <span class="cn">TRUE</span>, recodeMnr <span class="op">=</span> <span class="cn">TRUE</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
 <span>    aggregateData <span class="op">=</span> <span class="cn">TRUE</span>, scoreData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    writeSpss <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Starting automateDataPreparation 2026-10-17 09:44:57.411259</span></span>
+<span><span class="co">#&gt; Starting automateDataPreparation 2026-10-30 20:00:59.975417</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Check data...</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1211,7 +1211,7 @@ the final data preparation step.</p>
 <span><span class="co">#&gt; 6 booklet3               3   31</span></span>
 <span><span class="co">#&gt; start recoding (item-wise)</span></span>
 <span><span class="co">#&gt; done</span></span>
-<span><span class="co">#&gt; elapsed time: 0.0 secs</span></span>
+<span><span class="co">#&gt; elapsed time: 0.1 secs</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Start aggregating</span></span>
 <span><span class="co">#&gt; Since inputList$aggrMiss exists, this will be used instead of default.</span></span>
@@ -1225,7 +1225,7 @@ the final data preparation step.</p>
 <span><span class="co">#&gt; No SPSS-File has been written.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Missings are UNcollapsed.</span></span>
-<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-10-17 09:44:57.560069</span></span></code></pre></div>
+<span><span class="co">#&gt; automateDataPreparation terminated successfully! 2026-10-30 20:01:00.262691</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="additional-diagnostics-and-rater-tools">Additional Diagnostics and Rater Tools<a class="anchor" aria-label="anchor" href="#additional-diagnostics-and-rater-tools"></a>
@@ -2480,6 +2480,260 @@ shows individual and pooled panels, or only the pooled panel when
 <code>per_rater = FALSE</code>.</p>
 </div>
 <div class="section level3">
+<h3 id="ordinal-idm-cut-scores-with-rater-and-item-effects">Ordinal IDM Cut Scores with Rater and Item Effects<a class="anchor" aria-label="anchor" href="#ordinal-idm-cut-scores-with-rater-and-item-effects"></a>
+</h3>
+<p><code><a href="../reference/computeCutsIDMOrdinal.html">computeCutsIDMOrdinal()</a></code> fits one cumulative-logit model
+to all ordered ratings. By default it includes crossed random intercepts
+for raters and items. Rater effects describe systematic differences in
+level assignments between raters. Item effects describe remaining
+differences between items after accounting for their supplied difficulty
+estimates. The input uses the same long/wide column conventions as
+<code><a href="../reference/computeCutsIDMMAPT.html">computeCutsIDMMAPT()</a></code>.</p>
+<p>For rating category <span class="math inline">\(R_{ir}\)</span>,
+standardized difficulty <span class="math inline">\(z_i=(x_i-\mu)/s\)</span>, rater effect <span class="math inline">\(u_r\)</span>, and item effect <span class="math inline">\(v_i\)</span>, the model is</p>
+<p><span class="math display">\[
+\operatorname{logit}\Pr(R_{ir}\leq k\mid x_i,u_r,v_i)
+  = \alpha_k-\beta z_i-u_r-v_i.
+\]</span></p>
+<p>The thresholds <span class="math inline">\(\alpha_k\)</span> are
+ordered and freely estimated. The common positive slope <span class="math inline">\(\beta\)</span> describes how higher difficulty
+predicts a higher rating category. Sharing this slope across boundaries
+is the <strong>proportional-odds assumption</strong>. The random
+intercepts follow independent mean-zero normal distributions, each with
+its own estimated variance. They are assumed independent of the supplied
+difficulty predictor. Mixed models use <code><a href="https://rdrr.io/pkg/ordinal/man/clmm.html" class="external-link">ordinal::clmm()</a></code> with
+a Laplace approximation.</p>
+<p>The following reproducible example generates five ordered categories
+from 60 items rated by 10 raters. The known simulation effects are used
+only to generate the data; the fitting function receives the resulting
+ratings and difficulties.</p>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">4721</span><span class="op">)</span></span>
+<span><span class="va">n_items</span> <span class="op">&lt;-</span> <span class="fl">60L</span></span>
+<span><span class="va">n_raters</span> <span class="op">&lt;-</span> <span class="fl">10L</span></span>
+<span><span class="va">ordinalItems</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
+<span>  item <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_items</span><span class="op">)</span>, rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_raters</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">ordinalItems</span><span class="op">$</span><span class="va">est</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3.5</span>, <span class="fl">3.5</span>, length.out <span class="op">=</span> <span class="va">n_items</span><span class="op">)</span><span class="op">[</span><span class="va">ordinalItems</span><span class="op">$</span><span class="va">item</span><span class="op">]</span></span>
+<span><span class="va">rater_shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_raters</span>, sd <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span>
+<span><span class="va">item_shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_items</span>, sd <span class="op">=</span> <span class="fl">0.65</span><span class="op">)</span></span>
+<span><span class="va">latent</span> <span class="op">&lt;-</span> <span class="fl">1.1</span> <span class="op">*</span> <span class="va">ordinalItems</span><span class="op">$</span><span class="va">est</span> <span class="op">+</span> <span class="va">rater_shift</span><span class="op">[</span><span class="va">ordinalItems</span><span class="op">$</span><span class="va">rater</span><span class="op">]</span> <span class="op">+</span></span>
+<span>  <span class="va">item_shift</span><span class="op">[</span><span class="va">ordinalItems</span><span class="op">$</span><span class="va">item</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">rlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ordinalItems</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ordinalItems</span><span class="op">$</span><span class="va">rating</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/findInterval.html" class="external-link">findInterval</a></span><span class="op">(</span><span class="va">latent</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1L</span></span>
+<span></span>
+<span><span class="va">cutsOrdinal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDMOrdinal.html">computeCutsIDMOrdinal</a></span><span class="op">(</span></span>
+<span>  <span class="va">ordinalItems</span>,</span>
+<span>  item_id_col <span class="op">=</span> <span class="st">"item"</span>, rater_id_col <span class="op">=</span> <span class="st">"rater"</span>, rating_col <span class="op">=</span> <span class="st">"rating"</span>,</span>
+<span>  rating_levels <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">cutsOrdinal</span></span>
+<span><span class="co">#&gt; Joint ordinal IDM cuts (cumulative logit)</span></span>
+<span><span class="co">#&gt; 600 ratings from 10 raters on 60 items; 0 missing ratings dropped.</span></span>
+<span><span class="co">#&gt; Random intercepts: rater, item </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Reference cuts (rater and item effects set to zero):</span></span>
+<span><span class="co">#&gt;  cut_name    cut status extrapolated</span></span>
+<span><span class="co">#&gt;   cut_1_2 -1.351     ok        FALSE</span></span>
+<span><span class="co">#&gt;   cut_2_3 -0.418     ok        FALSE</span></span>
+<span><span class="co">#&gt;   cut_3_4  0.487     ok        FALSE</span></span>
+<span><span class="co">#&gt;   cut_4_5  1.554     ok        FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model diagnostics:</span></span>
+<span><span class="co">#&gt;  status converged max_gradient max_scaled_gradient hessian_positive_definite</span></span>
+<span><span class="co">#&gt;      ok      TRUE        0.001                   0                      TRUE</span></span>
+<span><span class="co">#&gt;  singular warning</span></span>
+<span><span class="co">#&gt;     FALSE        </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Random-intercept variance components (logit scale):</span></span>
+<span><span class="co">#&gt;  group variance    sd n_levels</span></span>
+<span><span class="co">#&gt;  rater    0.844 0.919       10</span></span>
+<span><span class="co">#&gt;   item    0.748 0.865       60</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional rater cuts: summary(x, per_rater = TRUE).</span></span>
+<span><span class="co">#&gt; Reference cuts are not the mean of rater cuts. No cut confidence intervals are computed.</span></span>
+<span><span class="co">#&gt; Model, effects and ratings remain in the original result: $model, $rater_effects, $item_effects, $data_used.</span></span>
+<span><span class="va">cutsOrdinal</span><span class="op">$</span><span class="va">variance_components</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
+<span><span class="co">#&gt;   group variance    sd n_levels</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> rater    0.844 0.919       10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> item     0.748 0.865       60</span></span>
+<span><span class="va">cutsOrdinal</span><span class="op">$</span><span class="va">model_diagnostics</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 13</span></span></span>
+<span><span class="co">#&gt;   status converged max_gradient max_scaled_gradient hessian_positive_definite</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ok     TRUE          0.000<span style="text-decoration: underline;">750</span>            0.000<span style="text-decoration: underline;">113</span> TRUE                     </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: condition_number &lt;dbl&gt;, singular &lt;lgl&gt;, warning &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   est_center &lt;dbl&gt;, est_scale &lt;dbl&gt;, n_ratings &lt;int&gt;, n_items &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   n_raters &lt;int&gt;</span></span></span></code></pre></div>
+<p><code>cuts_summary</code> contains <strong>reference cuts</strong>,
+at which the probability of a rating above the respective boundary is
+0.5 with both random intercepts set to zero:</p>
+<p><span class="math display">\[c_k=\mu+s\frac{\alpha_k}{\beta}.\]</span></p>
+<p>These are neither the mean of individual rater cuts nor cuts obtained
+by averaging predictions over the observed raters and items. The
+reference probability curve sets random intercepts to zero; it does not
+integrate over their distributions.</p>
+<p>With the default <code>per_rater = TRUE</code>,
+<code>cuts_per_person</code> contains conditional rater cuts. They use
+the rater’s estimated conditional random intercept <span class="math inline">\(\widehat u_r\)</span>, with the item effect still
+fixed at zero:</p>
+<p><span class="math display">\[c_{rk}=\mu+s\frac{\alpha_k-\widehat
+u_r}{\beta}.\]</span></p>
+<p>A positive rater effect means a tendency to assign higher categories
+at the same difficulty, so the rater’s cuts move towards lower
+difficulties. These effects are shrunk towards zero and estimated
+jointly with all other parameters. They are not separate models fitted
+to each rater.</p>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cutsOrdinal</span>, per_rater <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Joint ordinal IDM cuts (cumulative logit)</span></span>
+<span><span class="co">#&gt; 600 ratings from 10 raters on 60 items; 0 missing ratings dropped.</span></span>
+<span><span class="co">#&gt; Random intercepts: rater, item </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Reference cuts (rater and item effects set to zero):</span></span>
+<span><span class="co">#&gt;  cut_name    cut status extrapolated</span></span>
+<span><span class="co">#&gt;   cut_1_2 -1.351     ok        FALSE</span></span>
+<span><span class="co">#&gt;   cut_2_3 -0.418     ok        FALSE</span></span>
+<span><span class="co">#&gt;   cut_3_4  0.487     ok        FALSE</span></span>
+<span><span class="co">#&gt;   cut_4_5  1.554     ok        FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model diagnostics:</span></span>
+<span><span class="co">#&gt;  status converged max_gradient max_scaled_gradient hessian_positive_definite</span></span>
+<span><span class="co">#&gt;      ok      TRUE        0.001                   0                      TRUE</span></span>
+<span><span class="co">#&gt;  singular warning</span></span>
+<span><span class="co">#&gt;     FALSE        </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Random-intercept variance components (logit scale):</span></span>
+<span><span class="co">#&gt;  group variance    sd n_levels</span></span>
+<span><span class="co">#&gt;  rater    0.844 0.919       10</span></span>
+<span><span class="co">#&gt;   item    0.748 0.865       60</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional rater cuts (joint fit, item effect set to zero):</span></span>
+<span><span class="co">#&gt;  person cut_1_2 cut_2_3 cut_3_4 cut_4_5</span></span>
+<span><span class="co">#&gt;       1  -1.870  -0.936  -0.032   1.035</span></span>
+<span><span class="co">#&gt;      10  -1.400  -0.466   0.439   1.506</span></span>
+<span><span class="co">#&gt;       2  -1.539  -0.605   0.299   1.366</span></span>
+<span><span class="co">#&gt;       3  -0.501   0.433   1.337   2.404</span></span>
+<span><span class="co">#&gt;       4  -0.235   0.699   1.603   2.670</span></span>
+<span><span class="co">#&gt;       5  -1.164  -0.230   0.675   1.742</span></span>
+<span><span class="co">#&gt;       6  -0.197   0.737   1.642   2.708</span></span>
+<span><span class="co">#&gt;       7  -1.829  -0.895   0.009   1.076</span></span>
+<span><span class="co">#&gt;       8  -2.096  -1.162  -0.258   0.809</span></span>
+<span><span class="co">#&gt;       9  -2.686  -1.752  -0.848   0.219</span></span>
+<span><span class="co">#&gt; Reference cuts are not the mean of rater cuts. No cut confidence intervals are computed.</span></span>
+<span><span class="co">#&gt; Model, effects and ratings remain in the original result: $model, $rater_effects, $item_effects, $data_used.</span></span>
+<span><span class="va">cutsOrdinal</span><span class="op">$</span><span class="va">rater_effects</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 3</span></span></span>
+<span><span class="co">#&gt;    person  effect     n</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1       0.564     60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 10      0.052<span style="text-decoration: underline;">3</span>    60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 2       0.204     60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 3      -<span style="color: #BB0000;">0.924</span>     60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 4      -<span style="color: #BB0000;">1.21</span>      60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 5      -<span style="color: #BB0000;">0.204</span>     60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 6      -<span style="color: #BB0000;">1.25</span>      60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 7       0.519     60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 8       0.809     60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 9       1.45      60</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cutsOrdinal</span><span class="op">$</span><span class="va">item_effects</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
+<span><span class="co">#&gt;   item_id effect     n</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1        1.45     10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10       0.258    10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 11      -<span style="color: #BB0000;">0.312</span>    10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 12       1.32     10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 13       0.228    10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 14      -<span style="color: #BB0000;">0.161</span>    10</span></span></code></pre></div>
+<p>Set <code>per_rater = FALSE</code> to omit individual cut tables
+while keeping the same model and reference cuts.
+<code>random_effects = "rater"</code> or <code>"item"</code> selects one
+random-intercept term, and <code>random_effects = character()</code>
+fits a cumulative-logit model without random effects via
+<code><a href="https://rdrr.io/pkg/ordinal/man/clm.html" class="external-link">ordinal::clm()</a></code>. Requested effects require sufficient
+observed groups and replication; the function does not silently discard
+an effect when the design is insufficient. Item effects do not
+recalibrate the supplied item estimates and do not represent their
+calibration uncertainty.</p>
+<p>Wide input and labelled categories work in the same way as in the
+MAPT function:</p>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ordinalWide</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span></span>
+<span>  <span class="va">ordinalItems</span>, id_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">item</span>, <span class="va">est</span><span class="op">)</span>, names_from <span class="op">=</span> <span class="va">rater</span>,</span>
+<span>  values_from <span class="op">=</span> <span class="va">rating</span>, names_prefix <span class="op">=</span> <span class="st">"Rater"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">cutsOrdinalWide</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeCutsIDMOrdinal.html">computeCutsIDMOrdinal</a></span><span class="op">(</span></span>
+<span>  <span class="va">ordinalWide</span>, item_id_col <span class="op">=</span> <span class="st">"item"</span>, rating_levels <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">cutsOrdinalWide</span><span class="op">$</span><span class="va">cuts_summary</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
+<span><span class="co">#&gt;   cut_1_2 cut_2_3 cut_3_4 cut_4_5</span></span>
+<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>   -<span style="color: #BB0000;">1.35</span>  -<span style="color: #BB0000;">0.418</span>   0.487    1.55</span></span></code></pre></div>
+<p>For labels such as <code>c("1a", "1b", "2", "3", "4")</code>, supply
+those values in <code>rating_levels</code>, ordered from lowest to
+highest. The order defines the categories, without requiring equal
+distances between them. When <code>rating_levels</code> is supplied and
+<code>boundaries</code> is omitted, all adjacent cuts are returned.
+Selecting a subset through <code>boundaries</code> does not discard
+other rating categories from the joint fit.</p>
+<p><code><a href="../reference/plotCutsIDM.html">plotCutsIDM()</a></code> accepts the ordinal result directly:</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plotCutsIDM.html">plotCutsIDM</a></span><span class="op">(</span><span class="va">cutsOrdinal</span>, show_aggregate <span class="op">=</span> <span class="cn">TRUE</span>, show_raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>            cut_value_digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/ordinal%20idm%20plot-1.png" class="r-plt" alt="" width="960"></p>
+<p>Individual panels show conditional rater curves with item effects
+zero. The additional <code>Reference (ordinal)</code> panel sets both
+random intercepts to zero. Each boundary has its own color; cuts occur
+where its curve crosses the horizontal 0.5 line. A result computed with
+<code>per_rater = FALSE</code> shows only the reference panel, even when
+<code>show_aggregate = FALSE</code>.</p>
+<p>With <code>show_raw = TRUE</code>, points show observed proportions
+above each boundary. <code>show_residuals = TRUE</code> adds their
+deviations from the displayed curves. Because those curves set item
+effects to zero, these are not residuals from fully conditional
+predictions that include every item’s estimated effect. They can reflect
+the omitted item effects as well as other discrepancies. Fitted item
+effects remain in <code>item_effects</code>.</p>
+<p>Plausible-value plots also accept this result. Here the synthetic PVs
+use the same metric as the example item difficulties:</p>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">4722</span><span class="op">)</span></span>
+<span><span class="va">ordinalPopulation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>PV1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>, PV2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plotPopulationCutsIDM.html">plotPopulationCutsIDM</a></span><span class="op">(</span></span>
+<span>  <span class="va">cutsOrdinal</span>, <span class="va">ordinalPopulation</span>, pv_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PV1"</span>, <span class="st">"PV2"</span><span class="op">)</span>,</span>
+<span>  cut_selection <span class="op">=</span> <span class="st">"mean"</span>, cut_value_digits <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="main_functions_files/figure-html/ordinal%20idm%20population%20plot-1.png" class="r-plt" alt="" width="768"></p>
+<p>The legacy name <code>cut_selection = "mean"</code> selects the
+reference cuts for ordinal results; <code>"both"</code> includes
+conditional rater cuts. The resulting percentages describe respondents’
+PVs relative to those cuts, independently of the rating probabilities on
+the ordinal curves. <code><a href="../reference/plotWrightMap.html">plotWrightMap()</a></code> can also receive
+<code>cuts = cutsOrdinal</code> and uses its reference cuts.</p>
+<p>Before interpreting a result, inspect <code>model_diagnostics</code>
+and <code>cut_diagnostics</code>. Unusable fits return unavailable cuts
+with diagnostic statuses. Missing declared categories are not silently
+merged: they give <code>missing_categories</code> diagnostics and
+<code>NA</code> cuts. Reference cuts outside the observed difficulty
+range are retained but marked as extrapolated. A near-zero random-effect
+variance is flagged, but does not alone invalidate an otherwise usable
+model. Numerical convergence does not check the proportional-odds
+assumption or establish the validity of the descriptors. No cut-score
+confidence intervals or propagation of item-calibration uncertainty are
+computed.</p>
+<p>For a methods comparison, hold the item/rater observations and rating
+round fixed. Moving-average IDM crosses a mean numerical stage boundary;
+the ordinal and MAPT models cross a cumulative probability of 0.5. Their
+aggregation also differs: moving-average IDM averages rater cuts, MAPT
+fits pooled binary models, and this ordinal model returns reference cuts
+from a joint model with optional random effects. Differences between
+these outputs do not by themselves identify which method is
+substantively best.</p>
+</div>
+<div class="section level3">
 <h3 id="visual-subset-recoding">Visual Subset Recoding<a class="anchor" aria-label="anchor" href="#visual-subset-recoding"></a>
 </h3>
 <p><code><a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a></code> supports interactive inspection and
@@ -2488,7 +2742,7 @@ affected by a technical issue, you can display the relevant responses
 and decide whether to recode them to a value such as <code>mci</code>.
 Because the function opens an interactive review flow, it is not
 evaluated in this vignette.</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsetInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person100"</span>, <span class="st">"person101"</span>, <span class="st">"person102"</span><span class="op">)</span>,</span>
 <span>  datCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I01"</span>, <span class="st">"I02"</span>, <span class="st">"I03"</span><span class="op">)</span></span>
@@ -2522,7 +2776,7 @@ character missings should be converted to <code>0</code> or
 <code>NA</code>. It has default settings, but you can adapt them if
 needed. Type <code><a href="../reference/collapseMissings.html">?collapseMissings</a></code> into your console to learn
 more.</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datColMis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/collapseMissings.html">collapseMissings</a></span><span class="op">(</span><span class="va">datRec</span><span class="op">)</span></span></code></pre></div>
 <p>After doing that you should have a data frame that you can now use
 for further processing with the <code>eatModel</code> package.</p>
@@ -2538,7 +2792,7 @@ frames <code>dat</code>, <code>values</code>, <code>subunits</code> and
 where to save those new files.</p>
 <p>The function creates and saves those files, but the actual return
 values for this function is <code>NULL</code>.</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/writeSpss.html">writeSpss</a></span><span class="op">(</span><span class="va">dat</span>, <span class="va">values</span>, <span class="va">subunits</span>, <span class="va">units</span>,</span>
 <span>    filedat <span class="op">=</span> <span class="st">"mydata.txt"</span>, filesps <span class="op">=</span> <span class="st">"readmydata.sps"</span>,</span>
 <span>    missing.rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mvi <span class="op">=</span> <span class="fl">0</span>, mnr <span class="op">=</span> <span class="fl">0</span>, mci <span class="op">=</span> <span class="cn">NA</span>, mbd <span class="op">=</span> <span class="cn">NA</span>, mir <span class="op">=</span> <span class="fl">0</span>, mbi <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
@@ -2557,7 +2811,7 @@ example exports scored data (<code>trafoType</code> = “scored”), which
 usually has 0/1 values and mistypes like mbi/mbo etc. The second example
 exports the raw data (<code>trafoType</code> = “raw”), including the
 original values and subunits.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputDat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">inputList</span><span class="op">)</span></span>
 <span></span>
@@ -2571,7 +2825,7 @@ original values and subunits.</p>
 <span>                                      readSpss <span class="op">=</span> <span class="cn">FALSE</span>, checkData<span class="op">=</span><span class="cn">FALSE</span>, mergeData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      recodeData<span class="op">=</span><span class="cn">FALSE</span>, aggregateData<span class="op">=</span><span class="cn">FALSE</span>, scoreData<span class="op">=</span><span class="cn">FALSE</span>,</span>
 <span>                                      writeSpss<span class="op">=</span><span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GADSobj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prep2gads.html">prep2GADS</a></span><span class="op">(</span>dat <span class="op">=</span> <span class="va">prepDatScored</span>, inputList <span class="op">=</span> <span class="va">inputList</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, trafoType <span class="op">=</span> <span class="st">"scored"</span>,</span>
 <span>                      verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>

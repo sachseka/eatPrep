@@ -201,12 +201,17 @@ plotWrightMap(
 
 - cuts:
 
-  Optional mean cuts on the same metric as the PVs and item
-  difficulties. Accepts a finite non-decreasing numeric vector, a
-  one-row `cuts_summary` data frame with numeric columns starting with
-  `cut`, or a result of
-  [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md).
-  For the latter, only `cuts_summary` is used; individual rater cuts are
+  Optional cuts on the same metric as the PVs and item difficulties.
+  Accepts a finite non-decreasing numeric vector, a one-row
+  `cuts_summary` data frame with numeric columns starting with `cut`, or
+  a result of
+  [`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
+  [`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md),
+  or
+  [`computeCutsIDMOrdinal`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md).
+  For result objects, only `cuts_summary` is used: mean cuts for
+  moving-average IDM, pooled cuts for MAPT, and reference cuts with both
+  random intercepts zero for ordinal models. Individual rater cuts are
   never drawn. Missing cuts are rejected. Equal cuts share one mark and
   a combined label. `NULL` (default) leaves the original two-sided
   layout unchanged.

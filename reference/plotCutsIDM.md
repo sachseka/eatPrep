@@ -2,18 +2,22 @@
 
 Shows how item ratings relate to item difficulty, and where the
 resulting cut scores lie. Pass the result of
-[`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+[`computeCutsIDM`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
+[`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md),
 or
-[`computeCutsIDMMAPT`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md)
+[`computeCutsIDMOrdinal`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md)
 directly to this function. Each rater gets a separate panel.
 `show_aggregate = TRUE` adds a summary panel: mean cuts for
-moving-average IDM, or a jointly fitted `Pooled (MAPT)` model for MAPT.
+moving-average IDM, or a jointly fitted `Pooled (MAPT)` model for MAPT,
+or `Reference (ordinal)` curves with both random intercepts set to zero
+for ordinal models.
 
 The y-axis depends on the method: rating levels for moving-average IDM,
-probabilities from zero to one for MAPT. Optional plausible values (PVs)
-add population distributions in the background and percentage tables
-above the panels. The background height is scaled for display; read
-population shares from the percentage tables, not from that height.
+probabilities from zero to one for MAPT and ordinal models. Optional
+plausible values (PVs) add population distributions in the background
+and percentage tables above the panels. The background height is scaled
+for display; read population shares from the percentage tables, not from
+that height.
 
 ## Usage
 
@@ -61,9 +65,10 @@ plotCutsIDM(
 - res_list:
 
   A result from
-  [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md)
+  [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md),
+  [`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md),
   or
-  [`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md).
+  [`computeCutsIDMOrdinal()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md).
   The result's class selects the appropriate view.
 
 - est_col:
@@ -74,25 +79,30 @@ plotCutsIDM(
 - show_raw:
 
   Logical scalar. For moving-average IDM, shows raw ratings as points
-  and a thin line connecting items ordered by difficulty. For MAPT,
-  shows the empirical proportion of ratings above each boundary at each
-  observed difficulty, within the relevant rater or pooled panel. MAPT
-  points have the color of their boundary, matching its curve and cut
-  line; see the worked example below. `FALSE` hides points but keeps the
-  fitted MAPT curves.
+  and a thin line connecting items ordered by difficulty. For MAPT and
+  ordinal models, shows the empirical proportion of ratings above each
+  boundary at each observed difficulty, within the relevant rater or
+  pooled panel. MAPT points have the color of their boundary, matching
+  its curve and cut line; see the worked example below. `FALSE` hides
+  points but keeps the fitted probability curves. Ordinal points are
+  also empirical proportions, whereas the displayed curves set item
+  effects to zero.
 
 - show_smoothed:
 
   Logical scalar. Shows the non-monotonized moving average as a thin
-  dashed blue line. Has no effect for MAPT results, whose logistic
-  curves are always shown.
+  dashed blue line. Has no effect for MAPT or ordinal results, whose
+  logistic curves are always shown.
 
 - show_residuals:
 
   Logical scalar. Adds a residual row. For moving-average IDM, residuals
   are raw ratings minus smoothed moving averages. For MAPT, they are
   empirical proportions above each boundary minus the corresponding
-  model probabilities at the same difficulties.
+  model probabilities at the same difficulties. For ordinal models, they
+  are empirical proportions minus the displayed reference or conditional
+  rater curves, with item effects set to zero; they are not residuals
+  from the fully conditional model.
 
 - show_aggregate:
 
@@ -102,13 +112,16 @@ plotCutsIDM(
   pooled cuts from `res_list$cuts_summary`. This is not a mean of the
   rater-specific cuts. If the MAPT result was computed with
   `per_rater = FALSE`, only the pooled panel is shown regardless of this
-  option.
+  option. For ordinal results, adds `Reference (ordinal)` curves and
+  cuts with both random intercepts zero. With `per_rater = FALSE`, only
+  this reference panel is shown regardless of this option.
 
 - show_aggregate_labels:
 
   Logical scalar. Shows rater names near the right-hand end of
   monotonized curves in the `Mean` panel. Only used for moving-average
-  IDM when `show_aggregate = TRUE`; has no effect for MAPT results.
+  IDM when `show_aggregate = TRUE`; has no effect for MAPT or ordinal
+  results.
 
 - show_cut_values:
 
@@ -120,7 +133,7 @@ plotCutsIDM(
 
   Logical scalar. Shows item position numbers next to raw grey points in
   the individual moving-average IDM panels. Only used when
-  `show_raw = TRUE`; has no effect for MAPT results.
+  `show_raw = TRUE`; has no effect for MAPT or ordinal results.
 
 - cut_value_digits:
 
@@ -300,6 +313,38 @@ plotCutsIDM(
   `pv_data`.
 
 ## Details
+
+### Ordinal models: reference curves and conditional rater curves
+
+Results from
+[`computeCutsIDMOrdinal`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md)
+use the same zero-to-one probability axis as MAPT, with a horizontal
+line at 0.5. However, all boundaries and rater effects come from one
+joint cumulative-logit model. The `Reference (ordinal)` panel sets the
+rater and item random intercepts to zero. It is not the average of the
+individual curves and is not a marginal probability curve integrated
+over random effects.
+
+Individual panels incorporate the estimated conditional rater intercept
+and set the item intercept to zero. Their cuts are the 0.5 crossings of
+these curves. There are no separately fitted rater models. Conditional
+rater effects are shrunk towards zero; a positive effect shifts curves
+and cuts towards lower difficulties. If the fitted model has no rater
+effect, observed raters share the reference curve.
+
+Observed proportions and optional residuals are calculated as in the
+MAPT view, but the ordinal curves omit the fitted item intercepts. The
+resulting discrepancies can therefore reflect item effects as well as
+other lack of fit; they are not fully conditional model residuals. The
+model's item effects remain available in `res_list$item_effects`. These
+plotting choices do not refit or remove any effect from the model.
+
+`show_aggregate = TRUE` adds the reference panel to the individual
+panels. With `per_rater = FALSE`, only the reference panel appears.
+Population silhouettes, statistics, interval percentages, and
+extrapolation markings work as in the MAPT view, using each panel's own
+cuts. `show_smoothed`, `show_item_numbers`, and `show_aggregate_labels`
+have no effect for ordinal results.
 
 ### MAPT: read the axes and find a cut
 
@@ -557,9 +602,10 @@ With two cuts \\c_1\<c_2\\, the three intervals are
 \$\$(-\infty,c_1),\quad\[c_1,c_2),\quad\[c_2,\infty).\$\$ For example,
 with cuts 400 and 500, a score of 500 enters the last interval. Each
 individual panel uses its own rater's cuts. The MAPT pooled panel uses
-the jointly estimated cuts; the moving-average `Mean` panel uses mean
-cuts. Both aggregate panels recalculate percentages at their own cuts,
-rather than averaging individual raters' percentages.
+the jointly estimated cuts; the ordinal reference panel uses reference
+cuts; the moving-average `Mean` panel uses mean cuts. All aggregate
+panels recalculate percentages at their own cuts, rather than averaging
+individual raters' percentages.
 
 By default, each rating panel with population data also contains a
 percentage table. Percentage labels are centered between the visible cut

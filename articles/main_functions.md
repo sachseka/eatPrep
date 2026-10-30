@@ -841,7 +841,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.0 secs
+#> elapsed time: 0.1 secs
 ```
 
 Type
@@ -884,7 +884,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-10-17 09:44:57.411259
+#> Starting automateDataPreparation 2026-10-30 20:00:59.975417
 #> 
 #> Check data...
 #> 
@@ -946,7 +946,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.0 secs
+#> elapsed time: 0.1 secs
 #> 
 #> Start aggregating
 #> Since inputList$aggrMiss exists, this will be used instead of default.
@@ -960,7 +960,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-10-17 09:44:57.560069
+#> automateDataPreparation terminated successfully! 2026-10-30 20:01:00.262691
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -2347,6 +2347,294 @@ For a population distribution with a density axis, use
 With MAPT input, `cut_selection = "mean"` retains its existing argument
 name but selects the pooled cuts. `"both"` shows individual and pooled
 panels, or only the pooled panel when `per_rater = FALSE`.
+
+### Ordinal IDM Cut Scores with Rater and Item Effects
+
+[`computeCutsIDMOrdinal()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md)
+fits one cumulative-logit model to all ordered ratings. By default it
+includes crossed random intercepts for raters and items. Rater effects
+describe systematic differences in level assignments between raters.
+Item effects describe remaining differences between items after
+accounting for their supplied difficulty estimates. The input uses the
+same long/wide column conventions as
+[`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md).
+
+For rating category \\R\_{ir}\\, standardized difficulty
+\\z_i=(x_i-\mu)/s\\, rater effect \\u_r\\, and item effect \\v_i\\, the
+model is
+
+\\ \operatorname{logit}\Pr(R\_{ir}\leq k\mid x_i,u_r,v_i) =
+\alpha_k-\beta z_i-u_r-v_i. \\
+
+The thresholds \\\alpha_k\\ are ordered and freely estimated. The common
+positive slope \\\beta\\ describes how higher difficulty predicts a
+higher rating category. Sharing this slope across boundaries is the
+**proportional-odds assumption**. The random intercepts follow
+independent mean-zero normal distributions, each with its own estimated
+variance. They are assumed independent of the supplied difficulty
+predictor. Mixed models use
+[`ordinal::clmm()`](https://rdrr.io/pkg/ordinal/man/clmm.html) with a
+Laplace approximation.
+
+The following reproducible example generates five ordered categories
+from 60 items rated by 10 raters. The known simulation effects are used
+only to generate the data; the fitting function receives the resulting
+ratings and difficulties.
+
+``` r
+
+set.seed(4721)
+n_items <- 60L
+n_raters <- 10L
+ordinalItems <- expand.grid(
+  item = seq_len(n_items), rater = seq_len(n_raters)
+)
+ordinalItems$est <- seq(-3.5, 3.5, length.out = n_items)[ordinalItems$item]
+rater_shift <- rnorm(n_raters, sd = 0.7)
+item_shift <- rnorm(n_items, sd = 0.65)
+latent <- 1.1 * ordinalItems$est + rater_shift[ordinalItems$rater] +
+  item_shift[ordinalItems$item] + rlogis(nrow(ordinalItems))
+ordinalItems$rating <- findInterval(latent, c(-1.5, -0.5, 0.5, 1.5)) + 1L
+
+cutsOrdinal <- computeCutsIDMOrdinal(
+  ordinalItems,
+  item_id_col = "item", rater_id_col = "rater", rating_col = "rating",
+  rating_levels = 1:5
+)
+cutsOrdinal
+#> Joint ordinal IDM cuts (cumulative logit)
+#> 600 ratings from 10 raters on 60 items; 0 missing ratings dropped.
+#> Random intercepts: rater, item 
+#> 
+#> Reference cuts (rater and item effects set to zero):
+#>  cut_name    cut status extrapolated
+#>   cut_1_2 -1.351     ok        FALSE
+#>   cut_2_3 -0.418     ok        FALSE
+#>   cut_3_4  0.487     ok        FALSE
+#>   cut_4_5  1.554     ok        FALSE
+#> 
+#> Model diagnostics:
+#>  status converged max_gradient max_scaled_gradient hessian_positive_definite
+#>      ok      TRUE        0.001                   0                      TRUE
+#>  singular warning
+#>     FALSE        
+#> 
+#> Random-intercept variance components (logit scale):
+#>  group variance    sd n_levels
+#>  rater    0.844 0.919       10
+#>   item    0.748 0.865       60
+#> 
+#> Conditional rater cuts: summary(x, per_rater = TRUE).
+#> Reference cuts are not the mean of rater cuts. No cut confidence intervals are computed.
+#> Model, effects and ratings remain in the original result: $model, $rater_effects, $item_effects, $data_used.
+cutsOrdinal$variance_components
+#> # A tibble: 2 × 4
+#>   group variance    sd n_levels
+#>   <chr>    <dbl> <dbl>    <int>
+#> 1 rater    0.844 0.919       10
+#> 2 item     0.748 0.865       60
+cutsOrdinal$model_diagnostics
+#> # A tibble: 1 × 13
+#>   status converged max_gradient max_scaled_gradient hessian_positive_definite
+#>   <chr>  <lgl>            <dbl>               <dbl> <lgl>                    
+#> 1 ok     TRUE          0.000750            0.000113 TRUE                     
+#> # ℹ 8 more variables: condition_number <dbl>, singular <lgl>, warning <chr>,
+#> #   est_center <dbl>, est_scale <dbl>, n_ratings <int>, n_items <int>,
+#> #   n_raters <int>
+```
+
+`cuts_summary` contains **reference cuts**, at which the probability of
+a rating above the respective boundary is 0.5 with both random
+intercepts set to zero:
+
+\\c_k=\mu+s\frac{\alpha_k}{\beta}.\\
+
+These are neither the mean of individual rater cuts nor cuts obtained by
+averaging predictions over the observed raters and items. The reference
+probability curve sets random intercepts to zero; it does not integrate
+over their distributions.
+
+With the default `per_rater = TRUE`, `cuts_per_person` contains
+conditional rater cuts. They use the rater’s estimated conditional
+random intercept \\\widehat u_r\\, with the item effect still fixed at
+zero:
+
+\\c\_{rk}=\mu+s\frac{\alpha_k-\widehat u_r}{\beta}.\\
+
+A positive rater effect means a tendency to assign higher categories at
+the same difficulty, so the rater’s cuts move towards lower
+difficulties. These effects are shrunk towards zero and estimated
+jointly with all other parameters. They are not separate models fitted
+to each rater.
+
+``` r
+
+summary(cutsOrdinal, per_rater = TRUE)
+#> Joint ordinal IDM cuts (cumulative logit)
+#> 600 ratings from 10 raters on 60 items; 0 missing ratings dropped.
+#> Random intercepts: rater, item 
+#> 
+#> Reference cuts (rater and item effects set to zero):
+#>  cut_name    cut status extrapolated
+#>   cut_1_2 -1.351     ok        FALSE
+#>   cut_2_3 -0.418     ok        FALSE
+#>   cut_3_4  0.487     ok        FALSE
+#>   cut_4_5  1.554     ok        FALSE
+#> 
+#> Model diagnostics:
+#>  status converged max_gradient max_scaled_gradient hessian_positive_definite
+#>      ok      TRUE        0.001                   0                      TRUE
+#>  singular warning
+#>     FALSE        
+#> 
+#> Random-intercept variance components (logit scale):
+#>  group variance    sd n_levels
+#>  rater    0.844 0.919       10
+#>   item    0.748 0.865       60
+#> 
+#> Conditional rater cuts (joint fit, item effect set to zero):
+#>  person cut_1_2 cut_2_3 cut_3_4 cut_4_5
+#>       1  -1.870  -0.936  -0.032   1.035
+#>      10  -1.400  -0.466   0.439   1.506
+#>       2  -1.539  -0.605   0.299   1.366
+#>       3  -0.501   0.433   1.337   2.404
+#>       4  -0.235   0.699   1.603   2.670
+#>       5  -1.164  -0.230   0.675   1.742
+#>       6  -0.197   0.737   1.642   2.708
+#>       7  -1.829  -0.895   0.009   1.076
+#>       8  -2.096  -1.162  -0.258   0.809
+#>       9  -2.686  -1.752  -0.848   0.219
+#> Reference cuts are not the mean of rater cuts. No cut confidence intervals are computed.
+#> Model, effects and ratings remain in the original result: $model, $rater_effects, $item_effects, $data_used.
+cutsOrdinal$rater_effects
+#> # A tibble: 10 × 3
+#>    person  effect     n
+#>    <chr>    <dbl> <int>
+#>  1 1       0.564     60
+#>  2 10      0.0523    60
+#>  3 2       0.204     60
+#>  4 3      -0.924     60
+#>  5 4      -1.21      60
+#>  6 5      -0.204     60
+#>  7 6      -1.25      60
+#>  8 7       0.519     60
+#>  9 8       0.809     60
+#> 10 9       1.45      60
+head(cutsOrdinal$item_effects)
+#> # A tibble: 6 × 3
+#>   item_id effect     n
+#>   <chr>    <dbl> <int>
+#> 1 1        1.45     10
+#> 2 10       0.258    10
+#> 3 11      -0.312    10
+#> 4 12       1.32     10
+#> 5 13       0.228    10
+#> 6 14      -0.161    10
+```
+
+Set `per_rater = FALSE` to omit individual cut tables while keeping the
+same model and reference cuts. `random_effects = "rater"` or `"item"`
+selects one random-intercept term, and `random_effects = character()`
+fits a cumulative-logit model without random effects via
+[`ordinal::clm()`](https://rdrr.io/pkg/ordinal/man/clm.html). Requested
+effects require sufficient observed groups and replication; the function
+does not silently discard an effect when the design is insufficient.
+Item effects do not recalibrate the supplied item estimates and do not
+represent their calibration uncertainty.
+
+Wide input and labelled categories work in the same way as in the MAPT
+function:
+
+``` r
+
+ordinalWide <- tidyr::pivot_wider(
+  ordinalItems, id_cols = c(item, est), names_from = rater,
+  values_from = rating, names_prefix = "Rater"
+)
+cutsOrdinalWide <- computeCutsIDMOrdinal(
+  ordinalWide, item_id_col = "item", rating_levels = 1:5
+)
+cutsOrdinalWide$cuts_summary
+#> # A tibble: 1 × 4
+#>   cut_1_2 cut_2_3 cut_3_4 cut_4_5
+#>     <dbl>   <dbl>   <dbl>   <dbl>
+#> 1   -1.35  -0.418   0.487    1.55
+```
+
+For labels such as `c("1a", "1b", "2", "3", "4")`, supply those values
+in `rating_levels`, ordered from lowest to highest. The order defines
+the categories, without requiring equal distances between them. When
+`rating_levels` is supplied and `boundaries` is omitted, all adjacent
+cuts are returned. Selecting a subset through `boundaries` does not
+discard other rating categories from the joint fit.
+
+[`plotCutsIDM()`](https://sachseka.github.io/eatPrep/reference/plotCutsIDM.md)
+accepts the ordinal result directly:
+
+``` r
+
+plotCutsIDM(cutsOrdinal, show_aggregate = TRUE, show_raw = FALSE,
+            cut_value_digits = 2)
+```
+
+![](main_functions_files/figure-html/ordinal%20idm%20plot-1.png)
+
+Individual panels show conditional rater curves with item effects zero.
+The additional `Reference (ordinal)` panel sets both random intercepts
+to zero. Each boundary has its own color; cuts occur where its curve
+crosses the horizontal 0.5 line. A result computed with
+`per_rater = FALSE` shows only the reference panel, even when
+`show_aggregate = FALSE`.
+
+With `show_raw = TRUE`, points show observed proportions above each
+boundary. `show_residuals = TRUE` adds their deviations from the
+displayed curves. Because those curves set item effects to zero, these
+are not residuals from fully conditional predictions that include every
+item’s estimated effect. They can reflect the omitted item effects as
+well as other discrepancies. Fitted item effects remain in
+`item_effects`.
+
+Plausible-value plots also accept this result. Here the synthetic PVs
+use the same metric as the example item difficulties:
+
+``` r
+
+set.seed(4722)
+ordinalPopulation <- data.frame(PV1 = rnorm(500), PV2 = rnorm(500))
+plotPopulationCutsIDM(
+  cutsOrdinal, ordinalPopulation, pv_cols = c("PV1", "PV2"),
+  cut_selection = "mean", cut_value_digits = 2
+)
+```
+
+![](main_functions_files/figure-html/ordinal%20idm%20population%20plot-1.png)
+
+The legacy name `cut_selection = "mean"` selects the reference cuts for
+ordinal results; `"both"` includes conditional rater cuts. The resulting
+percentages describe respondents’ PVs relative to those cuts,
+independently of the rating probabilities on the ordinal curves.
+[`plotWrightMap()`](https://sachseka.github.io/eatPrep/reference/plotWrightMap.md)
+can also receive `cuts = cutsOrdinal` and uses its reference cuts.
+
+Before interpreting a result, inspect `model_diagnostics` and
+`cut_diagnostics`. Unusable fits return unavailable cuts with diagnostic
+statuses. Missing declared categories are not silently merged: they give
+`missing_categories` diagnostics and `NA` cuts. Reference cuts outside
+the observed difficulty range are retained but marked as extrapolated. A
+near-zero random-effect variance is flagged, but does not alone
+invalidate an otherwise usable model. Numerical convergence does not
+check the proportional-odds assumption or establish the validity of the
+descriptors. No cut-score confidence intervals or propagation of
+item-calibration uncertainty are computed.
+
+For a methods comparison, hold the item/rater observations and rating
+round fixed. Moving-average IDM crosses a mean numerical stage boundary;
+the ordinal and MAPT models cross a cumulative probability of 0.5. Their
+aggregation also differs: moving-average IDM averages rater cuts, MAPT
+fits pooled binary models, and this ordinal model returns reference cuts
+from a joint model with optional random effects. Differences between
+these outputs do not by themselves identify which method is
+substantively best.
 
 ### Visual Subset Recoding
 

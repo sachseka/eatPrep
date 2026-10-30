@@ -6,23 +6,27 @@
     }
   };
 </script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Plot IDM Cut Scores and Fitted Rating Functions — plotCutsIDM"><meta name="description" content="Shows how item ratings relate to item difficulty, and where the resulting
-cut scores lie. Pass the result of computeCutsIDM or
-computeCutsIDMMAPT directly to this function.
+cut scores lie. Pass the result of computeCutsIDM,
+computeCutsIDMMAPT, or computeCutsIDMOrdinal
+directly to this function.
 Each rater gets a separate panel. show_aggregate = TRUE adds a
 summary panel: mean cuts for moving-average IDM, or a jointly fitted
-Pooled (MAPT) model for MAPT.
+Pooled (MAPT) model for MAPT, or Reference (ordinal) curves
+with both random intercepts set to zero for ordinal models.
 The y-axis depends on the method: rating levels for moving-average IDM,
-probabilities from zero to one for MAPT. Optional plausible values (PVs)
+probabilities from zero to one for MAPT and ordinal models. Optional plausible values (PVs)
 add population distributions in the background and percentage tables above
 the panels. The background height is scaled for display; read population
 shares from the percentage tables, not from that height."><meta property="og:description" content="Shows how item ratings relate to item difficulty, and where the resulting
-cut scores lie. Pass the result of computeCutsIDM or
-computeCutsIDMMAPT directly to this function.
+cut scores lie. Pass the result of computeCutsIDM,
+computeCutsIDMMAPT, or computeCutsIDMOrdinal
+directly to this function.
 Each rater gets a separate panel. show_aggregate = TRUE adds a
 summary panel: mean cuts for moving-average IDM, or a jointly fitted
-Pooled (MAPT) model for MAPT.
+Pooled (MAPT) model for MAPT, or Reference (ordinal) curves
+with both random intercepts set to zero for ordinal models.
 The y-axis depends on the method: rating levels for moving-average IDM,
-probabilities from zero to one for MAPT. Optional plausible values (PVs)
+probabilities from zero to one for MAPT and ordinal models. Optional plausible values (PVs)
 add population distributions in the background and percentage tables above
 the panels. The background height is scaled for display; read population
 shares from the percentage tables, not from that height."><meta property="og:image" content="https://sachseka.github.io/eatPrep/logo.png"></head><body>
@@ -33,7 +37,7 @@ shares from the percentage tables, not from that height."><meta property="og:ima
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,13 +70,15 @@ shares from the percentage tables, not from that height."><meta property="og:ima
 
     <div class="ref-description section level2">
     <p>Shows how item ratings relate to item difficulty, and where the resulting
-cut scores lie. Pass the result of <code><a href="computeCutsIDM.html">computeCutsIDM</a></code> or
-<code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></code> directly to this function.
+cut scores lie. Pass the result of <code><a href="computeCutsIDM.html">computeCutsIDM</a></code>,
+<code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></code>, or <code><a href="computeCutsIDMOrdinal.html">computeCutsIDMOrdinal</a></code>
+directly to this function.
 Each rater gets a separate panel. <code>show_aggregate = TRUE</code> adds a
 summary panel: mean cuts for moving-average IDM, or a jointly fitted
-<code>Pooled (MAPT)</code> model for MAPT.</p>
+<code>Pooled (MAPT)</code> model for MAPT, or <code>Reference (ordinal)</code> curves
+with both random intercepts set to zero for ordinal models.</p>
 <p>The y-axis depends on the method: rating levels for moving-average IDM,
-probabilities from zero to one for MAPT. Optional plausible values (PVs)
+probabilities from zero to one for MAPT and ordinal models. Optional plausible values (PVs)
 add population distributions in the background and percentage tables above
 the panels. The background height is scaled for display; read population
 shares from the percentage tables, not from that height.</p>
@@ -122,31 +128,37 @@ shares from the percentage tables, not from that height.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <p></p>
 <dl><dt id="arg-res-list">res_list<a class="anchor" aria-label="anchor" href="#arg-res-list"></a></dt>
-<dd><p>A result from <code><a href="computeCutsIDM.html">computeCutsIDM()</a></code> or
-  <code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT()</a></code>. The result's class selects the appropriate view.</p></dd>
+<dd><p>A result from <code><a href="computeCutsIDM.html">computeCutsIDM()</a></code>,
+  <code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT()</a></code>, or <code><a href="computeCutsIDMOrdinal.html">computeCutsIDMOrdinal()</a></code>.
+  The result's class selects the appropriate view.</p></dd>
 
   <dt id="arg-est-col">est_col<a class="anchor" aria-label="anchor" href="#arg-est-col"></a></dt>
 <dd><p>Optional character scalar. Label to use for the item difficulty axis. If <code>NULL</code>, the value stored in <code>res_list</code> is used.</p></dd>
 
   <dt id="arg-show-raw">show_raw<a class="anchor" aria-label="anchor" href="#arg-show-raw"></a></dt>
 <dd><p>Logical scalar. For moving-average IDM, shows raw ratings as
-  points and a thin line connecting items ordered by difficulty. For MAPT,
+  points and a thin line connecting items ordered by difficulty. For MAPT
+  and ordinal models,
   shows the empirical proportion of ratings above each boundary at each
   observed difficulty, within the relevant rater or pooled panel. MAPT points
   have the color of their boundary, matching its curve and cut line; see
   the worked example below. <code>FALSE</code> hides points but keeps the fitted
-  MAPT curves.</p></dd>
+  probability curves. Ordinal points are also empirical proportions,
+  whereas the displayed curves set item effects to zero.</p></dd>
 
   <dt id="arg-show-smoothed">show_smoothed<a class="anchor" aria-label="anchor" href="#arg-show-smoothed"></a></dt>
 <dd><p>Logical scalar. Shows the non-monotonized moving
-  average as a thin dashed blue line. Has no effect for MAPT results, whose
+  average as a thin dashed blue line. Has no effect for MAPT or ordinal results, whose
   logistic curves are always shown.</p></dd>
 
   <dt id="arg-show-residuals">show_residuals<a class="anchor" aria-label="anchor" href="#arg-show-residuals"></a></dt>
 <dd><p>Logical scalar. Adds a residual row. For moving-average
   IDM, residuals are raw ratings minus smoothed moving averages. For MAPT,
   they are empirical proportions above each boundary minus the corresponding
-  model probabilities at the same difficulties.</p></dd>
+  model probabilities at the same difficulties. For ordinal models,
+  they are empirical proportions minus the displayed reference or conditional
+  rater curves, with item effects set to zero; they are not residuals from
+  the fully conditional model.</p></dd>
 
   <dt id="arg-show-aggregate">show_aggregate<a class="anchor" aria-label="anchor" href="#arg-show-aggregate"></a></dt>
 <dd><p>Logical scalar. Adds a <code>Mean</code> panel for
@@ -155,13 +167,15 @@ shares from the percentage tables, not from that height.</p>
   logistic curves and pooled cuts from <code>res_list$cuts_summary</code>. This is
   not a mean of the rater-specific cuts. If the MAPT result was computed with
   <code>per_rater = FALSE</code>, only the pooled panel is shown regardless of this
-  option.</p></dd>
+  option. For ordinal results, adds <code>Reference (ordinal)</code> curves and
+  cuts with both random intercepts zero. With <code>per_rater = FALSE</code>,
+  only this reference panel is shown regardless of this option.</p></dd>
 
   <dt id="arg-show-aggregate-labels">show_aggregate_labels<a class="anchor" aria-label="anchor" href="#arg-show-aggregate-labels"></a></dt>
 <dd><p>Logical scalar. Shows rater names near the
   right-hand end of monotonized curves in the <code>Mean</code> panel. Only used
   for moving-average IDM when <code>show_aggregate = TRUE</code>; has no effect
-  for MAPT results.</p></dd>
+  for MAPT or ordinal results.</p></dd>
 
   <dt id="arg-show-cut-values">show_cut_values<a class="anchor" aria-label="anchor" href="#arg-show-cut-values"></a></dt>
 <dd><p>Logical scalar. If <code>TRUE</code>, numeric cut values are shown next to the vertical cut lines in individual panels and, when requested, in the aggregate panel.</p></dd>
@@ -169,7 +183,7 @@ shares from the percentage tables, not from that height.</p>
   <dt id="arg-show-item-numbers">show_item_numbers<a class="anchor" aria-label="anchor" href="#arg-show-item-numbers"></a></dt>
 <dd><p>Logical scalar. Shows item position numbers next
   to raw grey points in the individual moving-average IDM panels. Only used
-  when <code>show_raw = TRUE</code>; has no effect for MAPT results.</p></dd>
+  when <code>show_raw = TRUE</code>; has no effect for MAPT or ordinal results.</p></dd>
 
   <dt id="arg-cut-value-digits">cut_value_digits<a class="anchor" aria-label="anchor" href="#arg-cut-value-digits"></a></dt>
 <dd><p>Non-negative integer scalar. Number of digits after the decimal point used for rounding cut value labels. The default <code>0L</code> shows rounded whole-number cut values.</p></dd>
@@ -255,6 +269,33 @@ shares from the percentage tables, not from that height.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
 
+<div class="section">
+<h3 id="ordinal-models-reference-curves-and-conditional-rater-curves">Ordinal models: reference curves and conditional rater curves<a class="anchor" aria-label="anchor" href="#ordinal-models-reference-curves-and-conditional-rater-curves"></a></h3>
+<p>Results from <code><a href="computeCutsIDMOrdinal.html">computeCutsIDMOrdinal</a></code> use the same zero-to-one
+probability axis as MAPT, with a horizontal line at 0.5. However, all
+boundaries and rater effects come from one joint cumulative-logit model.
+The <code>Reference (ordinal)</code> panel sets the rater and item random
+intercepts to zero. It is not the average of the individual curves and
+is not a marginal probability curve integrated over random effects.</p>
+<p>Individual panels incorporate the estimated conditional rater intercept
+and set the item intercept to zero. Their cuts are the 0.5 crossings of
+these curves. There are no separately fitted rater models. Conditional
+rater effects are shrunk towards zero; a positive effect shifts curves
+and cuts towards lower difficulties. If the fitted model has no rater
+effect, observed raters share the reference curve.</p>
+<p>Observed proportions and optional residuals are calculated as in the
+MAPT view, but the ordinal curves omit the fitted item intercepts. The
+resulting discrepancies can therefore reflect item effects as well as
+other lack of fit; they are not fully conditional model residuals.
+The model's item effects remain available in <code>res_list$item_effects</code>.
+These plotting choices do not refit or remove any effect from the model.</p>
+<p><code>show_aggregate = TRUE</code> adds the reference panel to the individual
+panels. With <code>per_rater = FALSE</code>, only the reference panel appears.
+Population silhouettes, statistics, interval percentages, and
+extrapolation markings work as in the MAPT view, using each panel's own
+cuts. <code>show_smoothed</code>, <code>show_item_numbers</code>, and
+<code>show_aggregate_labels</code> have no effect for ordinal results.</p>
+</div>
 <div class="section">
 <h3 id="mapt-read-the-axes-and-find-a-cut">MAPT: read the axes and find a cut<a class="anchor" aria-label="anchor" href="#mapt-read-the-axes-and-find-a-cut"></a></h3>
 <p>This section applies to a result from <code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT()</a></code>.
@@ -441,8 +482,9 @@ assigning them to intervals.</p>
 $$(-\infty,c_1),\quad[c_1,c_2),\quad[c_2,\infty).$$
 For example, with cuts 400 and 500, a score of 500 enters the last interval.
 Each individual panel uses its own rater's cuts. The MAPT pooled panel uses
-the jointly estimated cuts; the moving-average <code>Mean</code> panel uses mean
-cuts. Both aggregate panels recalculate percentages at their own cuts,
+the jointly estimated cuts; the ordinal reference panel uses reference
+cuts; the moving-average <code>Mean</code> panel uses mean cuts.
+All aggregate panels recalculate percentages at their own cuts,
 rather than averaging individual raters' percentages.</p>
 <p>By default, each rating panel with population data also contains a percentage
 table. Percentage labels are centered between the visible cut positions; outer

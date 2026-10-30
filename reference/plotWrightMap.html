@@ -21,7 +21,7 @@ All supplied scores must already share one metric and dimension."><meta property
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.17</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -222,11 +222,15 @@ All supplied scores must already share one metric and dimension.</p>
   All four colour arguments accept a single valid R colour.</p></dd>
 
   <dt id="arg-cuts">cuts<a class="anchor" aria-label="anchor" href="#arg-cuts"></a></dt>
-<dd><p>Optional mean cuts on the same metric as the PVs and item
+<dd><p>Optional cuts on the same metric as the PVs and item
   difficulties. Accepts a finite non-decreasing numeric vector, a one-row
   <code>cuts_summary</code> data frame with numeric columns starting with <code>cut</code>,
-  or a result of <code><a href="computeCutsIDM.html">computeCutsIDM</a></code>. For the latter, only
-  <code>cuts_summary</code> is used; individual rater cuts are never drawn. Missing
+  or a result of <code><a href="computeCutsIDM.html">computeCutsIDM</a></code>,
+  <code><a href="computeCutsIDMMAPT.html">computeCutsIDMMAPT</a></code>, or <code><a href="computeCutsIDMOrdinal.html">computeCutsIDMOrdinal</a></code>.
+  For result objects, only <code>cuts_summary</code> is used: mean cuts for
+  moving-average IDM, pooled cuts for MAPT, and reference cuts with both
+  random intercepts zero for ordinal models. Individual rater cuts are
+  never drawn. Missing
   cuts are rejected. Equal cuts share one mark and a combined label.
   <code>NULL</code> (default) leaves the original two-sided layout unchanged.</p></dd>
 

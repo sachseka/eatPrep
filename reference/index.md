@@ -32,6 +32,9 @@
 - [`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md)
   : Compute IDM Cut Scores Using MAPT-Style Logistic Regressions
 
+- [`computeCutsIDMOrdinal()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMOrdinal.md)
+  : Compute IDM Cuts from a Cumulative Ordinal Model
+
 - [`evalPbc()`](https://sachseka.github.io/eatPrep/reference/evalPbc.md)
   : Evaluate discrimination statistics
 
@@ -112,6 +115,11 @@
   [`print(`*`<cutsIDMMAPT>`*`)`](https://sachseka.github.io/eatPrep/reference/summary.cutsIDMMAPT.md)
   [`print(`*`<summary.cutsIDMMAPT>`*`)`](https://sachseka.github.io/eatPrep/reference/summary.cutsIDMMAPT.md)
   : Inspect MAPT Cuts and Fit Diagnostics
+
+- [`summary(`*`<cutsIDMOrdinal>`*`)`](https://sachseka.github.io/eatPrep/reference/summary.cutsIDMOrdinal.md)
+  [`print(`*`<cutsIDMOrdinal>`*`)`](https://sachseka.github.io/eatPrep/reference/summary.cutsIDMOrdinal.md)
+  [`print(`*`<summary.cutsIDMOrdinal>`*`)`](https://sachseka.github.io/eatPrep/reference/summary.cutsIDMOrdinal.md)
+  : Inspect Ordinal IDM Cuts and Model Diagnostics
 
 - [`visualSubsetRecode()`](https://sachseka.github.io/eatPrep/reference/visualSubsetRecode.md)
   : Inspect data subsets visually and recode instantaneously
