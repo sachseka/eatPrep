@@ -841,7 +841,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 ```
 
 Type
@@ -884,7 +884,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-10-30 20:00:59.975417
+#> Starting automateDataPreparation 2026-11-02 08:09:40.938633
 #> 
 #> Check data...
 #> 
@@ -960,7 +960,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-10-30 20:01:00.262691
+#> automateDataPreparation terminated successfully! 2026-11-02 08:09:41.201854
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -1941,26 +1941,26 @@ of statistics applies to all rater and mean-cut panels.
 Means and variances are estimated separately for each PV and population
 using the supplied sampling weights. The final M is the average of the
 PV means; the final SD is the square root of the average PV variance.
-For \\m\\ plausible values:
+For m plausible values:
 
-\\SD = \sqrt{\frac{1}{m}\sum\_{j=1}^{m} SD_j^2}.\\
+SD = \sqrt{\frac{1}{m}\sum\_{j=1}^{m} SD_j^2}.
 
 Every PV contributes equally. Respondents’ PVs are never averaged before
 estimating their population spread, and no variance component for
 differences between PV means is added.
 
 Within a PV, the weighted mean squared deviation from that PV’s weighted
-mean is multiplied by \\n_j/(n_j-1)\\ before taking the square root.
-Weights are normalized to sum to one, and \\n_j\\ counts observed
-respondents with positive weights in that PV and population after
-missing-data handling. The correction is applied separately for every
-PV, so different numbers of available respondents receive different
-correction factors. SD describes population spread; it is not a standard
-error. For example, with weights `c(1, 3)`, PV1 values `c(0, 4)` have M
-= 3 and corrected variance = 6, while PV2 values `c(18, 10)` have M = 12
-and corrected variance = 24. Here each PV has two respondents, so each
-variance is multiplied by 2. The displayed estimates are therefore M =
-7.50 and SD = sqrt((6 + 24) / 2) = 3.87.
+mean is multiplied by n_j/(n_j-1) before taking the square root. Weights
+are normalized to sum to one, and n_j counts observed respondents with
+positive weights in that PV and population after missing-data handling.
+The correction is applied separately for every PV, so different numbers
+of available respondents receive different correction factors. SD
+describes population spread; it is not a standard error. For example,
+with weights `c(1, 3)`, PV1 values `c(0, 4)` have M = 3 and corrected
+variance = 6, while PV2 values `c(18, 10)` have M = 12 and corrected
+variance = 24. Here each PV has two respondents, so each variance is
+multiplied by 2. The displayed estimates are therefore M = 7.50 and SD =
+sqrt((6 + 24) / 2) = 3.87.
 
 With `pv_missing = "drop"`, each PV uses its available observations and
 renormalized weights; zero-weight observations are excluded. Changing
@@ -2359,16 +2359,15 @@ accounting for their supplied difficulty estimates. The input uses the
 same long/wide column conventions as
 [`computeCutsIDMMAPT()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDMMAPT.md).
 
-For rating category \\R\_{ir}\\, standardized difficulty
-\\z_i=(x_i-\mu)/s\\, rater effect \\u_r\\, and item effect \\v_i\\, the
-model is
+For rating category R\_{ir}, standardized difficulty z_i=(x_i-\mu)/s,
+rater effect u_r, and item effect v_i, the model is
 
-\\ \operatorname{logit}\Pr(R\_{ir}\leq k\mid x_i,u_r,v_i) =
-\alpha_k-\beta z_i-u_r-v_i. \\
+\operatorname{logit}\Pr(R\_{ir}\leq k\mid x_i,u_r,v_i) = \alpha_k-\beta
+z_i-u_r-v_i.
 
-The thresholds \\\alpha_k\\ are ordered and freely estimated. The common
-positive slope \\\beta\\ describes how higher difficulty predicts a
-higher rating category. Sharing this slope across boundaries is the
+The thresholds \alpha_k are ordered and freely estimated. The common
+positive slope \beta describes how higher difficulty predicts a higher
+rating category. Sharing this slope across boundaries is the
 **proportional-odds assumption**. The random intercepts follow
 independent mean-zero normal distributions, each with its own estimated
 variance. They are assumed independent of the supplied difficulty
@@ -2447,7 +2446,7 @@ cutsOrdinal$model_diagnostics
 a rating above the respective boundary is 0.5 with both random
 intercepts set to zero:
 
-\\c_k=\mu+s\frac{\alpha_k}{\beta}.\\
+c_k=\mu+s\frac{\alpha_k}{\beta}.
 
 These are neither the mean of individual rater cuts nor cuts obtained by
 averaging predictions over the observed raters and items. The reference
@@ -2456,10 +2455,9 @@ over their distributions.
 
 With the default `per_rater = TRUE`, `cuts_per_person` contains
 conditional rater cuts. They use the rater’s estimated conditional
-random intercept \\\widehat u_r\\, with the item effect still fixed at
-zero:
+random intercept \widehat u_r, with the item effect still fixed at zero:
 
-\\c\_{rk}=\mu+s\frac{\alpha_k-\widehat u_r}{\beta}.\\
+c\_{rk}=\mu+s\frac{\alpha_k-\widehat u_r}{\beta}.
 
 A positive rater effect means a tendency to assign higher categories at
 the same difficulty, so the rater’s cuts move towards lower
