@@ -13,7 +13,7 @@ library(eatPrep)
 
 # Replay the documented decisions when building the vignette. The interactive
 # function and its namespace remain unchanged; only this local copy uses a script.
-review_example <- function(dat, info, decisions) {
+review_example <- function(dat = NULL, info = NULL, decisions, state = NULL, checkpoint = NULL) {
   answers <- decisions
   env <- new.env(parent = environment(visualSubsetRecode))
   env$.subset_menu <- function(choices) {
@@ -25,8 +25,11 @@ review_example <- function(dat, info, decisions) {
   }
   review <- visualSubsetRecode
   environment(review) <- env
+  args <- if (is.null(state)) {
+    list(dat = dat, subsetInfo = info, toRecodeVal = "mci", checkpoint = checkpoint)
+  } else list(state = state, checkpoint = checkpoint)
   invisible(capture.output(
-    result <- suppressMessages(review(dat, info, toRecodeVal = "mci"))
+    result <- suppressMessages(do.call(review, args))
   ))
   stopifnot(length(answers) == 0L)
   result
@@ -164,7 +167,9 @@ selections are also checked against each person's booklet.
 Run the following call in an interactive R session:
 
 ```{r interactive-review, eval=FALSE}
-result <- visualSubsetRecode(review_data, subset_info, toRecodeVal = "mci")
+result <- visualSubsetRecode(
+  review_data, subset_info, toRecodeVal = "mci", checkpoint = "review.rds"
+)
 ```
 
 Prepared selections automatically group the review by `issueId`, use the stored
@@ -199,7 +204,8 @@ The menus offer these decisions:
 | No / flag for later review | Leave the current recoding selection unchanged. Flags are recorded but are not revisited automatically. |
 | Go back | Return to the previous incident. |
 | Reset to original values | Withdraw this incident's recoding selection; retain changes still selected by another incident. |
-| Exit | Return completed changes after confirming exit. |
+| Pause review (resume later) | Return completed changes and the state needed to continue at this prompt. |
+| Exit | Return completed changes and a resumable state after confirming exit. |
 
 A new recoding action replaces that incident's earlier selection. Filters for
 non-valid values use the original input responses, even if a previous decision
@@ -239,20 +245,117 @@ Only P1/I1 remains `"mci"`, because V2 still selects it. The changes to P1/I2 an
 P2/I3 are withdrawn with V1's reset. Choosing **no** for V2 leaves its earlier
 selection intact. To withdraw that selection too, reset V2 explicitly.
 
+## Pause, interrupt, and resume
+
+For work across R sessions, choose a checkpoint file when starting the review.
+Use a new file name; a new review refuses to overwrite an existing file. Its parent
+directory must exist. For example, start this separate review with the original
+responses:
+
+```{r start-checkpoint-review, eval=FALSE}
+paused <- visualSubsetRecode(
+  review_data, subset_info, toRecodeVal = "mci", checkpoint = "review-session.rds"
+)
+```
+
+Choose **yes, all values** for V1, then **pause review (resume later)** when V2 is
+displayed. The initial state and each completed decision or navigation change are
+automatically saved. Here is the resulting progress:
+
+```{r replay-pause, include=FALSE}
+checkpoint_demo <- tempfile(fileext = ".rds")
+paused <- review_example(review_data, subset_info,
+  decisions = c("yes, all values", "pause review (resume later)"),
+  checkpoint = checkpoint_demo)
+```
+
+```{r paused-progress}
+paused$status
+paused$state$groups[paused$state$index]
+length(paused$state$history)
+```
+
+You can close R and later resume using just the checkpoint file. Load `eatPrep`
+and run the following from the directory containing that file, or supply its full
+path:
+
+```{r resume-checkpoint-review, eval=FALSE}
+library(eatPrep)
+resumed <- visualSubsetRecode(state = "review-session.rds")
+```
+
+The review continues at V2 and keeps saving to the same file. Do not supply
+`dat`, `subsetInfo`, or new settings when resuming: the state already contains
+the original responses, complete selection, replacement code, grouping and display
+settings. Choosing **yes, all values** for V2 and **yes** at the end produces:
+
+```{r replay-resume, include=FALSE}
+resumed <- review_example(decisions = c("yes, all values", "yes"), state = checkpoint_demo)
+```
+
+```{r resumed-progress}
+resumed$status
+resumed$dat
+```
+
+Original-code filtering, reset, and overlaps work exactly as before the pause.
+The state retains each incident's selected cells, so resetting V1 still preserves
+a recoding selected by V2. Starting a new review with already recoded responses
+would instead give those responses a new meaning as the "original" values; use
+`state` to continue the existing review.
+
+**Ctrl+C** also returns completed work, with `status = "interrupted"`, so assign
+the call to a variable as in the examples. An unfinished block submenu has no
+effect; it is repeated when you resume. An interrupt at the final end confirmation
+resumes at that confirmation without recording the last decision twice. Choosing
+**yes** there marks the review complete. Resuming a completed state returns the
+completed result without opening menus.
+
+Without a checkpoint file, an assigned result can still be resumed in memory, or
+its state can be saved manually:
+
+```{r manual-state, eval=FALSE}
+continued <- visualSubsetRecode(state = paused$state)
+saveRDS(paused$state, "manual-review-state.rds")
+continued <- visualSubsetRecode(state = "manual-review-state.rds")
+```
+
+Saving automatically also protects completed work if R is forcibly terminated:
+resume from the latest successfully written checkpoint. The file is written
+through a temporary file in the same directory and replaces the previous save
+only after serialization succeeds. An unfinished decision is repeated rather than
+partly applied. A changed or stale checkpoint is rejected instead of overwritten;
+use one active reviewer per checkpoint file.
+
+If saving fails, the pending decision is not accepted and the last checkpoint
+remains available. Resolve the file problem and resume that checkpoint. Errors
+during review have class `subsetReviewError`; their `$state` also exposes the last
+committed state for recovery through an R error handler. No checkpoint file is
+created when the function is called without a checkpoint or state-file path.
+
 ## Interpret and retain the results
 
-The return value has two components: `$dat` contains the modified response data;
-`$subsetInfo` joins reviewed selection rows to the decision history. Positional
-access through `[[1]]` and `[[2]]` remains available.
+The return value contains `$dat`, the modified response data; `$subsetInfo`, the
+reviewed selection rows joined to decision history; `$state`, the resumable
+session; and `$status`, which is `"paused"`, `"interrupted"`, or `"completed"`.
+Positional access through `[[1]]` and `[[2]]` remains available.
 
 ```{r history}
 unique(reset_result$subsetInfo[c("issueId", "choice", "timeStamp")])
 ```
 
-Repeated reviews create multiple history entries. This table is not a final-status
-table or a complete cell-level change log. In particular, the history records the
-block-submenu action but does not store which block positions were chosen.
-Unreviewed incidents are absent. Keep the original data, incident reports,
+Repeated reviews create multiple history entries. The `selectedCells` list column
+records each incident's active cell selection after that decision; `selectedBlocks`
+records the block positions chosen in a block-submenu action. The unjoined entries
+are also available in `$state$history`, including their exact selected cells:
+
+```{r history-cells}
+reset_result$state$history[[1]]$selected_cells
+```
+
+History timestamps are displayed in UTC. This table is not a final-status or final
+cell-difference table. Unreviewed incidents are absent from the history but remain
+in the resumable state. Keep the original data, incident reports,
 prepared selection, replacement code, and returned result together. For example:
 
 ```{r save-results, eval=FALSE}
@@ -264,9 +367,11 @@ saveRDS(list(
 ```
 
 Use the differences between original and returned data if you need a list of
-final cell changes. Saving the result preserves completed work; it does not create
-a resumable review session. Normal exit returns completed changes, but interrupt
-recovery and automatic resumption are not implemented.
+final cell changes. This archive includes the full result; resume it through the
+saved result's `$state`. Automatic checkpoint files and files saved with
+`saveRDS(result$state, ...)` contain the state directly and can be passed as a
+file path to `visualSubsetRecode(state = ...)`. Treat states as opaque objects and
+pass them back unchanged; invalid or incompatible states are rejected.
 
 ## Use project metadata and recoded columns
 

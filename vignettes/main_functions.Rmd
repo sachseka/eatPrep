@@ -1278,8 +1278,8 @@ outputs do not by themselves identify which method is substantively best.
 ### Visual Subset Recoding
 
 The [Reviewing Incident Reports vignette](subset_review.html) walks through a
-complete review, including rotated booklets, overlapping incidents, reset, and
-the interpretation of the returned decision history.
+complete review, including rotated booklets, overlapping incidents, reset,
+automatic checkpoints, resuming, and the interpretation of decision history.
 
 Use `prepareSubsetInfo()` to describe incidents at person or class level. Each
 report has a unique `issueId`, a `level` (`person` or `class`), the corresponding
@@ -1325,16 +1325,23 @@ silently losing class members. Each report currently selects one target.
 
 ```{r visualSubsetRecode example, eval=FALSE}
 # Prepared selections automatically enable incident grouping and available metadata.
-datVisRec <- visualSubsetRecode(reviewData, subsetInfo, toRecodeVal = "mci")
+datVisRec <- visualSubsetRecode(reviewData, subsetInfo, toRecodeVal = "mci",
+                                checkpoint = "subset-review.rds")
 datVisRec$dat
 datVisRec$subsetInfo
+datVisRec$status
+# After pausing, including in a new R session:
+datVisRec <- visualSubsetRecode(state = "subset-review.rds")
 ```
 
 Only marked person-item pairs are changed. Reviewing or resetting one incident
 does not alter another incident's selection. Reset retains a recoding if another
 incident still requires it; neither class nor individual reports take precedence.
-All recodings preserve `NA` responses. A normal exit returns completed changes;
-saving/resuming sessions and explicit person exceptions are future work.
+All recodings preserve `NA` responses. Pausing, confirmed exit, and Ctrl+C return
+completed work and a resumable `$state`. With `checkpoint`, the initial state and
+completed decisions or navigation changes are saved automatically. Resume through
+the checkpoint path or the returned state; original values and incident ownership
+are retained for later reset. Explicit person exceptions are not implemented.
 
 Manually prepared tables with `ID` and `datCols` remain accepted. For these,
 set `useGroups`, `positions`, and `comments` explicitly when needed.

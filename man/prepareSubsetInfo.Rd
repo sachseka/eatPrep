@@ -68,8 +68,9 @@ recovered.
 The returned table contains one row per incident/person/item. An overlapping cell
 appears once for each incident that selected it. There is no automatic priority
 between individual and class reports. In this first version each report selects
-one target; explicit person exceptions, persistent review sessions, and decisions
-with different replacement values per incident are not implemented.
+one target; explicit person exceptions and decisions with different replacement
+values per incident are not implemented. Pausing, automatic checkpoints and
+resuming a review are provided by \code{\link{visualSubsetRecode}}.
 }
 \value{
 \code{prepareSubsetInfo} returns a data frame of class \code{preparedSubsetInfo}
