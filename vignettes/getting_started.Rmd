@@ -238,6 +238,7 @@ rater2 <- c("[meanKappa()](main_functions.html#rater-agreement)", "calculates me
 rater3 <- c("[make.pseudo()](main_functions.html#pseudo-raters)", "reduces multiple real raters to a smaller number of pseudo raters.")
 idm1 <- c("[computeCutsIDM()](main_functions.html#idm-cut-scores)", "computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages.")
 idm2 <- c("[plotCutsIDM()](main_functions.html#idm-cut-scores)", "plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from `computeCutsIDM()`.")
+subset1 <- c("[prepareSubsetInfo()](subset_review.html)", "translates person and class incident reports into exact person-item selections.")
 visual1 <- c("[visualSubsetRecode()](main_functions.html#visual-subset-recoding)", "supports interactive visual inspection and recoding of flagged subsets.")
 # 6
 export1 <- c("[collapseMissings()](main_functions.html#collapsing-data)", "recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling.")
@@ -248,7 +249,7 @@ outline <- rbind.data.frame(head1, read1, read2, read3,
                             head2, check1, check2, check3,
                             head3, merge1, recode1, aggregate1, score1, score2,
                             head4, wrap1,
-                            head5, pbc1, pbc2, rater1, rater2, rater3, idm1, idm2, visual1,
+                            head5, pbc1, pbc2, rater1, rater2, rater3, idm1, idm2, subset1, visual1,
                             head6, export1, export2, export3)
 names(outline) <- c("Function", "Explanation")
 kable(outline, caption = "**Functions Overview**")

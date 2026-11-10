@@ -141,8 +141,9 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
 }
 
 .subset_values <- function(dat, cells, ID) {
+  ids <- .population_identifier_labels_idm(dat[[ID]])
   vapply(seq_len(nrow(cells)), function(i) {
-    value <- dat[[cells$datCols[i]]][match(cells[[ID]][i], as.character(dat[[ID]]))]
+    value <- dat[[cells$datCols[i]]][match(cells[[ID]][i], ids)]
     if (is.na(value)) NA_character_ else as.character(value)
   }, character(1))
 }
@@ -150,8 +151,9 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
 .subset_apply <- function(dat, selections, ID, value) {
   cells <- unique(do.call(rbind, selections))
   if (is.null(cells) || !nrow(cells)) return(dat)
+  ids <- .population_identifier_labels_idm(dat[[ID]])
   for (column in unique(cells$datCols)) {
-    rows <- match(cells[[ID]][cells$datCols == column], as.character(dat[[ID]]))
+    rows <- match(cells[[ID]][cells$datCols == column], ids)
     if (is.factor(dat[[column]]) && !as.character(value) %in% levels(dat[[column]])) {
       levels(dat[[column]]) <- c(levels(dat[[column]]), as.character(value))
     }
@@ -161,6 +163,7 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
 }
 
 .subset_display <- function(dat, current, ID, positions) {
+  ids <- .population_identifier_labels_idm(dat[[ID]])
   metadata <- c("datCols", if (positions) c("blockPosition", "subunitBlockPosition"))
   layouts <- list()
   members <- list()
@@ -178,7 +181,9 @@ visualSubsetRecode <- function(dat, subsetInfo, ID = "ID", toRecodeVal = -91,
   }
   for (i in seq_along(layouts)) {
     layout <- layouts[[i]]
-    display <- dat[match(members[[i]], as.character(dat[[ID]])), c(ID, layout$datCols), drop = FALSE]
+    rows <- match(members[[i]], ids)
+    display <- dat[rows, c(ID, layout$datCols), drop = FALSE]
+    display[[ID]] <- ids[rows]
     print(display, row.names = FALSE)
     if (positions) print(layout, row.names = FALSE)
   }

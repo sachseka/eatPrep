@@ -59,6 +59,12 @@ items, ambiguous mappings, and targets not administered to a selected person.
 It never silently drops class members or guesses assignments. Inspect and resolve
 these reports before starting a review. Empty report tables are rejected.
 
+Numeric identifiers retain enough precision to distinguish the stored values
+throughout preparation and review. Character identifiers are matched exactly.
+Import identifiers as character when leading zeros or digits beyond numeric
+precision must be preserved; precision already lost during import cannot be
+recovered.
+
 The returned table contains one row per incident/person/item. An overlapping cell
 appears once for each incident that selected it. There is no automatic priority
 between individual and class reports. In this first version each report selects
@@ -100,4 +106,5 @@ result$dat
 result$subsetInfo
 }
 }
-\seealso{\code{\link{visualSubsetRecode}}, \code{\link{inputList}}}
+\seealso{\code{\link{visualSubsetRecode}}, \code{\link{inputList}},
+  \code{vignette("subset_review", package = "eatPrep")}}

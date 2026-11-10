@@ -52,6 +52,8 @@ withdraw it. Overlapping selections are reported during review and apply the sam
 Unknown IDs or item columns and missing required identifiers cause errors before
 review. Optional metadata containing NA does not remove rows. Unlike earlier
 versions, invalid required inputs are rejected rather than omitted.
+Numeric person IDs are matched and displayed without losing precision; their
+original type is preserved in the returned response data.
 A standard R menu cancellation offers an exit; declining exit returns to the same
 subset. A normal exit returns completed changes. Interrupt recovery, session
 persistence and automatic revisiting of flagged entries are not implemented.
@@ -78,5 +80,6 @@ selection <- data.frame(ID = c("P1", "P2"), datCols = c("I1", "I2"), group = "G"
 result <- visualSubsetRecode(dat, selection, useGroups = "group")
 }
 }
-\seealso{\code{\link{prepareSubsetInfo}}}
+\seealso{\code{\link{prepareSubsetInfo}},
+  \code{vignette("subset_review", package = "eatPrep")}}
 \author{Karoline Sachse}

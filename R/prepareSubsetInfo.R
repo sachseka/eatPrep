@@ -64,7 +64,7 @@ prepareSubsetInfo <- function(dat, issues, persons = NULL, booklets = NULL,
     issue <- issues[i, , drop = FALSE]
     ids <- if (issue$level == "person") issue$targetId else persons[[ID]][persons[[classID]] == issue$targetId]
     if (!length(ids)) stop(sprintf("Issue '%s': unknown class '%s'.", issue$issueId, issue$targetId), call. = FALSE)
-    unknown <- setdiff(ids, as.character(dat[[ID]]))
+    unknown <- setdiff(ids, dat[[ID]])
     if (length(unknown)) stop(sprintf("Issue '%s': persons absent from dat: %s.", issue$issueId, paste(unknown, collapse = ", ")), call. = FALSE)
     for (person in ids) {
       selected <- NULL
@@ -147,7 +147,7 @@ summary.preparedSubsetInfo <- function(object, ...) {
   if (length(missing)) stop(sprintf("%s needs columns: %s.", label, paste(missing, collapse = ", ")), call. = FALSE)
   for (column in columns) {
     if (!is.atomic(x[[column]]) || is.matrix(x[[column]])) stop(sprintf("%s$%s must be a vector.", label, column), call. = FALSE)
-    x[[column]] <- as.character(x[[column]])
+    x[[column]] <- .population_identifier_labels_idm(x[[column]])
     if (anyNA(x[[column]]) || any(!nzchar(trimws(x[[column]])))) {
       stop(sprintf("%s$%s must not contain missing or empty values.", label, column), call. = FALSE)
     }

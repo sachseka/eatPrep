@@ -1,8 +1,44 @@
-# eatPrep 1.0.14
+# eatPrep 1.0.18
 
 * New `prepareSubsetInfo()` expands person and class incident reports into exact person-item selections. It resolves named blocks or block positions per booklet, supports recoded item names, preserves incident provenance, and provides counts and overlaps through `summary()`.
 * `visualSubsetRecode()` accepts prepared selections directly and reviews each incident separately. Group recoding and reset now affect only explicitly selected cells; reset retains recodings required by other incidents. Single-item layouts and optional missing comments are supported, and invalid required inputs fail before review instead of being omitted.
 * Review menus now handle cancellation and declined exits consistently. Results have names (`dat`, `subsetInfo`) while retaining positional access. New scripted review tests cover group boundaries, overlaps, reset, block selection, and missing responses.
+* Large numeric person, class, incident, and design identifiers retain their precision throughout subset preparation, display, and recoding. Returned response data preserve the original person ID type; regression tests verify distinct selections for identifiers that share the same default character representation.
+* Added the "Reviewing Incident Reports" vignette with a complete example covering class and individual reports, rotated booklets, overlapping selections, reset, missing responses, and decision-history interpretation. It explains where to insert the review in the preparation pipeline and how to handle recoded item names.
+
+# eatPrep 1.0.17
+
+* Raised the minimum R version to 4.2.0 and updated CI to check this minimum on all three operating systems.
+* Added `computeCutsIDMOrdinal()` for joint cumulative-logit IDM cuts, with crossed rater and item random intercepts by default. It accepts the same long/wide column conventions and ordered rating labels as the MAPT function. Random intercepts can be selected individually or omitted for a fixed-effects comparison. All boundaries share a difficulty slope and freely estimated ordered thresholds.
+* Ordinal results distinguish reference cuts with both random intercepts zero from conditional rater cuts obtained from the same joint fit. Results retain the fitted model, rating data, rater and item effects, variance components, and model/cut diagnostics. Invalid or unusable fits yield diagnostic statuses and unavailable cuts; declared categories are never silently merged. Compact `print()` and `summary()` methods expose the main results.
+* `plotCutsIDM()` accepts ordinal results, showing conditional rater curves and an optional `Reference (ordinal)` panel. Displayed curves fix item effects to zero; optional residual panels show deviations from these curves, not residuals from fully conditional predictions. `plotPopulationCutsIDM()` supports reference and conditional rater cuts, and `plotWrightMap()` accepts ordinal and MAPT result objects directly through `cuts`.
+* Added examples and help explaining proportional odds, reference versus marginal probability curves, random-effect shrinkage, fit diagnostics, and comparisons with existing IDM methods. The ordinal reference documents the category probabilities, joint likelihood, derivation of reference and conditional rater cuts, and a worked numerical example. Sources distinguish the established ordinal modelling framework and logistic IDM precedent from this package's specific extension. Cut-score uncertainty intervals and propagation of item-calibration uncertainty are not included.
+
+# eatPrep 1.0.16
+
+## new features
+
+* Added `computeCutsIDMMAPT()` as a logistic alternative to the existing IDM calculation. It fits pooled binary logistic regressions at each level boundary and calculates cuts at probability 0.5, following the MAPT logistic calculation without automatic rating trimming. Long and wide input, ordered category labels, and large numeric item and rater identifiers are supported. Results include pooled cuts, optional individual rater cuts and their means, fitted models, and diagnostics; unusable fits return `NA`, and extrapolated or unordered pooled cuts are flagged.
+* MAPT results have compact `print()` and `summary()` methods showing pooled cuts and flagged fits. `summary(x, per_rater = TRUE)` also includes individual cuts and diagnostics; models and rating data remain accessible in the original result.
+* `plotCutsIDM()` accepts MAPT results and shows individual logistic probability curves, empirical proportions, and cuts, with optional residuals and PV silhouettes, population statistics, and interval percentages. `show_aggregate = TRUE` adds a `Pooled (MAPT)` panel using all raters' ratings jointly; results computed with `per_rater = FALSE` show only this panel. Probability curves use a zero-to-one axis with a 0.5 reference; silhouettes show population distribution shape only.
+* `plotPopulationCutsIDM()` also accepts MAPT results: `cut_selection = "mean"` selects the pooled cuts, and `"both"` adds individual rater panels. Both plot functions preserve custom cut labels and their color order; the MAPT probability plot uses simple line keys for cut colors.
+* Expanded help pages and comparison examples explain the calculations and plots step by step, using mathematical formulas and labelled ratings. They distinguish pooled cuts from mean rater cuts and rating probabilities from population percentages. Regression tests cover logistic fits, input formats and identifiers, ties and row order, missing ratings, separation, rescaling, summaries, and plotting.
+
+# eatPrep 1.0.15
+
+* Reference-page formulas now render with MathJax instead of appearing as raw LaTeX.
+* The `computeCutsIDM()` reference and vignette now describe the implemented padding, missing-rating and short-sequence behavior, isotonic fitting, boundary interpolation, cut summaries, and agreement diagnostics more precisely. Eight regression tests verify these details against hand-calculated examples and missing-data cases.
+* The `computeCutsIDM()` return-value documentation now specifies how each statistic is calculated, including the `irr` functions and settings, Cohen/Fleiss kappa and ICC formulas, missing-data rules, and the identical-ratings convention in `meanKappa()`.
+* The returned Fleiss kappa and ICC tests now have documented null hypotheses, test directions, and interpretations of significant results. The reference also clarifies which outputs do not include p-values and why the two ICC p-values coincide at the default null value.
+
+# eatPrep 1.0.14
+
+* `plotWrightMap()` supports multiple populations through `population_col`, named `population_colors`, and `population_alpha`. Weighted PV distributions are estimated separately per group and overlaid with transparent fills, opaque outlines, and a legend. Densities share a grid and bandwidth; histograms share bins. A common width scale preserves relative density heights, while items and mean cuts remain shared.
+* `plotWrightMap()` gains optional mean cuts drawn as horizontal lines through the person densities or histograms, shared across populations and ending at the item divider. Labels avoid overlap and use white backgrounds on the person side; the item side keeps its full width. Supply a numeric vector, a one-row `cuts_summary` table, or a `computeCutsIDM()` result (only its mean cuts are used). Cut names, value display, rounding, text size, and colour are configurable. Unrounded values remain available in `attr(plot, "wright_data")$cuts`.
+
+* New `plotWrightMap()` displays a vertical PV distribution to the left of a continuous divider and item names to the right, using a soft teal fill, subtle guides, and configurable colours on white. Density is the default; a weighted histogram is optional. Names on the same display stage are separated by ` | ` and wrap with hanging indents and grouping brackets. Collision-free text blocks connect to exact stage markers through leaders; text is reduced only when needed to fit the panel.
+* Repeated item identifiers are disambiguated by `category_col` (default `"category"`). Only repeated identifiers receive `_cat<category>` suffixes. Duplicate identifier/category pairs, missing categories on repeated identifiers, and conflicting display names are rejected. Original identifiers and categories remain available with the plotted item data.
+* Wright maps accept named item difficulty vectors or item tables, and wide/long PVs with optional sampling weights. Distributions are estimated separately for each PV and averaged. Item stages, smoothing, histogram bins, labels, and panel proportions are configurable. Original item parameters, display stages, and population estimates are available in `attr(plot, "wright_data")`.
 
 # eatPrep 1.0.13
 

@@ -79,6 +79,59 @@ test_that("recoded column names, numeric IDs and tibbles are supported", {
   expect_equal(info$datCols, c("I1R", "I2R", "I3R", "I1R"))
 })
 
+test_that("large numeric persons match exact character reports and recode the right row", {
+  ids <- 1e15 + 1:2
+  labels <- c("1000000000000001", "1000000000000002")
+  dat <- data.frame(ID = ids, I1 = c(7, 9))
+  issues <- data.frame(issueId = c("second", "first"), level = "person",
+                       targetId = rev(labels), scope = "item", target = "I1")
+  info <- prepareSubsetInfo(dat, issues)
+  expect_identical(info$ID, rev(labels))
+  result <- run_subset_review(dat, info, c(1, 3, 1))
+  expect_identical(result$dat$ID, ids)
+  expect_equal(result$dat$I1, c(7, -91))
+  expect_identical(.subset_values(dat, as.data.frame(info), "ID"), c("9", "7"))
+  display <- capture.output(.subset_display(dat, info, "ID", positions = FALSE))
+  expect_true(all(vapply(labels, function(id) any(grepl(id, display, fixed = TRUE)), logical(1))))
+})
+
+test_that("large numeric class, incident and design IDs stay distinct", {
+  args <- subset_fixture()
+  ids <- 1e15 + 1:3
+  classes <- 1e15 + 11:12
+  booklets <- 1e15 + 31:32
+  blocks <- 1e15 + 41:42
+  args$dat$ID <- args$persons$ID <- args$rotation$ID <- ids
+  args$persons$classId <- classes[c(1, 1, 2)]
+  args$issues$issueId <- 1e15 + 21:22
+  args$issues$targetId <- c(classes[1], ids[1])
+  args$booklets$booklet <- booklets
+  args$rotation$booklet <- booklets[c(1, 2, 1)]
+  args$booklets$block1 <- blocks
+  args$booklets$block2 <- rev(blocks)
+  args$blocks$block <- blocks[c(1, 1, 2)]
+  info <- do.call(prepareSubsetInfo, args)
+  expect_identical(info$ID, sprintf("%.0f", ids[c(1, 1, 2, 1)]))
+  expect_identical(info$issueId, sprintf("%.0f", args$issues$issueId[c(1, 1, 1, 2)]))
+  expect_identical(info$block, sprintf("%.0f", blocks[c(1, 1, 2, 1)]))
+  expect_equal(summary(info)$overlappingCells, c(1L, 1L))
+  result <- run_subset_review(args$dat, info, c(1, 4, 1))
+  expect_identical(result$dat$ID, ids)
+  expect_equal(result$dat$I1, c(-91, 2, 3))
+  expect_equal(result$dat$I2, c(-91, 5, 6))
+  expect_equal(result$dat$I3, c(7, -91, 9))
+})
+
+test_that("manual selections preserve large numeric persons and review groups", {
+  ids <- 1e15 + 1:2
+  dat <- data.frame(pid = ids, I1 = c(4, 8))
+  info <- data.frame(pid = rev(ids), datCols = "I1", incident = 1e15 + 11:12)
+  result <- run_subset_review(dat, info, c(1, 3, 1), ID = "pid", useGroups = "incident")
+  expect_identical(result$dat$pid, ids)
+  expect_equal(result$dat$I1, c(4, -91))
+  expect_setequal(result$subsetInfo$incident, c("1000000000000011", "1000000000000012"))
+})
+
 test_that("unresolved and ambiguous inputs fail before review", {
   args <- subset_fixture()
   args$issues$targetId[1] <- "unknown"
