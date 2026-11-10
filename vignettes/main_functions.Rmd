@@ -81,13 +81,14 @@ rater3 <- c("[make.pseudo()](#pseudo-raters)", "reduces multiple real raters to 
 idm1 <- c("[computeCutsIDM()](#idm-cut-scores)", "computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages.")
 idm2 <- c("[plotCutsIDM()](#idm-cut-scores)", "plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from `computeCutsIDM()`.")
 idm3 <- c("[computeCutsIDMMAPT()](#logistic-idm-cut-scores)", "computes pooled logistic IDM cuts for comparison with the moving-average method.")
+subset1 <- c("[prepareSubsetInfo()](subset_review.html)", "translates person and class incident reports into exact person-item selections.")
 visual1 <- c("[visualSubsetRecode()](#visual-subset-recoding)", "supports interactive visual inspection and recoding of flagged subsets.")
 
 outline <- rbind.data.frame(head1, read1, read2, read3,
                             head2, check1, check2, check3,
                             head3, merge1, recode1, aggregate1, score1, score2,
                             head4, wrap1,
-                            head5, pbc1, pbc2, rater1, rater2, rater3, idm1, idm2, idm3, visual1,
+                            head5, pbc1, pbc2, rater1, rater2, rater3, idm1, idm2, idm3, subset1, visual1,
                             head6, export1, export2, export3)
 names(outline) <- c("Function", "Explanation")
 kable(outline, caption = "**Functions Overview**")
@@ -1276,17 +1277,74 @@ outputs do not by themselves identify which method is substantively best.
 
 ### Visual Subset Recoding
 
-`visualSubsetRecode()` supports interactive inspection and recoding of flagged subsets. For example, if a group of students was affected by a technical issue, you can display the relevant responses and decide whether to recode them to a value such as `mci`. Because the function opens an interactive review flow, it is not evaluated in this vignette.
+The [Reviewing Incident Reports vignette](subset_review.html) walks through a
+complete review, including rotated booklets, overlapping incidents, reset,
+automatic checkpoints, resuming, and the interpretation of decision history.
+
+Use `prepareSubsetInfo()` to describe incidents at person or class level. Each
+report has a unique `issueId`, a `level` (`person` or `class`), the corresponding
+`targetId`, and a task selection: `scope` is `item`, `block`, or `blockPosition`,
+with its name or position in `target`. Missing comments are allowed.
+
+This small example includes different booklets within one class and overlapping
+class and individual reports:
+
+```{r prepareSubsetInfo example}
+reviewData <- data.frame(ID = c("P1", "P2"), I1 = c(1, 0), I2 = c(0, 1))
+persons <- data.frame(ID = c("P1", "P2"), classId = "K1")
+booklets <- data.frame(booklet = c("X", "Y"),
+                       block1 = c("A", "B"), block2 = c("B", "A"))
+blocks <- data.frame(subunit = c("I1", "I2"), block = c("A", "B"),
+                     subunitBlockPosition = 1)
+rotation <- data.frame(ID = c("P1", "P2"), booklet = c("X", "Y"))
+issues <- data.frame(
+  issueId = c("V1", "V2"), level = c("class", "person"),
+  targetId = c("K1", "P1"), scope = c("blockPosition", "item"),
+  target = c("1", "I1"), comment = c("Audio failure", NA)
+)
+subsetInfo <- prepareSubsetInfo(
+  reviewData, issues, persons = persons,
+  booklets = booklets, blocks = blocks, rotation = rotation
+)
+summary(subsetInfo)
+subsetInfo
+```
+
+The class report selects `P1/I1` and `P2/I2`: block position 1 is resolved using
+each person's booklet. The individual report separately selects `P1/I1`. The
+summary counts persons, items, cells (including missing responses), and cells
+shared with other incidents. For a named block, use `scope = "block"`. For
+item-only reports the three design tables can be omitted. Existing projects can
+pass `inputList$booklets`, `inputList$blocks`, `inputList$rotation`, and, for renamed
+items, `inputList$subunits`. Class membership is supplied separately in `persons`.
+Class IDs must be unique across schools.
+
+Unknown persons, unresolved items and targets absent from a person's booklet
+produce an error before review. Inspect and correct these reports instead of
+silently losing class members. Each report currently selects one target.
 
 ```{r visualSubsetRecode example, eval=FALSE}
-subsetInfo <- data.frame(
-  ID = c("person100", "person101", "person102"),
-  datCols = c("I01", "I02", "I03")
-)
-
-datVisRec <- visualSubsetRecode(dat = preparedData, subsetInfo = subsetInfo,
-    ID = "ID", toRecodeVal = "mci")
+# Prepared selections automatically enable incident grouping and available metadata.
+datVisRec <- visualSubsetRecode(reviewData, subsetInfo, toRecodeVal = "mci",
+                                checkpoint = "subset-review.rds")
+datVisRec$dat
+datVisRec$subsetInfo
+datVisRec$status
+# After pausing, including in a new R session:
+datVisRec <- visualSubsetRecode(state = "subset-review.rds")
 ```
+
+Only marked person-item pairs are changed. Reviewing or resetting one incident
+does not alter another incident's selection. Reset retains a recoding if another
+incident still requires it; neither class nor individual reports take precedence.
+All recodings preserve `NA` responses. Pausing, confirmed exit, and Ctrl+C return
+completed work and a resumable `$state`. With `checkpoint`, the initial state and
+completed decisions or navigation changes are saved automatically. Resume through
+the checkpoint path or the returned state; original values and incident ownership
+are retained for later reset. Explicit person exceptions are not implemented.
+
+Manually prepared tables with `ID` and `datCols` remain accepted. For these,
+set `useGroups`, `positions`, and `comments` explicitly when needed.
 
 
 ## Export
