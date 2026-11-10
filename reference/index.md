@@ -88,6 +88,10 @@
   Convert eatPrep Data and Meta Info to `GADSdat` object as used in
   package `eatGADS`
 
+- [`prepareSubsetInfo()`](https://sachseka.github.io/eatPrep/reference/prepareSubsetInfo.md)
+  [`summary(`*`<preparedSubsetInfo>`*`)`](https://sachseka.github.io/eatPrep/reference/prepareSubsetInfo.md)
+  : Prepare Review Subsets from Person and Class Incident Reports
+
 - [`rater`](https://sachseka.github.io/eatPrep/reference/rater.md) :
   Variable ratings for 1287 examinees, 7 variables and 4 raters.
 
@@ -122,7 +126,7 @@
   : Inspect Ordinal IDM Cuts and Model Diagnostics
 
 - [`visualSubsetRecode()`](https://sachseka.github.io/eatPrep/reference/visualSubsetRecode.md)
-  : Inspect data subsets visually and recode instantaneously
+  : Inspect and Recode Selected Person–Item Pairs
 
 - [`writeSpss()`](https://sachseka.github.io/eatPrep/reference/writeSpss.md)
   : Export Datasets to SPSS

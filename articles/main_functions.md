@@ -51,6 +51,7 @@ You can click on the specific function to jump to its explanation.
 | [computeCutsIDM()](#idm-cut-scores) | computes cut scores, modal values, and agreement diagnostics for Item Descriptor Matching based on monotonized moving averages. |
 | [plotCutsIDM()](#idm-cut-scores) | plots the raw ratings, moving averages, monotonized curves, optional labelled aggregate or residual panels, and cut scores from [`computeCutsIDM()`](https://sachseka.github.io/eatPrep/reference/computeCutsIDM.md). |
 | [computeCutsIDMMAPT()](#logistic-idm-cut-scores) | computes pooled logistic IDM cuts for comparison with the moving-average method. |
+| [prepareSubsetInfo()](https://sachseka.github.io/eatPrep/articles/subset_review.md) | translates person and class incident reports into exact person-item selections. |
 | [visualSubsetRecode()](#visual-subset-recoding) | supports interactive visual inspection and recoding of flagged subsets. |
 | **Export** |  |
 | [collapseMissings()](#collapsing-data) | recodes missing types into predefined scores (usually 0, 1, and NA). Such a collapsed R data frame can be passed directly to eatModel for scaling. |
@@ -841,7 +842,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.0 secs
+#> elapsed time: 0.1 secs
 ```
 
 Type
@@ -884,7 +885,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-11-02 08:09:40.938633
+#> Starting automateDataPreparation 2026-11-10 16:43:26.082831
 #> 
 #> Check data...
 #> 
@@ -960,7 +961,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-11-02 08:09:41.201854
+#> automateDataPreparation terminated successfully! 2026-11-10 16:43:26.322296
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -2436,7 +2437,7 @@ cutsOrdinal$model_diagnostics
 #> # A tibble: 1 × 13
 #>   status converged max_gradient max_scaled_gradient hessian_positive_definite
 #>   <chr>  <lgl>            <dbl>               <dbl> <lgl>                    
-#> 1 ok     TRUE          0.000750            0.000113 TRUE                     
+#> 1 ok     TRUE          0.000748            0.000113 TRUE                     
 #> # ℹ 8 more variables: condition_number <dbl>, singular <lgl>, warning <chr>,
 #> #   est_center <dbl>, est_scale <dbl>, n_ratings <int>, n_items <int>,
 #> #   n_raters <int>
@@ -2636,23 +2637,97 @@ substantively best.
 
 ### Visual Subset Recoding
 
-[`visualSubsetRecode()`](https://sachseka.github.io/eatPrep/reference/visualSubsetRecode.md)
-supports interactive inspection and recoding of flagged subsets. For
-example, if a group of students was affected by a technical issue, you
-can display the relevant responses and decide whether to recode them to
-a value such as `mci`. Because the function opens an interactive review
-flow, it is not evaluated in this vignette.
+The [Reviewing Incident Reports
+vignette](https://sachseka.github.io/eatPrep/articles/subset_review.md)
+walks through a complete review, including rotated booklets, overlapping
+incidents, reset, automatic checkpoints, resuming, and the
+interpretation of decision history.
+
+Use
+[`prepareSubsetInfo()`](https://sachseka.github.io/eatPrep/reference/prepareSubsetInfo.md)
+to describe incidents at person or class level. Each report has a unique
+`issueId`, a `level` (`person` or `class`), the corresponding
+`targetId`, and a task selection: `scope` is `item`, `block`, or
+`blockPosition`, with its name or position in `target`. Missing comments
+are allowed.
+
+This small example includes different booklets within one class and
+overlapping class and individual reports:
 
 ``` r
 
-subsetInfo <- data.frame(
-  ID = c("person100", "person101", "person102"),
-  datCols = c("I01", "I02", "I03")
+reviewData <- data.frame(ID = c("P1", "P2"), I1 = c(1, 0), I2 = c(0, 1))
+persons <- data.frame(ID = c("P1", "P2"), classId = "K1")
+booklets <- data.frame(booklet = c("X", "Y"),
+                       block1 = c("A", "B"), block2 = c("B", "A"))
+blocks <- data.frame(subunit = c("I1", "I2"), block = c("A", "B"),
+                     subunitBlockPosition = 1)
+rotation <- data.frame(ID = c("P1", "P2"), booklet = c("X", "Y"))
+issues <- data.frame(
+  issueId = c("V1", "V2"), level = c("class", "person"),
+  targetId = c("K1", "P1"), scope = c("blockPosition", "item"),
+  target = c("1", "I1"), comment = c("Audio failure", NA)
 )
-
-datVisRec <- visualSubsetRecode(dat = preparedData, subsetInfo = subsetInfo,
-    ID = "ID", toRecodeVal = "mci")
+subsetInfo <- prepareSubsetInfo(
+  reviewData, issues, persons = persons,
+  booklets = booklets, blocks = blocks, rotation = rotation
+)
+summary(subsetInfo)
+#>   issueId  level targetId persons items cells overlappingCells
+#> 1      V1  class       K1       2     2     2                1
+#> 2      V2 person       P1       1     1     1                1
+subsetInfo
+#>   issueId ID datCols  level targetId         scope target block blockPosition
+#> 1      V1 P1      I1  class       K1 blockPosition      1     A             1
+#> 2      V1 P2      I2  class       K1 blockPosition      1     B             1
+#> 3      V2 P1      I1 person       P1          item     I1     A             1
+#>   subunitBlockPosition       comment
+#> 1                    1 Audio failure
+#> 2                    1 Audio failure
+#> 3                    1          <NA>
 ```
+
+The class report selects `P1/I1` and `P2/I2`: block position 1 is
+resolved using each person’s booklet. The individual report separately
+selects `P1/I1`. The summary counts persons, items, cells (including
+missing responses), and cells shared with other incidents. For a named
+block, use `scope = "block"`. For item-only reports the three design
+tables can be omitted. Existing projects can pass `inputList$booklets`,
+`inputList$blocks`, `inputList$rotation`, and, for renamed items,
+`inputList$subunits`. Class membership is supplied separately in
+`persons`. Class IDs must be unique across schools.
+
+Unknown persons, unresolved items and targets absent from a person’s
+booklet produce an error before review. Inspect and correct these
+reports instead of silently losing class members. Each report currently
+selects one target.
+
+``` r
+
+# Prepared selections automatically enable incident grouping and available metadata.
+datVisRec <- visualSubsetRecode(reviewData, subsetInfo, toRecodeVal = "mci",
+                                checkpoint = "subset-review.rds")
+datVisRec$dat
+datVisRec$subsetInfo
+datVisRec$status
+# After pausing, including in a new R session:
+datVisRec <- visualSubsetRecode(state = "subset-review.rds")
+```
+
+Only marked person-item pairs are changed. Reviewing or resetting one
+incident does not alter another incident’s selection. Reset retains a
+recoding if another incident still requires it; neither class nor
+individual reports take precedence. All recodings preserve `NA`
+responses. Pausing, confirmed exit, and Ctrl+C return completed work and
+a resumable `$state`. With `checkpoint`, the initial state and completed
+decisions or navigation changes are saved automatically. Resume through
+the checkpoint path or the returned state; original values and incident
+ownership are retained for later reset. Explicit person exceptions are
+not implemented.
+
+Manually prepared tables with `ID` and `datCols` remain accepted. For
+these, set `useGroups`, `positions`, and `comments` explicitly when
+needed.
 
 ## Export
 
