@@ -49,6 +49,13 @@ people in the same review group have different selected items. Persons with the
 same item layout are displayed together. Missing response values are counted in
 the summary and retained by all recoding actions.
 
+Selections prepared with \code{dataLevel = "unit"} map design subunits to unit
+response columns. A unit is displayed and recoded once per person, even when
+several originating subunits or positions are reported. The position table
+retains those subunits and their unit assignments. Choosing any affected block
+position selects the entire unit; individual components of an aggregate cannot
+be recoded separately. The response level and mapping survive pause/resume.
+
 Options include recoding all selected nonmissing values, recoding only original
 values \code{-99}, \code{-98}, \code{-97}, \code{-96}, choosing block positions,
 leaving the current selection unchanged, flagging for later review, going back,

@@ -1,16 +1,19 @@
 checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
-                                 subunits = NULL, ID = "ID", classID = "classId") {
+                                 subunits = NULL, ID = "ID", classID = "classId",
+                                 dataLevel = c("subunit", "unit")) {
+  dataLevel <- match.arg(dataLevel)
   .subset_check_incidents(dat, incidents, booklets, blocks, rotation,
-                          subunits, ID, classID)$report
+                          subunits, ID, classID, dataLevel)$report
 }
 
 .subset_check_incidents <- function(dat, incidents, booklets, blocks, rotation,
-                                    subunits, ID, classID) {
+                                    subunits, ID, classID, dataLevel) {
   checkmate::assert_string(ID, min.chars = 1)
   checkmate::assert_string(classID, min.chars = 1, null.ok = TRUE)
   reserved <- c("issueId", "sourceRow", "level", "targetId", "scope", "target",
                 "comment", "datCols", "booklet", "block", "blockPosition",
-                "subunitBlockPosition", "code", "message", "item", "itemStatus")
+                "subunitBlockPosition", "code", "message", "item", "itemStatus",
+                "subunit", "subunitRecoded", "unit")
   if (any(c(ID, classID) %in% reserved) || identical(ID, classID)) {
     stop("ID and classID must differ from each other and reserved incident/output names.", call. = FALSE)
   }
@@ -42,13 +45,24 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   positions <- suppressWarnings(as.numeric(incidents$blockPosition))
   problems <- list()
   rows <- list()
+  mappings <- list()
+  record_mapping <- function(selected, i) {
+    if (is.null(selected)) return(invisible(NULL))
+    selected$sourceRow <- i
+    if (!is.null(classID)) selected[[classID]] <- classes[i]
+    mappings[[length(mappings) + 1L]] <<- selected
+  }
   add_problem <- function(i, code, message, person = person_ids[i],
                           item = NA_character_, itemStatus = NA_character_,
-                          booklet = NA_character_, block = NA_character_) {
+                          booklet = NA_character_, block = NA_character_,
+                          subunit = NA_character_, subunitRecoded = NA_character_,
+                          unit = NA_character_, datCols = NA_character_) {
     row <- data.frame(sourceRow = i, issueId = incidents$issueId[i],
                       person = person, blockPosition = incidents$blockPosition[i],
                       code = code, message = message, item = item, itemStatus = itemStatus,
-                      booklet = booklet, block = block, stringsAsFactors = FALSE)
+                      booklet = booklet, block = block, subunit = subunit,
+                      subunitRecoded = subunitRecoded, unit = unit, datCols = datCols,
+                      stringsAsFactors = FALSE)
     names(row)[3] <- ID
     if (!is.null(classID)) row[[classID]] <- classes[i]
     problems[[length(problems) + 1L]] <<- row
@@ -60,7 +74,8 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   }
   resolve <- .subset_issue_resolver(dat, booklets, blocks, rotation, subunits, ID,
                                     needs_design = TRUE, classID = classID,
-                                    allow_missing_booklets = TRUE, collect_item_problems = TRUE)
+                                    allow_missing_booklets = TRUE, collect_item_problems = TRUE,
+                                    dataLevel = dataLevel)
   for (i in seq_len(n)) {
     previous <- length(problems)
     if (is.na(incidents$issueId[i])) add_problem(i, "missing_issue_id", "issueId must not be missing or empty.")
@@ -102,18 +117,21 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
                         comment = incidents$comment[i], stringsAsFactors = FALSE)
     for (person in ids) {
       selected <- tryCatch(resolve(issue, person), subsetResolutionError = function(e) {
+        record_mapping(e$selection, i)
         details <- if (is.null(e$problems)) list(e) else e$problems
         for (problem in details) {
-          metadata <- lapply(c("item", "itemStatus", "booklet", "block"), function(name) {
+          fields <- c("item", "itemStatus", "booklet", "block", "subunit", "subunitRecoded", "unit", "datCols")
+          metadata <- lapply(fields, function(name) {
             if (is.null(problem[[name]])) NA_character_ else problem[[name]]
           })
-          names(metadata) <- c("item", "itemStatus", "booklet", "block")
+          names(metadata) <- fields
           do.call(add_problem, c(list(i = i, code = problem$code, message = conditionMessage(problem),
                                      person = person), metadata))
         }
         NULL
       })
       if (!is.null(selected)) {
+        record_mapping(selected, i)
         selected$sourceRow <- i
         if (!is.null(classID)) selected[[classID]] <- classes[i]
         rows[[length(rows) + 1L]] <- selected
@@ -125,22 +143,26 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
                               person = character(), blockPosition = character(),
                               code = character(), message = character(),
                               item = character(), itemStatus = character(),
-                              booklet = character(), block = character())
+                              booklet = character(), block = character(), subunit = character(),
+                              subunitRecoded = character(), unit = character(), datCols = character())
   names(problem_table)[3] <- ID
   if (!is.null(classID)) problem_table[[classID]] <- character()
   if (length(problems)) problem_table <- do.call(rbind, problems)
   rownames(problem_table) <- NULL
   out <- if (length(rows)) do.call(rbind, rows) else NULL
   if (!is.null(out)) {
-    # A repeated source selection is harmless; conflicting positions for the
-    # same response cannot be reviewed together, even when reported separately.
-    layouts <- unique(out[c(ID, "datCols", "blockPosition", "subunitBlockPosition")])
+    # Repeated selections and different components of one unit are harmless.
+    # Reject conflicting subunit positions or different units sharing a cell.
+    layout_columns <- c(ID, "datCols", if (dataLevel == "unit") "unit" else c("blockPosition", "subunitBlockPosition"))
+    layouts <- unique(out[layout_columns])
     repeated <- duplicated(layouts[c(ID, "datCols")]) | duplicated(layouts[c(ID, "datCols")], fromLast = TRUE)
     if (any(repeated)) {
-      affected <- merge(out, layouts[repeated, ], by = c(ID, "datCols", "blockPosition", "subunitBlockPosition"))
+      affected <- merge(out, layouts[repeated, ], by = layout_columns)
       affected <- unique(affected[c("sourceRow", ID)])
       for (j in seq_len(nrow(affected))) {
-        add_problem(affected$sourceRow[j], "ambiguous_cell", "A response has conflicting positions across incident rows.", affected[[ID]][j])
+        message <- if (dataLevel == "unit") "Different units resolve to the same response across incident rows." else
+          "A response has conflicting positions across incident rows."
+        add_problem(affected$sourceRow[j], "ambiguous_cell", message, affected[[ID]][j])
       }
       problem_table <- do.call(rbind, problems)
       rownames(problem_table) <- NULL
@@ -153,15 +175,19 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
     classes = if (is.null(classID)) character() else distinct_ids(problem_table[[classID]][problem_table$code == "unknown_class"]),
     items = distinct_ids(problem_table$item[which(problem_table$itemStatus == "missing")])
   )
+  missing$subunits <- if (dataLevel == "subunit") missing$items else character()
+  missing$units <- if (dataLevel == "unit") missing$items else character()
   by_code <- data.frame(code = character(), problems = integer(), incidentRows = integer(),
-                        persons = integer(), classes = integer(), items = integer())
+                        persons = integer(), classes = integer(), items = integer(),
+                        subunits = integer(), units = integer())
   if (nrow(problem_table)) {
     by_code <- do.call(rbind, lapply(unique(problem_table$code), function(code) {
       selected <- problem_table[problem_table$code == code, , drop = FALSE]
       data.frame(code = code, problems = nrow(selected), incidentRows = count_ids(selected$sourceRow),
                  persons = count_ids(selected[[ID]]),
                  classes = if (is.null(classID)) 0L else count_ids(selected[[classID]]),
-                 items = count_ids(selected$item))
+                 items = count_ids(selected$item), subunits = count_ids(selected$subunit),
+                 units = count_ids(selected$unit))
     }))
   }
   bad_rows <- unique(problem_table$sourceRow)
@@ -172,14 +198,25 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
                          problemItems = count_ids(problem_table$item),
                          missingPersons = length(missing$persons), missingClasses = length(missing$classes),
                          missingItems = length(missing$items),
+                         missingSubunits = if (dataLevel == "subunit") length(missing$subunits) else NA_integer_,
+                         missingUnits = if (dataLevel == "unit") length(missing$units) else NA_integer_,
+                         unmappedSubunits = count_ids(problem_table$subunit[problem_table$code == "missing_unit_mapping"]),
                          ambiguousItems = count_ids(problem_table$item[which(problem_table$itemStatus == "ambiguous")]),
                          uncheckedItemRows = count_ids(problem_table$sourceRow[
                            !problem_table$code %in% c("unresolved_item", "ambiguous_cell")]))
+  mapping <- problem_table[FALSE, c("sourceRow", "issueId", ID, classID, "booklet", "block",
+                                   "blockPosition", "subunit", "subunitRecoded", "unit", "item", "datCols", "itemStatus")]
+  mapping$blockPosition <- numeric()
+  mapping$subunitBlockPosition <- numeric()
+  if (length(mappings)) mapping <- do.call(rbind, mappings)[names(mapping)]
+  rownames(mapping) <- NULL
   report <- structure(list(summary = overview, problems = problem_table,
-                           byCode = by_code, missing = missing), class = "subsetIncidentCheck")
+                           byCode = by_code, missing = missing, dataLevel = dataLevel,
+                           mapping = mapping), class = "subsetIncidentCheck")
   if (!is.null(out)) {
     rownames(out) <- NULL
     attr(out, "ID") <- ID
+    attr(out, "dataLevel") <- dataLevel
     attr(out, "classID") <- classID
     attr(out, "reviewGroup") <- if (is.null(classID)) ID else classID
     attr(out, "incidentCheck") <- report
@@ -189,9 +226,9 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
 }
 
 .subset_prepare_incidents <- function(dat, incidents, booklets, blocks, rotation,
-                                      subunits, ID, classID, unmatched) {
+                                      subunits, ID, classID, unmatched, dataLevel) {
   checked <- .subset_check_incidents(dat, incidents, booklets, blocks, rotation,
-                                     subunits, ID, classID)
+                                     subunits, ID, classID, dataLevel)
   problems <- checked$report$problems
   if (nrow(problems)) {
     print(checked$report)
@@ -214,10 +251,15 @@ print.subsetIncidentCheck <- function(x, ..., max_problems = 10L) {
   checkmate::assert_number(max_problems, lower = 0, finite = FALSE)
   if (max_problems != floor(max_problems)) stop("max_problems must be a whole number or Inf.", call. = FALSE)
   cat("Incident preflight\n")
+  if (!is.null(x$dataLevel)) cat("Response data level:", x$dataLevel, "\n")
   print(x$summary[c("incidentRows", "matchedRows", "problemRows")], row.names = FALSE)
   if (!is.null(x$missing)) {
     cat("\nMissing from dat (distinct identifiers):\n")
-    print(x$summary[c("missingPersons", "missingClasses", "missingItems")], row.names = FALSE)
+    item_count <- if (is.null(x$dataLevel)) "missingItems" else if (x$dataLevel == "unit") "missingUnits" else "missingSubunits"
+    print(x$summary[c("missingPersons", "missingClasses", item_count)], row.names = FALSE)
+    if (!is.null(x$summary$unmappedSubunits) && x$summary$unmappedSubunits) {
+      cat("Subunits without a unit assignment:", x$summary$unmappedSubunits, "\n")
+    }
     if (x$summary$ambiguousItems) cat("Ambiguous item mappings:", x$summary$ambiguousItems, "\n")
     if (x$summary$uncheckedItemRows) {
       cat("Item checks incomplete for", x$summary$uncheckedItemRows,

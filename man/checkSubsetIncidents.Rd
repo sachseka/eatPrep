@@ -9,7 +9,8 @@ the response data; no separate person-to-class table is needed.
 }
 \usage{
 checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
-                     subunits = NULL, ID = "ID", classID = "classId")
+                     subunits = NULL, ID = "ID", classID = "classId",
+                     dataLevel = c("subunit", "unit"))
 
 \method{print}{subsetIncidentCheck}(x, ..., max_problems = 10L)
 }
@@ -26,14 +27,19 @@ checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
     \code{subunitBlockPosition}, normally \code{inputList$blocks}.}
   \item{rotation}{Person-to-booklet table with columns named by \code{ID} and
     \code{booklet}, normally \code{inputList$rotation}.}
-  \item{subunits}{Optional raw-to-recoded item mapping, normally
-    \code{inputList$subunits}; see \code{\link{prepareSubsetInfo}}.}
+  \item{subunits}{Mapping table, normally \code{inputList$subunits}, with unique
+    \code{subunit}, optional \code{subunitRecoded}, and \code{unit}.
+    Required with \code{dataLevel = "unit"}; otherwise optional.
+    See \code{\link{prepareSubsetInfo}}.}
   \item{ID}{Person ID column in response, incident and rotation data, supplied as
     a column-name string, e.g. \code{"IDSTUD"}. Default: \code{"ID"}.
     Input columns do not need to be renamed.}
   \item{classID}{Class ID column in response and incident data. Default:
     \code{"classId"}. Supply a column-name string such as \code{"IDTESTGROUP"}, or
     set explicitly to \code{NULL} for individual data without classes.}
+  \item{dataLevel}{Response level: \code{"subunit"} (default) resolves original
+    or recoded subunit columns; \code{"unit"} resolves aggregated units through
+    \code{subunits$unit}. Supply the same level to \code{prepareSubsetInfo}.}
   \item{x}{A \code{subsetIncidentCheck} result.}
   \item{...}{Reserved for additional print arguments.}
   \item{max_problems}{Maximum number of problem details to print. Use \code{0}
@@ -59,8 +65,9 @@ still selects only those persons.
 \code{issueId} is optional: by default a unique identifier is generated per
 source row. Supplied identifiers must be nonmissing but may repeat across long
 rows of the same incident. Original row numbers are always retained separately
-as \code{sourceRow}. Repeated selections are permitted; conflicting positions
-for the same response are reported. \code{blockPosition} must be a positive
+as \code{sourceRow}. Repeated selections are permitted. Conflicting positions
+for a subunit response, or different units resolving to the same response, are
+reported. \code{blockPosition} must be a positive
 whole number and is resolved separately for each person's booklet.
 
 The checker returns all row/person problems that can be established from valid
@@ -71,12 +78,22 @@ a row's identifiers and position are valid; dependent problems cannot be assesse
 until those inputs are corrected. One problem can affect several long rows, and
 one class row can produce problems for several persons.
 
-All items in each resolved incident block are checked, including when several
-item columns are absent. Counts refer to the requested incident selections,
-not to every item in the design tables. An item is missing when neither its
-original name nor a mapped recoded name identifies a response column. If more
-than one candidate column exists, its mapping is ambiguous instead. Both cases
-use \code{unresolved_item}, distinguished by \code{itemStatus}.
+All subunits in each resolved incident block are mapped to the selected response
+level, including when several columns are absent. Counts refer to the requested
+incident selections, not to every item in the design tables. In subunit mode,
+exactly one original or recoded column must exist. In unit mode, the unit-named
+column takes precedence. If it is absent, original or recoded subunit names are
+accepted only for units having exactly one subunit in the mapping table. Multiple
+candidate columns are ambiguous; a component column never substitutes for a
+multi-subunit aggregate. Missing and ambiguous columns use \code{unresolved_item},
+distinguished by \code{itemStatus}.
+
+In unit mode, any affected subunit selects the whole unit for that person.
+Several subunits or block positions can select the same unit, which is counted,
+displayed and recoded once. All originating subunit positions remain in the
+mapping. Missing subunit-to-unit assignments use \code{missing_unit_mapping},
+not a missing-column diagnosis. Supply the complete subunit mapping so that
+single-subunit units can be identified correctly.
 
 A person with entirely missing responses is still present in \code{dat}. For
 items, an existing response column containing only NA is also present. For
@@ -97,34 +114,54 @@ A \code{subsetIncidentCheck} list with:
     \code{missingItems} count distinct identifiers actually absent from
     \code{dat}; repeated long rows or occurrences across persons do not inflate
     these totals. \code{ambiguousItems} counts distinct items with multiple
-    candidate response columns. \code{uncheckedItemRows} counts source rows
+    candidate response columns. These item counts use the chosen \code{dataLevel}.
+    \code{missingSubunits} and \code{missingUnits} give explicit totals: the
+    inactive level is NA because it is not checked. \code{unmappedSubunits}
+    counts subunits without unit assignments in unit mode.
+    \code{uncheckedItemRows} counts source rows
     whose item checks could not be completed for at least one person because
     of invalid identifiers, positions or unresolved design. Further missing
     items may be discovered after correcting those rows. Class counts are
     zero with \code{classID = NULL}.}
   \item{problems}{A data frame with \code{sourceRow}, \code{issueId}, the person ID,
     \code{blockPosition}, \code{code}, \code{message}, \code{item},
-    \code{itemStatus}, \code{booklet}, \code{block}, and, when used, the class ID.
+    \code{itemStatus}, \code{booklet}, \code{block}, \code{subunit},
+    \code{subunitRecoded}, \code{unit}, \code{datCols}, and, when used, the class ID.
     ID columns use the names supplied in \code{ID} and \code{classID}. It has zero
-    rows when all incidents can be resolved. Item problems retain the original
-    \code{blocks$subunit} identifier in \code{item}, with \code{itemStatus} equal
-    to \code{"missing"} or \code{"ambiguous"}. Booklet and block identifiers
-    are supplied when available. Inapplicable or unknown details are NA.}
+    rows when all incidents can be resolved. \code{subunit} retains the original
+    design identifier, \code{unit} its aggregation target, and \code{datCols}
+    the uniquely resolved response column (NA if unresolved). \code{item} is
+    retained as a level-dependent identifier: the subunit in subunit mode, the
+    unit in unit mode. \code{itemStatus} is \code{"missing"}, \code{"ambiguous"}
+    or \code{"unmapped"} for item problems. Inapplicable or unknown details are NA.}
   \item{byCode}{A data frame with one row per problem \code{code}:
     \code{problems} counts problem records; \code{incidentRows}, \code{persons},
-    \code{classes} and \code{items} count distinct nonmissing identifiers within
-    that code. These counts must not be summed across codes to obtain overall
+    \code{classes}, \code{items}, \code{subunits} and \code{units} count distinct
+    nonmissing identifiers within that code. Subunit/unit counts here describe
+    affected identifiers, not necessarily absent response columns.
+    These counts must not be summed across codes to obtain overall
     totals because the same identifier may occur under several codes.}
-  \item{missing}{A list of character vectors \code{persons}, \code{classes} and
+  \item{missing}{A list of character vectors \code{persons}, \code{classes},
+    \code{subunits}, \code{units} and
     \code{items}, containing the distinct identifiers absent from \code{dat}.
-    Item names use \code{blocks$subunit}, so original and recoded aliases count
-    as one item. Empty vectors indicate that none were detected.}
+    \code{items} is an alias for the active level's vector. Original and recoded
+    aliases count as one logical response. The inactive level's vector is empty;
+    consult \code{dataLevel} or the NA count in \code{summary}.}
+  \item{dataLevel}{The response level used for this check.}
+  \item{mapping}{A data frame recording each subunit in the incident selections
+    whose block design could be resolved, including successful mappings and
+    item problems. It contains source rows, person/class IDs, booklet and block
+    positions, \code{subunit}, \code{subunitRecoded}, \code{unit}, \code{item},
+    \code{datCols} and \code{itemStatus}. Successful mappings have status
+    \code{"matched"}. Several rows may refer to one unit response. Rows blocked
+    by invalid incident identifiers or unavailable design do not appear here.}
 }
 Problem codes include \code{unknown_person}, \code{unknown_class},
 \code{class_mismatch}, \code{mixed_person_ids}, \code{missing_person_id},
 \code{missing_class_id}, \code{class_without_id}, \code{missing_issue_id},
 \code{invalid_level}, \code{invalid_position}, \code{unknown_booklet},
-\code{unknown_block}, \code{not_administered}, \code{unresolved_item}, and
+\code{unknown_block}, \code{not_administered}, \code{unresolved_item},
+\code{missing_unit_mapping}, and
 \code{ambiguous_cell}. Printing displays overall missing counts, counts by code,
 and at most \code{max_problems} problem details (10 by default).
 }

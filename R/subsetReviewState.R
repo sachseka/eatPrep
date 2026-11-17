@@ -22,6 +22,8 @@
   dat_ids <- .subset_table(dat, ID, "dat")
   .subset_unique_key(dat_ids, ID, "dat")
   subsetInfo <- .subset_table(subsetInfo, c(ID, "datCols", useGroups), "subsetInfo")
+  unit_level <- identical(attr(subsetInfo, "dataLevel"), "unit")
+  if (unit_level) subsetInfo <- .subset_table(subsetInfo, "unit", "subsetInfo")
   if (any(!subsetInfo[[ID]] %in% dat_ids[[ID]])) {
     stop("subsetInfo contains IDs absent from dat.", call. = FALSE)
   }
@@ -44,9 +46,10 @@
   for (group in groups) {
     selected <- subsetInfo[subsetInfo[[group_col]] == group, , drop = FALSE]
     keys <- c(ID, "datCols")
-    if (settings$positions) keys <- c(keys, "blockPosition", "subunitBlockPosition")
+    if (unit_level) keys <- c(keys, "unit") else if (settings$positions) keys <- c(keys, "blockPosition", "subunitBlockPosition")
     selected <- unique(selected[keys])
     if (anyDuplicated(selected[c(ID, "datCols")])) {
+      if (unit_level) stop("Different units resolve to the same response within a review subset.", call. = FALSE)
       stop("A data cell has conflicting positions within a review subset.", call. = FALSE)
     }
   }

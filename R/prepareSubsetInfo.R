@@ -1,20 +1,23 @@
 prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NULL,
                               blocks = NULL, rotation = NULL, subunits = NULL,
                               ID = "ID", classID = "classId", incidents = NULL,
-                              unmatched = c("error", "drop")) {
+                              unmatched = c("error", "drop"),
+                              dataLevel = c("subunit", "unit")) {
   unmatched <- match.arg(unmatched)
+  dataLevel <- match.arg(dataLevel)
   if (!is.null(incidents)) {
     if (!is.null(issues) || !is.null(persons)) {
       stop("Supply incidents without issues or persons; class membership comes from dat.", call. = FALSE)
     }
     return(.subset_prepare_incidents(dat, incidents, booklets, blocks, rotation,
-                                     subunits, ID, classID, unmatched))
+                                     subunits, ID, classID, unmatched, dataLevel))
   }
   if (unmatched != "error") stop("unmatched = 'drop' is only available with incidents.", call. = FALSE)
   checkmate::assert_string(ID, min.chars = 1)
   checkmate::assert_string(classID, min.chars = 1, null.ok = TRUE)
   reserved <- c("issueId", "level", "targetId", "scope", "target", "comment",
-                "datCols", "booklet", "block", "blockPosition", "subunitBlockPosition")
+                "datCols", "booklet", "block", "blockPosition", "subunitBlockPosition",
+                "subunit", "subunitRecoded", "unit", "item", "itemStatus")
   if (ID %in% reserved || identical(ID, classID)) {
     stop("ID must differ from classID and the issue/output column names.", call. = FALSE)
   }
@@ -37,7 +40,8 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
     .subset_unique_key(persons, ID, "persons")
   }
   resolve <- .subset_issue_resolver(dat, booklets, blocks, rotation, subunits, ID,
-                                    needs_design = any(issues$scope != "item"))
+                                    needs_design = any(issues$scope != "item"),
+                                    classID = classID, dataLevel = dataLevel)
   rows <- list()
   for (i in seq_len(nrow(issues))) {
     issue <- issues[i, , drop = FALSE]
@@ -50,6 +54,7 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
   out <- do.call(rbind, rows)
   rownames(out) <- NULL
   attr(out, "ID") <- ID
+  attr(out, "dataLevel") <- dataLevel
   class(out) <- c("preparedSubsetInfo", "data.frame")
   out
 }
@@ -59,7 +64,7 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
 .subset_issue_resolver <- function(dat, booklets, blocks, rotation, subunits, ID,
                                    needs_design, classID = NULL,
                                    allow_missing_booklets = FALSE,
-                                   collect_item_problems = FALSE) {
+                                   collect_item_problems = FALSE, dataLevel = "subunit") {
   has_design <- !all(vapply(list(booklets, blocks, rotation), is.null, logical(1)))
   if (needs_design || has_design) {
     booklets <- .subset_table(booklets, "booklet", "booklets")
@@ -88,21 +93,11 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
     block_cols <- block_cols[order(block_pos)]
     block_pos <- sort(block_pos)
   }
-  if (!is.null(subunits)) {
-    subunits <- .subset_table(subunits, c("subunit", "subunitRecoded"), "subunits")
-    .subset_unique_key(subunits, "subunit", "subunits")
-  }
-  resolve_item <- function(item) {
-    candidates <- item
-    if (!is.null(subunits)) {
-      candidates <- unique(c(candidates, subunits$subunitRecoded[subunits$subunit == item]))
-    }
-    found <- intersect(candidates, setdiff(names(dat), c(ID, classID)))
-    if (length(found) != 1L) {
-      .subset_resolution_error("unresolved_item", sprintf("Item '%s' must resolve to exactly one column in dat (found %d).", item, length(found)),
-                               item = item, itemStatus = if (length(found)) "ambiguous" else "missing")
-    }
-    found
+  mapper <- .subset_item_mapper(dat, subunits, ID, classID, dataLevel)
+  subunits <- mapper$subunits
+  target_subunits <- function(target) {
+    if (dataLevel == "unit") return(subunits$subunit[which(subunits$unit == target)])
+    unique(c(target, subunits$subunit[which(subunits$subunitRecoded == target)]))
   }
   function(issue, person) {
     selected <- NULL
@@ -131,48 +126,46 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
           selected <- design[design$blockPosition == position, , drop = FALSE]
         }
         if (issue$scope == "item") {
-          item <- resolve_item(issue$target)
-          # Match raw or recoded item names without resolving unrelated items.
-          aliases <- item
-          if (!is.null(subunits)) aliases <- unique(c(aliases, subunits$subunit[subunits$subunitRecoded == item]))
-          selected <- design[design$subunit %in% aliases, , drop = FALSE]
+          selected <- design[design$subunit %in% target_subunits(issue$target), , drop = FALSE]
         }
       }
     } else {
-      selected <- data.frame(subunit = issue$target, block = NA_character_,
-                             blockPosition = NA_integer_, subunitBlockPosition = NA_integer_)
+      targets <- target_subunits(issue$target)
+      if (dataLevel == "subunit" && !is.null(subunits) && !issue$target %in% subunits$subunit) {
+        aliases <- subunits$subunit[which(subunits$subunitRecoded == issue$target)]
+        if (length(aliases)) targets <- aliases
+      }
+      if (length(targets)) selected <- data.frame(subunit = targets, block = NA_character_,
+                                                 blockPosition = NA_integer_, subunitBlockPosition = NA_integer_)
     }
     if (is.null(selected) || !nrow(selected)) {
       .subset_resolution_error("not_administered", sprintf("Issue '%s': target '%s' is not administered to person '%s'.", issue$issueId, issue$target, person),
                                booklet = booklet, block = if (issue$scope == "block") issue$target else NA_character_)
     }
     selected <- selected[order(selected$blockPosition, selected$subunitBlockPosition), , drop = FALSE]
-    if (collect_item_problems) {
-      resolved <- lapply(selected$subunit, function(item) {
-        tryCatch(resolve_item(item), subsetResolutionError = identity)
-      })
-      failed <- which(vapply(resolved, inherits, logical(1), what = "subsetResolutionError"))
-      if (length(failed)) {
-        problems <- lapply(failed, function(j) {
-          problem <- resolved[[j]]
-          problem$booklet <- booklet
-          problem$block <- selected$block[j]
-          problem
-        })
-        .subset_resolution_error("unresolved_item", "Selected items could not be resolved.", problems = problems)
-      }
-      cols <- vapply(resolved, identity, character(1))
-    } else {
-      cols <- vapply(selected$subunit, resolve_item, character(1))
-    }
-    if (anyDuplicated(cols)) .subset_resolution_error("ambiguous_cell", sprintf("Issue '%s': multiple design entries resolve to the same data cell for '%s'.", issue$issueId, person))
-    row <- data.frame(issueId = issue$issueId, person = person, datCols = unname(cols),
+    mapped <- mapper$map(selected$subunit)
+    row <- data.frame(issueId = issue$issueId, person = person, datCols = mapped$datCols,
                       level = issue$level, targetId = issue$targetId,
                       scope = issue$scope, target = issue$target,
-                      block = selected$block, blockPosition = selected$blockPosition,
+                      booklet = booklet, block = selected$block, blockPosition = selected$blockPosition,
                       subunitBlockPosition = selected$subunitBlockPosition,
-                      comment = issue$comment, stringsAsFactors = FALSE)
+                      comment = issue$comment, subunit = mapped$subunit,
+                      subunitRecoded = mapped$subunitRecoded, unit = mapped$unit,
+                      item = mapped$item, itemStatus = mapped$itemStatus, stringsAsFactors = FALSE)
     names(row)[2] <- ID
+    failed <- which(mapped$itemStatus != "matched")
+    if (length(failed)) {
+      problems <- lapply(failed, function(j) .subset_item_problem(row[j, ], dataLevel))
+      if (!collect_item_problems) stop(problems[[1L]])
+      .subset_resolution_error("unresolved_item", "Selected responses could not be resolved.",
+                               problems = problems, selection = row)
+    }
+    # Several subunits of one unit intentionally refer to the same response.
+    cells <- unique(mapped[c("item", "datCols")])
+    if ((dataLevel == "subunit" && anyDuplicated(mapped$datCols)) || anyDuplicated(cells$datCols)) {
+      .subset_resolution_error("ambiguous_cell", sprintf("Issue '%s': multiple design entries resolve to the same data cell for '%s'.", issue$issueId, person),
+                               selection = row)
+    }
     row
   }
 }

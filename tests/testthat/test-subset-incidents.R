@@ -51,7 +51,8 @@ test_that("long incidents select exact pairs and whole classes from dat", {
   expect_equal(check$summary$missingClasses, 0L)
   expect_equal(check$summary$missingItems, 0L)
   expect_equal(nrow(check$byCode), 0L)
-  expect_identical(check$missing, list(persons = character(), classes = character(), items = character()))
+  expect_identical(check$missing, list(persons = character(), classes = character(), items = character(),
+                                      subunits = character(), units = character()))
   expect_identical(attr(info, "incidentCheck"), check)
   expect_output(print(check), "All incident rows")
 })
@@ -272,7 +273,8 @@ test_that("missing identifiers and every absent block item are counted distinctl
                ID = c("absent", "absent", NA, NA), blockPosition = c(1, 2, 1, 2)),
     args$incidents[1, ])
   check <- do.call(checkSubsetIncidents, args)
-  expect_identical(check$missing, list(persons = "absent", classes = "K9", items = c("I1", "I2")))
+  expect_identical(check$missing, list(persons = "absent", classes = "K9", items = c("I1", "I2"),
+                                      subunits = c("I1", "I2"), units = character()))
   expect_equal(check$summary$missingPersons, 1L)
   expect_equal(check$summary$missingClasses, 1L)
   expect_equal(check$summary$missingItems, 2L)
@@ -366,6 +368,205 @@ test_that("printing gives a compact overview and optionally all problem details"
   expect_error(print(check, max_problems = 1.5), "whole number")
   expect_equal(check$summary$missingPersons, 1L)
   expect_equal(nrow(check$problems), 12L)
+})
+
+unit_incident_fixture <- function() {
+  args <- incident_fixture()
+  args$subunits <- data.frame(subunit = c("I1", "I2", "I3"),
+                              subunitRecoded = c("I1R", "I2R", "I3R"),
+                              unit = c("U12", "U12", "U3"))
+  args$dat <- data.frame(ID = args$dat$ID, classId = args$dat$classId,
+                         U12 = c(7, 9, 11, 13, NA), U3 = args$dat$I3)
+  args$dataLevel <- "unit"
+  args
+}
+
+test_that("unit data resolve through the input-list mapping and retain subunit provenance", {
+  args <- unit_incident_fixture()
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$dataLevel, "unit")
+  expect_equal(check$summary$matchedRows, 4L)
+  expect_equal(check$summary$missingUnits, 0L)
+  expect_true(is.na(check$summary$missingSubunits))
+  expect_equal(check$mapping$subunit, c("I1", "I2", "I3", "I3", "I3", "I1", "I2"))
+  expect_equal(check$mapping$unit, c("U12", "U12", "U3", "U3", "U3", "U12", "U12"))
+  expect_equal(check$mapping$datCols, check$mapping$unit)
+  expect_equal(check$mapping$itemStatus, rep("matched", 7))
+  info <- do.call(prepareSubsetInfo, args)
+  expect_equal(attr(info, "dataLevel"), "unit")
+  expect_equal(info$subunit, check$mapping$subunit)
+  expect_equal(summary(info)$cells, c(1L, 1L, 1L, 2L))
+  grouped <- incident_review(args$dat, info, c(rep("yes, all values", 2), "yes"))
+  individual <- incident_review(args$dat, info, c(rep("yes, all values", 4), "yes"), useGroups = NULL)
+  expected <- args$dat
+  expected$U12[1] <- -91
+  expected$U3[c(1, 2, 4)] <- -91
+  expect_identical(grouped$dat, expected)
+  expect_identical(individual$dat, expected)
+  expect_equal(grouped$state$groups, c("K1", "K2"))
+  expect_equal(attr(grouped$state$subset_info, "dataLevel"), "unit")
+  display <- capture.output(.subset_display(args$dat, info, "ID", positions = TRUE))
+  expect_false(any(grepl("U12.1", display, fixed = TRUE)))
+  expect_true(any(grepl("subunit", display, fixed = TRUE)))
+})
+
+test_that("missing unit totals deduplicate subunits and retain successful mappings", {
+  args <- unit_incident_fixture()
+  args$dat$U12 <- NULL
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$missingItems, 1L)
+  expect_equal(check$summary$missingUnits, 1L)
+  expect_true(is.na(check$summary$missingSubunits))
+  expect_equal(check$missing$units, "U12")
+  expect_equal(check$missing$items, "U12")
+  expect_identical(check$missing$subunits, character())
+  expect_equal(check$problems$unit, rep("U12", 4))
+  expect_equal(check$problems$subunit, rep(c("I1", "I2"), 2))
+  expect_true(all(is.na(check$problems$datCols)))
+  expect_equal(check$byCode$units, 1L)
+  expect_equal(check$byCode$subunits, 2L)
+  expect_equal(check$byCode$problems, 4L)
+  expect_equal(sum(check$mapping$itemStatus == "matched"), 3L)
+  expect_equal(check$summary$uncheckedItemRows, 0L)
+  expect_identical(incident_error(args)$report, check)
+  expect_output(print(check), "missingUnits")
+})
+
+test_that("unit mode supports retained single-subunit names without substituting partial aggregates", {
+  args <- unit_incident_fixture()
+  names(args$dat)[names(args$dat) == "U3"] <- "I3R"
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$matchedRows, 4L)
+  expect_equal(unique(check$mapping$datCols), c("U12", "I3R"))
+  args$dat$U3 <- args$dat$I3R
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$matchedRows, 4L)
+  expect_equal(unique(check$mapping$datCols), c("U12", "U3"))
+  args$dat$U12 <- NULL
+  args$dat$I1R <- 1:5
+  expect_equal(do.call(checkSubsetIncidents, args)$missing$units, "U12")
+  args$dat$U3 <- NULL
+  args$dat$I3 <- 1:5
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$ambiguousItems, 1L)
+  expect_equal(unique(check$problems$unit[check$problems$itemStatus == "ambiguous"]), "U3")
+})
+
+test_that("missing unit assignments are distinguished from missing data columns", {
+  args <- unit_incident_fixture()
+  args$subunits <- args$subunits[-2, ]
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$problems$code, rep("missing_unit_mapping", 2))
+  expect_equal(check$problems$subunit, rep("I2", 2))
+  expect_true(all(is.na(check$problems$unit)))
+  expect_equal(check$summary$missingUnits, 0L)
+  expect_equal(check$summary$unmappedSubunits, 1L)
+  expect_equal(check$summary$uncheckedItemRows, 2L)
+  incident_error(args, unmatched = "drop")
+  args$subunits <- NULL
+  expect_error(do.call(checkSubsetIncidents, args), "requires subunits")
+  args <- unit_incident_fixture()
+  args$subunits$unit <- NULL
+  expect_error(do.call(checkSubsetIncidents, args), "needs columns: unit")
+  args <- unit_incident_fixture()
+  args$subunits$unit[2] <- " "
+  expect_equal(do.call(checkSubsetIncidents, args)$summary$unmappedSubunits, 1L)
+  args <- unit_incident_fixture()
+  args$subunits$subunitRecoded <- NULL
+  expect_equal(do.call(checkSubsetIncidents, args)$summary$matchedRows, 4L)
+})
+
+test_that("a unit spanning block positions is selected once by any affected component", {
+  args <- unit_incident_fixture()
+  args$subunits$unit <- "Uall"
+  args$dat <- data.frame(ID = args$dat$ID, classId = args$dat$classId, Uall = 1:5)
+  info <- do.call(prepareSubsetInfo, args)
+  expect_equal(nrow(unique(info[c("ID", "datCols")])), 4L)
+  expect_setequal(info$blockPosition[info$ID == "A"], c(1, 2))
+  # Only A has a position-2 report in K1; B's unit must stay unchanged.
+  result <- incident_review(args$dat, info,
+    c("yes, specific blocks (submenu to select blocks follows)", "no, not block 1",
+      "yes, block 2", "no", "yes"))
+  expected <- args$dat
+  expected$Uall[1] <- -91
+  expect_identical(result$dat, expected)
+  paused <- incident_review(args$dat, info, c("yes, all values", "pause review (resume later)"))
+  path <- tempfile(fileext = ".rds")
+  on.exit(unlink(path))
+  saveRDS(paused$state, path)
+  resumed <- incident_review(NULL, NULL, c("yes, all values", "yes"), state = path)
+  complete <- incident_review(args$dat, info, c(rep("yes, all values", 2), "yes"))
+  expect_identical(resumed$dat, complete$dat)
+  expect_equal(attr(resumed$state$subset_info, "dataLevel"), "unit")
+  expect_identical(attr(resumed$state$subset_info, "incidentCheck"), attr(info, "incidentCheck"))
+})
+
+test_that("unit selections also support explicit issues with and without design", {
+  args <- unit_incident_fixture()
+  args$incidents <- NULL
+  args$issues <- data.frame(issueId = "unit", level = "person", targetId = "A", scope = "item", target = "U12")
+  info <- do.call(prepareSubsetInfo, args)
+  expect_equal(info$subunit, c("I1", "I2"))
+  expect_equal(summary(info)$cells, 1L)
+  args[c("booklets", "blocks", "rotation")] <- NULL
+  info <- do.call(prepareSubsetInfo, args)
+  expect_equal(info$subunit, c("I1", "I2"))
+  result <- incident_review(args$dat, info, c("yes, all values", "yes"))
+  expected <- args$dat
+  expected$U12[1] <- -91
+  expect_identical(result$dat, expected)
+})
+
+test_that("subunit reports retain explicit mapping and unit mode prevents column collisions", {
+  args <- incident_fixture()
+  args$subunits <- unit_incident_fixture()$subunits
+  names(args$dat)[3:5] <- c("I1R", "I2R", "I3R")
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$dataLevel, "subunit")
+  expect_equal(check$mapping$subunitRecoded, check$mapping$datCols)
+  expect_setequal(check$mapping$unit, c("U12", "U3"))
+  expect_equal(check$summary$missingSubunits, 0L)
+  expect_true(is.na(check$summary$missingUnits))
+  args <- unit_incident_fixture()
+  args$subunits$unit <- c("U1", "U2", "U3")
+  args$subunits$subunitRecoded[1:2] <- "shared"
+  args$dat$U12 <- NULL
+  args$dat$shared <- 1:5
+  expect_true("ambiguous_cell" %in% do.call(checkSubsetIncidents, args)$problems$code)
+  incident_error(args)
+  # The collision also matters when each incident block resolves on its own.
+  args$blocks <- args$blocks[-2, ]
+  args$subunits$subunitRecoded[3] <- "shared"
+  args$dat$U3 <- NULL
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$problems$code, rep("ambiguous_cell", 2))
+  expect_equal(check$problems$ID, c("A", "A"))
+  expect_setequal(check$problems$sourceRow, 1:2)
+  incident_error(args)
+})
+
+test_that("unit mappings preserve large identifiers and configurable individual IDs", {
+  args <- unit_incident_fixture()
+  units <- 1e15 + 1:2
+  args$subunits$unit <- units[c(1, 1, 2)]
+  names(args$dat)[3:4] <- sprintf("%.0f", units)
+  for (name in c("dat", "incidents", "rotation")) {
+    names(args[[name]])[names(args[[name]]) == "ID"] <- "IDSTUD"
+  }
+  args$ID <- "IDSTUD"
+  args$incidents <- args$incidents[1:3, c("IDSTUD", "blockPosition")]
+  args$dat$classId <- NULL
+  args["classID"] <- list(NULL)
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$matchedRows, 3L)
+  expect_identical(unique(check$mapping$unit), sprintf("%.0f", units))
+  expect_identical(unique(check$mapping$datCols), sprintf("%.0f", units))
+  expect_equal(check$mapping$IDSTUD, c("A", "A", "A", "B"))
+  info <- do.call(prepareSubsetInfo, args)
+  result <- incident_review(args$dat, info, c("yes, all values", "no", "yes"))
+  expected <- args$dat
+  expected[1, 2:3] <- -91
+  expect_identical(result$dat, expected)
 })
 
 test_that("new class grouping and provenance survive pause and resume", {

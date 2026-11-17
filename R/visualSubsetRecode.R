@@ -175,6 +175,9 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
 .subset_display <- function(dat, current, ID, positions) {
   ids <- .population_identifier_labels_idm(dat[[ID]])
   metadata <- c("datCols", if (positions) c("blockPosition", "subunitBlockPosition"))
+  if (positions && identical(attr(current, "dataLevel"), "unit")) {
+    metadata <- c(metadata, intersect(c("subunit", "unit"), names(current)))
+  }
   layouts <- list()
   members <- list()
   for (person in unique(current[[ID]])) {
@@ -192,7 +195,7 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
   for (i in seq_along(layouts)) {
     layout <- layouts[[i]]
     rows <- match(members[[i]], ids)
-    display <- dat[rows, c(ID, layout$datCols), drop = FALSE]
+    display <- dat[rows, c(ID, unique(layout$datCols)), drop = FALSE]
     display[[ID]] <- ids[rows]
     print(display, row.names = FALSE)
     if (positions) print(layout, row.names = FALSE)

@@ -1312,6 +1312,13 @@ uniquely across schools. Project data can use `inputList$booklets`,
 `inputList$blocks`, `inputList$rotation` and, after item renaming,
 `subunits = inputList$subunits`.
 
+For aggregated response data, supply `dataLevel = "unit"` and
+`subunits = inputList$subunits` to both the check and preparation. Design tables
+still contain subunits. Any affected subunit selects its whole unit, which is
+displayed and recoded once. The check's `$mapping` separates `subunit`, `unit`
+and the actual response column `datCols`; `$summary$missingUnits` counts missing
+units distinctly.
+
 The preflight returns `summary` and `problems`, including original incident row
 numbers, unmatched IDs, conflicting class assignments and unresolved positions.
 Preparation repeats this check and stops on problems by default. Explicit

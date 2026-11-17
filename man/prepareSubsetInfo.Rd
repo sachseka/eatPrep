@@ -12,7 +12,8 @@ is retained when reports overlap.
 prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
                   blocks = NULL, rotation = NULL, subunits = NULL,
                   ID = "ID", classID = "classId", incidents = NULL,
-                  unmatched = c("error", "drop"))
+                  unmatched = c("error", "drop"),
+                  dataLevel = c("subunit", "unit"))
 
 \method{summary}{preparedSubsetInfo}(object, ...)
 }
@@ -25,7 +26,8 @@ prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
       \item{targetId}{Person ID or class ID, according to \code{level}.}
       \item{scope}{Either \code{"item"}, \code{"block"}, or \code{"blockPosition"}.}
       \item{target}{A single item name, block name, or positive integer block position,
-        according to \code{scope}. A character column accommodates mixed scopes.}
+        according to \code{scope}. Item targets use subunit/recoded names in
+        subunit mode and unit names in unit mode. A character column accommodates mixed scopes.}
       \item{comment}{Optional description; missing comments are allowed.}
     }
   }
@@ -41,9 +43,10 @@ prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
     \code{subunitBlockPosition}. Items and positions must be unique within blocks.}
   \item{rotation}{Person-to-booklet mapping with columns named by \code{ID} and
     \code{booklet}, with one row per person.}
-  \item{subunits}{Optional mapping with unique \code{subunit} and corresponding
-    \code{subunitRecoded} names. Each selected item must match exactly one raw or
-    recoded column in \code{dat}. Aggregated item names are not inferred.}
+  \item{subunits}{Mapping with unique \code{subunit}, optional
+    \code{subunitRecoded} names and \code{unit} assignments, normally
+    \code{inputList$subunits}. Required in unit mode, including the \code{unit}
+    column. Supply the complete table so single-subunit units can be identified.}
   \item{ID}{Person identifier column-name string, e.g. \code{"IDSTUD"}, shared by
     \code{dat}, \code{incidents} and \code{rotation}. Input columns are not renamed.
     Must differ from \code{classID} and reserved incident/output column names.
@@ -62,6 +65,9 @@ prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
     with unknown persons/classes, with a warning and retained report. All other
     problems, including class mismatches and unresolved design, still stop preparation.
     Dropping every selection also raises an error.}
+  \item{dataLevel}{Response level: \code{"subunit"} (default) resolves raw or
+    recoded subunits; \code{"unit"} maps design subunits to aggregated units.
+    Supply the same level to \code{checkSubsetIncidents}.}
   \item{object}{A result from \code{prepareSubsetInfo}.}
   \item{...}{Reserved for additional summary arguments.}
 }
@@ -83,6 +89,21 @@ when \code{classID = NULL}. Pass \code{useGroups = NULL} explicitly to
 \code{visualSubsetRecode} to review individual persons even when classes are
 available. Multiple long rows for a person are combined. Grouping changes how
 selected cells are reviewed, not which cells are selected.
+
+\strong{Subunits and units.} Design tables always describe subunits. With
+\code{dataLevel = "subunit"}, each selected subunit must resolve to exactly one
+original or recoded response column. With \code{dataLevel = "unit"}, the mapping
+\code{subunits$unit} identifies the response: a unit-named column takes precedence.
+If that column is absent, a unit with exactly one subunit may use the original
+or recoded subunit name instead, supporting \code{aggregateData(rename = FALSE)}.
+A single component column cannot replace a multi-subunit aggregate.
+
+In unit mode, an incident affecting any subunit selects the entire unit for that
+person. Several subunits, including subunits at different block positions, can
+refer to the same response. The review displays and recodes it once; selecting
+any of its reported block positions also selects the entire unit. All source
+subunits and positions remain in the prepared table. Missing mappings and
+different units resolving to the same data cell are errors.
 
 \strong{Explicit issue workflow.} The original \code{issues} format remains
 supported for item names, named blocks and block positions. Each issue has one
@@ -107,7 +128,8 @@ Import identifiers as character when leading zeros or digits beyond numeric
 precision must be preserved; precision already lost during import cannot be
 recovered.
 
-The returned table contains one row per incident/person/item. An overlapping cell
+The returned table contains one row per incident/person/design subunit. In unit
+mode several rows can select one unit response. An overlapping cell
 appears once for each incident that selected it. There is no automatic priority
 between individual and class reports. In the explicit \code{issues} format each
 report selects one target. Different replacement values per incident are not
@@ -118,8 +140,12 @@ resuming a review are provided by \code{\link{visualSubsetRecode}}.
 \code{prepareSubsetInfo} returns a data frame of class \code{preparedSubsetInfo}
 with columns \code{issueId}, the person ID, \code{datCols}, \code{level},
 \code{targetId}, \code{scope}, \code{target}, \code{block}, \code{blockPosition},
-\code{subunitBlockPosition}, and \code{comment}. The ID column name is retained
-as an attribute. Without design tables, block metadata is missing.
+\code{subunitBlockPosition}, and \code{comment}, plus \code{booklet},
+\code{subunit}, \code{subunitRecoded}, \code{unit}, \code{item}, and
+\code{itemStatus}. \code{datCols} identifies the response column, \code{item}
+the logical identifier at the chosen response level; successful rows have
+\code{itemStatus = "matched"}. The ID column name and \code{dataLevel} are
+retained as attributes. Without design tables, block metadata is missing.
 Long incidents additionally retain \code{sourceRow} and the class ID (when used).
 Their attributes include \code{classID}, \code{reviewGroup} and \code{incidentCheck}.
 

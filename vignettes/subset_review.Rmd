@@ -59,8 +59,19 @@ separate `persons` table.
 
 ## Response data and the usual design tables
 
-Use merged response data **before aggregating subunits into items**. Both the
-response and incident tables normally contain the same person and class ID
+Use merged response data and explicitly choose its response level in both the
+check and preparation:
+
+| Response columns in `dat` | `dataLevel` | Mapping |
+|---|---|---|
+| Original or recoded subunits | `"subunit"` (default) | `subunit` / `subunitRecoded` |
+| Aggregated units/items | `"unit"` | `subunit` → `unit` |
+
+In unit mode, also supply `subunits = inputList$subunits`. The design tables
+always describe subunits; they do not need to be rewritten for aggregated data.
+An affected subunit then selects the entire unit for review and recoding.
+
+Both the response and incident tables normally contain the same person and class ID
 columns. Person IDs must be unique across the response data; class IDs must
 identify classes uniquely across schools.
 
@@ -100,6 +111,10 @@ blocks in different orders: **position 1 is b1 for A, but b2 for B**.
 
 ```{r design}
 inputList <- list(
+  subunits = data.frame(
+    subunit = c("I1", "I2", "I3"), subunitRecoded = c("I1R", "I2R", "I3R"),
+    unit = c("U12", "U12", "U3")
+  ),
   blocks = data.frame(
     subunit = c("I1", "I2", "I3"), block = c("b1", "b1", "b2"),
     subunitBlockPosition = c(1, 2, 1)
@@ -152,6 +167,7 @@ and a problem data frame without changing responses or opening the interactive r
 checked <- checkSubsetIncidents(
   dat, incidents, booklets = inputList$booklets,
   blocks = inputList$blocks, rotation = inputList$rotation,
+  subunits = inputList$subunits, dataLevel = "subunit",
   ID = student_id, classID = class_id
 )
 checked
@@ -174,6 +190,7 @@ dat_to_check <- dat[setdiff(names(dat), c("I1", "I2"))]
 checked_missing <- checkSubsetIncidents(
   dat_to_check, incidents_to_check, booklets = inputList$booklets,
   blocks = inputList$blocks, rotation = inputList$rotation,
+  subunits = inputList$subunits, dataLevel = "subunit",
   ID = student_id, classID = class_id
 )
 checked_missing
@@ -204,12 +221,17 @@ stopifnot(checked_missing$summary$missingPersons == 1L,
 
 `checked_missing$problems` contains every detected problem and can be inspected
 or exported. It retains the original incident row, IDs, position and reason.
-Item problems additionally have separate `item`, `itemStatus`, `booklet` and
-`block` columns; no parsing of `message` is needed. All unresolved items in a
+Item problems additionally separate `subunit`, `subunitRecoded`, `unit` and
+the actual response column `datCols`, along with `itemStatus`, `booklet` and
+`block`; no parsing of `message` is needed. `checked_missing$mapping` contains
+both successful and failed mappings for the resolved incident blocks.
+All unresolved items in a
 resolved block are reported. `unresolved_item` covers both missing columns
 (`itemStatus == "missing"`) and ambiguous mappings (`itemStatus == "ambiguous"`);
-only the former count towards `missingItems`. Item identifiers use the original
-names from `inputList$blocks$subunit`, also when recoded aliases are supplied.
+only the former count towards `missingItems`. The compatibility fields `item`,
+`missingItems` and `$missing$items` refer to the chosen response level: original
+subunit identifiers in subunit mode, unit identifiers in unit mode. Prefer the
+explicit `missingSubunits` or `missingUnits` count; the inactive level is NA.
 
 The printed overview shows up to ten problem details. Use
 `print(checked_missing, max_problems = 0)` for just the overview, or
@@ -237,15 +259,104 @@ stop preparation.
 The report is available as `attr(info, "incidentCheck")` on success or
 `condition$report` on a `subsetIncidentError`.
 
+## Response data already contain units/items
+
+The mapping distinguishes the levels even when their names differ. Here I1 and
+I2 form U12, while I3 belongs to U3. This small example mimics already aggregated
+data; in your project, use your existing unit-level response dataset:
+
+```{r unit-responses}
+dat_units <- data.frame(
+  IDSTUD = dat$IDSTUD, IDTESTGROUP = dat$IDTESTGROUP,
+  U12 = dat$I1 + dat$I2, U3 = dat$I3
+)
+checked_units <- checkSubsetIncidents(
+  dat_units, incidents, booklets = inputList$booklets,
+  blocks = inputList$blocks, rotation = inputList$rotation,
+  subunits = inputList$subunits, dataLevel = "unit",
+  ID = student_id, classID = class_id
+)
+checked_units
+checked_units$mapping[c("sourceRow", student_id, "subunit", "unit", "datCols", "itemStatus")]
+```
+
+I1 and I2 are **not missing responses** here: both resolve to U12. They remain
+separate provenance rows, while the review displays and recodes U12 once per
+person. No additional `units` table is needed; the assignment is already in
+`inputList$subunits$unit`.
+
+If U12 itself is absent, it counts as **one missing unit**, even though several
+subunits and people refer to it:
+
+```{r missing-unit}
+missing_unit <- checkSubsetIncidents(
+  dat_units[setdiff(names(dat_units), "U12")], incidents,
+  booklets = inputList$booklets, blocks = inputList$blocks,
+  rotation = inputList$rotation, subunits = inputList$subunits,
+  dataLevel = "unit", ID = student_id, classID = class_id
+)
+missing_unit$summary[c("missingPersons", "missingUnits", "missingSubunits")]
+missing_unit$missing$units
+missing_unit$problems[c("sourceRow", student_id, "subunit", "unit", "itemStatus")]
+```
+
+`missingSubunits = NA` means this check evaluates unit responses. Missing
+assignments in `inputList$subunits` instead produce `missing_unit_mapping` and
+increase `unmappedSubunits`; they cannot establish that a unit column is absent.
+Use the complete subunit table. For units consisting of exactly one subunit,
+the original or recoded name can still identify the response column if the unit
+name is absent, as after [aggregateData()](../reference/aggregateData.html) with
+`rename = FALSE`. A component of a multi-subunit unit cannot replace its aggregate.
+
+Preparation uses the same response level and mapping:
+
+```{r unit-selection}
+info_units <- prepareSubsetInfo(
+  dat_units, incidents = incidents, booklets = inputList$booklets,
+  blocks = inputList$blocks, rotation = inputList$rotation,
+  subunits = inputList$subunits, dataLevel = "unit",
+  ID = student_id, classID = class_id
+)
+```
+
+```{r unit-review, eval=FALSE}
+unit_result <- visualSubsetRecode(dat_units, info_units, toRecodeVal = "mci")
+```
+
+The class review displays each response column once and retains the originating
+subunit positions in its position table:
+
+```{r unit-display, echo=FALSE}
+unit_result <- review_example(dat_units, info_units, show = TRUE)
+```
+
+If a unit spans several block positions, selecting **any reported position**
+selects the whole unit for that person. An aggregated response cannot be recoded
+component by component. Class versus individual grouping and pause/resume work
+the same way at both response levels.
+
+```{r verify-unit-review, include=FALSE}
+expected_units <- dat_units
+expected_units$U12 <- c("mci", "1", "2", "1", NA)
+expected_units$U3 <- c("mci", "mci", "0", "mci", "1")
+stopifnot(checked_units$summary$matchedRows == 4L,
+          missing_unit$summary$missingUnits == 1L,
+          is.na(missing_unit$summary$missingSubunits),
+          identical(missing_unit$missing$units, "U12"),
+          identical(unit_result$dat, expected_units))
+```
+
 ## Prepare the affected responses
 
-Use [prepareSubsetInfo()](../reference/prepareSubsetInfo.html) to expand the
+For the original **subunit-level `dat`**, use
+[prepareSubsetInfo()](../reference/prepareSubsetInfo.html) to expand the
 incident rows into the affected responses:
 
 ```{r selection}
 info <- prepareSubsetInfo(
   dat, incidents = incidents, booklets = inputList$booklets,
   blocks = inputList$blocks, rotation = inputList$rotation,
+  subunits = inputList$subunits, dataLevel = "subunit",
   ID = student_id, classID = class_id
 )
 info[c("sourceRow", class_id, student_id, "datCols", "block", "blockPosition")]
@@ -257,7 +368,7 @@ only cells available to the review.
 
 After [recodeData()](../reference/recodeData.html), also supply
 `subunits = inputList$subunits` to map original subunit names to recoded columns.
-Review before aggregating several subunits into a single item.
+For already aggregated data, use the unit-level workflow above.
 
 ## Review together by class
 
