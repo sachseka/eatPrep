@@ -62,16 +62,33 @@ separate `persons` table.
 Use merged response data **before aggregating subunits into items**. Both the
 response and incident tables normally contain the same person and class ID
 columns. Person IDs must be unique across the response data; class IDs must
-identify classes uniquely across schools. For other column names, pass `ID`
-and `classID` explicitly.
+identify classes uniquely across schools.
+
+**Keep your existing identifier column names.** Choose them with the `ID` and
+`classID` arguments. This example uses `IDSTUD` for students and `IDTESTGROUP`
+for classes:
+
+```{r identifier-columns}
+student_id <- "IDSTUD"
+class_id <- "IDTESTGROUP"
+```
+
+The student column must have that name in `dat`, `incidents` and
+`inputList$rotation`; the class column must have that name in `dat` and
+`incidents`. Pass these column-name strings to both
+[checkSubsetIncidents()](../reference/checkSubsetIncidents.html) and
+[prepareSubsetInfo()](../reference/prepareSubsetInfo.html). The data are not
+renamed, and reports and results retain the original names.
+[visualSubsetRecode()](../reference/visualSubsetRecode.html) automatically uses
+the identifiers stored in the prepared selection.
 
 This example has three students in K1 and two in K2. C belongs to K1 but has no
 individual incident report. E has a missing response, which remains NA.
 
 ```{r responses}
 dat <- data.frame(
-  ID = c("A", "B", "C", "D", "E"),
-  classId = c("K1", "K1", "K1", "K2", "K2"),
+  IDSTUD = c("A", "B", "C", "D", "E"),
+  IDTESTGROUP = c("K1", "K1", "K1", "K2", "K2"),
   I1 = c(1, 0, 1, 0, NA), I2 = c(0, 1, 1, 1, 0), I3 = c(1, 0, 0, 1, 1)
 )
 dat
@@ -90,7 +107,7 @@ inputList <- list(
   booklets = data.frame(
     booklet = c("X", "Y"), block1 = c("b1", "b2"), block2 = c("b2", "b1")
   ),
-  rotation = data.frame(ID = dat$ID, booklet = c("X", "Y", "X", "X", "Y"))
+  rotation = data.frame(IDSTUD = dat$IDSTUD, booklet = c("X", "Y", "X", "X", "Y"))
 )
 inputList
 ```
@@ -103,8 +120,8 @@ the missing person ID means membership is taken from `dat`.
 
 ```{r incident-input}
 incidents <- data.frame(
-  classId = c("K1", "K1", "K1", "K2"),
-  ID = c("A", "A", "B", NA), blockPosition = c(1, 2, 1, 2),
+  IDTESTGROUP = c("K1", "K1", "K1", "K2"),
+  IDSTUD = c("A", "A", "B", NA), blockPosition = c(1, 2, 1, 2),
   comment = c("Display error", "Display error", "Interrupted test", "Audio failure")
 )
 incidents
@@ -134,7 +151,8 @@ and a problem data frame without changing responses or opening the interactive r
 ```{r preflight}
 checked <- checkSubsetIncidents(
   dat, incidents, booklets = inputList$booklets,
-  blocks = inputList$blocks, rotation = inputList$rotation
+  blocks = inputList$blocks, rotation = inputList$rotation,
+  ID = student_id, classID = class_id
 )
 checked
 ```
@@ -146,14 +164,15 @@ in the wrong class, and an unavailable block position:
 incidents_to_check <- rbind(
   incidents,
   data.frame(
-    classId = c("K1", "K9", "K3", "K1"),
-    ID = c("absent", NA, "A", "B"), blockPosition = c(1, 1, 1, 9),
+    IDTESTGROUP = c("K1", "K9", "K3", "K1"),
+    IDSTUD = c("absent", NA, "A", "B"), blockPosition = c(1, 1, 1, 9),
     comment = "Please check"
   )
 )
 problems <- checkSubsetIncidents(
   dat, incidents_to_check, booklets = inputList$booklets,
-  blocks = inputList$blocks, rotation = inputList$rotation
+  blocks = inputList$blocks, rotation = inputList$rotation,
+  ID = student_id, classID = class_id
 )
 problems
 ```
@@ -189,9 +208,10 @@ incident rows into the affected responses:
 ```{r selection}
 info <- prepareSubsetInfo(
   dat, incidents = incidents, booklets = inputList$booklets,
-  blocks = inputList$blocks, rotation = inputList$rotation
+  blocks = inputList$blocks, rotation = inputList$rotation,
+  ID = student_id, classID = class_id
 )
-info[c("sourceRow", "classId", "ID", "datCols", "block", "blockPosition")]
+info[c("sourceRow", class_id, student_id, "datCols", "block", "blockPosition")]
 ```
 
 A's two rows select I1, I2 and I3. B's position 1 selects only I3. C is not
@@ -206,11 +226,11 @@ Review before aggregating several subunits into a single item.
 
 For prepared long incidents, [visualSubsetRecode()](../reference/visualSubsetRecode.html)
 defaults to **one review step per class**.
-The explicit equivalent is `useGroups = "classId"`:
+The explicit equivalent is `useGroups = class_id` (here `"IDTESTGROUP"`):
 
 ```{r class-review, eval=FALSE}
 class_result <- visualSubsetRecode(dat, info, toRecodeVal = "mci")
-# Equivalent: useGroups = "classId"
+# Equivalent: useGroups = class_id
 ```
 
 The two steps are K1 (A and B) and K2 (D and E). Students with the same item and
@@ -275,14 +295,14 @@ reports are forbidden. An accidentally missing or misspelled class column does
 not silently enable this exception.
 
 ```{r no-class}
-individual_dat <- dat[c("ID", "I1", "I2", "I3")]
-individual_incidents <- incidents[1:3, c("ID", "blockPosition", "comment")]
+individual_dat <- dat[c(student_id, "I1", "I2", "I3")]
+individual_incidents <- incidents[1:3, c(student_id, "blockPosition", "comment")]
 individual_info <- prepareSubsetInfo(
-  individual_dat, incidents = individual_incidents, classID = NULL,
+  individual_dat, incidents = individual_incidents, ID = student_id, classID = NULL,
   booklets = inputList$booklets, blocks = inputList$blocks,
   rotation = inputList$rotation
 )
-individual_info[c("sourceRow", "ID", "datCols", "blockPosition")]
+individual_info[c("sourceRow", student_id, "datCols", "blockPosition")]
 ```
 
 Passing `individual_info` to [visualSubsetRecode()](../reference/visualSubsetRecode.html)

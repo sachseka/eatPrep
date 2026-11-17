@@ -28,9 +28,12 @@ checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
     \code{booklet}, normally \code{inputList$rotation}.}
   \item{subunits}{Optional raw-to-recoded item mapping, normally
     \code{inputList$subunits}; see \code{\link{prepareSubsetInfo}}.}
-  \item{ID}{Person ID column in response, incident and rotation data. Default: \code{"ID"}.}
+  \item{ID}{Person ID column in response, incident and rotation data, supplied as
+    a column-name string, e.g. \code{"IDSTUD"}. Default: \code{"ID"}.
+    Input columns do not need to be renamed.}
   \item{classID}{Class ID column in response and incident data. Default:
-    \code{"classId"}. Set explicitly to \code{NULL} for individual data without classes.}
+    \code{"classId"}. Supply a column-name string such as \code{"IDTESTGROUP"}, or
+    set explicitly to \code{NULL} for individual data without classes.}
   \item{x}{A \code{subsetIncidentCheck} result.}
   \item{...}{Reserved for additional print arguments.}
 }

@@ -44,10 +44,13 @@ prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
   \item{subunits}{Optional mapping with unique \code{subunit} and corresponding
     \code{subunitRecoded} names. Each selected item must match exactly one raw or
     recoded column in \code{dat}. Aggregated item names are not inferred.}
-  \item{ID}{Person identifier column name. Must differ from \code{classID} and
-    reserved incident/output column names. Default: \code{"ID"}.}
+  \item{ID}{Person identifier column-name string, e.g. \code{"IDSTUD"}, shared by
+    \code{dat}, \code{incidents} and \code{rotation}. Input columns are not renamed.
+    Must differ from \code{classID} and reserved incident/output column names.
+    Default: \code{"ID"}.}
   \item{classID}{Class identifier column, normally in \code{dat} and \code{incidents}.
-    Default: \code{"classId"}. Set \code{NULL} for individual data without classes;
+    Supply its name as a string, e.g. \code{"IDTESTGROUP"}; default: \code{"classId"}.
+    Set \code{NULL} for individual data without classes;
     class reports are then forbidden. Also names the column in legacy \code{persons}.}
   \item{incidents}{Long incident data with person ID, class ID and
     \code{blockPosition}; optional \code{issueId}, \code{level}, \code{comment}.

@@ -223,18 +223,33 @@ test_that("custom numeric identifiers, tibbles and recoded names work without mo
   args$incidents$issueId <- 1e15 + 21:24
   names(args$dat)[3:5] <- c("I1R", "I2R", "I3R")
   args$subunits <- data.frame(subunit = c("I1", "I2", "I3"), subunitRecoded = c("I1R", "I2R", "I3R"))
-  for (name in c("dat", "rotation", "incidents")) names(args[[name]])[names(args[[name]]) == "ID"] <- "pid"
-  for (name in c("dat", "incidents")) names(args[[name]])[names(args[[name]]) == "classId"] <- "cid"
+  for (name in c("dat", "rotation", "incidents")) names(args[[name]])[names(args[[name]]) == "ID"] <- "IDSTUD"
+  for (name in c("dat", "incidents")) names(args[[name]])[names(args[[name]]) == "classId"] <- "IDTESTGROUP"
   original <- args$dat
   args <- lapply(args, tibble::as_tibble)
-  args$ID <- "pid"
-  args$classID <- "cid"
+  args$ID <- "IDSTUD"
+  args$classID <- "IDTESTGROUP"
   info <- do.call(prepareSubsetInfo, args)
-  expect_equal(unique(info$pid), sprintf("%.0f", ids[c(1, 2, 4, 5)]))
-  expect_equal(unique(info$cid), sprintf("%.0f", classes))
+  expect_equal(unique(info$IDSTUD), sprintf("%.0f", ids[c(1, 2, 4, 5)]))
+  expect_equal(unique(info$IDTESTGROUP), sprintf("%.0f", classes))
   expect_equal(unique(info$issueId), sprintf("%.0f", 1e15 + 21:24))
   result <- incident_review(args$dat, info, c("no", "no", "yes"))
   expect_identical(result$dat, original)
+  grouped <- incident_review(args$dat, info, c(rep("yes, all values", 2), "yes"))
+  individual <- incident_review(args$dat, info, c(rep("yes, all values", 4), "yes"), useGroups = NULL)
+  expected <- original
+  expected[1, c("I1R", "I2R", "I3R")] <- -91
+  expected[c(2, 4), "I3R"] <- -91
+  expected[5, "I2R"] <- -91
+  expect_identical(grouped$dat, expected)
+  expect_identical(individual$dat, expected)
+  expect_equal(grouped$state$settings$ID, "IDSTUD")
+  expect_equal(grouped$state$settings$useGroups, "IDTESTGROUP")
+  args$incidents$IDSTUD[1] <- -1
+  checked <- do.call(checkSubsetIncidents, args)
+  expect_equal(checked$problems$IDSTUD, "-1")
+  expect_equal(checked$problems$IDTESTGROUP, sprintf("%.0f", classes[1]))
+  expect_equal(checked$problems$code, "unknown_person")
 })
 
 test_that("new class grouping and provenance survive pause and resume", {
