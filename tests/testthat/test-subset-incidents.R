@@ -166,8 +166,9 @@ test_that("design problems are collected per affected person and cannot be dropp
   args <- incident_fixture()
   args$dat$I1 <- NULL
   check <- do.call(checkSubsetIncidents, args)
-  expect_equal(check$problems$sourceRow, c(1L, 4L))
-  expect_equal(check$problems$code, rep("unresolved_item", 2))
+  expect_equal(check$ignored$sourceRow, c(1L, 4L))
+  expect_equal(check$ignored$ignoredReason, rep("response_column_absent", 2))
+  expect_equal(nrow(check$problems), 0L)
   args <- incident_fixture()
   args$booklets$block1[1] <- "unknown"
   check <- do.call(checkSubsetIncidents, args)
@@ -279,27 +280,31 @@ test_that("missing identifiers and every absent block item are counted distinctl
   expect_equal(check$summary$missingClasses, 1L)
   expect_equal(check$summary$missingItems, 2L)
   expect_equal(check$summary$ambiguousItems, 0L)
-  expect_equal(check$summary$problemPersons, 3L)
-  expect_equal(check$summary$problemClasses, 3L)
-  expect_equal(check$summary$problemItems, 2L)
+  expect_equal(check$summary$problemPersons, 1L)
+  expect_equal(check$summary$problemClasses, 2L)
+  expect_equal(check$summary$problemItems, 0L)
   expect_equal(check$summary$incidentRows, 9L)
-  expect_equal(check$summary$matchedRows, 2L)
-  expect_equal(check$summary$problemRows, 7L)
+  expect_equal(check$summary$matchedRows, 3L)
+  expect_equal(check$summary$problemRows, 4L)
+  expect_equal(check$summary$emptyRows, 2L)
   expect_equal(check$summary$uncheckedItemRows, 4L)
-  item_rows <- check$problems[check$problems$code == "unresolved_item", ]
+  item_rows <- check$ignored
   expect_equal(item_rows$sourceRow, rep(c(1L, 4L, 9L), each = 2))
   expect_equal(item_rows$item, rep(c("I1", "I2"), 3))
   expect_equal(item_rows$itemStatus, rep("missing", 6))
   expect_equal(item_rows$booklet, rep(c("X", "Y", "X"), each = 2))
   expect_equal(item_rows$block, rep("b1", 6))
-  counts <- check$byCode[match(c("unknown_person", "unresolved_item", "unknown_class"), check$byCode$code), ]
-  expect_equal(counts$problems, c(2L, 6L, 2L))
-  expect_equal(counts$incidentRows, c(2L, 3L, 2L))
-  expect_equal(counts$persons, c(1L, 2L, 0L))
-  expect_equal(counts$classes, c(1L, 2L, 1L))
-  expect_equal(counts$items, c(0L, 2L, 0L))
-  error <- incident_error(args)
+  counts <- check$byCode[match(c("unknown_person", "unknown_class"), check$byCode$code), ]
+  expect_equal(counts$problems, c(2L, 2L))
+  expect_equal(counts$incidentRows, c(2L, 2L))
+  expect_equal(counts$persons, c(1L, 0L))
+  expect_equal(counts$classes, c(1L, 1L))
+  expect_equal(counts$items, c(0L, 0L))
+  error <- incident_error(args, unmatched = "error")
   expect_identical(error$report, check)
+  invisible(capture.output(info <- suppressMessages(do.call(prepareSubsetInfo, args))))
+  expect_equal(info$ID, c("A", "B", "D"))
+  expect_equal(unique(info$datCols), "I3")
 })
 
 test_that("ambiguous aliases are not counted as missing items", {
@@ -310,13 +315,14 @@ test_that("ambiguous aliases are not counted as missing items", {
   check <- do.call(checkSubsetIncidents, args)
   expect_equal(check$summary$missingItems, 1L)
   expect_equal(check$summary$ambiguousItems, 1L)
-  expect_equal(check$summary$problemItems, 2L)
+  expect_equal(check$summary$problemItems, 1L)
   expect_equal(check$summary$uncheckedItemRows, 0L)
   expect_equal(check$missing$items, "I2")
-  expect_equal(check$problems$item, rep(c("I1", "I2"), 2))
-  expect_equal(check$problems$itemStatus, rep(c("ambiguous", "missing"), 2))
-  expect_equal(check$byCode$problems, 4L)
-  expect_equal(check$byCode$items, 2L)
+  expect_equal(check$problems$item, rep("I1", 2))
+  expect_equal(check$problems$itemStatus, rep("ambiguous", 2))
+  expect_equal(check$ignored$item, rep("I2", 2))
+  expect_equal(check$byCode$problems, 2L)
+  expect_equal(check$byCode$items, 1L)
   incident_error(args, unmatched = "drop")
 })
 
@@ -348,7 +354,7 @@ test_that("individual reports have usable distinct counts without class IDs", {
   expect_equal(check$summary$missingItems, 1L)
   expect_equal(check$summary$missingClasses, 0L)
   expect_identical(check$missing$classes, character())
-  expect_equal(check$byCode$classes, c(0L, 0L))
+  expect_equal(check$byCode$classes, 0L)
   expect_false("classId" %in% names(check$problems))
 })
 
@@ -421,15 +427,17 @@ test_that("missing unit totals deduplicate subunits and retain successful mappin
   expect_equal(check$missing$units, "U12")
   expect_equal(check$missing$items, "U12")
   expect_identical(check$missing$subunits, character())
-  expect_equal(check$problems$unit, rep("U12", 4))
-  expect_equal(check$problems$subunit, rep(c("I1", "I2"), 2))
-  expect_true(all(is.na(check$problems$datCols)))
-  expect_equal(check$byCode$units, 1L)
-  expect_equal(check$byCode$subunits, 2L)
-  expect_equal(check$byCode$problems, 4L)
+  expect_equal(check$ignored$unit, rep("U12", 4))
+  expect_equal(check$ignored$subunit, rep(c("I1", "I2"), 2))
+  expect_true(all(is.na(check$ignored$datCols)))
+  expect_equal(check$summary$ignoredUnits, 1L)
+  expect_equal(check$summary$ignoredSubunits, 2L)
+  expect_equal(nrow(check$problems), 0L)
   expect_equal(sum(check$mapping$itemStatus == "matched"), 3L)
   expect_equal(check$summary$uncheckedItemRows, 0L)
-  expect_identical(incident_error(args)$report, check)
+  invisible(capture.output(info <- suppressMessages(do.call(prepareSubsetInfo, args))))
+  expect_identical(attr(info, "incidentCheck"), check)
+  expect_equal(info$ID, c("A", "B", "D"))
   expect_output(print(check), "Missing unit columns: 1 detected")
 })
 
@@ -457,13 +465,13 @@ test_that("missing unit assignments are distinguished from missing data columns"
   args <- unit_incident_fixture()
   args$subunits <- args$subunits[-2, ]
   check <- do.call(checkSubsetIncidents, args)
-  expect_equal(check$problems$code, rep("missing_unit_mapping", 2))
-  expect_equal(check$problems$subunit, rep("I2", 2))
-  expect_true(all(is.na(check$problems$unit)))
+  expect_equal(check$ignored$ignoredReason, rep("unmapped_without_data_match", 2))
+  expect_equal(check$ignored$subunit, rep("I2", 2))
+  expect_true(all(is.na(check$ignored$unit)))
   expect_equal(check$summary$missingUnits, 0L)
-  expect_equal(check$summary$unmappedSubunits, 1L)
-  expect_equal(check$summary$uncheckedItemRows, 2L)
-  incident_error(args, unmatched = "drop")
+  expect_equal(check$summary$unmappedSubunits, 0L)
+  expect_equal(check$summary$uncheckedItemRows, 0L)
+  expect_equal(check$summary$readyRows, 4L)
   args$subunits <- NULL
   expect_error(do.call(checkSubsetIncidents, args), "requires subunits")
   args <- unit_incident_fixture()
@@ -471,7 +479,7 @@ test_that("missing unit assignments are distinguished from missing data columns"
   expect_error(do.call(checkSubsetIncidents, args), "needs columns: unit")
   args <- unit_incident_fixture()
   args$subunits$unit[2] <- " "
-  expect_equal(do.call(checkSubsetIncidents, args)$summary$unmappedSubunits, 1L)
+  expect_equal(do.call(checkSubsetIncidents, args)$summary$ignoredSubunits, 1L)
   args <- unit_incident_fixture()
   args$subunits$subunitRecoded <- NULL
   expect_equal(do.call(checkSubsetIncidents, args)$summary$matchedRows, 4L)
@@ -570,7 +578,7 @@ test_that("unit mappings preserve large identifiers and configurable individual 
   expect_identical(result$dat, expected)
 })
 
-test_that("case matching is distinct from unresolved unit mappings in the reported scenario", {
+test_that("unmapped design extras are ignored and empty review selections are explicit", {
   ids <- paste0("P", 1:12)
   classes <- paste0("K", c(1:10, 1:2))
   subunits <- paste0("S", 1:438)
@@ -594,19 +602,19 @@ test_that("case matching is distinct from unresolved unit mappings in the report
   expect_equal(check$summary$matchedCaseRows, 88L)
   expect_equal(check$summary$absentCaseRows, 36L)
   expect_equal(check$summary$invalidCaseRows, 0L)
-  expect_equal(check$summary$pendingItemRows, 88L)
+  expect_equal(check$summary$pendingItemRows, 0L)
   expect_equal(check$summary$checkedItems, 0L)
-  expect_false(check$summary$itemCheckComplete)
+  expect_true(check$summary$itemCheckComplete)
   expect_equal(check$summary$missingPersons, 5L)
-  expect_equal(check$summary$unmappedSubunits, 438L)
-  expect_equal(check$byCode$problems[check$byCode$code == "missing_unit_mapping"], 957L)
-  expect_equal(nrow(check$mappingIssues), 438L)
-  expect_equal(unique(check$mappingIssues$mappingIssue), "subunit_not_listed")
+  expect_equal(check$summary$ignoredSubunits, 438L)
+  expect_equal(nrow(check$ignored), 957L)
+  expect_equal(nrow(check$mappingIssues), 0L)
+  expect_equal(unique(check$ignored$mappingIssue), "subunit_not_listed")
   output <- paste(capture.output(print(check)), collapse = "\n")
   expect_match(output, "Cases: 88 of 124 incident rows matched to dat.", fixed = TRUE)
   expect_match(output, "Absent from dat: 5 persons, 0 classes (36 incident rows).", fixed = TRUE)
-  expect_match(output, "Unit mapping needed: 438 subunits (88 rows, 12 persons)", fixed = TRUE)
-  expect_match(output, "Missing unit columns: not assessed yet.", fixed = TRUE)
+  expect_match(output, "Outside review selection: 438 design subunits", fixed = TRUE)
+  expect_match(output, "No response columns selected from dat.", fixed = TRUE)
   expect_false(grepl("957|problemRows|additional missing items", output))
   incident_error(args, unmatched = "drop")
 
@@ -631,6 +639,8 @@ test_that("case matching is distinct from unresolved unit mappings in the report
 
 test_that("mapping diagnostics distinguish missing keys from empty unit assignments", {
   args <- unit_incident_fixture()
+  args$dat$I1 <- 1:5
+  args$dat$I2 <- 6:10
   args$subunits$unit[1] <- " "
   args$subunits <- args$subunits[-2, ]
   check <- do.call(checkSubsetIncidents, args)
@@ -659,6 +669,70 @@ test_that("case-stage counts separate missing and contradictory identifiers", {
   # Reports saved before the stage counters were introduced still print.
   check$summary$matchedCaseRows <- NULL
   expect_output(print(check), "Incident check", fixed = TRUE)
+})
+
+test_that("extra design subunits do not widen or block the available incident selection", {
+  args <- unit_incident_fixture()
+  baseline <- do.call(prepareSubsetInfo, args)
+  extras <- c("M178b33a", "M096a11a")
+  args$blocks <- rbind(args$blocks, data.frame(subunit = extras, block = "b1", subunitBlockPosition = 3:4))
+  args$dat$unreported <- 101:105
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(nrow(check$problems), 0L)
+  expect_equal(nrow(check$mappingIssues), 0L)
+  expect_equal(check$summary$ignoredSubunits, 2L)
+  expect_equal(check$summary$readyRows, 4L)
+  expect_setequal(check$ignored$subunit, extras)
+  expect_equal(unique(check$ignored$ignoredReason), "unmapped_without_data_match")
+  invisible(capture.output(expect_message(info <- do.call(prepareSubsetInfo, args), "Skipped 2 design subunits")))
+  expect_identical(info$datCols, baseline$datCols)
+  expect_identical(info$ID, baseline$ID)
+  result <- incident_review(args$dat, info, c(rep("yes, all values", 2), "yes"))
+  reference <- incident_review(args$dat, baseline, c(rep("yes, all values", 2), "yes"))
+  expect_identical(result$dat, reference$dat)
+  expect_identical(result$dat$unreported, args$dat$unreported)
+  # A concrete column with an unresolved assignment is relevant and must not
+  # silently disappear along with metadata-only extras.
+  args$dat$M178b33a <- 1:5
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(unique(check$problems$subunit), "M178b33a")
+  expect_equal(unique(check$ignored$subunit), "M096a11a")
+  incident_error(args)
+})
+
+test_that("unrequested metadata rows and booklet positions are outside incident validation", {
+  args <- unit_incident_fixture()
+  args$incidents <- args$incidents[1, ]
+  args$booklets$block2[1] <- "unused_unknown_block"
+  args$booklets <- rbind(args$booklets, data.frame(booklet = rep("unused", 2), block1 = "bad", block2 = "bad"))
+  args$blocks <- rbind(args$blocks, data.frame(subunit = rep("unused", 2), block = "bad", subunitBlockPosition = "bad"))
+  args$rotation <- rbind(args$rotation, data.frame(ID = rep("not_in_incidents", 2), booklet = "unused"))
+  args$subunits <- rbind(args$subunits, data.frame(subunit = rep("unused", 2), subunitRecoded = "unusedR", unit = "unusedU"))
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$readyRows, 1L)
+  expect_equal(nrow(check$problems), 0L)
+  info <- do.call(prepareSubsetInfo, args)
+  expect_equal(unique(info$datCols), "U12")
+  # The same missing block is actionable once an incident actually names it.
+  args$incidents$blockPosition <- 2
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$problems$code, "unknown_block")
+  incident_error(args)
+})
+
+test_that("scoping metadata retains complete unit membership for alias resolution", {
+  args <- unit_incident_fixture()
+  args$incidents <- args$incidents[1, ]
+  args$blocks <- data.frame(subunit = c("I1", "I2"), block = c("b1", "b2"), subunitBlockPosition = 1)
+  args$dat$U12 <- NULL
+  args$dat$I1R <- 1:5
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$missing$units, "U12")
+  expect_equal(check$summary$readyRows, 0L)
+  expect_equal(check$summary$emptyRows, 1L)
+  expect_equal(check$ignored$subunit, "I1")
+  expect_equal(check$ignored$ignoredReason, "response_column_absent")
+  expect_match(conditionMessage(incident_error(args)), "No incident selections remain")
 })
 
 test_that("new class grouping and provenance survive pause and resume", {

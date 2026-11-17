@@ -71,10 +71,17 @@ for a subunit response, or different units resolving to the same response, are
 reported. \code{blockPosition} must be a positive
 whole number and is resolved separately for each person's booklet.
 
-The checker returns all row/person problems that can be established from valid
-input tables. It does not modify responses or open review menus. Missing required
-columns, duplicate keys in response/design tables and other unusable table
-structures raise errors immediately. Design resolution is attempted only after
+The review scope is defined by \code{dat} and \code{incidents}. Input-list tables
+provide lookup information; this is not a comprehensive metadata audit.
+Only the reported persons, their booklets and the requested block positions are
+used for design validation. All members of selected units are retained when
+determining whether single-subunit aliases are allowed. Use
+\code{\link{checkInputList}} separately for input-list structure and its metadata
+consistency checks, and \code{\link{checkDesign}} for broader design/data checks.
+
+The checker does not modify responses or open review menus. Missing required
+columns, duplicate keys in the relevant tables and other unusable structures
+raise errors immediately. Design resolution is attempted only after
 a row's identifiers and position are valid; dependent problems cannot be assessed
 until those inputs are corrected. One problem can affect several long rows, and
 one class row can produce problems for several persons.
@@ -86,14 +93,18 @@ exactly one original or recoded column must exist. In unit mode, the unit-named
 column takes precedence. If it is absent, original or recoded subunit names are
 accepted only for units having exactly one subunit in the mapping table. Multiple
 candidate columns are ambiguous; a component column never substitutes for a
-multi-subunit aggregate. Missing and ambiguous columns use \code{unresolved_item},
-distinguished by \code{itemStatus}.
+multi-subunit aggregate. Absent response columns are omitted from the selection
+and recorded in \code{ignored}; their distinct identifiers remain in
+\code{missing}. Ambiguous columns remain \code{unresolved_item} problems.
 
 In unit mode, any affected subunit selects the whole unit for that person.
 Several subunits or block positions can select the same unit, which is counted,
 displayed and recoded once. All originating subunit positions remain in the
-mapping. Missing subunit-to-unit assignments use \code{missing_unit_mapping},
-not a missing-column diagnosis. Supply the complete subunit mapping so that
+mapping. A design subunit without a unit assignment and without a direct match
+to a response column (original or known recoded name) is also omitted and recorded
+in \code{ignored}. No unit name is guessed. If a response column does match but
+the unit assignment is missing, \code{missing_unit_mapping} remains a problem.
+Supply the complete subunit mapping so that
 single-subunit units can be identified correctly.
 
 A person with entirely missing responses is still present in \code{dat}. For
@@ -112,9 +123,11 @@ A \code{subsetIncidentCheck} list with:
     counts rows whose case findings only involve absent IDs; \code{invalidCaseRows}
     counts rows with other case/report-field findings. These three counts sum to
     \code{incidentRows}. Block-position validation belongs to the response check.
-    \code{readyRows} counts fully resolved incident rows, ready for review.
-    The existing fields \code{matchedRows} (equal to \code{readyRows}) and
-    \code{problemRows} retain their original full-resolution meaning; a zero
+    \code{readyRows} counts incident rows with at least one selected response
+    and no actionable problems. \code{matchedRows} is an alias for \code{readyRows}.
+    \code{problemRows} counts rows with entries in \code{problems}; \code{emptyRows}
+    counts rows without actionable problems but with no response to select.
+    These three counts sum to \code{incidentRows}. A zero
     \code{matchedRows} does not mean that no persons were found in \code{dat}.
     \code{problemPersons}, \code{problemClasses} and
     \code{problemItems} count distinct nonmissing identifiers in the problem
@@ -126,7 +139,10 @@ A \code{subsetIncidentCheck} list with:
     candidate response columns. These item counts use the chosen \code{dataLevel}.
     \code{missingSubunits} and \code{missingUnits} give explicit totals: the
     inactive level is NA because it is not checked. \code{unmappedSubunits}
-    counts subunits without unit assignments in unit mode.
+    counts relevant subunits requiring unit assignments in unit mode.
+    \code{ignoredRows}, \code{ignoredSubunits} and \code{ignoredUnits} count
+    distinct identifiers in \code{ignored}, excluding NA. Ignored rows can also
+    have available responses and therefore overlap with \code{readyRows}.
     \code{uncheckedItemRows} counts source rows
     whose item checks could not be completed for at least one person because
     of invalid identifiers, positions or unresolved design, including absent
@@ -136,8 +152,10 @@ A \code{subsetIncidentCheck} list with:
     ambiguous); unmapped subunits are excluded. \code{itemCheckComplete} is true
     when there are matched cases and neither pending item checks nor invalid
     case/report fields remain. Absent cases alone do not make the response check
-    incomplete. This flag describes coverage, not readiness: detected missing
-    or ambiguous columns still prevent preparation. A zero missing-item count
+    incomplete. This flag describes coverage within the available-data review
+    scope, not completeness of the input-list metadata. Ignored design entries
+    do not make it false; ambiguities affecting existing responses still prevent
+    preparation. A zero missing-item count
     is only the number detected so far when this flag is false. Class counts are
     zero with \code{classID = NULL}.}
   \item{problems}{A data frame with \code{sourceRow}, \code{issueId}, the person ID,
@@ -146,11 +164,12 @@ A \code{subsetIncidentCheck} list with:
     \code{subunitRecoded}, \code{unit}, \code{datCols}, \code{mappingIssue}, and,
     when used, the class ID.
     ID columns use the names supplied in \code{ID} and \code{classID}. It has zero
-    rows when all incidents can be resolved. \code{subunit} retains the original
+    rows when there are no actionable findings; omitted design entries are
+    reported separately in \code{ignored}. \code{subunit} retains the original
     design identifier, \code{unit} its aggregation target, and \code{datCols}
     the uniquely resolved response column (NA if unresolved). \code{item} is
     retained as a level-dependent identifier: the subunit in subunit mode, the
-    unit in unit mode. \code{itemStatus} is \code{"missing"}, \code{"ambiguous"}
+    unit in unit mode. \code{itemStatus} is \code{"ambiguous"}
     or \code{"unmapped"} for item problems. \code{mappingIssue} distinguishes
     \code{"subunit_not_listed"} from \code{"unit_not_assigned"} (an empty unit
     assignment). Inapplicable or unknown details are NA.}
@@ -172,15 +191,22 @@ A \code{subsetIncidentCheck} list with:
     whose block design could be resolved, including successful mappings and
     item problems. It contains source rows, person/class IDs, booklet and block
     positions, \code{subunit}, \code{subunitRecoded}, \code{unit}, \code{item},
-    \code{datCols}, \code{itemStatus} and \code{mappingIssue}. Successful mappings have status
+    \code{datCols}, \code{itemStatus}, \code{mappingIssue} and \code{ignoredReason}. Successful mappings have status
     \code{"matched"}. Several rows may refer to one unit response. Rows blocked
     by invalid incident identifiers or unavailable design do not appear here.}
-  \item{mappingIssues}{A deduplicated data frame of unresolved subunit-to-unit
+  \item{mappingIssues}{A deduplicated data frame of actionable subunit-to-unit
     assignments with \code{subunit}, \code{subunitRecoded}, \code{unit} and
     \code{mappingIssue}. It distinguishes design subunits absent from
     \code{subunits$subunit} from listed subunits with missing/empty
     \code{subunits$unit}. These are assignment findings, not evidence that
     the response data lack those units.}
+  \item{ignored}{The subset of \code{mapping} omitted from the review, with
+    \code{ignoredReason} equal to \code{"response_column_absent"} or
+    \code{"unmapped_without_data_match"}. The latter records a missing unit
+    assignment without a matching original/recoded response column; it makes
+    no claim about the presence of an unknown unit. These rows do not block
+    preparation. Entries in unrelated blocks or for unreported persons are
+    outside the check altogether.}
 }
 Problem codes include \code{unknown_person}, \code{unknown_class},
 \code{class_mismatch}, \code{mixed_person_ids}, \code{missing_person_id},

@@ -85,6 +85,16 @@ The report remains available on successful results as
 \code{attr(info, "incidentCheck")}, including any explicitly excluded rows.
 Input data are never modified by preparation or checking.
 
+For \code{incidents}, the review uses only available response columns at the
+reported block positions. Design entries without a response column, including
+unmapped subunits with no original/recoded column match, are omitted. They remain
+in \code{attr(info, "incidentCheck")$ignored}. Additional metadata for unreported
+persons and positions does not block the selection. No unit names are guessed.
+Ambiguities affecting existing columns and unavailable design for a reported
+position remain errors. If no selections remain, preparation stops with an empty
+selection message and the report. This is separate from a comprehensive
+\code{\link{checkInputList}} or \code{\link{checkDesign}} check.
+
 For long incidents, review defaults to one decision per class, or per person
 when \code{classID = NULL}. Pass \code{useGroups = NULL} explicitly to
 \code{visualSubsetRecode} to review individual persons even when classes are
@@ -103,8 +113,9 @@ In unit mode, an incident affecting any subunit selects the entire unit for that
 person. Several subunits, including subunits at different block positions, can
 refer to the same response. The review displays and recodes it once; selecting
 any of its reported block positions also selects the entire unit. All source
-subunits and positions remain in the prepared table. Missing mappings and
-different units resolving to the same data cell are errors.
+subunits and positions of selected responses remain in the prepared table.
+Missing mappings for existing response-column matches and different units
+resolving to the same data cell are errors.
 
 \strong{Explicit issue workflow.} The original \code{issues} format remains
 supported for item names, named blocks and block positions. Each issue has one
@@ -143,7 +154,8 @@ with columns \code{issueId}, the person ID, \code{datCols}, \code{level},
 \code{targetId}, \code{scope}, \code{target}, \code{block}, \code{blockPosition},
 \code{subunitBlockPosition}, and \code{comment}, plus \code{booklet},
 \code{subunit}, \code{subunitRecoded}, \code{unit}, \code{item}, and
-\code{itemStatus}, and \code{mappingIssue}. \code{datCols} identifies the response column, \code{item}
+\code{itemStatus}, \code{mappingIssue}, and \code{ignoredReason}.
+\code{datCols} identifies the response column, \code{item}
 the logical identifier at the chosen response level; successful rows have
 \code{itemStatus = "matched"}. The ID column name and \code{dataLevel} are
 retained as attributes. Without design tables, block metadata is missing.

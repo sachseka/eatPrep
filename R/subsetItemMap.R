@@ -1,16 +1,16 @@
 # Keep the design identifier, aggregation target and response column separate.
-.subset_item_mapper <- function(dat, subunits, ID, classID, dataLevel) {
+.subset_item_mapper <- function(dat, subunits, ID, classID, dataLevel, allow_empty = FALSE) {
   if (dataLevel == "unit" && is.null(subunits)) {
     stop("dataLevel = 'unit' requires subunits with columns subunit and unit.", call. = FALSE)
   }
   if (!is.null(subunits)) {
     required <- c("subunit", if (dataLevel == "unit") "unit")
-    subunits <- .subset_table(subunits, "subunit", "subunits")
+    subunits <- .subset_table(subunits, "subunit", "subunits", min.rows = if (allow_empty) 0L else 1L)
     absent <- setdiff(required, names(subunits))
     if (length(absent)) stop("subunits needs columns: ", paste(absent, collapse = ", "), ".", call. = FALSE)
     .subset_unique_key(subunits, "subunit", "subunits")
     for (column in c("subunitRecoded", "unit")) {
-      if (!column %in% names(subunits)) subunits[[column]] <- NA_character_
+      if (!column %in% names(subunits)) subunits[[column]] <- rep(NA_character_, nrow(subunits))
       if (!is.atomic(subunits[[column]]) || is.matrix(subunits[[column]])) {
         stop("subunits$", column, " must be a vector.", call. = FALSE)
       }
@@ -28,8 +28,9 @@
     out <- data.frame(subunit = ids, subunitRecoded = recoded, unit = units,
                       item = if (dataLevel == "unit") units else ids,
                       datCols = NA_character_, itemStatus = NA_character_,
-                      mappingIssue = NA_character_, stringsAsFactors = FALSE)
+                      mappingIssue = NA_character_, dataCandidate = FALSE, stringsAsFactors = FALSE)
     for (j in seq_along(ids)) {
+      out$dataCandidate[j] <- any(c(ids[j], recoded[j], units[j]) %in% columns)
       if (dataLevel == "unit" && is.na(units[j])) {
         out$itemStatus[j] <- "unmapped"
         out$mappingIssue[j] <- if (is.na(index[j])) "subunit_not_listed" else "unit_not_assigned"

@@ -13,7 +13,7 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   reserved <- c("issueId", "sourceRow", "level", "targetId", "scope", "target",
                 "comment", "datCols", "booklet", "block", "blockPosition",
                 "subunitBlockPosition", "code", "message", "item", "itemStatus",
-                "subunit", "subunitRecoded", "unit", "mappingIssue")
+                "subunit", "subunitRecoded", "unit", "mappingIssue", "ignoredReason")
   if (any(c(ID, classID) %in% reserved) || identical(ID, classID)) {
     stop("ID and classID must differ from each other and reserved incident/output names.", call. = FALSE)
   }
@@ -75,10 +75,12 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
     take <- which(!is.na(classes) & classes == class)
     if (anyNA(person_ids[take]) && !all(is.na(person_ids[take]))) mixed[take] <- TRUE
   }
-  resolve <- .subset_issue_resolver(dat, booklets, blocks, rotation, subunits, ID,
+  scoped <- .subset_incident_scope(dat, person_ids, classes, positions, booklets,
+                                    blocks, rotation, subunits, ID, classID)
+  resolve <- .subset_issue_resolver(dat, scoped$booklets, scoped$blocks, scoped$rotation, scoped$subunits, ID,
                                     needs_design = TRUE, classID = classID,
                                     allow_missing_booklets = TRUE, collect_item_problems = TRUE,
-                                    dataLevel = dataLevel)
+                                    dataLevel = dataLevel, available_only = TRUE)
   for (i in seq_len(n)) {
     previous <- length(problems)
     if (is.na(incidents$issueId[i])) add_problem(i, "missing_issue_id", "issueId must not be missing or empty.")
@@ -139,9 +141,12 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
       })
       if (!is.null(selected)) {
         record_mapping(selected, i)
-        selected$sourceRow <- i
-        if (!is.null(classID)) selected[[classID]] <- classes[i]
-        rows[[length(rows) + 1L]] <- selected
+        selected <- selected[is.na(selected$ignoredReason), , drop = FALSE]
+        if (nrow(selected)) {
+          selected$sourceRow <- i
+          if (!is.null(classID)) selected[[classID]] <- classes[i]
+          rows[[length(rows) + 1L]] <- selected
+        }
       }
     }
   }
@@ -178,10 +183,19 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   }
   distinct_ids <- function(x) unique(x[!is.na(x)])
   count_ids <- function(x) length(distinct_ids(x))
+  mapping <- problem_table[FALSE, c("sourceRow", "issueId", ID, classID, "booklet", "block",
+                                   "blockPosition", "subunit", "subunitRecoded", "unit", "item", "datCols", "itemStatus", "mappingIssue")]
+  mapping$blockPosition <- numeric()
+  mapping$subunitBlockPosition <- numeric()
+  mapping$ignoredReason <- character()
+  if (length(mappings)) mapping <- do.call(rbind, mappings)[names(mapping)]
+  rownames(mapping) <- NULL
+  ignored <- mapping[!is.na(mapping$ignoredReason), , drop = FALSE]
+  rownames(ignored) <- NULL
   missing <- list(
     persons = distinct_ids(problem_table[[ID]][problem_table$code == "unknown_person"]),
     classes = if (is.null(classID)) character() else distinct_ids(problem_table[[classID]][problem_table$code == "unknown_class"]),
-    items = distinct_ids(problem_table$item[which(problem_table$itemStatus == "missing")])
+    items = distinct_ids(mapping$item[which(mapping$itemStatus == "missing")])
   )
   missing$subunits <- if (dataLevel == "subunit") missing$items else character()
   missing$units <- if (dataLevel == "unit") missing$items else character()
@@ -199,10 +213,11 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
     }))
   }
   bad_rows <- unique(problem_table$sourceRow)
+  ready_rows <- setdiff(if (is.null(out)) integer() else unique(out$sourceRow), bad_rows)
   pending_rows <- unique(problem_table$sourceRow[
     !problem_table$code %in% c("unresolved_item", "ambiguous_cell") &
       case_status[problem_table$sourceRow] == "matched"])
-  overview <- data.frame(incidentRows = n, matchedRows = n - length(bad_rows),
+  overview <- data.frame(incidentRows = n, matchedRows = length(ready_rows),
                          problemRows = length(bad_rows),
                          problemPersons = count_ids(problem_table[[ID]]),
                          problemClasses = if (is.null(classID)) 0L else count_ids(problem_table[[classID]]),
@@ -220,12 +235,10 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   overview$absentCaseRows <- sum(case_status == "absent")
   overview$invalidCaseRows <- sum(case_status == "invalid")
   overview$pendingItemRows <- length(pending_rows)
-  mapping <- problem_table[FALSE, c("sourceRow", "issueId", ID, classID, "booklet", "block",
-                                   "blockPosition", "subunit", "subunitRecoded", "unit", "item", "datCols", "itemStatus", "mappingIssue")]
-  mapping$blockPosition <- numeric()
-  mapping$subunitBlockPosition <- numeric()
-  if (length(mappings)) mapping <- do.call(rbind, mappings)[names(mapping)]
-  rownames(mapping) <- NULL
+  overview$emptyRows <- length(setdiff(seq_len(n), c(bad_rows, ready_rows)))
+  overview$ignoredRows <- count_ids(ignored$sourceRow)
+  overview$ignoredSubunits <- count_ids(ignored$subunit)
+  overview$ignoredUnits <- count_ids(ignored$unit)
   overview$checkedItems <- count_ids(mapping$item[mapping$itemStatus %in% c("matched", "missing", "ambiguous")])
   overview$itemCheckComplete <- overview$matchedCaseRows > 0L &&
     overview$pendingItemRows == 0L && overview$invalidCaseRows == 0L
@@ -234,7 +247,8 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   rownames(mapping_issues) <- NULL
   report <- structure(list(summary = overview, problems = problem_table,
                            byCode = by_code, missing = missing, dataLevel = dataLevel,
-                           mapping = mapping, mappingIssues = mapping_issues), class = "subsetIncidentCheck")
+                           mapping = mapping, mappingIssues = mapping_issues,
+                           ignored = ignored), class = "subsetIncidentCheck")
   if (!is.null(out)) {
     rownames(out) <- NULL
     attr(out, "ID") <- ID
@@ -252,8 +266,8 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   checked <- .subset_check_incidents(dat, incidents, booklets, blocks, rotation,
                                      subunits, ID, classID, dataLevel)
   problems <- checked$report$problems
+  if (nrow(problems) || nrow(checked$report$ignored)) print(checked$report)
   if (nrow(problems)) {
-    print(checked$report)
     can_drop <- problems$code %in% c("unknown_person", "unknown_class")
     if (unmatched == "error" || any(!can_drop)) {
       message <- if (any(problems$code == "missing_unit_mapping")) {
@@ -270,6 +284,8 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   if (nrow(problems)) message(sprintf("Excluded %d incident rows for %d absent persons and %d absent classes; see attr(info, 'incidentCheck').",
                                      length(unique(problems$sourceRow)), checked$report$summary$missingPersons,
                                      checked$report$summary$missingClasses))
+  if (nrow(checked$report$ignored)) message(sprintf("Skipped %d design subunits outside the review selection; see attr(info, 'incidentCheck')$ignored.",
+                                                 checked$report$summary$ignoredSubunits))
   checked$info
 }
 
@@ -303,7 +319,8 @@ print.subsetIncidentCheck <- function(x, ..., max_problems = 0L) {
       }
       label <- if (identical(x$dataLevel, "unit")) "unit" else "subunit"
       if (!s$checkedItems) {
-        cat("Missing", label, "columns: not assessed yet.\n")
+        if (s$itemCheckComplete) cat("No response columns selected from dat.\n") else
+          cat("Missing", label, "columns: not assessed yet.\n")
       } else {
         cat("Missing", label, "columns:", s$missingItems, "detected among", s$checkedItems,
             "distinct", label, "identifiers checked")
@@ -311,6 +328,10 @@ print.subsetIncidentCheck <- function(x, ..., max_problems = 0L) {
       }
       if (s$ambiguousItems) cat("Ambiguous response-column mappings:", s$ambiguousItems, "identifiers.\n")
       if (s$matchedRows) cat("Ready for review:", s$matchedRows, "incident rows.\n")
+      if (!is.null(s$ignoredSubunits) && s$ignoredSubunits) {
+        cat("Outside review selection:", s$ignoredSubunits, "design subunits; see x$ignored.\n")
+      }
+      if (!is.null(s$emptyRows) && s$emptyRows) cat("Incident rows with no selected response columns:", s$emptyRows, "\n")
     }
     other <- x$byCode[!x$byCode$code %in% c("unknown_person", "unknown_class", "missing_unit_mapping", "unresolved_item"), ]
     if (nrow(other)) {
@@ -329,6 +350,9 @@ print.subsetIncidentCheck <- function(x, ..., max_problems = 0L) {
     if (!shown) cat("Details: x$byCode, x$problems, or print(x, max_problems = 10).\n") else
       if (shown < nrow(x$problems)) cat("Showing", shown, "of", nrow(x$problems),
                                     "problems. All details: x$problems or print(x, max_problems = Inf).\n")
+  } else if (!is.null(x$ignored) && nrow(x$ignored)) {
+    if (s$matchedRows) cat("Available responses resolved; omitted design entries are listed in x$ignored.\n") else
+      cat("No responses remain in the review selection; see x$ignored.\n")
   } else cat("All incident rows could be matched and resolved.\n")
   invisible(x)
 }

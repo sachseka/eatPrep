@@ -1324,7 +1324,11 @@ numbers, unmatched IDs, conflicting class assignments and unresolved positions.
 Preparation repeats this check and skips absent persons/classes by default
 (`unmatched = "drop"`), with an informational message and the retained report in
 `attr(subsetInfo, "incidentCheck")`. Use `unmatched = "error"` for strict handling.
-Other problems, including unresolved unit assignments, still stop preparation.
+Additional design entries without response-column matches are omitted and
+retained in `$ignored`. Only design rows needed for the reported persons and
+positions are validated. Ambiguities and missing assignments affecting existing
+response columns still stop preparation. Full metadata checking is separate
+from review selection; see `checkInputList()` and `checkDesign()`.
 The default report separates matched cases from pending response checks;
 `$mappingIssues` lists unresolved unit assignments without repeated incident rows.
 

@@ -18,7 +18,7 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
   checkmate::assert_string(classID, min.chars = 1, null.ok = TRUE)
   reserved <- c("issueId", "level", "targetId", "scope", "target", "comment",
                 "datCols", "booklet", "block", "blockPosition", "subunitBlockPosition",
-                "subunit", "subunitRecoded", "unit", "item", "itemStatus", "mappingIssue")
+                "subunit", "subunitRecoded", "unit", "item", "itemStatus", "mappingIssue", "ignoredReason")
   if (ID %in% reserved || identical(ID, classID)) {
     stop("ID must differ from classID and the issue/output column names.", call. = FALSE)
   }
@@ -65,18 +65,20 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
 .subset_issue_resolver <- function(dat, booklets, blocks, rotation, subunits, ID,
                                    needs_design, classID = NULL,
                                    allow_missing_booklets = FALSE,
-                                   collect_item_problems = FALSE, dataLevel = "subunit") {
+                                   collect_item_problems = FALSE, dataLevel = "subunit",
+                                   available_only = FALSE) {
+  min_design_rows <- if (available_only) 0L else 1L
   has_design <- !all(vapply(list(booklets, blocks, rotation), is.null, logical(1)))
   if (needs_design || has_design) {
-    booklets <- .subset_table(booklets, "booklet", "booklets")
+    booklets <- .subset_table(booklets, "booklet", "booklets", min.rows = min_design_rows)
     .subset_unique_key(booklets, "booklet", "booklets")
-    blocks <- .subset_table(blocks, c("subunit", "block", "subunitBlockPosition"), "blocks")
+    blocks <- .subset_table(blocks, c("subunit", "block", "subunitBlockPosition"), "blocks", min.rows = min_design_rows)
     blocks$subunitBlockPosition <- .subset_positions(blocks$subunitBlockPosition, "blocks$subunitBlockPosition")
     if (anyDuplicated(blocks[c("block", "subunit")]) ||
         anyDuplicated(blocks[c("block", "subunitBlockPosition")])) {
       stop("blocks must have unique items and positions within each block.", call. = FALSE)
     }
-    rotation <- .subset_table(rotation, if (allow_missing_booklets) ID else c(ID, "booklet"), "rotation")
+    rotation <- .subset_table(rotation, if (allow_missing_booklets) ID else c(ID, "booklet"), "rotation", min.rows = min_design_rows)
     if (allow_missing_booklets) {
       if (!"booklet" %in% names(rotation)) stop("rotation needs columns: booklet.", call. = FALSE)
       if (!is.atomic(rotation$booklet) || is.matrix(rotation$booklet)) {
@@ -94,7 +96,7 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
     block_cols <- block_cols[order(block_pos)]
     block_pos <- sort(block_pos)
   }
-  mapper <- .subset_item_mapper(dat, subunits, ID, classID, dataLevel)
+  mapper <- .subset_item_mapper(dat, subunits, ID, classID, dataLevel, allow_empty = available_only)
   subunits <- mapper$subunits
   target_subunits <- function(target) {
     if (dataLevel == "unit") return(subunits$subunit[which(subunits$unit == target)])
@@ -111,6 +113,7 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
       }
       design <- list()
       for (j in seq_along(block_cols)) {
+        if (available_only && issue$scope == "blockPosition" && block_pos[j] != as.numeric(issue$target)) next
         block <- as.character(booklets[booklets$booklet == booklet, block_cols[j]])
         if (is.na(block) || !nzchar(trimws(block))) next
         b <- blocks[blocks$block == block, , drop = FALSE]
@@ -153,9 +156,14 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
                       comment = issue$comment, subunit = mapped$subunit,
                       subunitRecoded = mapped$subunitRecoded, unit = mapped$unit,
                       item = mapped$item, itemStatus = mapped$itemStatus,
-                      mappingIssue = mapped$mappingIssue, stringsAsFactors = FALSE)
+                      mappingIssue = mapped$mappingIssue, ignoredReason = NA_character_, stringsAsFactors = FALSE)
     names(row)[2] <- ID
-    failed <- which(mapped$itemStatus != "matched")
+    if (available_only) {
+      row$ignoredReason[mapped$itemStatus == "missing"] <- "response_column_absent"
+      row$ignoredReason[mapped$itemStatus == "unmapped" & !mapped$dataCandidate] <- "unmapped_without_data_match"
+    }
+    in_scope <- is.na(row$ignoredReason)
+    failed <- which(mapped$itemStatus != "matched" & in_scope)
     if (length(failed)) {
       problems <- lapply(failed, function(j) .subset_item_problem(row[j, ], dataLevel))
       if (!collect_item_problems) stop(problems[[1L]])
@@ -163,8 +171,8 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
                                problems = problems, selection = row)
     }
     # Several subunits of one unit intentionally refer to the same response.
-    cells <- unique(mapped[c("item", "datCols")])
-    if ((dataLevel == "subunit" && anyDuplicated(mapped$datCols)) || anyDuplicated(cells$datCols)) {
+    cells <- unique(mapped[in_scope, c("item", "datCols")])
+    if ((dataLevel == "subunit" && anyDuplicated(mapped$datCols[in_scope])) || anyDuplicated(cells$datCols)) {
       .subset_resolution_error("ambiguous_cell", sprintf("Issue '%s': multiple design entries resolve to the same data cell for '%s'.", issue$issueId, person),
                                selection = row)
     }
@@ -193,8 +201,8 @@ summary.preparedSubsetInfo <- function(object, ...) {
   do.call(rbind, rows)
 }
 
-.subset_table <- function(x, columns, label) {
-  checkmate::assert_data_frame(x, min.rows = 1, .var.name = label)
+.subset_table <- function(x, columns, label, min.rows = 1L) {
+  checkmate::assert_data_frame(x, min.rows = min.rows, .var.name = label)
   x <- as.data.frame(x)
   if (anyDuplicated(names(x))) stop(sprintf("%s has duplicate column names.", label), call. = FALSE)
   missing <- setdiff(columns, names(x))
