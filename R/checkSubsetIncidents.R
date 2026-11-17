@@ -10,7 +10,7 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   checkmate::assert_string(classID, min.chars = 1, null.ok = TRUE)
   reserved <- c("issueId", "sourceRow", "level", "targetId", "scope", "target",
                 "comment", "datCols", "booklet", "block", "blockPosition",
-                "subunitBlockPosition", "code", "message")
+                "subunitBlockPosition", "code", "message", "item", "itemStatus")
   if (any(c(ID, classID) %in% reserved) || identical(ID, classID)) {
     stop("ID and classID must differ from each other and reserved incident/output names.", call. = FALSE)
   }
@@ -42,10 +42,13 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   positions <- suppressWarnings(as.numeric(incidents$blockPosition))
   problems <- list()
   rows <- list()
-  add_problem <- function(i, code, message, person = person_ids[i]) {
+  add_problem <- function(i, code, message, person = person_ids[i],
+                          item = NA_character_, itemStatus = NA_character_,
+                          booklet = NA_character_, block = NA_character_) {
     row <- data.frame(sourceRow = i, issueId = incidents$issueId[i],
                       person = person, blockPosition = incidents$blockPosition[i],
-                      code = code, message = message, stringsAsFactors = FALSE)
+                      code = code, message = message, item = item, itemStatus = itemStatus,
+                      booklet = booklet, block = block, stringsAsFactors = FALSE)
     names(row)[3] <- ID
     if (!is.null(classID)) row[[classID]] <- classes[i]
     problems[[length(problems) + 1L]] <<- row
@@ -57,7 +60,7 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   }
   resolve <- .subset_issue_resolver(dat, booklets, blocks, rotation, subunits, ID,
                                     needs_design = TRUE, classID = classID,
-                                    allow_missing_booklets = TRUE)
+                                    allow_missing_booklets = TRUE, collect_item_problems = TRUE)
   for (i in seq_len(n)) {
     previous <- length(problems)
     if (is.na(incidents$issueId[i])) add_problem(i, "missing_issue_id", "issueId must not be missing or empty.")
@@ -99,7 +102,15 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
                         comment = incidents$comment[i], stringsAsFactors = FALSE)
     for (person in ids) {
       selected <- tryCatch(resolve(issue, person), subsetResolutionError = function(e) {
-        add_problem(i, e$code, conditionMessage(e), person)
+        details <- if (is.null(e$problems)) list(e) else e$problems
+        for (problem in details) {
+          metadata <- lapply(c("item", "itemStatus", "booklet", "block"), function(name) {
+            if (is.null(problem[[name]])) NA_character_ else problem[[name]]
+          })
+          names(metadata) <- c("item", "itemStatus", "booklet", "block")
+          do.call(add_problem, c(list(i = i, code = problem$code, message = conditionMessage(problem),
+                                     person = person), metadata))
+        }
         NULL
       })
       if (!is.null(selected)) {
@@ -112,7 +123,9 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   # Keep a stable schema even when every source row is valid.
   problem_table <- data.frame(sourceRow = integer(), issueId = character(),
                               person = character(), blockPosition = character(),
-                              code = character(), message = character())
+                              code = character(), message = character(),
+                              item = character(), itemStatus = character(),
+                              booklet = character(), block = character())
   names(problem_table)[3] <- ID
   if (!is.null(classID)) problem_table[[classID]] <- character()
   if (length(problems)) problem_table <- do.call(rbind, problems)
@@ -133,13 +146,37 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
       rownames(problem_table) <- NULL
     }
   }
-  count_ids <- function(x) length(unique(x[!is.na(x)]))
+  distinct_ids <- function(x) unique(x[!is.na(x)])
+  count_ids <- function(x) length(distinct_ids(x))
+  missing <- list(
+    persons = distinct_ids(problem_table[[ID]][problem_table$code == "unknown_person"]),
+    classes = if (is.null(classID)) character() else distinct_ids(problem_table[[classID]][problem_table$code == "unknown_class"]),
+    items = distinct_ids(problem_table$item[which(problem_table$itemStatus == "missing")])
+  )
+  by_code <- data.frame(code = character(), problems = integer(), incidentRows = integer(),
+                        persons = integer(), classes = integer(), items = integer())
+  if (nrow(problem_table)) {
+    by_code <- do.call(rbind, lapply(unique(problem_table$code), function(code) {
+      selected <- problem_table[problem_table$code == code, , drop = FALSE]
+      data.frame(code = code, problems = nrow(selected), incidentRows = count_ids(selected$sourceRow),
+                 persons = count_ids(selected[[ID]]),
+                 classes = if (is.null(classID)) 0L else count_ids(selected[[classID]]),
+                 items = count_ids(selected$item))
+    }))
+  }
   bad_rows <- unique(problem_table$sourceRow)
   overview <- data.frame(incidentRows = n, matchedRows = n - length(bad_rows),
                          problemRows = length(bad_rows),
                          problemPersons = count_ids(problem_table[[ID]]),
-                         problemClasses = if (is.null(classID)) 0L else count_ids(problem_table[[classID]]))
-  report <- structure(list(summary = overview, problems = problem_table), class = "subsetIncidentCheck")
+                         problemClasses = if (is.null(classID)) 0L else count_ids(problem_table[[classID]]),
+                         problemItems = count_ids(problem_table$item),
+                         missingPersons = length(missing$persons), missingClasses = length(missing$classes),
+                         missingItems = length(missing$items),
+                         ambiguousItems = count_ids(problem_table$item[which(problem_table$itemStatus == "ambiguous")]),
+                         uncheckedItemRows = count_ids(problem_table$sourceRow[
+                           !problem_table$code %in% c("unresolved_item", "ambiguous_cell")]))
+  report <- structure(list(summary = overview, problems = problem_table,
+                           byCode = by_code, missing = missing), class = "subsetIncidentCheck")
   if (!is.null(out)) {
     rownames(out) <- NULL
     attr(out, "ID") <- ID
@@ -173,12 +210,32 @@ checkSubsetIncidents <- function(dat, incidents, booklets, blocks, rotation,
   checked$info
 }
 
-print.subsetIncidentCheck <- function(x, ...) {
+print.subsetIncidentCheck <- function(x, ..., max_problems = 10L) {
+  checkmate::assert_number(max_problems, lower = 0, finite = FALSE)
+  if (max_problems != floor(max_problems)) stop("max_problems must be a whole number or Inf.", call. = FALSE)
   cat("Incident preflight\n")
-  print(x$summary, row.names = FALSE)
+  print(x$summary[c("incidentRows", "matchedRows", "problemRows")], row.names = FALSE)
+  if (!is.null(x$missing)) {
+    cat("\nMissing from dat (distinct identifiers):\n")
+    print(x$summary[c("missingPersons", "missingClasses", "missingItems")], row.names = FALSE)
+    if (x$summary$ambiguousItems) cat("Ambiguous item mappings:", x$summary$ambiguousItems, "\n")
+    if (x$summary$uncheckedItemRows) {
+      cat("Item checks incomplete for", x$summary$uncheckedItemRows,
+          "incident rows; additional missing items may remain undetected.\n")
+    }
+    if (nrow(x$byCode)) {
+      cat("\nProblems by code (distinct rows and IDs within each code):\n")
+      print(x$byCode, row.names = FALSE)
+    }
+  }
   if (nrow(x$problems)) {
-    cat("\nProblems (original incident row numbers):\n")
-    print(x$problems, row.names = FALSE, max = nrow(x$problems) * ncol(x$problems))
+    shown <- min(max_problems, nrow(x$problems))
+    if (shown) {
+      cat("\nProblems (original incident row numbers):\n")
+      print(x$problems[seq_len(shown), , drop = FALSE], row.names = FALSE, max = shown * ncol(x$problems))
+    }
+    if (shown < nrow(x$problems)) cat("Showing", shown, "of", nrow(x$problems),
+                                    "problems. All details: x$problems or print(x, max_problems = Inf).\n")
   } else cat("All incident rows could be matched and resolved.\n")
   invisible(x)
 }

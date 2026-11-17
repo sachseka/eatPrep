@@ -11,7 +11,7 @@ the response data; no separate person-to-class table is needed.
 checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
                      subunits = NULL, ID = "ID", classID = "classId")
 
-\method{print}{subsetIncidentCheck}(x, ...)
+\method{print}{subsetIncidentCheck}(x, ..., max_problems = 10L)
 }
 \arguments{
   \item{dat}{Wide response data with unique, nonmissing person IDs and, unless
@@ -36,6 +36,9 @@ checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
     set explicitly to \code{NULL} for individual data without classes.}
   \item{x}{A \code{subsetIncidentCheck} result.}
   \item{...}{Reserved for additional print arguments.}
+  \item{max_problems}{Maximum number of problem details to print. Use \code{0}
+    for the overview alone or \code{Inf} for all details. The returned problem
+    table always contains all detected problems.}
 }
 \details{
 Within each class, incident person IDs must be either all supplied or all missing.
@@ -68,7 +71,15 @@ a row's identifiers and position are valid; dependent problems cannot be assesse
 until those inputs are corrected. One problem can affect several long rows, and
 one class row can produce problems for several persons.
 
+All items in each resolved incident block are checked, including when several
+item columns are absent. Counts refer to the requested incident selections,
+not to every item in the design tables. An item is missing when neither its
+original name nor a mapped recoded name identifies a response column. If more
+than one candidate column exists, its mapping is ambiguous instead. Both cases
+use \code{unresolved_item}, distinguished by \code{itemStatus}.
+
 A person with entirely missing responses is still present in \code{dat}. For
+items, an existing response column containing only NA is also present. For
 whole-class reports, membership is defined by \code{dat}; missing class members
 cannot be identified without an external roster or explicit incident person IDs.
 Numeric identifiers retain stored precision; import IDs as character to preserve
@@ -77,21 +88,45 @@ leading zeros or digits beyond numeric precision.
 \value{
 A \code{subsetIncidentCheck} list with:
 \describe{
-  \item{summary}{A one-row data frame counting incident rows, fully matched rows,
-    problem rows, and distinct persons and classes appearing in the problem table.
-    Repeated long rows do not inflate distinct-person or distinct-class counts.
-    Counts of problem persons include affected members of whole-class reports.}
+  \item{summary}{A one-row data frame. \code{incidentRows}, \code{matchedRows}
+    and \code{problemRows} count source rows, fully matched rows and rows with
+    at least one problem. \code{problemPersons}, \code{problemClasses} and
+    \code{problemItems} count distinct nonmissing identifiers in the problem
+    table, including existing persons affected by item problems and members of
+    whole-class reports. \code{missingPersons}, \code{missingClasses} and
+    \code{missingItems} count distinct identifiers actually absent from
+    \code{dat}; repeated long rows or occurrences across persons do not inflate
+    these totals. \code{ambiguousItems} counts distinct items with multiple
+    candidate response columns. \code{uncheckedItemRows} counts source rows
+    whose item checks could not be completed for at least one person because
+    of invalid identifiers, positions or unresolved design. Further missing
+    items may be discovered after correcting those rows. Class counts are
+    zero with \code{classID = NULL}.}
   \item{problems}{A data frame with \code{sourceRow}, \code{issueId}, the person ID,
-    \code{blockPosition}, \code{code}, \code{message}, and, when used, the class ID.
+    \code{blockPosition}, \code{code}, \code{message}, \code{item},
+    \code{itemStatus}, \code{booklet}, \code{block}, and, when used, the class ID.
     ID columns use the names supplied in \code{ID} and \code{classID}. It has zero
-    rows when all incidents can be resolved.}
+    rows when all incidents can be resolved. Item problems retain the original
+    \code{blocks$subunit} identifier in \code{item}, with \code{itemStatus} equal
+    to \code{"missing"} or \code{"ambiguous"}. Booklet and block identifiers
+    are supplied when available. Inapplicable or unknown details are NA.}
+  \item{byCode}{A data frame with one row per problem \code{code}:
+    \code{problems} counts problem records; \code{incidentRows}, \code{persons},
+    \code{classes} and \code{items} count distinct nonmissing identifiers within
+    that code. These counts must not be summed across codes to obtain overall
+    totals because the same identifier may occur under several codes.}
+  \item{missing}{A list of character vectors \code{persons}, \code{classes} and
+    \code{items}, containing the distinct identifiers absent from \code{dat}.
+    Item names use \code{blocks$subunit}, so original and recoded aliases count
+    as one item. Empty vectors indicate that none were detected.}
 }
 Problem codes include \code{unknown_person}, \code{unknown_class},
 \code{class_mismatch}, \code{mixed_person_ids}, \code{missing_person_id},
 \code{missing_class_id}, \code{class_without_id}, \code{missing_issue_id},
 \code{invalid_level}, \code{invalid_position}, \code{unknown_booklet},
 \code{unknown_block}, \code{not_administered}, \code{unresolved_item}, and
-\code{ambiguous_cell}. Printing displays the summary and complete problem table.
+\code{ambiguous_cell}. Printing displays overall missing counts, counts by code,
+and at most \code{max_problems} problem details (10 by default).
 }
 \examples{
 dat <- data.frame(ID = c("P1", "P2"), classId = "K1", I1 = c(1, NA))
@@ -101,6 +136,9 @@ rotation <- data.frame(ID = dat$ID, booklet = "X")
 incidents <- data.frame(ID = c("P1", "absent"), classId = "K1", blockPosition = 1)
 checked <- checkSubsetIncidents(dat, incidents, booklets, blocks, rotation)
 checked
+checked$summary[c("missingPersons", "missingItems", "missingClasses")]
+checked$missing
+checked$byCode
 checked$problems
 }
 \seealso{\code{\link{prepareSubsetInfo}}, \code{\link{visualSubsetRecode}},

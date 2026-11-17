@@ -58,7 +58,8 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
 # typed conditions let the incident preflight collect all resolvable problems.
 .subset_issue_resolver <- function(dat, booklets, blocks, rotation, subunits, ID,
                                    needs_design, classID = NULL,
-                                   allow_missing_booklets = FALSE) {
+                                   allow_missing_booklets = FALSE,
+                                   collect_item_problems = FALSE) {
   has_design <- !all(vapply(list(booklets, blocks, rotation), is.null, logical(1)))
   if (needs_design || has_design) {
     booklets <- .subset_table(booklets, "booklet", "booklets")
@@ -98,23 +99,27 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
     }
     found <- intersect(candidates, setdiff(names(dat), c(ID, classID)))
     if (length(found) != 1L) {
-      .subset_resolution_error("unresolved_item", sprintf("Item '%s' must resolve to exactly one column in dat (found %d).", item, length(found)))
+      .subset_resolution_error("unresolved_item", sprintf("Item '%s' must resolve to exactly one column in dat (found %d).", item, length(found)),
+                               item = item, itemStatus = if (length(found)) "ambiguous" else "missing")
     }
     found
   }
   function(issue, person) {
     selected <- NULL
+    booklet <- NA_character_
     if (needs_design || has_design) {
       booklet <- rotation$booklet[rotation[[ID]] == person]
       if (length(booklet) != 1L || !booklet %in% booklets$booklet) {
-        .subset_resolution_error("unknown_booklet", sprintf("Issue '%s': no unique known booklet for person '%s'.", issue$issueId, person))
+        .subset_resolution_error("unknown_booklet", sprintf("Issue '%s': no unique known booklet for person '%s'.", issue$issueId, person),
+                                 booklet = if (length(booklet) == 1L) booklet else NA_character_)
       }
       design <- list()
       for (j in seq_along(block_cols)) {
         block <- as.character(booklets[booklets$booklet == booklet, block_cols[j]])
         if (is.na(block) || !nzchar(trimws(block))) next
         b <- blocks[blocks$block == block, , drop = FALSE]
-        if (!nrow(b)) .subset_resolution_error("unknown_block", sprintf("Booklet '%s': unknown block '%s'.", booklet, block))
+        if (!nrow(b)) .subset_resolution_error("unknown_block", sprintf("Booklet '%s': unknown block '%s'.", booklet, block),
+                                               booklet = booklet, block = block)
         b$blockPosition <- block_pos[j]
         design[[length(design) + 1L]] <- b
       }
@@ -138,10 +143,28 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
                              blockPosition = NA_integer_, subunitBlockPosition = NA_integer_)
     }
     if (is.null(selected) || !nrow(selected)) {
-      .subset_resolution_error("not_administered", sprintf("Issue '%s': target '%s' is not administered to person '%s'.", issue$issueId, issue$target, person))
+      .subset_resolution_error("not_administered", sprintf("Issue '%s': target '%s' is not administered to person '%s'.", issue$issueId, issue$target, person),
+                               booklet = booklet, block = if (issue$scope == "block") issue$target else NA_character_)
     }
     selected <- selected[order(selected$blockPosition, selected$subunitBlockPosition), , drop = FALSE]
-    cols <- vapply(selected$subunit, resolve_item, character(1))
+    if (collect_item_problems) {
+      resolved <- lapply(selected$subunit, function(item) {
+        tryCatch(resolve_item(item), subsetResolutionError = identity)
+      })
+      failed <- which(vapply(resolved, inherits, logical(1), what = "subsetResolutionError"))
+      if (length(failed)) {
+        problems <- lapply(failed, function(j) {
+          problem <- resolved[[j]]
+          problem$booklet <- booklet
+          problem$block <- selected$block[j]
+          problem
+        })
+        .subset_resolution_error("unresolved_item", "Selected items could not be resolved.", problems = problems)
+      }
+      cols <- vapply(resolved, identity, character(1))
+    } else {
+      cols <- vapply(selected$subunit, resolve_item, character(1))
+    }
     if (anyDuplicated(cols)) .subset_resolution_error("ambiguous_cell", sprintf("Issue '%s': multiple design entries resolve to the same data cell for '%s'.", issue$issueId, person))
     row <- data.frame(issueId = issue$issueId, person = person, datCols = unname(cols),
                       level = issue$level, targetId = issue$targetId,
@@ -154,8 +177,8 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
   }
 }
 
-.subset_resolution_error <- function(code, message) {
-  stop(errorCondition(message, class = "subsetResolutionError", code = code))
+.subset_resolution_error <- function(code, message, ...) {
+  stop(errorCondition(message, class = "subsetResolutionError", code = code, ...))
 }
 
 summary.preparedSubsetInfo <- function(object, ...) {

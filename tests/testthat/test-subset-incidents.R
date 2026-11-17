@@ -47,6 +47,11 @@ test_that("long incidents select exact pairs and whole classes from dat", {
   expect_s3_class(check, "subsetIncidentCheck")
   expect_equal(nrow(check$problems), 0)
   expect_equal(check$summary$matchedRows, 4)
+  expect_equal(check$summary$missingPersons, 0L)
+  expect_equal(check$summary$missingClasses, 0L)
+  expect_equal(check$summary$missingItems, 0L)
+  expect_equal(nrow(check$byCode), 0L)
+  expect_identical(check$missing, list(persons = character(), classes = character(), items = character()))
   expect_identical(attr(info, "incidentCheck"), check)
   expect_output(print(check), "All incident rows")
 })
@@ -154,6 +159,8 @@ test_that("design problems are collected per affected person and cannot be dropp
   expect_equal(check$problems$sourceRow, c(1L, 2L, 3L, 4L))
   expect_equal(check$problems$ID, c("A", "A", "B", "D"))
   expect_equal(check$problems$code, c("unknown_booklet", "unknown_booklet", "not_administered", "unknown_booklet"))
+  expect_equal(check$problems$booklet, c("unknown", "unknown", "Y", NA))
+  expect_true(all(is.na(check$problems$item)))
   incident_error(args, unmatched = "drop")
   args <- incident_fixture()
   args$dat$I1 <- NULL
@@ -162,7 +169,10 @@ test_that("design problems are collected per affected person and cannot be dropp
   expect_equal(check$problems$code, rep("unresolved_item", 2))
   args <- incident_fixture()
   args$booklets$block1[1] <- "unknown"
-  expect_true("unknown_block" %in% do.call(checkSubsetIncidents, args)$problems$code)
+  check <- do.call(checkSubsetIncidents, args)
+  expect_true("unknown_block" %in% check$problems$code)
+  expect_equal(unique(check$problems$block), "unknown")
+  expect_equal(unique(check$problems$booklet), "X")
   args <- incident_fixture()
   args$rotation$booklet[c(1, 4)] <- c(NA, " ")
   check <- do.call(checkSubsetIncidents, args)
@@ -250,6 +260,112 @@ test_that("custom numeric identifiers, tibbles and recoded names work without mo
   expect_equal(checked$problems$IDSTUD, "-1")
   expect_equal(checked$problems$IDTESTGROUP, sprintf("%.0f", classes[1]))
   expect_equal(checked$problems$code, "unknown_person")
+  expect_equal(checked$summary$missingPersons, 1L)
+  expect_identical(checked$missing$persons, "-1")
+})
+
+test_that("missing identifiers and every absent block item are counted distinctly", {
+  args <- incident_fixture()
+  args$dat[c("I1", "I2")] <- NULL
+  args$incidents <- rbind(args$incidents,
+    data.frame(classId = c("K1", "K1", "K9", "K9"),
+               ID = c("absent", "absent", NA, NA), blockPosition = c(1, 2, 1, 2)),
+    args$incidents[1, ])
+  check <- do.call(checkSubsetIncidents, args)
+  expect_identical(check$missing, list(persons = "absent", classes = "K9", items = c("I1", "I2")))
+  expect_equal(check$summary$missingPersons, 1L)
+  expect_equal(check$summary$missingClasses, 1L)
+  expect_equal(check$summary$missingItems, 2L)
+  expect_equal(check$summary$ambiguousItems, 0L)
+  expect_equal(check$summary$problemPersons, 3L)
+  expect_equal(check$summary$problemClasses, 3L)
+  expect_equal(check$summary$problemItems, 2L)
+  expect_equal(check$summary$incidentRows, 9L)
+  expect_equal(check$summary$matchedRows, 2L)
+  expect_equal(check$summary$problemRows, 7L)
+  expect_equal(check$summary$uncheckedItemRows, 4L)
+  item_rows <- check$problems[check$problems$code == "unresolved_item", ]
+  expect_equal(item_rows$sourceRow, rep(c(1L, 4L, 9L), each = 2))
+  expect_equal(item_rows$item, rep(c("I1", "I2"), 3))
+  expect_equal(item_rows$itemStatus, rep("missing", 6))
+  expect_equal(item_rows$booklet, rep(c("X", "Y", "X"), each = 2))
+  expect_equal(item_rows$block, rep("b1", 6))
+  counts <- check$byCode[match(c("unknown_person", "unresolved_item", "unknown_class"), check$byCode$code), ]
+  expect_equal(counts$problems, c(2L, 6L, 2L))
+  expect_equal(counts$incidentRows, c(2L, 3L, 2L))
+  expect_equal(counts$persons, c(1L, 2L, 0L))
+  expect_equal(counts$classes, c(1L, 2L, 1L))
+  expect_equal(counts$items, c(0L, 2L, 0L))
+  error <- incident_error(args)
+  expect_identical(error$report, check)
+})
+
+test_that("ambiguous aliases are not counted as missing items", {
+  args <- incident_fixture()
+  args$subunits <- data.frame(subunit = c("I1", "I2"), subunitRecoded = c("I1R", "I2R"))
+  args$dat$I1R <- args$dat$I1
+  args$dat$I2 <- NULL
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$missingItems, 1L)
+  expect_equal(check$summary$ambiguousItems, 1L)
+  expect_equal(check$summary$problemItems, 2L)
+  expect_equal(check$summary$uncheckedItemRows, 0L)
+  expect_equal(check$missing$items, "I2")
+  expect_equal(check$problems$item, rep(c("I1", "I2"), 2))
+  expect_equal(check$problems$itemStatus, rep(c("ambiguous", "missing"), 2))
+  expect_equal(check$byCode$problems, 4L)
+  expect_equal(check$byCode$items, 2L)
+  incident_error(args, unmatched = "drop")
+})
+
+test_that("item counts cover requested blocks and missing responses are not missing items", {
+  args <- incident_fixture()
+  args$incidents <- args$incidents[2, ]
+  args$dat[c("I1", "I2")] <- NULL
+  args$dat$I3 <- NA_real_
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$matchedRows, 1L)
+  expect_equal(check$summary$missingItems, 0L)
+  expect_equal(check$summary$uncheckedItemRows, 0L)
+  args$rotation$booklet[1] <- NA
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$missingItems, 0L)
+  expect_equal(check$summary$uncheckedItemRows, 1L)
+  expect_output(print(check), "additional missing items may remain undetected")
+})
+
+test_that("individual reports have usable distinct counts without class IDs", {
+  args <- incident_fixture()
+  args$dat$classId <- NULL
+  args$incidents <- args$incidents[1:3, c("ID", "blockPosition")]
+  args$incidents$ID[3] <- "absent"
+  args$dat$I1 <- NULL
+  args["classID"] <- list(NULL)
+  check <- do.call(checkSubsetIncidents, args)
+  expect_equal(check$summary$missingPersons, 1L)
+  expect_equal(check$summary$missingItems, 1L)
+  expect_equal(check$summary$missingClasses, 0L)
+  expect_identical(check$missing$classes, character())
+  expect_equal(check$byCode$classes, c(0L, 0L))
+  expect_false("classId" %in% names(check$problems))
+})
+
+test_that("printing gives a compact overview and optionally all problem details", {
+  args <- incident_fixture()
+  args$incidents <- args$incidents[rep(1, 12), ]
+  args$incidents$ID <- "absent"
+  check <- do.call(checkSubsetIncidents, args)
+  output <- paste(capture.output(print(check)), collapse = "\n")
+  expect_match(output, "Missing from dat ")
+  expect_match(output, "Problems by code ")
+  expect_match(output, "Showing 10 of 12 problems")
+  expect_false(grepl("uncheckedItemRows", output, fixed = TRUE))
+  expect_output(print(check, max_problems = 0), "Showing 0 of 12 problems")
+  expect_false(any(grepl("Showing", capture.output(print(check, max_problems = Inf)), fixed = TRUE)))
+  expect_error(print(check, max_problems = -1))
+  expect_error(print(check, max_problems = 1.5), "whole number")
+  expect_equal(check$summary$missingPersons, 1L)
+  expect_equal(nrow(check$problems), 12L)
 })
 
 test_that("new class grouping and provenance survive pause and resume", {

@@ -56,8 +56,9 @@ prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
     \code{blockPosition}; optional \code{issueId}, \code{level}, \code{comment}.
     Supply this instead of \code{issues} and \code{persons}.
     See \code{\link{checkSubsetIncidents}} for the complete input contract.}
-  \item{unmatched}{For \code{incidents}, \code{"error"} (default) prints all
-    detected problems and stops. \code{"drop"} explicitly excludes source rows
+  \item{unmatched}{For \code{incidents}, \code{"error"} (default) prints a problem
+    overview and up to 10 details, then stops. The complete report is retained
+    in \code{condition$report}. \code{"drop"} explicitly excludes source rows
     with unknown persons/classes, with a warning and retained report. All other
     problems, including class mismatches and unresolved design, still stop preparation.
     Dropping every selection also raises an error.}

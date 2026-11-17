@@ -158,7 +158,8 @@ checked
 ```
 
 Suppose additional reports name a missing student, a missing class, a student
-in the wrong class, and an unavailable block position:
+in the wrong class, and an unavailable block position. To illustrate missing
+items too, the copy of the response data used for this check lacks I1 and I2:
 
 ```{r unmatched-example}
 incidents_to_check <- rbind(
@@ -169,29 +170,65 @@ incidents_to_check <- rbind(
     comment = "Please check"
   )
 )
-problems <- checkSubsetIncidents(
-  dat, incidents_to_check, booklets = inputList$booklets,
+dat_to_check <- dat[setdiff(names(dat), c("I1", "I2"))]
+checked_missing <- checkSubsetIncidents(
+  dat_to_check, incidents_to_check, booklets = inputList$booklets,
   blocks = inputList$blocks, rotation = inputList$rotation,
   ID = student_id, classID = class_id
 )
-problems
+checked_missing
 ```
 
-`problems$problems` is a data frame you can inspect or export. It retains the
-original incident row, IDs, position and reason. One source row can have several
-problems; the summary counts affected rows and distinct persons/classes
-separately. Long rows do not inflate distinct-person counts.
+**Use the distinct missing totals**, rather than counting problem records:
+
+```{r missing-totals}
+checked_missing$summary[c("missingPersons", "missingItems", "missingClasses")]
+checked_missing$missing$persons
+checked_missing$missing$items
+checked_missing$missing$classes
+```
+
+There is one absent person (`absent`), two missing item columns (`I1`, `I2`),
+and two class IDs absent from `dat` (`K9`, `K3`). Each identifier counts once,
+even if it occurs in several long rows or an item affects several people.
+`checked_missing$byCode` gives counts per problem code, distinguishing problem
+records, incident rows, persons, classes and items. Use `$summary` for overall
+counts; counts for different codes can overlap.
+
+```{r verify-missing-totals, include=FALSE}
+stopifnot(checked_missing$summary$missingPersons == 1L,
+          checked_missing$summary$missingItems == 2L,
+          checked_missing$summary$missingClasses == 2L,
+          identical(checked_missing$missing$items, c("I1", "I2")))
+```
+
+`checked_missing$problems` contains every detected problem and can be inspected
+or exported. It retains the original incident row, IDs, position and reason.
+Item problems additionally have separate `item`, `itemStatus`, `booklet` and
+`block` columns; no parsing of `message` is needed. All unresolved items in a
+resolved block are reported. `unresolved_item` covers both missing columns
+(`itemStatus == "missing"`) and ambiguous mappings (`itemStatus == "ambiguous"`);
+only the former count towards `missingItems`. Item identifiers use the original
+names from `inputList$blocks$subunit`, also when recoded aliases are supplied.
+
+The printed overview shows up to ten problem details. Use
+`print(checked_missing, max_problems = 0)` for just the overview, or
+`print(checked_missing, max_problems = Inf)` for all details.
 
 Unknown persons/classes, contradictory membership, missing booklet assignments
 and unavailable positions are distinguished. Invalid table structures, such as
 duplicate response IDs, stop the check immediately. A row's design cannot be
-checked until its identifiers and position are valid.
+checked until its identifiers and position are valid. `uncheckedItemRows`
+in `$summary` counts rows whose item checks could not be completed; additional
+missing items may appear after those rows are corrected. Item counts refer to
+the requested incident blocks.
 
-A student with all responses missing is still present in the data. For a
+A student with all responses missing is still present in the data, as is an
+item column containing only NA. For a
 whole-class report, missing individual class members cannot be identified
 without a separate roster or explicit incident person IDs.
 
-Preparation repeats this check and **prints the problems and stops by default**.
+Preparation repeats this check and **prints the overview and stops by default**.
 Correct the reports before proceeding. If reports absent from this particular
 response dataset should deliberately be excluded, use `unmatched = "drop"` in
 [prepareSubsetInfo()](../reference/prepareSubsetInfo.html). This warns and retains
