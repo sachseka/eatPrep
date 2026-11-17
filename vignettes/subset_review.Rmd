@@ -37,6 +37,14 @@ review_example <- function(dat, info, useGroups = attr(info, "reviewGroup"), sho
 }
 ```
 
+This workflow uses three functions:
+
+| Function | Purpose |
+|---|---|
+| [checkSubsetIncidents()](../reference/checkSubsetIncidents.html) | Check incident IDs, class membership and test design. |
+| [prepareSubsetInfo()](../reference/prepareSubsetInfo.html) | Select the affected person--item pairs. |
+| [visualSubsetRecode()](../reference/visualSubsetRecode.html) | Review, recode, pause and resume by class or person. |
+
 The usual input is **response data, the design tables from `inputList`, and a
 long incident data frame**. The incident table contains a class ID, a person ID
 and one affected block position per row. A person affected at several positions
@@ -120,8 +128,8 @@ row number is retained independently as `sourceRow`.
 
 ## Check the incidents before reviewing
 
-`checkSubsetIncidents()` returns a summary and a problem data frame without
-changing responses or opening the interactive review.
+[checkSubsetIncidents()](../reference/checkSubsetIncidents.html) returns a summary
+and a problem data frame without changing responses or opening the interactive review.
 
 ```{r preflight}
 checked <- checkSubsetIncidents(
@@ -167,12 +175,16 @@ without a separate roster or explicit incident person IDs.
 Preparation repeats this check and **prints the problems and stops by default**.
 Correct the reports before proceeding. If reports absent from this particular
 response dataset should deliberately be excluded, use `unmatched = "drop"` in
-`prepareSubsetInfo()`. This warns and retains the exclusion report. Class
-mismatches, ambiguous IDs and design problems still stop preparation.
+[prepareSubsetInfo()](../reference/prepareSubsetInfo.html). This warns and retains
+the exclusion report. Class mismatches, ambiguous IDs and design problems still
+stop preparation.
 The report is available as `attr(info, "incidentCheck")` on success or
 `condition$report` on a `subsetIncidentError`.
 
 ## Prepare the affected responses
+
+Use [prepareSubsetInfo()](../reference/prepareSubsetInfo.html) to expand the
+incident rows into the affected responses:
 
 ```{r selection}
 info <- prepareSubsetInfo(
@@ -186,13 +198,14 @@ A's two rows select I1, I2 and I3. B's position 1 selects only I3. C is not
 selected. In K2, position 2 selects I3 for D but I1 and I2 for E. These are the
 only cells available to the review.
 
-After `recodeData()`, also supply `subunits = inputList$subunits` to map original
-subunit names to recoded columns. Review before aggregating several subunits
-into a single item.
+After [recodeData()](../reference/recodeData.html), also supply
+`subunits = inputList$subunits` to map original subunit names to recoded columns.
+Review before aggregating several subunits into a single item.
 
 ## Review together by class
 
-For prepared long incidents, the default is **one review step per class**.
+For prepared long incidents, [visualSubsetRecode()](../reference/visualSubsetRecode.html)
+defaults to **one review step per class**.
 The explicit equivalent is `useGroups = "classId"`:
 
 ```{r class-review, eval=FALSE}
@@ -272,8 +285,9 @@ individual_info <- prepareSubsetInfo(
 individual_info[c("sourceRow", "ID", "datCols", "blockPosition")]
 ```
 
-Passing `individual_info` to `visualSubsetRecode()` defaults to one step per
-person. If the incident table contains `level`, every value must be `"person"`.
+Passing `individual_info` to [visualSubsetRecode()](../reference/visualSubsetRecode.html)
+defaults to one step per person. If the incident table contains `level`, every
+value must be `"person"`.
 
 ## Pause, resume and retain decisions
 
@@ -305,4 +319,5 @@ person/class reports using `issueId`, `level`, `targetId`, `scope`, and `target`
 This format requires a unique `issueId` per row and defaults to one review step
 per issue. Class issues can use membership directly from `dat`; an existing
 `persons` argument remains supported for this legacy format. See
-`?prepareSubsetInfo` and `?visualSubsetRecode` for details.
+[prepareSubsetInfo()](../reference/prepareSubsetInfo.html) and
+[visualSubsetRecode()](../reference/visualSubsetRecode.html) for details.
