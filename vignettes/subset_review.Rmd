@@ -233,29 +233,37 @@ only the former count towards `missingItems`. The compatibility fields `item`,
 subunit identifiers in subunit mode, unit identifiers in unit mode. Prefer the
 explicit `missingSubunits` or `missingUnits` count; the inactive level is NA.
 
-The printed overview shows up to ten problem details. Use
-`print(checked_missing, max_problems = 0)` for just the overview, or
+The default output separates **case matching** from **response-column checks**.
+`matchedCaseRows` counts valid person/class assignments and report fields;
+`readyRows` counts fully resolved incident rows. The older `matchedRows` field
+still equals `readyRows`, so a zero there does not mean no persons were found.
+`pendingItemRows` counts incomplete checks for matched cases only. Missing cases
+are reported separately. `itemCheckComplete` indicates coverage for the matched
+cases; missing-column totals are explicitly labelled as partial or not yet
+assessed when necessary.
+
+Detailed records are retained without being printed by default. Use
+`print(checked_missing, max_problems = 10)` for up to ten details plus counts by code, or
 `print(checked_missing, max_problems = Inf)` for all details.
 
 Unknown persons/classes, contradictory membership, missing booklet assignments
 and unavailable positions are distinguished. Invalid table structures, such as
 duplicate response IDs, stop the check immediately. A row's design cannot be
-checked until its identifiers and position are valid. `uncheckedItemRows`
-in `$summary` counts rows whose item checks could not be completed; additional
-missing items may appear after those rows are corrected. Item counts refer to
-the requested incident blocks.
+checked until its identifiers and position are valid. The older
+`uncheckedItemRows` count includes absent cases as well. Use `pendingItemRows`
+and `itemCheckComplete` to assess response-check coverage for the remaining
+cases. Item counts refer to the requested incident blocks.
 
 A student with all responses missing is still present in the data, as is an
 item column containing only NA. For a
 whole-class report, missing individual class members cannot be identified
 without a separate roster or explicit incident person IDs.
 
-Preparation repeats this check and **prints the overview and stops by default**.
-Correct the reports before proceeding. If reports absent from this particular
-response dataset should deliberately be excluded, use `unmatched = "drop"` in
-[prepareSubsetInfo()](../reference/prepareSubsetInfo.html). This warns and retains
-the exclusion report. Class mismatches, ambiguous IDs and design problems still
-stop preparation.
+Preparation repeats this check and **skips absent persons/classes by default**
+(`unmatched = "drop"`), with an informational message and retained exclusion
+report. Set `unmatched = "error"` for strict handling. Class mismatches, ambiguous
+IDs and design problems, including missing unit assignments, still stop
+preparation. An empty remaining selection also stops because nothing can be reviewed.
 The report is available as `attr(info, "incidentCheck")` on success or
 `condition$report` on a `subsetIncidentError`.
 
@@ -307,6 +315,58 @@ Use the complete subunit table. For units consisting of exactly one subunit,
 the original or recoded name can still identify the response column if the unit
 name is absent, as after [aggregateData()](../reference/aggregateData.html) with
 `rename = FALSE`. A component of a multi-subunit unit cannot replace its aggregate.
+
+Missing persons and missing assignments are independent findings. Here one
+additional incident names an absent person, while an incomplete mapping affects
+some of the people who are present:
+
+```{r case-and-response-checks}
+incidents_with_absent <- rbind(
+  incidents,
+  data.frame(IDTESTGROUP = "K1", IDSTUD = "absent", blockPosition = 1,
+             comment = "Person not in this dataset")
+)
+incomplete_mapping <- inputList$subunits[-2, ]
+incomplete_mapping$unit[1] <- NA_character_
+mapping_check <- checkSubsetIncidents(
+  dat_units, incidents_with_absent,
+  booklets = inputList$booklets, blocks = inputList$blocks,
+  rotation = inputList$rotation, subunits = incomplete_mapping,
+  dataLevel = "unit", ID = student_id, classID = class_id
+)
+mapping_check
+mapping_check$mappingIssues
+```
+
+`mappingIssues` contains one row per unresolved assignment. `subunit_not_listed`
+means the design identifier is absent from `subunits$subunit`;
+`unit_not_assigned` means its row exists but `subunits$unit` is missing or blank.
+These findings require correcting the mapping before the relevant response
+columns can be checked. They do not establish that the unit columns are absent.
+
+With the complete mapping, only the absent person remains. Preparation now
+continues with the four valid incident rows automatically:
+
+```{r prepare-available-cases}
+info_available <- prepareSubsetInfo(
+  dat_units, incidents = incidents_with_absent,
+  booklets = inputList$booklets, blocks = inputList$blocks,
+  rotation = inputList$rotation, subunits = inputList$subunits,
+  dataLevel = "unit", ID = student_id, classID = class_id
+)
+attr(info_available, "incidentCheck")$missing$persons
+```
+
+```{r verify-case-and-response-checks, include=FALSE}
+stopifnot(mapping_check$summary$matchedCaseRows == 4L,
+          mapping_check$summary$absentCaseRows == 1L,
+          mapping_check$summary$readyRows == 2L,
+          mapping_check$summary$pendingItemRows == 2L,
+          !mapping_check$summary$itemCheckComplete,
+          nrow(mapping_check$mappingIssues) == 2L,
+          identical(unique(info_available$sourceRow), 1:4),
+          attr(info_available, "incidentCheck")$summary$itemCheckComplete)
+```
 
 Preparation uses the same response level and mapping:
 

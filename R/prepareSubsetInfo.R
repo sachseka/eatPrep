@@ -1,8 +1,9 @@
 prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NULL,
                               blocks = NULL, rotation = NULL, subunits = NULL,
                               ID = "ID", classID = "classId", incidents = NULL,
-                              unmatched = c("error", "drop"),
+                              unmatched = c("drop", "error"),
                               dataLevel = c("subunit", "unit")) {
+  unmatched_supplied <- !missing(unmatched)
   unmatched <- match.arg(unmatched)
   dataLevel <- match.arg(dataLevel)
   if (!is.null(incidents)) {
@@ -12,12 +13,12 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
     return(.subset_prepare_incidents(dat, incidents, booklets, blocks, rotation,
                                      subunits, ID, classID, unmatched, dataLevel))
   }
-  if (unmatched != "error") stop("unmatched = 'drop' is only available with incidents.", call. = FALSE)
+  if (unmatched_supplied && unmatched != "error") stop("unmatched = 'drop' is only available with incidents.", call. = FALSE)
   checkmate::assert_string(ID, min.chars = 1)
   checkmate::assert_string(classID, min.chars = 1, null.ok = TRUE)
   reserved <- c("issueId", "level", "targetId", "scope", "target", "comment",
                 "datCols", "booklet", "block", "blockPosition", "subunitBlockPosition",
-                "subunit", "subunitRecoded", "unit", "item", "itemStatus")
+                "subunit", "subunitRecoded", "unit", "item", "itemStatus", "mappingIssue")
   if (ID %in% reserved || identical(ID, classID)) {
     stop("ID must differ from classID and the issue/output column names.", call. = FALSE)
   }
@@ -151,7 +152,8 @@ prepareSubsetInfo <- function(dat, issues = NULL, persons = NULL, booklets = NUL
                       subunitBlockPosition = selected$subunitBlockPosition,
                       comment = issue$comment, subunit = mapped$subunit,
                       subunitRecoded = mapped$subunitRecoded, unit = mapped$unit,
-                      item = mapped$item, itemStatus = mapped$itemStatus, stringsAsFactors = FALSE)
+                      item = mapped$item, itemStatus = mapped$itemStatus,
+                      mappingIssue = mapped$mappingIssue, stringsAsFactors = FALSE)
     names(row)[2] <- ID
     failed <- which(mapped$itemStatus != "matched")
     if (length(failed)) {

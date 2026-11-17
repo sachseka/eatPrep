@@ -12,7 +12,7 @@ checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
                      subunits = NULL, ID = "ID", classID = "classId",
                      dataLevel = c("subunit", "unit"))
 
-\method{print}{subsetIncidentCheck}(x, ..., max_problems = 10L)
+\method{print}{subsetIncidentCheck}(x, ..., max_problems = 0L)
 }
 \arguments{
   \item{dat}{Wide response data with unique, nonmissing person IDs and, unless
@@ -42,8 +42,9 @@ checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
     \code{subunits$unit}. Supply the same level to \code{prepareSubsetInfo}.}
   \item{x}{A \code{subsetIncidentCheck} result.}
   \item{...}{Reserved for additional print arguments.}
-  \item{max_problems}{Maximum number of problem details to print. Use \code{0}
-    for the overview alone or \code{Inf} for all details. The returned problem
+  \item{max_problems}{Maximum number of problem details to print. The default
+    \code{0} shows the case/response overview. Positive values additionally show
+    counts by code and up to that many details; use \code{Inf} for all details. The returned problem
     table always contains all detected problems.}
 }
 \details{
@@ -105,9 +106,17 @@ leading zeros or digits beyond numeric precision.
 \value{
 A \code{subsetIncidentCheck} list with:
 \describe{
-  \item{summary}{A one-row data frame. \code{incidentRows}, \code{matchedRows}
-    and \code{problemRows} count source rows, fully matched rows and rows with
-    at least one problem. \code{problemPersons}, \code{problemClasses} and
+  \item{summary}{A one-row data frame. \code{incidentRows} counts source rows.
+    \code{matchedCaseRows} counts rows with valid person/class assignments and
+    report fields, independently of item/design resolution. \code{absentCaseRows}
+    counts rows whose case findings only involve absent IDs; \code{invalidCaseRows}
+    counts rows with other case/report-field findings. These three counts sum to
+    \code{incidentRows}. Block-position validation belongs to the response check.
+    \code{readyRows} counts fully resolved incident rows, ready for review.
+    The existing fields \code{matchedRows} (equal to \code{readyRows}) and
+    \code{problemRows} retain their original full-resolution meaning; a zero
+    \code{matchedRows} does not mean that no persons were found in \code{dat}.
+    \code{problemPersons}, \code{problemClasses} and
     \code{problemItems} count distinct nonmissing identifiers in the problem
     table, including existing persons affected by item problems and members of
     whole-class reports. \code{missingPersons}, \code{missingClasses} and
@@ -120,20 +129,31 @@ A \code{subsetIncidentCheck} list with:
     counts subunits without unit assignments in unit mode.
     \code{uncheckedItemRows} counts source rows
     whose item checks could not be completed for at least one person because
-    of invalid identifiers, positions or unresolved design. Further missing
-    items may be discovered after correcting those rows. Class counts are
+    of invalid identifiers, positions or unresolved design, including absent
+    cases. \code{pendingItemRows} restricts incomplete checks to rows counted
+    in \code{matchedCaseRows}. \code{checkedItems} counts distinct logical
+    identifiers whose response columns were assessed (matched, missing or
+    ambiguous); unmapped subunits are excluded. \code{itemCheckComplete} is true
+    when there are matched cases and neither pending item checks nor invalid
+    case/report fields remain. Absent cases alone do not make the response check
+    incomplete. This flag describes coverage, not readiness: detected missing
+    or ambiguous columns still prevent preparation. A zero missing-item count
+    is only the number detected so far when this flag is false. Class counts are
     zero with \code{classID = NULL}.}
   \item{problems}{A data frame with \code{sourceRow}, \code{issueId}, the person ID,
     \code{blockPosition}, \code{code}, \code{message}, \code{item},
     \code{itemStatus}, \code{booklet}, \code{block}, \code{subunit},
-    \code{subunitRecoded}, \code{unit}, \code{datCols}, and, when used, the class ID.
+    \code{subunitRecoded}, \code{unit}, \code{datCols}, \code{mappingIssue}, and,
+    when used, the class ID.
     ID columns use the names supplied in \code{ID} and \code{classID}. It has zero
     rows when all incidents can be resolved. \code{subunit} retains the original
     design identifier, \code{unit} its aggregation target, and \code{datCols}
     the uniquely resolved response column (NA if unresolved). \code{item} is
     retained as a level-dependent identifier: the subunit in subunit mode, the
     unit in unit mode. \code{itemStatus} is \code{"missing"}, \code{"ambiguous"}
-    or \code{"unmapped"} for item problems. Inapplicable or unknown details are NA.}
+    or \code{"unmapped"} for item problems. \code{mappingIssue} distinguishes
+    \code{"subunit_not_listed"} from \code{"unit_not_assigned"} (an empty unit
+    assignment). Inapplicable or unknown details are NA.}
   \item{byCode}{A data frame with one row per problem \code{code}:
     \code{problems} counts problem records; \code{incidentRows}, \code{persons},
     \code{classes}, \code{items}, \code{subunits} and \code{units} count distinct
@@ -152,9 +172,15 @@ A \code{subsetIncidentCheck} list with:
     whose block design could be resolved, including successful mappings and
     item problems. It contains source rows, person/class IDs, booklet and block
     positions, \code{subunit}, \code{subunitRecoded}, \code{unit}, \code{item},
-    \code{datCols} and \code{itemStatus}. Successful mappings have status
+    \code{datCols}, \code{itemStatus} and \code{mappingIssue}. Successful mappings have status
     \code{"matched"}. Several rows may refer to one unit response. Rows blocked
     by invalid incident identifiers or unavailable design do not appear here.}
+  \item{mappingIssues}{A deduplicated data frame of unresolved subunit-to-unit
+    assignments with \code{subunit}, \code{subunitRecoded}, \code{unit} and
+    \code{mappingIssue}. It distinguishes design subunits absent from
+    \code{subunits$subunit} from listed subunits with missing/empty
+    \code{subunits$unit}. These are assignment findings, not evidence that
+    the response data lack those units.}
 }
 Problem codes include \code{unknown_person}, \code{unknown_class},
 \code{class_mismatch}, \code{mixed_person_ids}, \code{missing_person_id},
@@ -162,8 +188,11 @@ Problem codes include \code{unknown_person}, \code{unknown_class},
 \code{invalid_level}, \code{invalid_position}, \code{unknown_booklet},
 \code{unknown_block}, \code{not_administered}, \code{unresolved_item},
 \code{missing_unit_mapping}, and
-\code{ambiguous_cell}. Printing displays overall missing counts, counts by code,
-and at most \code{max_problems} problem details (10 by default).
+\code{ambiguous_cell}. Printing separates case matching from response-column
+resolution. Missing-column counts are labelled as partial when coverage is
+incomplete, or as not yet assessed when no logical response could be checked.
+Repeated problem records and counts by code are available on request via
+\code{max_problems}; full details always remain in the returned data frames.
 }
 \examples{
 dat <- data.frame(ID = c("P1", "P2"), classId = "K1", I1 = c(1, NA))

@@ -27,10 +27,12 @@
     units <- if (is.null(subunits)) rep(NA_character_, length(ids)) else subunits$unit[index]
     out <- data.frame(subunit = ids, subunitRecoded = recoded, unit = units,
                       item = if (dataLevel == "unit") units else ids,
-                      datCols = NA_character_, itemStatus = NA_character_, stringsAsFactors = FALSE)
+                      datCols = NA_character_, itemStatus = NA_character_,
+                      mappingIssue = NA_character_, stringsAsFactors = FALSE)
     for (j in seq_along(ids)) {
       if (dataLevel == "unit" && is.na(units[j])) {
         out$itemStatus[j] <- "unmapped"
+        out$mappingIssue[j] <- if (is.na(index[j])) "subunit_not_listed" else "unit_not_assigned"
         next
       }
       candidates <- if (dataLevel == "unit") units[j] else c(ids[j], recoded[j])
@@ -50,10 +52,12 @@
 }
 
 .subset_item_problem <- function(row, dataLevel) {
-  metadata <- as.list(row[c("subunit", "subunitRecoded", "unit", "item", "datCols", "itemStatus", "booklet", "block")])
+  metadata <- as.list(row[c("subunit", "subunitRecoded", "unit", "item", "datCols", "itemStatus", "mappingIssue", "booklet", "block")])
   if (row$itemStatus == "unmapped") {
     code <- "missing_unit_mapping"
-    message <- sprintf("Subunit '%s' has no unit assignment in subunits.", row$subunit)
+    message <- if (row$mappingIssue == "subunit_not_listed") {
+      sprintf("Subunit '%s' is not listed in subunits$subunit.", row$subunit)
+    } else sprintf("Subunit '%s' has an empty unit assignment in subunits$unit.", row$subunit)
   } else {
     code <- "unresolved_item"
     label <- if (dataLevel == "unit") "Unit" else "Subunit"

@@ -12,7 +12,7 @@ is retained when reports overlap.
 prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
                   blocks = NULL, rotation = NULL, subunits = NULL,
                   ID = "ID", classID = "classId", incidents = NULL,
-                  unmatched = c("error", "drop"),
+                  unmatched = c("drop", "error"),
                   dataLevel = c("subunit", "unit"))
 
 \method{summary}{preparedSubsetInfo}(object, ...)
@@ -59,10 +59,11 @@ prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
     \code{blockPosition}; optional \code{issueId}, \code{level}, \code{comment}.
     Supply this instead of \code{issues} and \code{persons}.
     See \code{\link{checkSubsetIncidents}} for the complete input contract.}
-  \item{unmatched}{For \code{incidents}, \code{"error"} (default) prints a problem
-    overview and up to 10 details, then stops. The complete report is retained
-    in \code{condition$report}. \code{"drop"} explicitly excludes source rows
-    with unknown persons/classes, with a warning and retained report. All other
+  \item{unmatched}{For \code{incidents}, \code{"drop"} (default) excludes source
+    rows with unknown persons/classes, with an informational message and retained
+    report. \code{"error"} makes absent cases an error as well. On errors, an
+    overview separates case matching from response resolution; the complete
+    report is retained in \code{condition$report}. All other
     problems, including class mismatches and unresolved design, still stop preparation.
     Dropping every selection also raises an error.}
   \item{dataLevel}{Response level: \code{"subunit"} (default) resolves raw or
@@ -142,7 +143,7 @@ with columns \code{issueId}, the person ID, \code{datCols}, \code{level},
 \code{targetId}, \code{scope}, \code{target}, \code{block}, \code{blockPosition},
 \code{subunitBlockPosition}, and \code{comment}, plus \code{booklet},
 \code{subunit}, \code{subunitRecoded}, \code{unit}, \code{item}, and
-\code{itemStatus}. \code{datCols} identifies the response column, \code{item}
+\code{itemStatus}, and \code{mappingIssue}. \code{datCols} identifies the response column, \code{item}
 the logical identifier at the chosen response level; successful rows have
 \code{itemStatus = "matched"}. The ID column name and \code{dataLevel} are
 retained as attributes. Without design tables, block metadata is missing.

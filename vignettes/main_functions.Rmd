@@ -1321,9 +1321,12 @@ units distinctly.
 
 The preflight returns `summary` and `problems`, including original incident row
 numbers, unmatched IDs, conflicting class assignments and unresolved positions.
-Preparation repeats this check and stops on problems by default. Explicit
-`unmatched = "drop"` can exclude absent persons/classes while retaining the
-report in `attr(subsetInfo, "incidentCheck")`; other problems still stop.
+Preparation repeats this check and skips absent persons/classes by default
+(`unmatched = "drop"`), with an informational message and the retained report in
+`attr(subsetInfo, "incidentCheck")`. Use `unmatched = "error"` for strict handling.
+Other problems, including unresolved unit assignments, still stop preparation.
+The default report separates matched cases from pending response checks;
+`$mappingIssues` lists unresolved unit assignments without repeated incident rows.
 
 ```{r visualSubsetRecode example, eval=FALSE}
 # Default for long incidents: one review step per class.
