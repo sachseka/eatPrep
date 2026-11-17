@@ -67,6 +67,8 @@ design/data checks in [checkDesign()](../reference/checkDesign.html).
 
 ## Response data and the usual design tables
 
+All identifiers, column names and response values in the examples are fictional.
+
 Use merged response data and explicitly choose its response level in both the
 check and preparation:
 
@@ -84,12 +86,12 @@ columns. Person IDs must be unique across the response data; class IDs must
 identify classes uniquely across schools.
 
 **Keep your existing identifier column names.** Choose them with the `ID` and
-`classID` arguments. This example uses `IDSTUD` for students and `IDTESTGROUP`
+`classID` arguments. This example uses `learner_key` for students and `group_key`
 for classes:
 
 ```{r identifier-columns}
-student_id <- "IDSTUD"
-class_id <- "IDTESTGROUP"
+student_id <- "learner_key"
+class_id <- "group_key"
 ```
 
 The student column must have that name in `dat`, `incidents` and
@@ -106,8 +108,8 @@ individual incident report. E has a missing response, which remains NA.
 
 ```{r responses}
 dat <- data.frame(
-  IDSTUD = c("A", "B", "C", "D", "E"),
-  IDTESTGROUP = c("K1", "K1", "K1", "K2", "K2"),
+  learner_key = c("A", "B", "C", "D", "E"),
+  group_key = c("K1", "K1", "K1", "K2", "K2"),
   I1 = c(1, 0, 1, 0, NA), I2 = c(0, 1, 1, 1, 0), I3 = c(1, 0, 0, 1, 1)
 )
 dat
@@ -130,7 +132,7 @@ inputList <- list(
   booklets = data.frame(
     booklet = c("X", "Y"), block1 = c("b1", "b2"), block2 = c("b2", "b1")
   ),
-  rotation = data.frame(IDSTUD = dat$IDSTUD, booklet = c("X", "Y", "X", "X", "Y"))
+  rotation = data.frame(learner_key = dat$learner_key, booklet = c("X", "Y", "X", "X", "Y"))
 )
 inputList
 ```
@@ -143,8 +145,8 @@ the missing person ID means membership is taken from `dat`.
 
 ```{r incident-input}
 incidents <- data.frame(
-  IDTESTGROUP = c("K1", "K1", "K1", "K2"),
-  IDSTUD = c("A", "A", "B", NA), blockPosition = c(1, 2, 1, 2),
+  group_key = c("K1", "K1", "K1", "K2"),
+  learner_key = c("A", "A", "B", NA), blockPosition = c(1, 2, 1, 2),
   comment = c("Display error", "Display error", "Interrupted test", "Audio failure")
 )
 incidents
@@ -189,8 +191,8 @@ items too, the copy of the response data used for this check lacks I1 and I2:
 incidents_to_check <- rbind(
   incidents,
   data.frame(
-    IDTESTGROUP = c("K1", "K9", "K3", "K1"),
-    IDSTUD = c("absent", NA, "A", "B"), blockPosition = c(1, 1, 1, 9),
+    group_key = c("K1", "K9", "K3", "K1"),
+    learner_key = c("absent", NA, "A", "B"), blockPosition = c(1, 1, 1, 9),
     comment = "Please check"
   )
 )
@@ -287,7 +289,7 @@ data; in your project, use your existing unit-level response dataset:
 
 ```{r unit-responses}
 dat_units <- data.frame(
-  IDSTUD = dat$IDSTUD, IDTESTGROUP = dat$IDTESTGROUP,
+  learner_key = dat$learner_key, group_key = dat$group_key,
   U12 = dat$I1 + dat$I2, U3 = dat$I3
 )
 checked_units <- checkSubsetIncidents(
@@ -336,12 +338,12 @@ contains two extra subunits with neither a mapping nor a column in `dat_units`:
 ```{r case-and-response-checks}
 incidents_with_absent <- rbind(
   incidents,
-  data.frame(IDTESTGROUP = "K1", IDSTUD = "absent", blockPosition = 1,
+  data.frame(group_key = "K1", learner_key = "absent", blockPosition = 1,
              comment = "Person not in this dataset")
 )
 extended_blocks <- rbind(
   inputList$blocks,
-  data.frame(subunit = c("M178b33a", "M096a11a"), block = "b1",
+  data.frame(subunit = c("I_extra1", "I_extra2"), block = "b1",
              subunitBlockPosition = 3:4)
 )
 mapping_check <- checkSubsetIncidents(
@@ -452,7 +454,7 @@ For already aggregated data, use the unit-level workflow above.
 
 For prepared long incidents, [visualSubsetRecode()](../reference/visualSubsetRecode.html)
 defaults to **one review step per class**.
-The explicit equivalent is `useGroups = class_id` (here `"IDTESTGROUP"`):
+The explicit equivalent is `useGroups = class_id` (here `"group_key"`):
 
 ```{r class-review, eval=FALSE}
 class_result <- visualSubsetRecode(dat, info, toRecodeVal = "mci")

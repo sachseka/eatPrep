@@ -674,7 +674,7 @@ test_that("case-stage counts separate missing and contradictory identifiers", {
 test_that("extra design subunits do not widen or block the available incident selection", {
   args <- unit_incident_fixture()
   baseline <- do.call(prepareSubsetInfo, args)
-  extras <- c("M178b33a", "M096a11a")
+  extras <- c("I_extra1", "I_extra2")
   args$blocks <- rbind(args$blocks, data.frame(subunit = extras, block = "b1", subunitBlockPosition = 3:4))
   args$dat$unreported <- 101:105
   check <- do.call(checkSubsetIncidents, args)
@@ -693,10 +693,10 @@ test_that("extra design subunits do not widen or block the available incident se
   expect_identical(result$dat$unreported, args$dat$unreported)
   # A concrete column with an unresolved assignment is relevant and must not
   # silently disappear along with metadata-only extras.
-  args$dat$M178b33a <- 1:5
+  args$dat$I_extra1 <- 1:5
   check <- do.call(checkSubsetIncidents, args)
-  expect_equal(unique(check$problems$subunit), "M178b33a")
-  expect_equal(unique(check$ignored$subunit), "M096a11a")
+  expect_equal(unique(check$problems$subunit), "I_extra1")
+  expect_equal(unique(check$ignored$subunit), "I_extra2")
   incident_error(args)
 })
 
