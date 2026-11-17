@@ -3,15 +3,16 @@
 \alias{summary.preparedSubsetInfo}
 \title{Prepare Review Subsets from Person and Class Incident Reports}
 \description{
-Translate incident reports into exact person--item pairs for
-\code{\link{visualSubsetRecode}}. Class reports are expanded using class membership
-and, for block selections, each person's booklet. Incident provenance is retained
-when reports overlap.
+Translate long incident reports or explicit issue specifications into exact
+person--item pairs for \code{\link{visualSubsetRecode}}. Long incidents use class
+membership from the response data and each person's booklet. Incident provenance
+is retained when reports overlap.
 }
 \usage{
-prepareSubsetInfo(dat, issues, persons = NULL, booklets = NULL,
+prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
                   blocks = NULL, rotation = NULL, subunits = NULL,
-                  ID = "ID", classID = "classId")
+                  ID = "ID", classID = "classId", incidents = NULL,
+                  unmatched = c("error", "drop"))
 
 \method{summary}{preparedSubsetInfo}(object, ...)
 }
@@ -28,9 +29,11 @@ prepareSubsetInfo(dat, issues, persons = NULL, booklets = NULL,
       \item{comment}{Optional description; missing comments are allowed.}
     }
   }
-  \item{persons}{Required for class reports: a data frame with columns named by
-    \code{ID} and \code{classID}, with one row per person. Class IDs must be unique
-    across schools; combine school and class identifiers beforehand if needed.}
+  \item{persons}{Optional legacy class-membership table for \code{issues}, with
+    columns named by \code{ID} and \code{classID} and one row per person.
+    When omitted, class issues use the membership in \code{dat}.
+    Do not supply this argument with \code{incidents}. Class IDs must identify
+    classes uniquely across schools.}
   \item{booklets}{Booklet design with \code{booklet} and columns \code{block1},
     \code{block2}, etc. Column suffixes determine positions, regardless of column
     order. Empty or missing block entries represent unoccupied positions.}
@@ -43,18 +46,53 @@ prepareSubsetInfo(dat, issues, persons = NULL, booklets = NULL,
     recoded column in \code{dat}. Aggregated item names are not inferred.}
   \item{ID}{Person identifier column name. Must differ from \code{classID} and
     reserved incident/output column names. Default: \code{"ID"}.}
-  \item{classID}{Class identifier column in \code{persons}. Default: \code{"classId"}.}
+  \item{classID}{Class identifier column, normally in \code{dat} and \code{incidents}.
+    Default: \code{"classId"}. Set \code{NULL} for individual data without classes;
+    class reports are then forbidden. Also names the column in legacy \code{persons}.}
+  \item{incidents}{Long incident data with person ID, class ID and
+    \code{blockPosition}; optional \code{issueId}, \code{level}, \code{comment}.
+    Supply this instead of \code{issues} and \code{persons}.
+    See \code{\link{checkSubsetIncidents}} for the complete input contract.}
+  \item{unmatched}{For \code{incidents}, \code{"error"} (default) prints all
+    detected problems and stops. \code{"drop"} explicitly excludes source rows
+    with unknown persons/classes, with a warning and retained report. All other
+    problems, including class mismatches and unresolved design, still stop preparation.
+    Dropping every selection also raises an error.}
   \item{object}{A result from \code{prepareSubsetInfo}.}
   \item{...}{Reserved for additional summary arguments.}
 }
 \details{
+\strong{Long incident workflow.} Each row of \code{incidents} describes a
+person--block-position pair, or a class--block-position pair with a missing person
+ID. Within each class all person IDs must be supplied or all must be missing.
+All-missing IDs select the entire class in \code{dat}; supplied IDs preserve the
+exact reported person--position pairs. No separate \code{persons} input is needed.
+Use \code{\link{checkSubsetIncidents}} to inspect the collected problems first.
+Preparation runs the same check automatically. Errors of class
+\code{subsetIncidentError} retain the report in \code{condition$report}.
+The report remains available on successful results as
+\code{attr(info, "incidentCheck")}, including any explicitly excluded rows.
+Input data are never modified by preparation or checking.
+
+For long incidents, review defaults to one decision per class, or per person
+when \code{classID = NULL}. Pass \code{useGroups = NULL} explicitly to
+\code{visualSubsetRecode} to review individual persons even when classes are
+available. Multiple long rows for a person are combined. Grouping changes how
+selected cells are reviewed, not which cells are selected.
+
+\strong{Explicit issue workflow.} The original \code{issues} format remains
+supported for item names, named blocks and block positions. Each issue has one
+unique \code{issueId} and one target, and reviews still default to grouping by
+\code{issueId}. Class issues select all members in \code{persons}, or \code{dat}
+when \code{persons} is omitted.
+
 For block or block-position reports, supply all three design tables
 \code{booklets}, \code{blocks}, and \code{rotation}. A named block can appear at
 different positions for different people; a block position can refer to different
 blocks. Item-only reports do not require design tables. When design tables are
 supplied, item selections are also checked against each person's booklet.
 
-The function stops on unknown classes, persons absent from \code{dat}, unresolved
+For \code{issues}, the function stops on unknown classes, persons absent from \code{dat}, unresolved
 items, ambiguous mappings, and targets not administered to a selected person.
 It never silently drops class members or guesses assignments. Inspect and resolve
 these reports before starting a review. Empty report tables are rejected.
@@ -67,9 +105,9 @@ recovered.
 
 The returned table contains one row per incident/person/item. An overlapping cell
 appears once for each incident that selected it. There is no automatic priority
-between individual and class reports. In this first version each report selects
-one target; explicit person exceptions and decisions with different replacement
-values per incident are not implemented. Pausing, automatic checkpoints and
+between individual and class reports. In the explicit \code{issues} format each
+report selects one target. Different replacement values per incident are not
+implemented. Pausing, automatic checkpoints and
 resuming a review are provided by \code{\link{visualSubsetRecode}}.
 }
 \value{
@@ -78,12 +116,16 @@ with columns \code{issueId}, the person ID, \code{datCols}, \code{level},
 \code{targetId}, \code{scope}, \code{target}, \code{block}, \code{blockPosition},
 \code{subunitBlockPosition}, and \code{comment}. The ID column name is retained
 as an attribute. Without design tables, block metadata is missing.
+Long incidents additionally retain \code{sourceRow} and the class ID (when used).
+Their attributes include \code{classID}, \code{reviewGroup} and \code{incidentCheck}.
 
-Pass this object directly to \code{visualSubsetRecode}; incident grouping,
+Pass this object directly to \code{visualSubsetRecode}; the default grouping,
 ID column, comments, and available positions are selected automatically.
 \code{summary} returns a data frame with one row per incident, its level and target
-ID, counts of persons, items and cells, and \code{overlappingCells}: the number of
-its cells also selected by another incident. Counts include cells containing NA.
+ID (comma-separated when several occur), counts of persons, items and distinct
+cells, and \code{overlappingCells}: the number of its cells also selected by another
+incident. Repeated rows of the same incident do not inflate cell or overlap counts.
+Counts include cells containing NA.
 }
 \examples{
 dat <- data.frame(ID = c("P1", "P2"), I1 = c(1, 0), I2 = c(0, 1))

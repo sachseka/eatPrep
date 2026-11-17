@@ -24,8 +24,10 @@ visualSubsetRecode(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
     A character replacement can convert numeric response columns to character.
     Factor columns retain their class, adding the replacement level if necessary.}
   \item{useGroups}{Optional column identifying review subsets. With \code{NULL},
-    review one person at a time. For prepared selections, omission selects
-    \code{"issueId"}, so each incident is reviewed separately.}
+    review one person at a time, combining all reported rows for that person.
+    For prepared long incidents, omission selects the stored class column, or
+    the person ID when prepared with \code{classID = NULL}. For legacy
+    \code{issues} selections, omission selects \code{"issueId"}.}
   \item{positions}{Show \code{blockPosition} and \code{subunitBlockPosition}, and
     offer block-position selection. Both columns must contain positive whole numbers.
     For prepared selections, enabled automatically if all positions are available.}

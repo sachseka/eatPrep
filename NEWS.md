@@ -1,3 +1,10 @@
+# Development version
+
+* `prepareSubsetInfo()` now accepts long `incidents` with class ID, person ID and block position. Class membership comes from the response data: fully missing incident person IDs select the whole class, supplied IDs select exact person-position pairs, and mixed missing/supplied IDs within a class are rejected. `classID = NULL` supports individual data without classes. Existing `issues` and `persons` calls remain supported.
+* New `checkSubsetIncidents()` collects unmatched persons/classes, contradictory membership and unresolved design selections in a printable report with original incident row numbers and distinct-case counts. Preparation repeats this check and stops by default; explicit `unmatched = "drop"` excludes only absent persons/classes and retains the report. Other ambiguities remain errors.
+* Prepared long incidents default to class review, or individual review without class IDs; explicit `useGroups = NULL` combines all reported positions per person. Source rows, repeated incident identifiers, exact cell selections and reports survive review and checkpoints. Summary cell and overlap counts deduplicate repeated rows of the same incident.
+* Reworked the incident vignette around the usual input-list design and long incident data, with preflight diagnostics, whole classes versus named students, both review groupings, and the individual-data exception.
+
 # eatPrep 1.0.18
 
 * New `prepareSubsetInfo()` expands person and class incident reports into exact person-item selections. It resolves named blocks or block positions per booklet, supports recoded item names, preserves incident provenance, and provides counts and overlaps through `summary()`.

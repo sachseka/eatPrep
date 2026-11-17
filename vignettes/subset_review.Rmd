@@ -11,261 +11,298 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(eatPrep)
 
-# Replay the interactive choices when building the vignette.
-review_example <- function(dat, info) {
-  answers <- c(rep("yes, all values", length(unique(info$issueId))), "yes")
-  env <- new.env(parent = environment(visualSubsetRecode))
+# Replay the real review menus without requiring input during the build.
+review_example <- function(dat, info, useGroups = attr(info, "reviewGroup"), show = FALSE) {
+  group <- if (is.null(useGroups)) attr(info, "ID") else useGroups
+  answers <- c(rep("yes, all values", length(unique(info[[group]]))), "yes")
+  review <- visualSubsetRecode
+  env <- new.env(parent = environment(review))
   env$.subset_menu <- function(choices) {
-    if (!length(answers) || !answers[1] %in% choices) {
-      stop("Unexpected example prompt.")
-    }
+    stopifnot(length(answers) > 0L, answers[1] %in% choices)
     answer <- answers[1]
     answers <<- answers[-1]
     answer
   }
-  review <- visualSubsetRecode
   environment(review) <- env
-  invisible(capture.output(
-    result <- suppressMessages(review(dat, info, toRecodeVal = "mci"))
-  ))
+  output <- capture.output(result <- withCallingHandlers(
+    review(dat, info, useGroups = useGroups, toRecodeVal = "mci"),
+    message = function(m) {
+      text <- conditionMessage(m)
+      if (!grepl("Begin visual inspection", text, fixed = TRUE)) cat(text)
+      invokeRestart("muffleMessage")
+    }))
   stopifnot(length(answers) == 0L, result$status == "completed")
+  if (show) cat(paste(output, collapse = "\n"), "\n")
   result
 }
 ```
 
-**You can process person-level, class-level, and mixed incident reports.** Each
-row describes one incident affecting one person or one class. **A table can contain
-reports for many people or classes.** A class report is reviewed as one incident,
-even when it affects several people.
+The usual input is **response data, the design tables from `inputList`, and a
+long incident data frame**. The incident table contains a class ID, a person ID
+and one affected block position per row. A person affected at several positions
+appears on several rows. **Keep this long format.**
 
-| Report type | `level` | `targetId` contains | Additional input |
-|---|---|---|---|
-| Person-level | `"person"` | The person ID for that row, e.g. `"P1"` | None for an item report |
-| Class-level | `"class"` | The class ID for that row, e.g. `"K1"` | `persons`: the person-to-class mapping |
-| Mixed: people and classes | `"person"` or `"class"` per row | The person or class ID for that row | `persons`: the person-to-class mapping |
+1. Check which incident rows match the response data and test design.
+2. Prepare the exact affected person--item pairs.
+3. Review those pairs together by class or separately by person.
 
-"Mixed" describes a table containing both kinds of report. Each row still uses
-`level = "person"` or `level = "class"`. See [workflow 3](#workflow-3-mixed-reports).
+Class membership comes from the response data. You do not need to supply a
+separate `persons` table.
 
-All three input options have the same steps: **describe the incident, check the selected
-responses, then review and decide whether to recode them.**
-`prepareSubsetInfo()` selects responses; `visualSubsetRecode()` opens the review.
+## Response data and the usual design tables
 
-Every issue table needs the same **five columns**: `issueId`, `level`, `targetId`,
-`scope`, and `target`. Each `issueId` must be unique. The examples also include
-the optional `comment` column; use `""` when no comment is needed. `head()` shows
-the input table in each example.
+Use merged response data **before aggregating subunits into items**. Both the
+response and incident tables normally contain the same person and class ID
+columns. Person IDs must be unique across the response data; class IDs must
+identify classes uniquely across schools. For other column names, pass `ID`
+and `classID` explicitly.
 
-## Shared example data
-
-Three people answered two items. Use merged response data, before aggregating
-subunits into items. In these examples, `"mci"` is the replacement code for
-responses invalidated by an incident.
+This example has three students in K1 and two in K2. C belongs to K1 but has no
+individual incident report. E has a missing response, which remains NA.
 
 ```{r responses}
-review_data <- data.frame(
-  ID = c("P1", "P2", "P3"),
-  I1 = c(1, 0, 1),
-  I2 = c(0, 1, 0)
+dat <- data.frame(
+  ID = c("A", "B", "C", "D", "E"),
+  classId = c("K1", "K1", "K1", "K2", "K2"),
+  I1 = c(1, 0, 1, 0, NA), I2 = c(0, 1, 1, 1, 0), I3 = c(1, 0, 0, 1, 1)
 )
-review_data
+dat
 ```
 
-## Workflow 1: person-level reports
+Here is a small `inputList` in the usual format. In your project, use the
+corresponding tables from your existing input list. X and Y administer the same
+blocks in different orders: **position 1 is b1 for A, but b2 for B**.
 
-**Example: display errors affected item I2 for P1 and P3.** Enter both reports in
-one table, with a separate `issueId` for each. Set `level = "person"` and put
-the affected person's ID in `targetId` on each row.
-
-```{r person-input}
-person_issues <- data.frame(
-  issueId = c("V1", "V2"), level = "person", targetId = c("P1", "P3"),
-  scope = "item", target = "I2", comment = c("Display error", "")
+```{r design}
+inputList <- list(
+  blocks = data.frame(
+    subunit = c("I1", "I2", "I3"), block = c("b1", "b1", "b2"),
+    subunitBlockPosition = c(1, 2, 1)
+  ),
+  booklets = data.frame(
+    booklet = c("X", "Y"), block1 = c("b1", "b2"), block2 = c("b2", "b1")
+  ),
+  rotation = data.frame(ID = dat$ID, booklet = c("X", "Y", "X", "X", "Y"))
 )
-head(person_issues)
+inputList
 ```
 
-Resolve the affected responses:
+## Incident data: selected students and whole classes
 
-```{r person-selection}
-person_info <- prepareSubsetInfo(review_data, person_issues)
-person_info[c("issueId", "ID", "datCols")]
-```
+The first three rows report **A at positions 1 and 2, and B at position 1**.
+They do not select C. The last row reports position 2 for **everyone in K2**:
+the missing person ID means membership is taken from `dat`.
 
-The selection contains **P1/I2 and P3/I2**, reviewed as two separate incidents.
-No class or booklet tables are needed.
-Start the review in an interactive R session:
-
-```{r person-review, eval=FALSE}
-person_result <- visualSubsetRecode(review_data, person_info, toRecodeVal = "mci")
-```
-
-Choose **yes, all values** for each report, then **yes** to end the review.
-The result is:
-
-```{r replay-person, include=FALSE}
-person_result <- review_example(review_data, person_info)
-expected_person <- review_data
-expected_person$I2 <- c("mci", "1", "mci")
-stopifnot(identical(person_result$dat, expected_person))
-```
-
-```{r person-result}
-person_result$dat
-```
-
-P1's and P3's responses to I2 change. P2's responses and all responses to I1
-keep their original values.
-
-## Workflow 2: class-level reports
-
-**Example: a display error affected item I2 for everyone in class K1.** Set
-`level = "class"` and put the class ID in `targetId`. Supply `persons` so the
-function knows who belongs to that class:
-
-```{r class-input}
-persons <- data.frame(
-  ID = c("P1", "P2", "P3"), classId = c("K1", "K1", "K2")
+```{r incident-input}
+incidents <- data.frame(
+  classId = c("K1", "K1", "K1", "K2"),
+  ID = c("A", "A", "B", NA), blockPosition = c(1, 2, 1, 2),
+  comment = c("Display error", "Display error", "Interrupted test", "Audio failure")
 )
-class_issue <- data.frame(
-  issueId = "V3", level = "class", targetId = "K1",
-  scope = "item", target = "I2", comment = ""
+incidents
+```
+
+The person-ID rule is applied **separately within each class**:
+
+| Person IDs in that class's incident rows | Selection |
+|---|---|
+| All supplied | Exactly the reported person--position pairs |
+| All missing | Every reported position for every class member in `dat` |
+| Partly supplied, partly missing | Error: resolve the ambiguous input first |
+
+NA, empty strings and whitespace-only strings count as missing. An explicit
+`level = "person"` always needs a person ID. An explicit `level = "class"`
+with person IDs still selects only those people. Usually `level` can be omitted.
+
+`issueId` is optional. The function generates one per input row when absent;
+existing incident identifiers may repeat over multiple long rows. The original
+row number is retained independently as `sourceRow`.
+
+## Check the incidents before reviewing
+
+`checkSubsetIncidents()` returns a summary and a problem data frame without
+changing responses or opening the interactive review.
+
+```{r preflight}
+checked <- checkSubsetIncidents(
+  dat, incidents, booklets = inputList$booklets,
+  blocks = inputList$blocks, rotation = inputList$rotation
 )
-head(class_issue)
+checked
 ```
 
-Resolve the affected responses:
+Suppose additional reports name a missing student, a missing class, a student
+in the wrong class, and an unavailable block position:
 
-```{r class-selection}
-class_info <- prepareSubsetInfo(review_data, class_issue, persons = persons)
-class_info[c("issueId", "ID", "datCols")]
+```{r unmatched-example}
+incidents_to_check <- rbind(
+  incidents,
+  data.frame(
+    classId = c("K1", "K9", "K3", "K1"),
+    ID = c("absent", NA, "A", "B"), blockPosition = c(1, 1, 1, 9),
+    comment = "Please check"
+  )
+)
+problems <- checkSubsetIncidents(
+  dat, incidents_to_check, booklets = inputList$booklets,
+  blocks = inputList$blocks, rotation = inputList$rotation
+)
+problems
 ```
 
-The single class report selects **P1/I2 and P2/I2**. Both rows retain `issueId =
-"V3"`, so you review them together and make **one decision for the class report**.
-P3 belongs to K2 and is outside the selection.
+`problems$problems` is a data frame you can inspect or export. It retains the
+original incident row, IDs, position and reason. One source row can have several
+problems; the summary counts affected rows and distinct persons/classes
+separately. Long rows do not inflate distinct-person counts.
+
+Unknown persons/classes, contradictory membership, missing booklet assignments
+and unavailable positions are distinguished. Invalid table structures, such as
+duplicate response IDs, stop the check immediately. A row's design cannot be
+checked until its identifiers and position are valid.
+
+A student with all responses missing is still present in the data. For a
+whole-class report, missing individual class members cannot be identified
+without a separate roster or explicit incident person IDs.
+
+Preparation repeats this check and **prints the problems and stops by default**.
+Correct the reports before proceeding. If reports absent from this particular
+response dataset should deliberately be excluded, use `unmatched = "drop"` in
+`prepareSubsetInfo()`. This warns and retains the exclusion report. Class
+mismatches, ambiguous IDs and design problems still stop preparation.
+The report is available as `attr(info, "incidentCheck")` on success or
+`condition$report` on a `subsetIncidentError`.
+
+## Prepare the affected responses
+
+```{r selection}
+info <- prepareSubsetInfo(
+  dat, incidents = incidents, booklets = inputList$booklets,
+  blocks = inputList$blocks, rotation = inputList$rotation
+)
+info[c("sourceRow", "classId", "ID", "datCols", "block", "blockPosition")]
+```
+
+A's two rows select I1, I2 and I3. B's position 1 selects only I3. C is not
+selected. In K2, position 2 selects I3 for D but I1 and I2 for E. These are the
+only cells available to the review.
+
+After `recodeData()`, also supply `subunits = inputList$subunits` to map original
+subunit names to recoded columns. Review before aggregating several subunits
+into a single item.
+
+## Review together by class
+
+For prepared long incidents, the default is **one review step per class**.
+The explicit equivalent is `useGroups = "classId"`:
 
 ```{r class-review, eval=FALSE}
-class_result <- visualSubsetRecode(review_data, class_info, toRecodeVal = "mci")
+class_result <- visualSubsetRecode(dat, info, toRecodeVal = "mci")
+# Equivalent: useGroups = "classId"
 ```
 
-Choose **yes, all values**, then **yes** to end the review:
+The two steps are K1 (A and B) and K2 (D and E). Students with the same item and
+position layout appear in one table. Different layouts produce separate tables
+**within the same review step and decision**. Here is the actual response and
+position display when choosing **yes, all values** for each class:
 
-```{r replay-class, include=FALSE}
-class_result <- review_example(review_data, class_info)
-expected_class <- review_data
-expected_class$I2 <- c("mci", "mci", "0")
-stopifnot(identical(class_result$dat, expected_class))
+```{r class-display, echo=FALSE}
+class_result <- review_example(dat, info, show = TRUE)
 ```
+
+`"mci"` is the replacement code used here for invalidated responses. Choosing
+**yes, specific blocks** restricts the decision to selected block positions
+within the current class. It never adds unreported person--position pairs.
+Missing responses remain NA.
 
 ```{r class-result}
 class_result$dat
 ```
 
-The difference from workflow 1 is the affected people: **the same item is recoded
-for everyone in K1**, while P3's responses stay unchanged. Class IDs must identify
-classes uniquely across the data set, including across schools.
+C's responses and B's I1/I2 retain their original values. E's I1 remains missing.
 
-## Workflow 3: mixed reports
+## Review separately by person
 
-**Example: process the two person reports and the class report together.** Combine
-them in one table. Each row keeps its own `level`, `targetId`, and unique `issueId`:
+Use the **same selection**, with `useGroups = NULL` supplied explicitly:
 
-```{r combined-input}
-issues <- rbind(person_issues, class_issue)
-head(issues)
-```
-
-Supply the class membership table `persons`, as in workflow 2:
-
-```{r combined-selection}
-subset_info <- prepareSubsetInfo(review_data, issues, persons = persons)
-summary(subset_info)
-```
-
-Start one review for the whole table:
-
-```{r mixed-review, eval=FALSE}
-mixed_result <- visualSubsetRecode(review_data, subset_info, toRecodeVal = "mci")
-```
-
-The review presents **V1 (P1), V2 (P3), and V3 (class K1)** separately. Choose
-**yes, all values** for each report, then **yes** to end the review:
-
-```{r replay-mixed, include=FALSE}
-mixed_result <- review_example(review_data, subset_info)
-expected_mixed <- review_data
-expected_mixed$I2 <- rep("mci", 3)
-stopifnot(identical(mixed_result$dat, expected_mixed))
-```
-
-```{r mixed-result}
-mixed_result$dat
-```
-
-All three people's responses to I2 are recoded. P1/I2 occurs in both V1 and V3;
-resetting one report keeps a recoding still required by the other. Choose
-**reset to original values** to withdraw a previous recoding; **no** leaves it
-unchanged. All three workflows preserve existing `NA` responses.
-
-## If the incident affects a block
-
-In all three workflows, `level` answers **who is affected?** and `scope` answers
-**which responses are affected?** An item report uses `scope = "item"`. For an
-entire block, also supply `booklets`, `blocks`, and `rotation`.
-
-For example, P1 and P2 are both in K1 but use different block orders:
-
-```{r block-design}
-booklets <- data.frame(
-  booklet = c("X", "Y"), block1 = c("A", "B"), block2 = c("B", "A")
+```{r individual-review, eval=FALSE}
+individual_result <- visualSubsetRecode(
+  dat, info, useGroups = NULL, toRecodeVal = "mci"
 )
-blocks <- data.frame(
-  subunit = c("I1", "I2"), block = c("A", "B"), subunitBlockPosition = 1
+```
+
+The four steps are A, B, D and E. All positions reported for A are shown in A's
+single step. Omitting `useGroups` retains the class default, so the explicit
+`NULL` matters. Accepting all four persons produces the same responses as
+accepting both classes:
+
+```{r replay-individual, include=FALSE}
+individual_result <- review_example(dat, info, useGroups = NULL)
+```
+
+```{r individual-result}
+individual_result$dat
+identical(class_result$dat, individual_result$dat)
+```
+
+```{r verify-results, include=FALSE}
+expected <- dat
+expected$I1 <- c("mci", "0", "1", "0", NA)
+expected$I2 <- c("mci", "1", "1", "1", "mci")
+expected$I3 <- c("mci", "mci", "0", "mci", "1")
+stopifnot(identical(class_result$dat, expected),
+          identical(individual_result$dat, expected),
+          identical(class_result$state$groups, c("K1", "K2")),
+          identical(individual_result$state$groups, c("A", "B", "D", "E")))
+```
+
+## Individual data without a class ID
+
+Set `classID = NULL` explicitly. Every incident then needs a person ID; class
+reports are forbidden. An accidentally missing or misspelled class column does
+not silently enable this exception.
+
+```{r no-class}
+individual_dat <- dat[c("ID", "I1", "I2", "I3")]
+individual_incidents <- incidents[1:3, c("ID", "blockPosition", "comment")]
+individual_info <- prepareSubsetInfo(
+  individual_dat, incidents = individual_incidents, classID = NULL,
+  booklets = inputList$booklets, blocks = inputList$blocks,
+  rotation = inputList$rotation
 )
-rotation <- data.frame(ID = c("P1", "P2", "P3"), booklet = c("X", "Y", "X"))
+individual_info[c("sourceRow", "ID", "datCols", "blockPosition")]
 ```
 
-To report a problem with **the first block in class K1**, keep the class target
-and change the scope to `"blockPosition"`:
+Passing `individual_info` to `visualSubsetRecode()` defaults to one step per
+person. If the incident table contains `level`, every value must be `"person"`.
 
-```{r block-input}
-block_issue <- class_issue
-block_issue$scope <- "blockPosition"
-block_issue$target <- "1"
-head(block_issue)
-```
+## Pause, resume and retain decisions
 
-```{r block-selection}
-block_info <- prepareSubsetInfo(
-  review_data, block_issue, persons = persons,
-  booklets = booklets, blocks = blocks, rotation = rotation
-)
-block_info[c("ID", "datCols", "block", "blockPosition")]
-```
-
-This selects **P1/I1 and P2/I2**: the first block is A for P1 and B for P2.
-Review `block_info` just like `class_info` above. To select **named block A**
-instead, use `scope = "block", target = "A"`; that selects I1 for both people.
-
-## Pause and continue
-
-For a longer review, choose a new checkpoint filename when starting:
+For a longer review, choose a new checkpoint filename:
 
 ```{r checkpoint, eval=FALSE}
 result <- visualSubsetRecode(
-  review_data, subset_info, toRecodeVal = "mci", checkpoint = "review.rds"
+  dat, info, toRecodeVal = "mci", checkpoint = "review.rds"
 )
 # Choose "pause review (resume later)". In a later R session:
 library(eatPrep)
 result <- visualSubsetRecode(state = "review.rds")
 ```
 
-Completed decisions are saved automatically. Resume with `state` to keep the
-original values and earlier decisions. Continue your data preparation with
-`result$dat`; `result$subsetInfo` contains the decision history.
+Completed decisions, original responses, grouping and incident row references
+are retained. Continue data preparation with `result$dat`. `result$subsetInfo`
+contains the decision history, including selected cells and original incident
+rows; rows can repeat when a group was reviewed more than once.
 
-For project data, the design tables can come from `inputList`. After
-`recodeData()`, also pass `subunits = inputList$subunits` to map original item
-names to recoded columns. See `?prepareSubsetInfo` and `?visualSubsetRecode` for
-input requirements, review options, and checkpoint recovery.
+**Reset to original values** withdraws the current group's previous recoding;
+**no** leaves it unchanged. If another review group still requires a recoding of
+the same cell, reset preserves it. Resume from the saved state to retain this
+history and the original values.
+
+## Existing explicit issue specifications
+
+The `issues` input remains available for item names, named blocks, and explicit
+person/class reports using `issueId`, `level`, `targetId`, `scope`, and `target`.
+This format requires a unique `issueId` per row and defaults to one review step
+per issue. Class issues can use membership directly from `dat`; an existing
+`persons` argument remains supported for this legacy format. See
+`?prepareSubsetInfo` and `?visualSubsetRecode` for details.

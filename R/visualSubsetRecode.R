@@ -19,7 +19,10 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
   } else {
     if (inherits(subsetInfo, "preparedSubsetInfo")) {
       if (missing(ID)) ID <- attr(subsetInfo, "ID")
-      if (missing(useGroups)) useGroups <- "issueId"
+      if (missing(useGroups)) {
+        useGroups <- attr(subsetInfo, "reviewGroup")
+        if (is.null(useGroups)) useGroups <- "issueId"
+      }
       if (missing(positions)) positions <- !anyNA(subsetInfo[c("blockPosition", "subunitBlockPosition")])
       if (missing(comments)) comments <- TRUE
     }
