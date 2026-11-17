@@ -1,6 +1,9 @@
 ---
 title: "Reviewing Incident Reports"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    includes:
+      after_body: subset-code-copy.html
 vignette: >
   %\VignetteIndexEntry{Reviewing Incident Reports}
   %\VignetteEncoding{UTF-8}
@@ -8,13 +11,15 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(collapse = FALSE, comment = "#>")
 library(eatPrep)
 
-# Replay the real review menus without requiring input during the build.
-review_example <- function(dat, info, useGroups = attr(info, "reviewGroup"), show = FALSE) {
+# Exercise the review without interactive input when building the vignette.
+review_example <- function(dat, info, useGroups = attr(info, "reviewGroup"),
+                           nonValidValues = c(-99, -98, -97, -96),
+                           choice = "yes, all values") {
   group <- if (is.null(useGroups)) attr(info, "ID") else useGroups
-  answers <- c(rep("yes, all values", length(unique(info[[group]]))), "yes")
+  answers <- c(rep(choice, length(unique(info[[group]]))), "yes")
   review <- visualSubsetRecode
   env <- new.env(parent = environment(review))
   env$.subset_menu <- function(choices) {
@@ -24,102 +29,46 @@ review_example <- function(dat, info, useGroups = attr(info, "reviewGroup"), sho
     answer
   }
   environment(review) <- env
-  output <- capture.output(result <- withCallingHandlers(
-    review(dat, info, useGroups = useGroups, toRecodeVal = "mci"),
-    message = function(m) {
-      text <- conditionMessage(m)
-      if (!grepl("Begin visual inspection", text, fixed = TRUE)) cat(text)
-      invokeRestart("muffleMessage")
-    }))
+  invisible(capture.output(result <- suppressMessages(review(
+    dat, info, useGroups = useGroups, nonValidValues = nonValidValues,
+    toRecodeVal = "mci"))))
   stopifnot(length(answers) == 0L, result$status == "completed")
-  if (show) cat(paste(output, collapse = "\n"), "\n")
   result
 }
 ```
 
-This workflow uses three functions:
-
 | Function | Purpose |
 |---|---|
-| [checkSubsetIncidents()](../reference/checkSubsetIncidents.html) | Check incident IDs, class membership and test design. |
-| [prepareSubsetInfo()](../reference/prepareSubsetInfo.html) | Select the affected person--item pairs. |
-| [visualSubsetRecode()](../reference/visualSubsetRecode.html) | Review, recode, pause and resume by class or person. |
+| [checkSubsetIncidents()](../reference/checkSubsetIncidents.html) | Check IDs, affected responses and design assignments. |
+| [prepareSubsetInfo()](../reference/prepareSubsetInfo.html) | Select the reported person-response pairs. |
+| [visualSubsetRecode()](../reference/visualSubsetRecode.html) | Review and recode by class or person; pause and resume. |
 
-The usual input is **response data, the design tables from `inputList`, and a
-long incident data frame**. The incident table contains a class ID, a person ID
-and one affected block position per row. A person affected at several positions
-appears on several rows. **Keep this long format.**
+## 1. Inputs
 
-1. Check which incident rows match the response data and test design.
-2. Prepare the exact affected person--item pairs.
-3. Review those pairs together by class or separately by person.
+Use your response data, a **long incident table**, and the design tables from
+**one input list**. No separate class roster is needed. Keep existing ID column
+names and choose the response level explicitly:
 
-Class membership comes from the response data. You do not need to supply a
-separate `persons` table.
-
-**The review is defined by the available data and the incidents.** Input-list
-tables supply lookup information. Extra design entries without an available
-response-column match are omitted and recorded in `checked$ignored`; they do
-not block the remaining selection. Unreported persons and block positions are
-outside the check. This is separate from the structure and consistency checks
-in [checkInputList()](../reference/checkInputList.html) and the broader
-design/data checks in [checkDesign()](../reference/checkDesign.html).
-
-## Response data and the usual design tables
-
-All identifiers, column names and response values in the examples are fictional.
-
-Use merged response data and explicitly choose its response level in both the
-check and preparation:
-
-| Response columns in `dat` | `dataLevel` | Mapping |
-|---|---|---|
-| Original or recoded subunits | `"subunit"` (default) | `subunit` / `subunitRecoded` |
-| Aggregated units/items | `"unit"` | `subunit` → `unit` |
-
-In unit mode, also supply `subunits = inputList$subunits`. The design tables
-always describe subunits; they do not need to be rewritten for aggregated data.
-An affected subunit then selects the entire unit for review and recoding.
-
-Both the response and incident tables normally contain the same person and class ID
-columns. Person IDs must be unique across the response data; class IDs must
-identify classes uniquely across schools.
-
-**Keep your existing identifier column names.** Choose them with the `ID` and
-`classID` arguments. This example uses `learner_key` for students and `group_key`
-for classes:
-
-```{r identifier-columns}
+```{r settings}
+library(eatPrep)
 student_id <- "learner_key"
 class_id <- "group_key"
+data_level <- "unit"  # Use "subunit" for original or recoded subunit columns.
 ```
 
-The student column must have that name in `dat`, `incidents` and
-`inputList$rotation`; the class column must have that name in `dat` and
-`incidents`. Pass these column-name strings to both
-[checkSubsetIncidents()](../reference/checkSubsetIncidents.html) and
-[prepareSubsetInfo()](../reference/prepareSubsetInfo.html). The data are not
-renamed, and reports and results retain the original names.
-[visualSubsetRecode()](../reference/visualSubsetRecode.html) automatically uses
-the identifiers stored in the prepared selection.
+The student-ID column must occur in `dat`, `incidents` and `inputList$rotation`;
+the class-ID column in `dat` and `incidents`. Student IDs must be unique, and
+class IDs must identify classes across schools.
 
-This example has three students in K1 and two in K2. C belongs to K1 but has no
-individual incident report. E has a missing response, which remains NA.
+<details>
+<summary>Runnable example inputs (all identifiers and values are fictional)</summary>
 
-```{r responses}
+```{r example-inputs}
 dat <- data.frame(
   learner_key = c("A", "B", "C", "D", "E"),
   group_key = c("K1", "K1", "K1", "K2", "K2"),
-  I1 = c(1, 0, 1, 0, NA), I2 = c(0, 1, 1, 1, 0), I3 = c(1, 0, 0, 1, 1)
+  U12 = c("mbi", "1", "2", "1", NA), U3 = c("1", "mnr", "0", "1", "1")
 )
-dat
-```
-
-Here is a small `inputList` in the usual format. In your project, use the
-corresponding tables from your existing input list. X and Y administer the same
-blocks in different orders: **position 1 is b1 for A, but b2 for B**.
-
-```{r design}
 inputList <- list(
   subunits = data.frame(
     subunit = c("I1", "I2", "I3"), subunitRecoded = c("I1R", "I2R", "I3R"),
@@ -132,450 +81,153 @@ inputList <- list(
   booklets = data.frame(
     booklet = c("X", "Y"), block1 = c("b1", "b2"), block2 = c("b2", "b1")
   ),
-  rotation = data.frame(learner_key = dat$learner_key, booklet = c("X", "Y", "X", "X", "Y"))
+  rotation = data.frame(learner_key = dat$learner_key,
+                        booklet = c("X", "Y", "X", "X", "Y"))
 )
-inputList
-```
-
-## Incident data: selected students and whole classes
-
-The first three rows report **A at positions 1 and 2, and B at position 1**.
-They do not select C. The last row reports position 2 for **everyone in K2**:
-the missing person ID means membership is taken from `dat`.
-
-```{r incident-input}
 incidents <- data.frame(
   group_key = c("K1", "K1", "K1", "K2"),
   learner_key = c("A", "A", "B", NA), blockPosition = c(1, 2, 1, 2),
   comment = c("Display error", "Display error", "Interrupted test", "Audio failure")
 )
-incidents
 ```
 
-The person-ID rule is applied **separately within each class**:
+</details>
 
-| Person IDs in that class's incident rows | Selection |
+Each incident row names **one affected block position**. Keep repeated persons
+on separate rows. Positions refer to each person's booklet: in this example,
+position 1 means block b1 for A, but b2 for B.
+
+| Person IDs within a class's incident rows | Selection |
 |---|---|
-| All supplied | Exactly the reported person--position pairs |
-| All missing | Every reported position for every class member in `dat` |
-| Partly supplied, partly missing | Error: resolve the ambiguous input first |
+| All supplied | Exactly the reported person-position pairs. |
+| All missing (`NA`, empty or whitespace) | All members of that class in `dat`, at the reported positions. |
+| Mixed supplied and missing | Error: clarify the intended selection. |
 
-NA, empty strings and whitespace-only strings count as missing. An explicit
-`level = "person"` always needs a person ID. An explicit `level = "class"`
-with person IDs still selects only those people. Usually `level` can be omitted.
+The example selects A at positions 1 and 2, B at position 1, and everyone in K2
+at position 2. C is not selected. Optional `issueId` and `level` columns usually
+need not be supplied; `comment` is optional too.
 
-`issueId` is optional. The function generates one per input row when absent;
-existing incident identifiers may repeat over multiple long rows. The original
-row number is retained independently as `sourceRow`.
-
-## Check the incidents before reviewing
-
-[checkSubsetIncidents()](../reference/checkSubsetIncidents.html) returns a summary
-and a problem data frame without changing responses or opening the interactive review.
+## 2. Check
 
 ```{r preflight}
 checked <- checkSubsetIncidents(
   dat, incidents, booklets = inputList$booklets,
   blocks = inputList$blocks, rotation = inputList$rotation,
-  subunits = inputList$subunits, dataLevel = "subunit",
+  subunits = inputList$subunits, dataLevel = data_level,
   ID = student_id, classID = class_id
 )
 checked
 ```
 
-Suppose additional reports name a missing student, a missing class, a student
-in the wrong class, and an unavailable block position. To illustrate missing
-items too, the copy of the response data used for this check lacks I1 and I2:
+Use **distinct counts**, rather than counting repeated problem records:
 
-```{r unmatched-example}
-incidents_to_check <- rbind(
-  incidents,
-  data.frame(
-    group_key = c("K1", "K9", "K3", "K1"),
-    learner_key = c("absent", NA, "A", "B"), blockPosition = c(1, 1, 1, 9),
-    comment = "Please check"
-  )
-)
-dat_to_check <- dat[setdiff(names(dat), c("I1", "I2"))]
-checked_missing <- checkSubsetIncidents(
-  dat_to_check, incidents_to_check, booklets = inputList$booklets,
-  blocks = inputList$blocks, rotation = inputList$rotation,
-  subunits = inputList$subunits, dataLevel = "subunit",
-  ID = student_id, classID = class_id
-)
-checked_missing
+```{r inspect-check, eval=FALSE}
+checked$summary[c("missingPersons", "missingClasses", "missingUnits", "readyRows")]
+checked$missing  # Identifiers behind the missing counts.
+print(checked, max_problems = 10)
+unique(checked$ignored[c("subunit", "unit", "ignoredReason")])
 ```
 
-**Use the distinct missing totals**, rather than counting problem records:
+`$problems` contains findings to inspect; `$ignored` lists omitted design entries
+without usable response columns. Preparation skips absent persons/classes by
+default (`unmatched = "drop"`) and retains the report. Contradictory assignments,
+ambiguities affecting existing responses and unresolved reported positions still
+stop preparation, as does an entirely empty selection. Use `unmatched = "error"`
+for strict handling of absent cases.
 
-```{r missing-totals}
-checked_missing$summary[c("missingPersons", "missingItems", "missingClasses")]
-checked_missing$missing$persons
-checked_missing$missing$items
-checked_missing$missing$classes
-```
+The review covers the **available data and reported incidents**. Broader metadata
+checks remain separate: [checkInputList()](../reference/checkInputList.html) and
+[checkDesign()](../reference/checkDesign.html). Missing-item totals are provisional
+when `checked$summary$itemCheckComplete` is `FALSE`.
 
-There is one absent person (`absent`), two missing item columns (`I1`, `I2`),
-and two class IDs absent from `dat` (`K9`, `K3`). Each identifier counts once,
-even if it occurs in several long rows or an item affects several people.
-`checked_missing$byCode` gives counts per problem code, distinguishing problem
-records, incident rows, persons, classes and items. Use `$summary` for overall
-counts; counts for different codes can overlap.
+## 3. Prepare and review
 
-```{r verify-missing-totals, include=FALSE}
-stopifnot(checked_missing$summary$missingPersons == 1L,
-          checked_missing$summary$missingItems == 2L,
-          checked_missing$summary$missingClasses == 2L,
-          identical(checked_missing$missing$items, c("I1", "I2")))
-```
-
-`checked_missing$problems` contains actionable findings and can be inspected
-or exported. Missing response columns and design entries without a data-column
-match are recorded separately in `$ignored`. Both retain incident row references.
-Item problems additionally separate `subunit`, `subunitRecoded`, `unit` and
-the actual response column `datCols`, along with `itemStatus`, `booklet` and
-`block`; no parsing of `message` is needed. `checked_missing$mapping` contains
-both successful and failed mappings for the resolved incident blocks.
-All unresolved items in a
-resolved block are recorded in `$mapping`. Missing columns have
-`itemStatus == "missing"`, contribute to `missingItems`, and are omitted from
-review. Ambiguous column mappings remain `unresolved_item` problems.
-The compatibility fields `item`,
-`missingItems` and `$missing$items` refer to the chosen response level: original
-subunit identifiers in subunit mode, unit identifiers in unit mode. Prefer the
-explicit `missingSubunits` or `missingUnits` count; the inactive level is NA.
-
-The default output separates **case matching** from **response-column checks**.
-`matchedCaseRows` counts valid person/class assignments and report fields;
-`readyRows` counts rows with available responses and no actionable problems.
-`emptyRows` counts rows without problems but with no response columns to select.
-The older `matchedRows` field
-still equals `readyRows`, so a zero there does not mean no persons were found.
-`pendingItemRows` counts incomplete checks for matched cases only. Missing cases
-are reported separately. `itemCheckComplete` indicates coverage for the matched
-cases; missing-column totals are explicitly labelled as partial or not yet
-assessed when necessary.
-
-Detailed records are retained without being printed by default. Use
-`print(checked_missing, max_problems = 10)` for up to ten details plus counts by code, or
-`print(checked_missing, max_problems = Inf)` for all details.
-
-Unknown persons/classes, contradictory membership, missing booklet assignments
-and unavailable positions are distinguished. Invalid table structures, such as
-duplicate response IDs, stop the check immediately. A row's design cannot be
-checked until its identifiers and position are valid. The older
-`uncheckedItemRows` count includes absent cases as well. Use `pendingItemRows`
-and `itemCheckComplete` to assess response-check coverage for the remaining
-cases. Item counts refer to the requested incident blocks.
-
-A student with all responses missing is still present in the data, as is an
-item column containing only NA. For a
-whole-class report, missing individual class members cannot be identified
-without a separate roster or explicit incident person IDs.
-
-Preparation repeats this check and **skips absent persons/classes by default**
-(`unmatched = "drop"`), with an informational message and retained exclusion
-report. Set `unmatched = "error"` for strict handling. Class mismatches, ambiguous
-IDs and design problems affecting the available selection still stop preparation.
-An empty remaining selection also stops because nothing can be reviewed.
-The report is available as `attr(info, "incidentCheck")` on success or
-`condition$report` on a `subsetIncidentError`.
-
-## Response data already contain units/items
-
-The mapping distinguishes the levels even when their names differ. Here I1 and
-I2 form U12, while I3 belongs to U3. This small example mimics already aggregated
-data; in your project, use your existing unit-level response dataset:
-
-```{r unit-responses}
-dat_units <- data.frame(
-  learner_key = dat$learner_key, group_key = dat$group_key,
-  U12 = dat$I1 + dat$I2, U3 = dat$I3
-)
-checked_units <- checkSubsetIncidents(
-  dat_units, incidents, booklets = inputList$booklets,
-  blocks = inputList$blocks, rotation = inputList$rotation,
-  subunits = inputList$subunits, dataLevel = "unit",
-  ID = student_id, classID = class_id
-)
-checked_units
-checked_units$mapping[c("sourceRow", student_id, "subunit", "unit", "datCols", "itemStatus")]
-```
-
-I1 and I2 are **not missing responses** here: both resolve to U12. They remain
-separate provenance rows, while the review displays and recodes U12 once per
-person. No additional `units` table is needed; the assignment is already in
-`inputList$subunits$unit`.
-
-If U12 itself is absent, it counts as **one missing unit**, even though several
-subunits and people refer to it:
-
-```{r missing-unit}
-missing_unit <- checkSubsetIncidents(
-  dat_units[setdiff(names(dat_units), "U12")], incidents,
-  booklets = inputList$booklets, blocks = inputList$blocks,
-  rotation = inputList$rotation, subunits = inputList$subunits,
-  dataLevel = "unit", ID = student_id, classID = class_id
-)
-missing_unit$summary[c("missingPersons", "missingUnits", "missingSubunits")]
-missing_unit$missing$units
-missing_unit$ignored[c("sourceRow", student_id, "subunit", "unit", "ignoredReason")]
-```
-
-`missingSubunits = NA` means this check evaluates unit responses. Absent unit
-columns are omitted while the available responses remain selectable. Unmapped
-design subunits without a matching response column are also omitted. If an
-original/recoded response column exists but its unit assignment is missing,
-`missing_unit_mapping` remains an actionable finding.
-Use the complete subunit table. For units consisting of exactly one subunit,
-the original or recoded name can still identify the response column if the unit
-name is absent, as after [aggregateData()](../reference/aggregateData.html) with
-`rename = FALSE`. A component of a multi-subunit unit cannot replace its aggregate.
-
-Here one additional incident names an absent person, and the block design
-contains two extra subunits with neither a mapping nor a column in `dat_units`:
-
-```{r case-and-response-checks}
-incidents_with_absent <- rbind(
-  incidents,
-  data.frame(group_key = "K1", learner_key = "absent", blockPosition = 1,
-             comment = "Person not in this dataset")
-)
-extended_blocks <- rbind(
-  inputList$blocks,
-  data.frame(subunit = c("I_extra1", "I_extra2"), block = "b1",
-             subunitBlockPosition = 3:4)
-)
-mapping_check <- checkSubsetIncidents(
-  dat_units, incidents_with_absent,
-  booklets = inputList$booklets, blocks = extended_blocks,
-  rotation = inputList$rotation, subunits = inputList$subunits,
-  dataLevel = "unit", ID = student_id, classID = class_id
-)
-mapping_check
-unique(mapping_check$ignored[c("subunit", "unit", "ignoredReason")])
-```
-
-Both extra subunits are outside the review selection. `unmapped_without_data_match`
-records the missing assignment without inferring an unknown unit name.
-`response_column_absent` instead means a known target has no response column.
-The original diagnostic reason remains in `$ignored$mappingIssue`: either
-`subunit_not_listed` or `unit_not_assigned`. Only assignment problems affecting
-an existing original/recoded column remain in `$mappingIssues` and require correction.
-
-Preparation skips the absent person and the extra design entries, and continues
-with the available responses from the four valid incident rows:
-
-```{r prepare-available-cases}
-info_available <- prepareSubsetInfo(
-  dat_units, incidents = incidents_with_absent,
-  booklets = inputList$booklets, blocks = extended_blocks,
-  rotation = inputList$rotation, subunits = inputList$subunits,
-  dataLevel = "unit", ID = student_id, classID = class_id
-)
-attr(info_available, "incidentCheck")$missing$persons
-```
-
-```{r verify-case-and-response-checks, include=FALSE}
-stopifnot(mapping_check$summary$matchedCaseRows == 4L,
-          mapping_check$summary$absentCaseRows == 1L,
-          mapping_check$summary$readyRows == 4L,
-          mapping_check$summary$pendingItemRows == 0L,
-          mapping_check$summary$itemCheckComplete,
-          nrow(mapping_check$mappingIssues) == 0L,
-          mapping_check$summary$ignoredSubunits == 2L,
-          identical(unique(info_available$sourceRow), 1:4),
-          attr(info_available, "incidentCheck")$summary$itemCheckComplete)
-```
-
-Preparation uses the same response level and mapping:
-
-```{r unit-selection}
-info_units <- prepareSubsetInfo(
-  dat_units, incidents = incidents, booklets = inputList$booklets,
-  blocks = inputList$blocks, rotation = inputList$rotation,
-  subunits = inputList$subunits, dataLevel = "unit",
-  ID = student_id, classID = class_id
-)
-```
-
-```{r unit-review, eval=FALSE}
-unit_result <- visualSubsetRecode(dat_units, info_units, toRecodeVal = "mci")
-```
-
-The class review displays each response column once. With `positions = TRUE`,
-two rows directly below the answers show **Block position** and **Position in
-block**, aligned with the response columns. A dashed line separates these
-position rows from the students' responses. For U12, the latter is `1, 2`
-because two subunits contribute to the unit:
-
-```{r unit-display, echo=FALSE}
-unit_result <- review_example(dat_units, info_units, show = TRUE)
-```
-
-If a unit spans several block positions, semicolons keep their position groups
-paired: `1; 3` in **Block position** and `1, 2; 2` in **Position in block** mean
-positions 1 and 2 in the first block, and position 2 in the third block.
-The complete subunit-to-unit mapping remains in `info_units`.
-
-Selecting **any reported position**
-selects the whole unit for that person. An aggregated response cannot be recoded
-component by component. Class versus individual grouping and pause/resume work
-the same way at both response levels.
-
-```{r verify-unit-review, include=FALSE}
-expected_units <- dat_units
-expected_units$U12 <- c("mci", "1", "2", "1", NA)
-expected_units$U3 <- c("mci", "mci", "0", "mci", "1")
-stopifnot(checked_units$summary$matchedRows == 4L,
-          missing_unit$summary$missingUnits == 1L,
-          is.na(missing_unit$summary$missingSubunits),
-          identical(missing_unit$missing$units, "U12"),
-          identical(unit_result$dat, expected_units))
-```
-
-## Prepare the affected responses
-
-For the original **subunit-level `dat`**, use
-[prepareSubsetInfo()](../reference/prepareSubsetInfo.html) to expand the
-incident rows into the affected responses:
+Use the same ID names, response level and input list for preparation:
 
 ```{r selection}
 info <- prepareSubsetInfo(
   dat, incidents = incidents, booklets = inputList$booklets,
   blocks = inputList$blocks, rotation = inputList$rotation,
-  subunits = inputList$subunits, dataLevel = "subunit",
+  subunits = inputList$subunits, dataLevel = data_level,
   ID = student_id, classID = class_id
 )
-info[c("sourceRow", class_id, student_id, "datCols", "block", "blockPosition")]
 ```
 
-A's two rows select I1, I2 and I3. B's position 1 selects only I3. C is not
-selected. In K2, position 2 selects I3 for D but I1 and I2 for E. These are the
-only cells available to the review.
-
-After [recodeData()](../reference/recodeData.html), also supply
-`subunits = inputList$subunits` to map original subunit names to recoded columns.
-For already aggregated data, use the unit-level workflow above.
-
-## Review together by class
-
-For prepared long incidents, [visualSubsetRecode()](../reference/visualSubsetRecode.html)
-defaults to **one review step per class**.
-The explicit equivalent is `useGroups = class_id` (here `"group_key"`):
+In unit mode, **any affected subunit selects its entire unit**. Here I1 and I2
+both select U12, which is displayed and recoded once per person. Supply the
+complete `inputList$subunits` table; subunit names and unit response names may differ.
 
 ```{r class-review, eval=FALSE}
-class_result <- visualSubsetRecode(dat, info, toRecodeVal = "mci")
-# Equivalent: useGroups = class_id
+result <- visualSubsetRecode(
+  dat, info, toRecodeVal = "mci", nonValidValues = c("mbi", "mnr"),
+  positions = TRUE, comments = TRUE
+)
 ```
 
-The two steps are K1 (A and B) and K2 (D and E). Students with the same item and
-position layout appear in one table. Different layouts produce separate tables
-**within the same review step and decision**. With `positions = TRUE`, the two
-position rows appear directly beneath the answers in each table. Explicit
-`positions = FALSE` hides them and disables selection by block position.
-Here is the actual display when choosing **yes, all values** for each class:
+This gives **one decision per class**. Different item/position layouts appear in
+separate tables within that decision. `positions = TRUE` adds the two rows below
+the responses and enables block selection; `comments = TRUE` shows incident
+comments. Both switches accept `TRUE` or `FALSE`. For the first class:
 
-```{r class-display, echo=FALSE}
-class_result <- review_example(dat, info, show = TRUE)
+```{r response-display, echo=FALSE}
+eatPrep:::.subset_display(dat, info[info[[class_id]] == "K1", ], student_id, TRUE)
 ```
 
-`"mci"` is the replacement code used here for invalidated responses. Choosing
-**yes, specific blocks** restricts the decision to selected block positions
-within the current class. It never adds unreported person--position pairs.
-Missing responses remain NA.
+Multiple within-block positions are comma-separated. Semicolons separate paired
+block groups when a unit spans several blocks; selecting any reported block
+position selects the whole unit. The full mapping remains in `info`.
 
-```{r class-result}
-class_result$dat
-```
+Choose **all values**, **all non-valid values**, or **specific blocks** in the
+menu. `nonValidValues` controls only the second choice: supply numeric codes or
+text codes as in the example. Its default is `c(-99, -98, -97, -96)`; matching
+uses original responses, even after revisiting a group. `NA` responses stay missing.
+**Reset** withdraws the group's previous recoding; **no** leaves it unchanged.
 
-C's responses and B's I1/I2 retain their original values. E's I1 remains missing.
+## 4. Individual review and resuming
 
-## Review separately by person
-
-Use the **same selection**, with `useGroups = NULL` supplied explicitly:
+For one decision per person, pass `useGroups = NULL` explicitly:
 
 ```{r individual-review, eval=FALSE}
-individual_result <- visualSubsetRecode(
-  dat, info, useGroups = NULL, toRecodeVal = "mci"
+result <- visualSubsetRecode(
+  dat, info, useGroups = NULL, nonValidValues = c("mbi", "mnr"), toRecodeVal = "mci"
 )
 ```
 
-The four steps are A, B, D and E. All positions reported for A are shown in A's
-single step. Omitting `useGroups` retains the class default, so the explicit
-`NULL` matters. Accepting all four persons produces the same responses as
-accepting both classes:
+All incident rows for a person are combined. For data without classes, use
+`classID = NULL` in both checking and preparation; every incident must then name
+a person, and class-level reports are not allowed.
 
-```{r replay-individual, include=FALSE}
-individual_result <- review_example(dat, info, useGroups = NULL)
-```
-
-```{r individual-result}
-individual_result$dat
-identical(class_result$dat, individual_result$dat)
-```
-
-```{r verify-results, include=FALSE}
-expected <- dat
-expected$I1 <- c("mci", "0", "1", "0", NA)
-expected$I2 <- c("mci", "1", "1", "1", "mci")
-expected$I3 <- c("mci", "mci", "0", "mci", "1")
-stopifnot(identical(class_result$dat, expected),
-          identical(individual_result$dat, expected),
-          identical(class_result$state$groups, c("K1", "K2")),
-          identical(individual_result$state$groups, c("A", "B", "D", "E")))
-```
-
-## Individual data without a class ID
-
-Set `classID = NULL` explicitly. Every incident then needs a person ID; class
-reports are forbidden. An accidentally missing or misspelled class column does
-not silently enable this exception.
-
-```{r no-class}
-individual_dat <- dat[c(student_id, "I1", "I2", "I3")]
-individual_incidents <- incidents[1:3, c(student_id, "blockPosition", "comment")]
-individual_info <- prepareSubsetInfo(
-  individual_dat, incidents = individual_incidents, ID = student_id, classID = NULL,
-  booklets = inputList$booklets, blocks = inputList$blocks,
-  rotation = inputList$rotation
-)
-individual_info[c("sourceRow", student_id, "datCols", "blockPosition")]
-```
-
-Passing `individual_info` to [visualSubsetRecode()](../reference/visualSubsetRecode.html)
-defaults to one step per person. If the incident table contains `level`, every
-value must be `"person"`.
-
-## Pause, resume and retain decisions
-
-For a longer review, choose a new checkpoint filename:
+For longer reviews, choose a new checkpoint file and use the pause menu:
 
 ```{r checkpoint, eval=FALSE}
 result <- visualSubsetRecode(
-  dat, info, toRecodeVal = "mci", checkpoint = "review.rds"
+  dat, info, nonValidValues = c("mbi", "mnr"),
+  toRecodeVal = "mci", checkpoint = "review.rds"
 )
-# Choose "pause review (resume later)". In a later R session:
-library(eatPrep)
+# After pausing, including in a later R session:
 result <- visualSubsetRecode(state = "review.rds")
 ```
 
-Completed decisions, original responses, grouping and incident row references
-are retained. Continue data preparation with `result$dat`. `result$subsetInfo`
-contains the decision history, including selected cells and original incident
-rows; rows can repeat when a group was reviewed more than once.
+Resume with `state` alone: it retains the original data, decisions and settings,
+including `nonValidValues`. Continue processing with `result$dat`; inspect decisions
+in `result$subsetInfo`. For the legacy `issues` format and all argument details,
+see [prepareSubsetInfo()](../reference/prepareSubsetInfo.html) and
+[visualSubsetRecode()](../reference/visualSubsetRecode.html).
 
-**Reset to original values** withdraws the current group's previous recoding;
-**no** leaves it unchanged. If another review group still requires a recoding of
-the same cell, reset preserves it. Resume from the saved state to retain this
-history and the original values.
-
-## Existing explicit issue specifications
-
-The `issues` input remains available for item names, named blocks, and explicit
-person/class reports using `issueId`, `level`, `targetId`, `scope`, and `target`.
-This format requires a unique `issueId` per row and defaults to one review step
-per issue. Class issues can use membership directly from `dat`; an existing
-`persons` argument remains supported for this legacy format. See
-[prepareSubsetInfo()](../reference/prepareSubsetInfo.html) and
-[visualSubsetRecode()](../reference/visualSubsetRecode.html) for details.
+```{r verify-results, include=FALSE}
+by_class <- review_example(dat, info)
+by_person <- review_example(dat, info, useGroups = NULL)
+expected <- dat
+expected$U12[1] <- "mci"
+expected$U3[c(1, 2, 4)] <- "mci"
+filtered <- review_example(dat, info, nonValidValues = c("mbi", "mnr"),
+                            choice = "yes, all non-valid values (mbi, mnr)")
+expected_filtered <- dat
+expected_filtered$U12[1] <- "mci"
+expected_filtered$U3[2] <- "mci"
+stopifnot(checked$summary$readyRows == 4L,
+          identical(by_class$dat, expected), identical(by_person$dat, expected),
+          identical(filtered$dat, expected_filtered),
+          identical(by_class$state$groups, c("K1", "K2")),
+          identical(by_person$state$groups, c("A", "B", "D", "E")))
+```

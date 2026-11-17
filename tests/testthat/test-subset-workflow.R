@@ -191,6 +191,46 @@ test_that("group recoding changes only flagged cells with and without positions"
   }
 })
 
+test_that("custom numeric non-valid codes filter original values only", {
+  dat <- data.frame(ID = paste0("P", 1:5), I1 = c(-88, -99, 1, NA, -77))
+  info <- data.frame(ID = dat$ID, datCols = "I1", group = "G")
+  expected <- dat
+  expected$I1[c(1, 5)] <- -91
+  selected <- run_subset_review(dat, info, c(2, 1), useGroups = "group",
+                                nonValidValues = c(-88, -77))
+  expect_identical(selected$dat, expected)
+  expect_identical(selected$state$settings$nonValidValues, c("-88", "-77"))
+  expect_identical(selected$state$history[[1]]$choice, "yes, all non-valid values (-88, -77)")
+  # Revisiting after recoding all cells must still inspect their original values.
+  revisited <- run_subset_review(dat, info, c(1, 2, 2, 1), useGroups = "group",
+                                 nonValidValues = c(-88, -77))
+  expect_identical(revisited$dat, expected)
+  all_values <- run_subset_review(dat, info, c(1, 1), useGroups = "group",
+                                  nonValidValues = -88)
+  expect_equal(all_values$dat$I1, c(-91, -91, -91, NA, -91))
+})
+
+test_that("text non-valid codes match factor responses exactly and retain NAs", {
+  dat <- data.frame(ID = paste0("P", 1:5), I1 = factor(c("mbi", "mnr", "MNR", "1", NA)))
+  info <- data.frame(ID = dat$ID, datCols = "I1", group = "G")
+  result <- run_subset_review(dat, info, c(2, 1), useGroups = "group",
+                              nonValidValues = c("mbi", "mnr", "mbi"), toRecodeVal = "mci")
+  expect_identical(as.character(result$dat$I1), c("mci", "mci", "MNR", "1", NA))
+  expect_s3_class(result$dat$I1, "factor")
+  expect_identical(result$state$settings$nonValidValues, c("mbi", "mnr"))
+  expect_identical(result$state$history[[1]]$choice, "yes, all non-valid values (mbi, mnr)")
+})
+
+test_that("invalid non-valid filters fail before opening menus", {
+  dat <- data.frame(ID = "P1", I1 = 1)
+  info <- data.frame(ID = "P1", datCols = "I1")
+  invalid <- list(NULL, numeric(), character(), TRUE, NA_real_, c("mbi", NA),
+                  c("mbi", " "), Inf, list("mbi"), matrix("mbi"), factor("mbi"))
+  for (values in invalid) {
+    expect_error(visualSubsetRecode(dat, info, nonValidValues = values), "nonValidValues")
+  }
+})
+
 test_that("positions print below responses in the matching columns", {
   old_options <- options(width = 100)
   on.exit(options(old_options), add = TRUE)

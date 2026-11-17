@@ -1,11 +1,13 @@
 visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
                                useGroups = NULL, positions = FALSE, comments = FALSE,
-                               state = NULL, checkpoint = NULL) {
+                               state = NULL, checkpoint = NULL,
+                               nonValidValues = c(-99, -98, -97, -96)) {
   resuming <- !is.null(state)
   if (resuming) {
     supplied <- c(dat = !missing(dat), subsetInfo = !missing(subsetInfo), ID = !missing(ID),
                   toRecodeVal = !missing(toRecodeVal), useGroups = !missing(useGroups),
-                  positions = !missing(positions), comments = !missing(comments))
+                  positions = !missing(positions), comments = !missing(comments),
+                  nonValidValues = !missing(nonValidValues))
     if (any(supplied)) {
       stop("When resuming, supply only state and optionally checkpoint; the original inputs and settings are stored in state.", call. = FALSE)
     }
@@ -27,7 +29,8 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
       if (missing(comments)) comments <- TRUE
     }
     settings <- list(ID = ID, toRecodeVal = toRecodeVal, useGroups = useGroups,
-                     positions = positions, comments = comments)
+                     positions = positions, comments = comments,
+                     nonValidValues = .subset_nonvalid_values(nonValidValues))
     session <- .subset_new_state(dat, subsetInfo, settings)
   }
   checkpoint <- .subset_checkpoint_path(checkpoint)
@@ -36,7 +39,7 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
   positions <- session$settings$positions
   comments <- session$settings$comments
   group_col <- .subset_group_column(session$settings)
-  choices <- .subset_review_choices(positions)
+  choices <- .subset_review_choices(positions, .subset_state_nonvalid(session$settings))
 
   # UI and submenu work never mutate session. Publish a complete transition only
   # after its checkpoint was replaced successfully, with interrupts deferred.

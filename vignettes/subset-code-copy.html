@@ -1,0 +1,93 @@
+<style>
+.subset-code-wrap { position: relative; }
+.subset-code-wrap pre { padding-top: 2.6rem; }
+.subset-copy-button {
+  position: absolute; top: 0.35rem; right: 0.45rem; z-index: 1;
+  padding: 0.2rem 0.55rem; border: 1px solid #b7bec7; border-radius: 4px;
+  background: #fff; color: #253447; font: 12px/1.4 sans-serif; cursor: pointer;
+}
+.subset-copy-button:hover { background: #e9eef4; }
+.subset-copy-button:focus-visible { outline: 2px solid #28649b; outline-offset: 2px; }
+@media print {
+  .subset-copy-button { display: none; }
+  .subset-code-wrap pre { padding-top: 0.5rem; }
+}
+</style>
+<script>
+(function () {
+  function fallbackCopy(text) {
+    var focused = document.activeElement;
+    var field = document.createElement("textarea");
+    field.value = text;
+    field.setAttribute("aria-label", "Code to copy");
+    field.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
+    document.body.appendChild(field);
+    try {
+      field.focus();
+      field.select();
+      if (!document.execCommand("copy")) throw new Error("Clipboard unavailable");
+    } finally {
+      field.remove();
+      if (focused && typeof focused.focus === "function") focused.focus();
+    }
+  }
+
+  function installCopyButtons() {
+    document.querySelectorAll("pre.r, pre.sourceCode").forEach(function (pre) {
+      var code = pre.querySelector("code");
+      if (!code || pre.dataset.subsetCopy) return;
+      pre.dataset.subsetCopy = "true";
+      var wrapper = pre.parentElement;
+      if (!wrapper.classList.contains("sourceCode")) {
+        wrapper = document.createElement("div");
+        pre.parentNode.insertBefore(wrapper, pre);
+        wrapper.appendChild(pre);
+      }
+      wrapper.classList.add("subset-code-wrap");
+      // Avoid duplicate controls if pkgdown has already installed its buttons.
+      wrapper.querySelectorAll("[data-clipboard-copy]").forEach(function (button) {
+        button.remove();
+      });
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "subset-copy-button";
+      button.textContent = "Copy";
+      button.setAttribute("aria-label", "Copy R code to clipboard");
+      button.setAttribute("aria-live", "polite");
+      var timer;
+      button.addEventListener("click", async function () {
+        var text = code.textContent.replace(/\n$/, "");
+        clearTimeout(timer);
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(text);
+            } catch (error) {
+              fallbackCopy(text);
+            }
+          } else {
+            fallbackCopy(text);
+          }
+          button.textContent = "Copied!";
+          button.setAttribute("aria-label", "Code copied to clipboard");
+        } catch (error) {
+          var range = document.createRange();
+          range.selectNodeContents(code);
+          var selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          button.textContent = "Press Ctrl+C / Cmd+C";
+          button.setAttribute("aria-label", "Copy unavailable. Code selected; press Control+C or Command+C.");
+        }
+        timer = setTimeout(function () {
+          button.textContent = "Copy";
+          button.setAttribute("aria-label", "Copy R code to clipboard");
+        }, 2500);
+      });
+      wrapper.appendChild(button);
+    });
+  }
+  if (document.readyState === "complete") installCopyButtons();
+  else window.addEventListener("load", installCopyButtons, { once: true });
+}());
+</script>

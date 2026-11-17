@@ -9,7 +9,8 @@ or provide a manually constructed selection table.
 \usage{
 visualSubsetRecode(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
                    useGroups = NULL, positions = FALSE, comments = FALSE,
-                   state = NULL, checkpoint = NULL)
+                   state = NULL, checkpoint = NULL,
+                   nonValidValues = c(-99, -98, -97, -96))
 }
 \arguments{
   \item{dat}{A nonempty data frame of responses in wide format: one row per person,
@@ -78,6 +79,16 @@ visualSubsetRecode(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
     \code{state} is a file path, that file is also used as the checkpoint unless
     a different \code{checkpoint} path is supplied. An object supplied through
     \code{state} does not enable disk saving by itself.}
+  \item{nonValidValues}{A nonempty numeric or character vector defining the values
+    selected by the \sQuote{yes, all non-valid values} menu action. Default:
+    \code{c(-99, -98, -97, -96)}. For text-coded responses, for example, use
+    \code{c("mbi", "mnr")}. Values are matched exactly against the original
+    responses after conversion to character; matching is case-sensitive.
+    Duplicates are removed. \code{NA}, \code{NULL}, blank strings, infinite values,
+    logical vectors, factors and lists are not allowed. Missing responses remain
+    unchanged. The menu shows the configured values; the \sQuote{all values}
+    action is unaffected. The filter is stored in \code{state}; omit this argument
+    when resuming. Older checkpoints retain the historical four-code filter.}
 }
 \details{
 Only the selected person--item pairs are displayed and modified, including when
@@ -98,7 +109,7 @@ position selects the entire unit; individual components of an aggregate cannot
 be recoded separately. The response level and mapping survive pause/resume.
 
 Options include recoding all selected nonmissing values, recoding only original
-values \code{-99}, \code{-98}, \code{-97}, \code{-96}, choosing block positions,
+values listed in \code{nonValidValues}, choosing block positions,
 leaving the current selection unchanged, flagging for later review, going back,
 resetting, pausing, and exiting. The non-valid-code filter uses the original input values,
 so revisiting a subset does not change which cells qualify.
@@ -198,6 +209,10 @@ result <- visualSubsetRecode(state = result$state)
 # Explicit logical flags override the prepared selection's display defaults.
 result <- visualSubsetRecode(dat, info, useGroups = NULL,
                              positions = FALSE, comments = TRUE)
+
+# For responses with text missing codes, configure the non-valid menu action.
+result <- visualSubsetRecode(dat, info, nonValidValues = c("mbi", "mnr"),
+                             toRecodeVal = "mci")
 
 # Manually constructed selections remain supported.
 selection <- data.frame(ID = c("P1", "P2"), datCols = c("I1", "I2"), group = "G")
