@@ -18,59 +18,86 @@ prepareSubsetInfo(dat, issues = NULL, persons = NULL, booklets = NULL,
 \method{summary}{preparedSubsetInfo}(object, ...)
 }
 \arguments{
-  \item{dat}{Data frame of responses in wide format, with unique, nonmissing person IDs.}
-  \item{issues}{A data frame with one row per incident and these columns:
+  \item{dat}{A nonempty data frame of wide responses: one row per person and one
+    column per response, with unique, nonmissing, nonblank person IDs. For
+    \code{incidents}, also include nonmissing, nonblank class IDs unless
+    \code{classID = NULL}. Response values may be \code{NA}.}
+  \item{issues}{\code{NULL} (default) or a nonempty data frame for the explicit
+    issue workflow. Supply exactly one of \code{issues} and \code{incidents}.
+    An \code{issues} table has one row per issue and these columns:
     \describe{
-      \item{issueId}{Unique, nonmissing incident identifier.}
-      \item{level}{Either \code{"person"} or \code{"class"}.}
-      \item{targetId}{Person ID or class ID, according to \code{level}.}
-      \item{scope}{Either \code{"item"}, \code{"block"}, or \code{"blockPosition"}.}
+      \item{issueId}{Unique, nonmissing, nonblank incident identifier.}
+      \item{level}{Character entries: \code{"person"} or \code{"class"}.}
+      \item{targetId}{Nonmissing, nonblank person ID or class ID, according to \code{level}.}
+      \item{scope}{Character entries: \code{"item"}, \code{"block"}, or \code{"blockPosition"}.}
       \item{target}{A single item name, block name, or positive integer block position,
         according to \code{scope}. Item targets use subunit/recoded names in
         subunit mode and unit names in unit mode. A character column accommodates mixed scopes.}
       \item{comment}{Optional description; missing comments are allowed.}
     }
   }
-  \item{persons}{Optional legacy class-membership table for \code{issues}, with
+  \item{persons}{\code{NULL} (default) or a nonempty legacy class-membership data
+    frame for \code{issues}, with
     columns named by \code{ID} and \code{classID} and one row per person.
-    When omitted, class issues use the membership in \code{dat}.
+    IDs must be nonmissing and nonblank; person IDs must be unique.
+    With \code{NULL}, class issues use the membership in \code{dat}.
     Do not supply this argument with \code{incidents}. Class IDs must identify
     classes uniquely across schools.}
-  \item{booklets}{Booklet design with \code{booklet} and columns \code{block1},
+  \item{booklets}{\code{NULL} (default) or a booklet-design data frame with a unique
+    \code{booklet} identifier and columns \code{block1},
     \code{block2}, etc. Column suffixes determine positions, regardless of column
-    order. Empty or missing block entries represent unoccupied positions.}
-  \item{blocks}{Block design with \code{block}, \code{subunit}, and
-    \code{subunitBlockPosition}. Items and positions must be unique within blocks.}
-  \item{rotation}{Person-to-booklet mapping with columns named by \code{ID} and
-    \code{booklet}, with one row per person.}
-  \item{subunits}{Mapping with unique \code{subunit}, optional
+    order. Entries are block identifiers; empty or missing entries represent
+    unoccupied positions. Required together with \code{blocks} and \code{rotation}
+    for \code{incidents} and for issues with scope \code{"block"} or
+    \code{"blockPosition"}. All three may be \code{NULL} for item-only issues.}
+  \item{blocks}{\code{NULL} (default) or a block-design data frame with \code{block},
+    \code{subunit}, and \code{subunitBlockPosition}. Positions must be positive,
+    finite whole numbers, such as \code{1}, \code{2}, or their character
+    equivalents. Items and positions must be unique within each relevant block.
+    Required whenever \code{booklets} is required.}
+  \item{rotation}{\code{NULL} (default) or a person-to-booklet data frame with
+    columns named by \code{ID} and \code{booklet}, with one row per person.
+    Required whenever \code{booklets} is required.}
+  \item{subunits}{\code{NULL} (default) or a mapping data frame with unique \code{subunit}, optional
     \code{subunitRecoded} names and \code{unit} assignments, normally
     \code{inputList$subunits}. Required in unit mode, including the \code{unit}
-    column. Supply the complete table so single-subunit units can be identified.}
-  \item{ID}{Person identifier column-name string, e.g. \code{"IDSTUD"}, shared by
+    column. Supply the complete table from the same input list as the design
+    tables so single-subunit units can be identified. In subunit mode,
+    \code{NULL} permits matching original subunit names directly to data columns.}
+  \item{ID}{A single nonempty character string naming the person-ID column,
+    e.g. \code{"learner_key"}, shared by
     \code{dat}, \code{incidents} and \code{rotation}. Input columns are not renamed.
     Must differ from \code{classID} and reserved incident/output column names.
-    Default: \code{"ID"}.}
-  \item{classID}{Class identifier column, normally in \code{dat} and \code{incidents}.
-    Supply its name as a string, e.g. \code{"IDTESTGROUP"}; default: \code{"classId"}.
+    Default: \code{"ID"}. Supply a column name, not a vector of IDs.}
+  \item{classID}{A single nonempty character string naming the class-ID column,
+    normally in \code{dat} and \code{incidents}, or \code{NULL}.
+    An example column name is \code{"group_key"}; default: \code{"classId"}.
     Set \code{NULL} for individual data without classes;
     class reports are then forbidden. Also names the column in legacy \code{persons}.}
-  \item{incidents}{Long incident data with person ID, class ID and
-    \code{blockPosition}; optional \code{issueId}, \code{level}, \code{comment}.
+  \item{incidents}{\code{NULL} (default) or a nonempty long data frame with person
+    ID, class ID and \code{blockPosition}. Column names for the IDs are supplied
+    through \code{ID} and \code{classID}; \code{classID = NULL} removes the class
+    column requirement. Block positions must be positive, finite whole numbers
+    (numeric or character equivalents). Optional columns are \code{issueId},
+    \code{level} (\code{"person"} or \code{"class"}) and \code{comment}.
     Supply this instead of \code{issues} and \code{persons}.
     See \code{\link{checkSubsetIncidents}} for the complete input contract.}
-  \item{unmatched}{For \code{incidents}, \code{"drop"} (default) excludes source
+  \item{unmatched}{A single character string: \code{"drop"} (default for
+    \code{incidents}) or \code{"error"}. For \code{incidents}, \code{"drop"} excludes source
     rows with unknown persons/classes, with an informational message and retained
     report. \code{"error"} makes absent cases an error as well. On errors, an
     overview separates case matching from response resolution; the complete
     report is retained in \code{condition$report}. All other
     problems, including class mismatches and unresolved design, still stop preparation.
-    Dropping every selection also raises an error.}
-  \item{dataLevel}{Response level: \code{"subunit"} (default) resolves raw or
+    Dropping every selection also raises an error. With \code{issues}, handling
+    is always strict: omit this argument or use \code{"error"}; explicitly
+    supplying \code{"drop"} is not allowed.}
+  \item{dataLevel}{A single character string: \code{"subunit"} (default) or
+    \code{"unit"}. \code{"subunit"} resolves raw or
     recoded subunits; \code{"unit"} maps design subunits to aggregated units.
     Supply the same level to \code{checkSubsetIncidents}.}
-  \item{object}{A result from \code{prepareSubsetInfo}.}
-  \item{...}{Reserved for additional summary arguments.}
+  \item{object}{A \code{preparedSubsetInfo} data frame returned by \code{prepareSubsetInfo}.}
+  \item{...}{Additional summary arguments; currently ignored.}
 }
 \details{
 \strong{Long incident workflow.} Each row of \code{incidents} describes a

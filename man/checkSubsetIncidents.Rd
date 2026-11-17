@@ -15,34 +15,58 @@ checkSubsetIncidents(dat, incidents, booklets, blocks, rotation,
 \method{print}{subsetIncidentCheck}(x, ..., max_problems = 0L)
 }
 \arguments{
-  \item{dat}{Wide response data with unique, nonmissing person IDs and, unless
-    \code{classID = NULL}, nonmissing class IDs.}
-  \item{incidents}{A long data frame with columns named by \code{ID} and
-    \code{classID}, and \code{blockPosition}. Each row reports one affected
-    block position. Optional columns are \code{issueId}, \code{level} and
-    \code{comment}. See Details.}
-  \item{booklets}{Booklet table with \code{booklet}, \code{block1}, \code{block2}, etc.,
-    normally \code{inputList$booklets}.}
-  \item{blocks}{Block table with \code{subunit}, \code{block} and
-    \code{subunitBlockPosition}, normally \code{inputList$blocks}.}
-  \item{rotation}{Person-to-booklet table with columns named by \code{ID} and
-    \code{booklet}, normally \code{inputList$rotation}.}
-  \item{subunits}{Mapping table, normally \code{inputList$subunits}, with unique
+  \item{dat}{A nonempty data frame of wide response data: one row per person and
+    one column per response. Person IDs must be unique, nonmissing and nonblank.
+    Unless \code{classID = NULL}, class IDs must also be nonmissing and nonblank.
+    Response values may be \code{NA}.}
+  \item{incidents}{A nonempty long data frame with columns named by \code{ID} and
+    \code{classID}, plus \code{blockPosition}. With \code{classID = NULL}, the
+    class column is not required. Each row reports one affected block position,
+    a positive finite whole number such as \code{1} or \code{2}; numeric values
+    and their character equivalents are accepted. Optional \code{level} entries
+    are \code{"person"} or \code{"class"}. Optional \code{issueId} entries must
+    be nonmissing and nonblank but may repeat; optional \code{comment} entries
+    may be missing. Person IDs may be missing only for class reports; see Details
+    for the all-supplied/all-missing rule and automatic \code{level} selection.}
+  \item{booklets}{A data frame, normally \code{inputList$booklets}, with a unique
+    \code{booklet} identifier and columns \code{block1}, \code{block2}, etc.
+    Entries in these columns are block identifiers; \code{NA} and blank entries
+    denote unoccupied positions. Positive integer column suffixes specify the
+    positions, regardless of column order. Required; cannot be \code{NULL}.}
+  \item{blocks}{A data frame, normally \code{inputList$blocks}, with \code{subunit},
+    \code{block} and \code{subunitBlockPosition}. Positions must be positive finite
+    whole numbers (numeric or character equivalents). Subunits and positions must
+    be unique within each relevant block. Required; cannot be \code{NULL}.}
+  \item{rotation}{A data frame, normally \code{inputList$rotation}, with columns
+    named by \code{ID} and \code{booklet}, with one row per relevant person.
+    Missing booklet assignments are reported by the check.
+    Required; cannot be \code{NULL}.}
+  \item{subunits}{\code{NULL} (default) or a mapping data frame, normally
+    \code{inputList$subunits}, with unique
     \code{subunit}, optional \code{subunitRecoded}, and \code{unit}.
-    Required with \code{dataLevel = "unit"}; otherwise optional.
+    Required, including the \code{unit} column, with \code{dataLevel = "unit"};
+    otherwise optional. Names and assignments are identifiers, not response values.
+    Supply the complete table from the same input list as the design tables.
     See \code{\link{prepareSubsetInfo}}.}
-  \item{ID}{Person ID column in response, incident and rotation data, supplied as
-    a column-name string, e.g. \code{"IDSTUD"}. Default: \code{"ID"}.
+  \item{ID}{A single nonempty character string naming the person-ID column in
+    response, incident and rotation data, e.g. \code{"learner_key"}.
+    Default: \code{"ID"}. Supply a column name, not a vector of IDs.
+    It must differ from \code{classID} and reserved incident/output names.
     Input columns do not need to be renamed.}
-  \item{classID}{Class ID column in response and incident data. Default:
-    \code{"classId"}. Supply a column-name string such as \code{"IDTESTGROUP"}, or
-    set explicitly to \code{NULL} for individual data without classes.}
-  \item{dataLevel}{Response level: \code{"subunit"} (default) resolves original
+  \item{classID}{A single nonempty character string naming the class-ID column in
+    response and incident data, e.g. \code{"group_key"}, or \code{NULL} for
+    individual data without classes. Default: \code{"classId"}.
+    It must differ from \code{ID} and reserved incident/output names.
+    \code{NULL} forbids class-level reports.}
+  \item{dataLevel}{A single character string: \code{"subunit"} (default) or
+    \code{"unit"}. \code{"subunit"} resolves original
     or recoded subunit columns; \code{"unit"} resolves aggregated units through
     \code{subunits$unit}. Supply the same level to \code{prepareSubsetInfo}.}
-  \item{x}{A \code{subsetIncidentCheck} result.}
-  \item{...}{Reserved for additional print arguments.}
-  \item{max_problems}{Maximum number of problem details to print. The default
+  \item{x}{A \code{subsetIncidentCheck} list returned by \code{checkSubsetIncidents}.}
+  \item{...}{Additional print arguments; currently ignored.}
+  \item{max_problems}{A single nonnegative whole number (numeric or integer), or
+    \code{Inf}, giving the maximum number of problem details to print.
+    \code{NA}, \code{NULL}, negative and fractional values are not allowed. The default
     \code{0} shows the case/response overview. Positive values additionally show
     counts by code and up to that many details; use \code{Inf} for all details. The returned problem
     table always contains all detected problems.}
