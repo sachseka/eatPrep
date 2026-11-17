@@ -1,5 +1,24 @@
 # Changelog
 
+## eatPrep 1.0.19
+
+- [`prepareSubsetInfo()`](https://sachseka.github.io/eatPrep/reference/prepareSubsetInfo.md)
+  accepts long incidents, configurable ID columns and unit-level
+  responses. Class membership comes from the data; review defaults to
+  one step per class, with `useGroups = NULL` for individual review.
+- [`checkSubsetIncidents()`](https://sachseka.github.io/eatPrep/reference/checkSubsetIncidents.md)
+  reports distinct missing counts and separates case matching from
+  response mapping. Preparation skips absent cases by default and
+  records unavailable design entries in `$ignored`; ambiguities
+  affecting available responses remain errors.
+- [`visualSubsetRecode()`](https://sachseka.github.io/eatPrep/reference/visualSubsetRecode.md)
+  accepts `nonValidValues` for numeric or text missing codes, retained
+  across pause/resume. With `positions = TRUE`, block positions appear
+  below the responses, separated by a dashed line.
+- Shortened the incident vignette, added code-copy buttons, and
+  clarified argument types, allowed values and defaults in the help
+  pages.
+
 ## eatPrep 1.0.18
 
 - New

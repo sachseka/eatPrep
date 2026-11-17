@@ -842,7 +842,7 @@ mnrDat <- mnrCoding(dat = prepDat2, pid = "ID",
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 ```
 
 Type
@@ -885,7 +885,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
     recodeData = TRUE, recodeMnr = TRUE, breaks = c(1,2),
     aggregateData = TRUE, scoreData = TRUE,
     writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-11-10 16:43:26.082831
+#> Starting automateDataPreparation 2026-11-17 16:53:11.951691
 #> 
 #> Check data...
 #> 
@@ -947,7 +947,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> 6 booklet3               3   31
 #> start recoding (item-wise)
 #> done
-#> elapsed time: 0.1 secs
+#> elapsed time: 0.0 secs
 #> 
 #> Start aggregating
 #> Since inputList$aggrMiss exists, this will be used instead of default.
@@ -961,7 +961,7 @@ preparedData <- automateDataPreparation(inputList = inputList,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-11-10 16:43:26.322296
+#> automateDataPreparation terminated successfully! 2026-11-17 16:53:12.147726
 ```
 
 ## Additional Diagnostics and Rater Tools
@@ -2639,95 +2639,111 @@ substantively best.
 
 The [Reviewing Incident Reports
 vignette](https://sachseka.github.io/eatPrep/articles/subset_review.md)
-walks through a complete review, including rotated booklets, overlapping
-incidents, reset, automatic checkpoints, resuming, and the
-interpretation of decision history.
+follows the usual workflow: response data, design tables from
+`inputList`, and long incidents with class ID, person ID and affected
+block position. It includes a collected preflight report, class and
+individual review, and pause/resume.
 
-Use
-[`prepareSubsetInfo()`](https://sachseka.github.io/eatPrep/reference/prepareSubsetInfo.md)
-to describe incidents at person or class level. Each report has a unique
-`issueId`, a `level` (`person` or `class`), the corresponding
-`targetId`, and a task selection: `scope` is `item`, `block`, or
-`blockPosition`, with its name or position in `target`. Missing comments
-are allowed.
-
-This small example includes different booklets within one class and
-overlapping class and individual reports:
+In each class, incident person IDs must be either all supplied or all
+missing. Supplied IDs select exactly the reported person–position pairs;
+all-missing IDs select every member of that class in the response data.
+Partly missing IDs are rejected. A separate `persons` table is not
+needed.
 
 ``` r
 
-reviewData <- data.frame(ID = c("P1", "P2"), I1 = c(1, 0), I2 = c(0, 1))
-persons <- data.frame(ID = c("P1", "P2"), classId = "K1")
+reviewData <- data.frame(ID = c("P1", "P2", "P3"), classId = "K1",
+                         I1 = c(1, 0, 1), I2 = c(0, 1, 0))
 booklets <- data.frame(booklet = c("X", "Y"),
                        block1 = c("A", "B"), block2 = c("B", "A"))
 blocks <- data.frame(subunit = c("I1", "I2"), block = c("A", "B"),
                      subunitBlockPosition = 1)
-rotation <- data.frame(ID = c("P1", "P2"), booklet = c("X", "Y"))
-issues <- data.frame(
-  issueId = c("V1", "V2"), level = c("class", "person"),
-  targetId = c("K1", "P1"), scope = c("blockPosition", "item"),
-  target = c("1", "I1"), comment = c("Audio failure", NA)
-)
+rotation <- data.frame(ID = reviewData$ID, booklet = c("X", "Y", "X"))
+incidents <- data.frame(classId = "K1", ID = c("P1", "P2"),
+                        blockPosition = 1, comment = "Audio failure")
+checkSubsetIncidents(reviewData, incidents, booklets, blocks, rotation)
+#> Incident check (subunit responses)
+#> Cases: 2 of 2 incident rows matched to dat.
+#> Missing subunit columns: 0 detected among 2 distinct subunit identifiers checked.
+#> Ready for review: 2 incident rows.
+#> All incident rows could be matched and resolved.
 subsetInfo <- prepareSubsetInfo(
-  reviewData, issues, persons = persons,
+  reviewData, incidents = incidents,
   booklets = booklets, blocks = blocks, rotation = rotation
 )
-summary(subsetInfo)
-#>   issueId  level targetId persons items cells overlappingCells
-#> 1      V1  class       K1       2     2     2                1
-#> 2      V2 person       P1       1     1     1                1
 subsetInfo
-#>   issueId ID datCols  level targetId         scope target block blockPosition
-#> 1      V1 P1      I1  class       K1 blockPosition      1     A             1
-#> 2      V1 P2      I2  class       K1 blockPosition      1     B             1
-#> 3      V2 P1      I1 person       P1          item     I1     A             1
-#>   subunitBlockPosition       comment
-#> 1                    1 Audio failure
-#> 2                    1 Audio failure
-#> 3                    1          <NA>
+#>   issueId ID datCols  level targetId         scope target booklet block
+#> 1    row1 P1      I1 person       P1 blockPosition      1       X     A
+#> 2    row2 P2      I2 person       P2 blockPosition      1       Y     B
+#>   blockPosition subunitBlockPosition       comment subunit subunitRecoded unit
+#> 1             1                    1 Audio failure      I1           <NA> <NA>
+#> 2             1                    1 Audio failure      I2           <NA> <NA>
+#>   item itemStatus mappingIssue ignoredReason sourceRow classId
+#> 1   I1    matched         <NA>          <NA>         1      K1
+#> 2   I2    matched         <NA>          <NA>         2      K1
 ```
 
-The class report selects `P1/I1` and `P2/I2`: block position 1 is
-resolved using each person’s booklet. The individual report separately
-selects `P1/I1`. The summary counts persons, items, cells (including
-missing responses), and cells shared with other incidents. For a named
-block, use `scope = "block"`. For item-only reports the three design
-tables can be omitted. Existing projects can pass `inputList$booklets`,
-`inputList$blocks`, `inputList$rotation`, and, for renamed items,
-`inputList$subunits`. Class membership is supplied separately in
-`persons`. Class IDs must be unique across schools.
+Position 1 selects `P1/I1` and `P2/I2` according to their booklets. P3
+is not selected. To report the whole class instead, use a row with
+`classId = "K1"`, `ID = NA_character_` and `blockPosition = 1`. Class
+IDs must identify classes uniquely across schools. Project data can use
+`inputList$booklets`, `inputList$blocks`, `inputList$rotation` and,
+after item renaming, `subunits = inputList$subunits`.
 
-Unknown persons, unresolved items and targets absent from a person’s
-booklet produce an error before review. Inspect and correct these
-reports instead of silently losing class members. Each report currently
-selects one target.
+For aggregated response data, supply `dataLevel = "unit"` and
+`subunits = inputList$subunits` to both the check and preparation.
+Design tables still contain subunits. Any affected subunit selects its
+whole unit, which is displayed and recoded once. The check’s `$mapping`
+separates `subunit`, `unit` and the actual response column `datCols`;
+`$summary$missingUnits` counts missing units distinctly.
+
+The preflight returns `summary` and `problems`, including original
+incident row numbers, unmatched IDs, conflicting class assignments and
+unresolved positions. Preparation repeats this check and skips absent
+persons/classes by default (`unmatched = "drop"`), with an informational
+message and the retained report in `attr(subsetInfo, "incidentCheck")`.
+Use `unmatched = "error"` for strict handling. Additional design entries
+without response-column matches are omitted and retained in `$ignored`.
+Only design rows needed for the reported persons and positions are
+validated. Ambiguities and missing assignments affecting existing
+response columns still stop preparation. Full metadata checking is
+separate from review selection; see
+[`checkInputList()`](https://sachseka.github.io/eatPrep/reference/checkInputList.md)
+and
+[`checkDesign()`](https://sachseka.github.io/eatPrep/reference/checkDesign.md).
+The default report separates matched cases from pending response checks;
+`$mappingIssues` lists unresolved unit assignments without repeated
+incident rows.
 
 ``` r
 
-# Prepared selections automatically enable incident grouping and available metadata.
+# Default for long incidents: one review step per class.
 datVisRec <- visualSubsetRecode(reviewData, subsetInfo, toRecodeVal = "mci",
                                 checkpoint = "subset-review.rds")
+# Alternative for a new review: one step per person, combining their long rows.
+individualReview <- visualSubsetRecode(reviewData, subsetInfo,
+                                       useGroups = NULL, toRecodeVal = "mci")
 datVisRec$dat
 datVisRec$subsetInfo
-datVisRec$status
 # After pausing, including in a new R session:
 datVisRec <- visualSubsetRecode(state = "subset-review.rds")
 ```
 
-Only marked person-item pairs are changed. Reviewing or resetting one
-incident does not alter another incident’s selection. Reset retains a
-recoding if another incident still requires it; neither class nor
-individual reports take precedence. All recodings preserve `NA`
-responses. Pausing, confirmed exit, and Ctrl+C return completed work and
-a resumable `$state`. With `checkpoint`, the initial state and completed
-decisions or navigation changes are saved automatically. Resume through
-the checkpoint path or the returned state; original values and incident
-ownership are retained for later reset. Explicit person exceptions are
-not implemented.
+Only selected person–item pairs are changed, and NA responses are
+preserved. Different item/position layouts appear in separate tables
+within the same class review step. Reset withdraws the current group’s
+decision while preserving recodings still required by other groups.
+Checkpoints retain original responses, grouping and decisions for later
+continuation.
 
-Manually prepared tables with `ID` and `datCols` remain accepted. For
-these, set `useGroups`, `positions`, and `comments` explicitly when
-needed.
+For individual datasets without classes, prepare with `classID = NULL`.
+Every incident must then have a person ID, class-level reports are
+forbidden, and review defaults to one step per person.
+
+The existing `issues` format for item names, named blocks and explicit
+targets remains supported and defaults to reviewing each unique
+`issueId` separately. Manually prepared tables with `ID` and `datCols`
+also remain accepted.
 
 ## Export
 

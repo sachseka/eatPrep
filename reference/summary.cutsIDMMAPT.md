@@ -182,7 +182,7 @@ s$diagnostics_per_person
 # Fitted models and the actual ratings stay in the original object.
 stats::coef(cuts$models[[1]])
 #>   (Intercept)    difficulty 
-#> -1.359079e-16  9.386582e-01 
+#> -1.907337e-16  9.386582e-01 
 head(cuts$data_used)
 #> # A tibble: 6 × 5
 #>   item_id person   est stage_label stage_raw

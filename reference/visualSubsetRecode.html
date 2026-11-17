@@ -11,7 +11,7 @@ or provide a manually constructed selection table."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.18</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.19</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,57 +53,108 @@ or provide a manually constructed selection table.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">visualSubsetRecode</span><span class="op">(</span>dat <span class="op">=</span> <span class="cn">NULL</span>, subsetInfo <span class="op">=</span> <span class="cn">NULL</span>, ID <span class="op">=</span> <span class="st">"ID"</span>, toRecodeVal <span class="op">=</span> <span class="op">-</span><span class="fl">91</span>,</span>
 <span>                   useGroups <span class="op">=</span> <span class="cn">NULL</span>, positions <span class="op">=</span> <span class="cn">FALSE</span>, comments <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                   state <span class="op">=</span> <span class="cn">NULL</span>, checkpoint <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span>                   state <span class="op">=</span> <span class="cn">NULL</span>, checkpoint <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                   nonValidValues <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">99</span>, <span class="op">-</span><span class="fl">98</span>, <span class="op">-</span><span class="fl">97</span>, <span class="op">-</span><span class="fl">96</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <p></p>
 <dl><dt id="arg-dat">dat<a class="anchor" aria-label="anchor" href="#arg-dat"></a></dt>
-<dd><p>Data frame of responses in wide format, with unique, nonmissing IDs.
-    Required for a new review; omit when resuming through <code>state</code>.</p></dd>
+<dd><p>A nonempty data frame of responses in wide format: one row per person,
+    one column per response, and a person-ID column named by <code>ID</code>. IDs must
+    be unique, nonmissing and nonblank; response values may be <code>NA</code>.
+    Required for a new review. Default: <code>NULL</code>; omit when resuming through
+    <code>state</code>.</p></dd>
 
   <dt id="arg-subsetinfo">subsetInfo<a class="anchor" aria-label="anchor" href="#arg-subsetinfo"></a></dt>
-<dd><p>A data frame with columns named by <code>ID</code> and <code>datCols</code>.
-    Each row selects exactly one person–item pair. Optional columns provide review
-    groups, positions and comments. Alternatively, the result of
-    <code><a href="prepareSubsetInfo.html">prepareSubsetInfo</a></code>.</p></dd>
+<dd><p>A nonempty data frame, usually the result of
+    <code><a href="prepareSubsetInfo.html">prepareSubsetInfo</a></code>, or a manually constructed table with columns
+    named by <code>ID</code> and <code>datCols</code>. Each row selects one person–response
+    pair: its ID must occur in <code>dat</code>, and <code>datCols</code> must name an existing
+    response column other than the ID column. Neither entry may be missing or
+    blank. Optional columns provide groups, positions and comments as described
+    below. Required for a new review; default <code>NULL</code> is used when resuming.</p></dd>
 
   <dt id="arg-id">ID<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
-<dd><p>Person identifier column name; defaults to <code>"ID"</code>, or the stored
-    ID column for a prepared selection if this argument is omitted.</p></dd>
+<dd><p>A single nonempty character string naming the person-ID column in
+    both <code>dat</code> and <code>subsetInfo</code>, e.g. <code>"learner_key"</code>. Default:
+    <code>"ID"</code> for a manual selection; if omitted for a prepared selection,
+    its stored ID column is used. Supply a column name, not a vector of IDs.</p></dd>
 
   <dt id="arg-torecodeval">toRecodeVal<a class="anchor" aria-label="anchor" href="#arg-torecodeval"></a></dt>
-<dd><p>Single nonmissing replacement value, e.g. <code>-91</code> or <code>"mci"</code>.
+<dd><p>A single nonmissing atomic replacement value (length one),
+    usually a number such as <code>-91</code> or a character string such as <code>"mci"</code>.
+    Default: <code>-91</code>. <code>NA</code>, <code>NULL</code> and vectors of multiple values are
+    not allowed. The same value is used for every accepted recoding in the review.
     A character replacement can convert numeric response columns to character.
     Factor columns retain their class, adding the replacement level if necessary.</p></dd>
 
   <dt id="arg-usegroups">useGroups<a class="anchor" aria-label="anchor" href="#arg-usegroups"></a></dt>
-<dd><p>Optional column identifying review subsets. With <code>NULL</code>,
-    review one person at a time. For prepared selections, omission selects
-    <code>"issueId"</code>, so each incident is reviewed separately.</p></dd>
+<dd><p><code>NULL</code> or a single character string naming a column in
+    <code>subsetInfo</code>, e.g. <code>"group_key"</code> or <code>"issueId"</code>; this is not a
+    logical/boolean switch. The named column must have nonmissing, nonblank group
+    identifiers; all rows with the same value form one review step. Explicit
+    <code>NULL</code> reviews one person at a time, combining all their reported rows.
+    For a manual selection the default is <code>NULL</code>.
+    For prepared long incidents, omission selects the stored class column, or
+    the person ID when prepared with <code>classID = NULL</code>. For legacy
+    <code>issues</code> selections, omission selects <code>"issueId"</code>.</p></dd>
 
   <dt id="arg-positions">positions<a class="anchor" aria-label="anchor" href="#arg-positions"></a></dt>
-<dd><p>Show <code>blockPosition</code> and <code>subunitBlockPosition</code>, and
-    offer block-position selection. Both columns must contain positive whole numbers.
-    For prepared selections, enabled automatically if all positions are available.</p></dd>
+<dd><p>A single logical (boolean) value, <code>TRUE</code> or <code>FALSE</code>;
+    <code>NA</code>, <code>NULL</code>, numbers and strings are not allowed. <code>TRUE</code> shows
+    two rows below the responses, separated by a dashed rule and aligned with
+    their columns: ‘Block position’
+    (<code>blockPosition</code>) and ‘Position in block’ (<code>subunitBlockPosition</code>).
+    It also offers selection by block position. Both columns must then exist in <code>subsetInfo</code> and contain
+    positive, finite whole numbers without missing values (e.g. <code>1</code>,
+    <code>2</code>, or their character equivalents <code>"1"</code>, <code>"2"</code>).
+    <code>FALSE</code> hides these two rows and removes that menu option.
+    Default for manual selections: <code>FALSE</code>. If omitted for a prepared
+    selection, it is <code>TRUE</code> when all positions are available, otherwise
+    <code>FALSE</code>. Explicit <code>FALSE</code> overrides this automatic setting.</p></dd>
 
   <dt id="arg-comments">comments<a class="anchor" aria-label="anchor" href="#arg-comments"></a></dt>
-<dd><p>Show the <code>comment</code> column. Missing comments are allowed.
-    Enabled automatically for prepared selections.</p></dd>
+<dd><p>A single logical (boolean) value, <code>TRUE</code> or <code>FALSE</code>;
+    <code>NA</code>, <code>NULL</code>, numbers and strings are not allowed. <code>TRUE</code> shows
+    the <code>comment</code> column, which must exist in <code>subsetInfo</code>; individual
+    comments may be missing. <code>FALSE</code> hides comments and does not require that
+    column. Default for manual selections: <code>FALSE</code>. If omitted for a prepared
+    selection, it is <code>TRUE</code>; explicit <code>FALSE</code> disables the display.</p></dd>
 
   <dt id="arg-state">state<a class="anchor" aria-label="anchor" href="#arg-state"></a></dt>
-<dd><p>A <code>subsetReviewState</code> object from a previous result's
-    <code>$state</code>, or the path to an RDS checkpoint containing such an object.
+<dd><p><code>NULL</code> (default) to start a new review, a
+    <code>subsetReviewState</code> object from a previous result's <code>$state</code>, or a
+    single nonempty character string giving the path to an existing RDS checkpoint
+    containing such an object, e.g. <code>"review.rds"</code>.
     When resuming, omit <code>dat</code>, <code>subsetInfo</code>, and all recoding/display
-    settings: the state retains the original inputs and settings.</p></dd>
+    settings: supply only <code>state</code> and optionally <code>checkpoint</code>. Even
+    explicitly passing <code>dat = NULL</code> is not allowed when resuming; the state
+    retains the original inputs and settings.</p></dd>
 
   <dt id="arg-checkpoint">checkpoint<a class="anchor" aria-label="anchor" href="#arg-checkpoint"></a></dt>
-<dd><p>Optional RDS file for automatic saving. Its parent directory
-    must exist. A new review refuses to overwrite an existing file. When
+<dd><p><code>NULL</code> (default) or a single nonempty character string
+    naming an RDS file for automatic saving, e.g. <code>"review.rds"</code>.
+    This is a file path, not a <code>TRUE</code>/<code>FALSE</code> switch. Its parent directory
+    must exist. <code>NULL</code> means no automatic disk saving for a new review or
+    when resuming from an in-memory state object. A new review refuses to
+    overwrite an existing file. When
     <code>state</code> is a file path, that file is also used as the checkpoint unless
     a different <code>checkpoint</code> path is supplied. An object supplied through
     <code>state</code> does not enable disk saving by itself.</p></dd>
+
+  <dt id="arg-nonvalidvalues">nonValidValues<a class="anchor" aria-label="anchor" href="#arg-nonvalidvalues"></a></dt>
+<dd><p>A nonempty numeric or character vector defining the values
+    selected by the ‘yes, all non-valid values’ menu action. Default:
+    <code>c(-99, -98, -97, -96)</code>. For text-coded responses, for example, use
+    <code>c("mbi", "mnr")</code>. Values are matched exactly against the original
+    responses after conversion to character; matching is case-sensitive.
+    Duplicates are removed. <code>NA</code>, <code>NULL</code>, blank strings, infinite values,
+    logical vectors, factors and lists are not allowed. Missing responses remain
+    unchanged. The menu shows the configured values; the ‘all values’
+    action is unaffected. The filter is stored in <code>state</code>; omit this argument
+    when resuming. Older checkpoints retain the historical four-code filter.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -112,8 +163,19 @@ or provide a manually constructed selection table.</p>
 people in the same review group have different selected items. Persons with the
 same item layout are displayed together. Missing response values are counted in
 the summary and retained by all recoding actions.</p>
+<p>Selections prepared with <code>dataLevel = "unit"</code> map design subunits to unit
+response columns. A unit is displayed and recoded once per person, even when
+several originating subunits or positions are reported. Its within-block positions
+are listed together in the row below the responses, e.g. <code>1, 2</code>. When a unit
+spans multiple block positions, semicolons separate corresponding groups in both
+rows: ‘Block position’ <code>1; 3</code> with ‘Position in block’
+<code>1, 2; 2</code> means positions 1 and 2 in block position 1, and position 2 in
+block position 3. Repeated incident rows do not repeat the positions. The full
+subunit-to-unit mapping remains in <code>subsetInfo</code>. Choosing any affected block
+position selects the entire unit; individual components of an aggregate cannot
+be recoded separately. The response level and mapping survive pause/resume.</p>
 <p>Options include recoding all selected nonmissing values, recoding only original
-values <code>-99</code>, <code>-98</code>, <code>-97</code>, <code>-96</code>, choosing block positions,
+values listed in <code>nonValidValues</code>, choosing block positions,
 leaving the current selection unchanged, flagging for later review, going back,
 resetting, pausing, and exiting. The non-valid-code filter uses the original input values,
 so revisiting a subset does not change which cells qualify.</p>
@@ -215,6 +277,14 @@ save and pass it back unchanged, rather than editing its fields.</p>
 <span class="r-in"><span><span class="co"># Without automatic disk saving, an assigned result can be resumed in memory.</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">visualSubsetRecode</span><span class="op">(</span><span class="va">dat</span>, <span class="va">info</span>, toRecodeVal <span class="op">=</span> <span class="st">"mci"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">visualSubsetRecode</span><span class="op">(</span>state <span class="op">=</span> <span class="va">result</span><span class="op">$</span><span class="va">state</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Explicit logical flags override the prepared selection's display defaults.</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">visualSubsetRecode</span><span class="op">(</span><span class="va">dat</span>, <span class="va">info</span>, useGroups <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>                             positions <span class="op">=</span> <span class="cn">FALSE</span>, comments <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># For responses with text missing codes, configure the non-valid menu action.</span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">visualSubsetRecode</span><span class="op">(</span><span class="va">dat</span>, <span class="va">info</span>, nonValidValues <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mbi"</span>, <span class="st">"mnr"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                             toRecodeVal <span class="op">=</span> <span class="st">"mci"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Manually constructed selections remain supported.</span></span></span>
 <span class="r-in"><span><span class="va">selection</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P1"</span>, <span class="st">"P2"</span><span class="op">)</span>, datCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I1"</span>, <span class="st">"I2"</span><span class="op">)</span>, group <span class="op">=</span> <span class="st">"G"</span><span class="op">)</span></span></span>

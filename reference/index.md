@@ -21,6 +21,10 @@
 - [`checkInputList()`](https://sachseka.github.io/eatPrep/reference/checkInputList.md)
   : Check InputList structure for internal consistency
 
+- [`checkSubsetIncidents()`](https://sachseka.github.io/eatPrep/reference/checkSubsetIncidents.md)
+  [`print(`*`<subsetIncidentCheck>`*`)`](https://sachseka.github.io/eatPrep/reference/checkSubsetIncidents.md)
+  : Check Long Incident Reports Before Subset Review
+
 - [`collapseMissings()`](https://sachseka.github.io/eatPrep/reference/collapseMissings.md)
   :
 

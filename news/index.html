@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.18</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.19</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,16 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.19" id="eatprep-1019">eatPrep 1.0.19<a class="anchor" aria-label="anchor" href="#eatprep-1019"></a></h2>
+<ul><li>
+<code><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo()</a></code> accepts long incidents, configurable ID columns and unit-level responses. Class membership comes from the data; review defaults to one step per class, with <code>useGroups = NULL</code> for individual review.</li>
+<li>
+<code><a href="../reference/checkSubsetIncidents.html">checkSubsetIncidents()</a></code> reports distinct missing counts and separates case matching from response mapping. Preparation skips absent cases by default and records unavailable design entries in <code>$ignored</code>; ambiguities affecting available responses remain errors.</li>
+<li>
+<code><a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a></code> accepts <code>nonValidValues</code> for numeric or text missing codes, retained across pause/resume. With <code>positions = TRUE</code>, block positions appear below the responses, separated by a dashed line.</li>
+<li>Shortened the incident vignette, added code-copy buttons, and clarified argument types, allowed values and defaults in the help pages.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.18" id="eatprep-1018">eatPrep 1.0.18<a class="anchor" aria-label="anchor" href="#eatprep-1018"></a></h2>
 <ul><li>New <code><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo()</a></code> expands person and class incident reports into exact person-item selections. It resolves named blocks or block positions per booklet, supports recoded item names, preserves incident provenance, and provides counts and overlaps through <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>.</li>

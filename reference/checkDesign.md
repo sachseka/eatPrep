@@ -69,7 +69,7 @@ data(inputList)
 prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
     readSpss = FALSE, checkData = FALSE, mergeData = TRUE, recodeData = TRUE,
     aggregateData = FALSE, scoreData = FALSE, writeSpss = FALSE, verbose = TRUE)
-#> Starting automateDataPreparation 2026-11-10 16:42:17.450089
+#> Starting automateDataPreparation 2026-11-17 16:52:21.433744
 #> 
 #> Check has been skipped.
 #> 
@@ -97,7 +97,7 @@ prepDat <- automateDataPreparation (inputList = inputList, datList = inputDat,
 #> No SPSS-File has been written.
 #> 
 #> Missings are UNcollapsed.
-#> automateDataPreparation terminated successfully! 2026-11-10 16:42:17.524056
+#> automateDataPreparation terminated successfully! 2026-11-17 16:52:21.500584
 
 checkDesign(dat = prepDat, booklets = inputList$booklets, blocks = inputList$blocks,
     rotation = inputList$rotation, sysMis = "mbd", id="ID",

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">eatPrep</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.18</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.19</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,272 +72,224 @@
 
     
     
-<p><strong>You can process person-level, class-level, and mixed incident
-reports.</strong> Each row describes one incident affecting one person
-or one class. <strong>A table can contain reports for many people or
-classes.</strong> A class report is reviewed as one incident, even when
-it affects several people.</p>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
+<col width="50%">
+<col width="50%">
 </colgroup>
 <thead><tr class="header">
-<th>Report type</th>
-<th><code>level</code></th>
-<th>
-<code>targetId</code> contains</th>
-<th>Additional input</th>
+<th>Function</th>
+<th>Purpose</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Person-level</td>
-<td><code>"person"</code></td>
-<td>The person ID for that row, e.g. <code>"P1"</code>
-</td>
-<td>None for an item report</td>
+<td><a href="../reference/checkSubsetIncidents.html">checkSubsetIncidents()</a></td>
+<td>Check IDs, affected responses and design assignments.</td>
 </tr>
 <tr class="even">
-<td>Class-level</td>
-<td><code>"class"</code></td>
-<td>The class ID for that row, e.g. <code>"K1"</code>
-</td>
-<td>
-<code>persons</code>: the person-to-class mapping</td>
+<td><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo()</a></td>
+<td>Select the reported person-response pairs.</td>
 </tr>
 <tr class="odd">
-<td>Mixed: people and classes</td>
-<td>
-<code>"person"</code> or <code>"class"</code> per row</td>
-<td>The person or class ID for that row</td>
-<td>
-<code>persons</code>: the person-to-class mapping</td>
+<td><a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a></td>
+<td>Review and recode by class or person; pause and resume.</td>
 </tr>
 </tbody>
 </table>
-<p>“Mixed” describes a table containing both kinds of report. Each row
-still uses <code>level = "person"</code> or
-<code>level = "class"</code>. See <a href="#workflow-3-mixed-reports">workflow 3</a>.</p>
-<p>All three input options have the same steps: <strong>describe the
-incident, check the selected responses, then review and decide whether
-to recode them.</strong> <code><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo()</a></code> selects
-responses; <code><a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a></code> opens the review.</p>
-<p>Every issue table needs the same <strong>five columns</strong>:
-<code>issueId</code>, <code>level</code>, <code>targetId</code>,
-<code>scope</code>, and <code>target</code>. Each <code>issueId</code>
-must be unique. The examples also include the optional
-<code>comment</code> column; use <code>""</code> when no comment is
-needed. <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">head()</a></code> shows the input table in each example.</p>
 <div class="section level2">
-<h2 id="shared-example-data">Shared example data<a class="anchor" aria-label="anchor" href="#shared-example-data"></a>
+<h2 id="inputs">1. Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
 </h2>
-<p>Three people answered two items. Use merged response data, before
-aggregating subunits into items. In these examples, <code>"mci"</code>
-is the replacement code for responses invalidated by an incident.</p>
+<p>Use your response data, a <strong>long incident table</strong>, and
+the design tables from <strong>one input list</strong>. No separate
+class roster is needed. Keep existing ID column names and choose the
+response level explicitly:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">review_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P1"</span>, <span class="st">"P2"</span>, <span class="st">"P3"</span><span class="op">)</span>,</span>
-<span>  I1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  I2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sachseka.github.io/eatPrep/">eatPrep</a></span><span class="op">)</span></span>
+<span><span class="va">student_id</span> <span class="op">&lt;-</span> <span class="st">"learner_key"</span></span>
+<span><span class="va">class_id</span> <span class="op">&lt;-</span> <span class="st">"group_key"</span></span>
+<span><span class="va">data_level</span> <span class="op">&lt;-</span> <span class="st">"unit"</span>  <span class="co"># Use "subunit" for original or recoded subunit columns.</span></span></code></pre></div>
+<p>The student-ID column must occur in <code>dat</code>,
+<code>incidents</code> and <code>inputList$rotation</code>; the class-ID
+column in <code>dat</code> and <code>incidents</code>. Student IDs must
+be unique, and class IDs must identify classes across schools.</p>
+<details><summary>
+Runnable example inputs (all identifiers and values are fictional)
+</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  learner_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"D"</span>, <span class="st">"E"</span><span class="op">)</span>,</span>
+<span>  group_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"K1"</span>, <span class="st">"K1"</span>, <span class="st">"K1"</span>, <span class="st">"K2"</span>, <span class="st">"K2"</span><span class="op">)</span>,</span>
+<span>  U12 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mbi"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"1"</span>, <span class="cn">NA</span><span class="op">)</span>, U3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"mnr"</span>, <span class="st">"0"</span>, <span class="st">"1"</span>, <span class="st">"1"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">review_data</span></span>
-<span><span class="co">#&gt;   ID I1 I2</span></span>
-<span><span class="co">#&gt; 1 P1  1  0</span></span>
-<span><span class="co">#&gt; 2 P2  0  1</span></span>
-<span><span class="co">#&gt; 3 P3  1  0</span></span></code></pre></div>
+<span><span class="va">inputList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  subunits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    subunit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I1"</span>, <span class="st">"I2"</span>, <span class="st">"I3"</span><span class="op">)</span>, subunitRecoded <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I1R"</span>, <span class="st">"I2R"</span>, <span class="st">"I3R"</span><span class="op">)</span>,</span>
+<span>    unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"U12"</span>, <span class="st">"U12"</span>, <span class="st">"U3"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  blocks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    subunit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I1"</span>, <span class="st">"I2"</span>, <span class="st">"I3"</span><span class="op">)</span>, block <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b1"</span>, <span class="st">"b1"</span>, <span class="st">"b2"</span><span class="op">)</span>,</span>
+<span>    subunitBlockPosition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  booklets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    booklet <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>, <span class="st">"Y"</span><span class="op">)</span>, block1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b1"</span>, <span class="st">"b2"</span><span class="op">)</span>, block2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b2"</span>, <span class="st">"b1"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  rotation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>learner_key <span class="op">=</span> <span class="va">dat</span><span class="op">$</span><span class="va">learner_key</span>,</span>
+<span>                        booklet <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>, <span class="st">"Y"</span>, <span class="st">"X"</span>, <span class="st">"X"</span>, <span class="st">"Y"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">incidents</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  group_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"K1"</span>, <span class="st">"K1"</span>, <span class="st">"K1"</span>, <span class="st">"K2"</span><span class="op">)</span>,</span>
+<span>  learner_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="cn">NA</span><span class="op">)</span>, blockPosition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  comment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Display error"</span>, <span class="st">"Display error"</span>, <span class="st">"Interrupted test"</span>, <span class="st">"Audio failure"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</details><p>Each incident row names <strong>one affected block position</strong>.
+Keep repeated persons on separate rows. Positions refer to each person’s
+booklet: in this example, position 1 means block b1 for A, but b2 for
+B.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Person IDs within a class’s incident rows</th>
+<th>Selection</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>All supplied</td>
+<td>Exactly the reported person-position pairs.</td>
+</tr>
+<tr class="even">
+<td>All missing (<code>NA</code>, empty or whitespace)</td>
+<td>All members of that class in <code>dat</code>, at the reported
+positions.</td>
+</tr>
+<tr class="odd">
+<td>Mixed supplied and missing</td>
+<td>Error: clarify the intended selection.</td>
+</tr>
+</tbody>
+</table>
+<p>The example selects A at positions 1 and 2, B at position 1, and
+everyone in K2 at position 2. C is not selected. Optional
+<code>issueId</code> and <code>level</code> columns usually need not be
+supplied; <code>comment</code> is optional too.</p>
 </div>
 <div class="section level2">
-<h2 id="workflow-1-person-level-reports">Workflow 1: person-level reports<a class="anchor" aria-label="anchor" href="#workflow-1-person-level-reports"></a>
+<h2 id="check">2. Check<a class="anchor" aria-label="anchor" href="#check"></a>
 </h2>
-<p><strong>Example: display errors affected item I2 for P1 and
-P3.</strong> Enter both reports in one table, with a separate
-<code>issueId</code> for each. Set <code>level = "person"</code> and put
-the affected person’s ID in <code>targetId</code> on each row.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">person_issues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  issueId <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"V1"</span>, <span class="st">"V2"</span><span class="op">)</span>, level <span class="op">=</span> <span class="st">"person"</span>, targetId <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P1"</span>, <span class="st">"P3"</span><span class="op">)</span>,</span>
-<span>  scope <span class="op">=</span> <span class="st">"item"</span>, target <span class="op">=</span> <span class="st">"I2"</span>, comment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Display error"</span>, <span class="st">""</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">person_issues</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   issueId  level targetId scope target       comment</span></span>
-<span><span class="co">#&gt; 1      V1 person       P1  item     I2 Display error</span></span>
-<span><span class="co">#&gt; 2      V2 person       P3  item     I2</span></span></code></pre></div>
-<p>Resolve the affected responses:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">person_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo</a></span><span class="op">(</span><span class="va">review_data</span>, <span class="va">person_issues</span><span class="op">)</span></span>
-<span><span class="va">person_info</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"issueId"</span>, <span class="st">"ID"</span>, <span class="st">"datCols"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;   issueId ID datCols</span></span>
-<span><span class="co">#&gt; 1      V1 P1      I2</span></span>
-<span><span class="co">#&gt; 2      V2 P3      I2</span></span></code></pre></div>
-<p>The selection contains <strong>P1/I2 and P3/I2</strong>, reviewed as
-two separate incidents. No class or booklet tables are needed. Start the
-review in an interactive R session:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">person_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualSubsetRecode.html">visualSubsetRecode</a></span><span class="op">(</span><span class="va">review_data</span>, <span class="va">person_info</span>, toRecodeVal <span class="op">=</span> <span class="st">"mci"</span><span class="op">)</span></span></code></pre></div>
-<p>Choose <strong>yes, all values</strong> for each report, then
-<strong>yes</strong> to end the review. The result is:</p>
+<code class="sourceCode R"><span><span class="va">checked</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/checkSubsetIncidents.html">checkSubsetIncidents</a></span><span class="op">(</span></span>
+<span>  <span class="va">dat</span>, <span class="va">incidents</span>, booklets <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">booklets</span>,</span>
+<span>  blocks <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">blocks</span>, rotation <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">rotation</span>,</span>
+<span>  subunits <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">subunits</span>, dataLevel <span class="op">=</span> <span class="va">data_level</span>,</span>
+<span>  ID <span class="op">=</span> <span class="va">student_id</span>, classID <span class="op">=</span> <span class="va">class_id</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">checked</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Incident check (unit responses)</span></span>
+<span><span class="co">#&gt; Cases: 4 of 4 incident rows matched to dat.</span></span>
+<span><span class="co">#&gt; Missing unit columns: 0 detected among 2 distinct unit identifiers checked.</span></span>
+<span><span class="co">#&gt; Ready for review: 4 incident rows.</span></span>
+<span><span class="co">#&gt; All incident rows could be matched and resolved.</span></span></code></pre>
+<p>Use <strong>distinct counts</strong>, rather than counting repeated
+problem records:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">person_result</span><span class="op">$</span><span class="va">dat</span></span>
-<span><span class="co">#&gt;   ID I1  I2</span></span>
-<span><span class="co">#&gt; 1 P1  1 mci</span></span>
-<span><span class="co">#&gt; 2 P2  0   1</span></span>
-<span><span class="co">#&gt; 3 P3  1 mci</span></span></code></pre></div>
-<p>P1’s and P3’s responses to I2 change. P2’s responses and all
-responses to I1 keep their original values.</p>
+<code class="sourceCode R"><span><span class="va">checked</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"missingPersons"</span>, <span class="st">"missingClasses"</span>, <span class="st">"missingUnits"</span>, <span class="st">"readyRows"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">checked</span><span class="op">$</span><span class="va">missing</span>  <span class="co"># Identifiers behind the missing counts.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">checked</span>, max_problems <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">checked</span><span class="op">$</span><span class="va">ignored</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"subunit"</span>, <span class="st">"unit"</span>, <span class="st">"ignoredReason"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p><code>$problems</code> contains findings to inspect;
+<code>$ignored</code> lists omitted design entries without usable
+response columns. Preparation skips absent persons/classes by default
+(<code>unmatched = "drop"</code>) and retains the report. Contradictory
+assignments, ambiguities affecting existing responses and unresolved
+reported positions still stop preparation, as does an entirely empty
+selection. Use <code>unmatched = "error"</code> for strict handling of
+absent cases.</p>
+<p>The review covers the <strong>available data and reported
+incidents</strong>. Broader metadata checks remain separate: <a href="../reference/checkInputList.html">checkInputList()</a> and <a href="../reference/checkDesign.html">checkDesign()</a>. Missing-item
+totals are provisional when
+<code>checked$summary$itemCheckComplete</code> is
+<code>FALSE</code>.</p>
 </div>
 <div class="section level2">
-<h2 id="workflow-2-class-level-reports">Workflow 2: class-level reports<a class="anchor" aria-label="anchor" href="#workflow-2-class-level-reports"></a>
+<h2 id="prepare-and-review">3. Prepare and review<a class="anchor" aria-label="anchor" href="#prepare-and-review"></a>
 </h2>
-<p><strong>Example: a display error affected item I2 for everyone in
-class K1.</strong> Set <code>level = "class"</code> and put the class ID
-in <code>targetId</code>. Supply <code>persons</code> so the function
-knows who belongs to that class:</p>
+<p>Use the same ID names, response level and input list for
+preparation:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">persons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P1"</span>, <span class="st">"P2"</span>, <span class="st">"P3"</span><span class="op">)</span>, classId <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"K1"</span>, <span class="st">"K1"</span>, <span class="st">"K2"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">class_issue</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  issueId <span class="op">=</span> <span class="st">"V3"</span>, level <span class="op">=</span> <span class="st">"class"</span>, targetId <span class="op">=</span> <span class="st">"K1"</span>,</span>
-<span>  scope <span class="op">=</span> <span class="st">"item"</span>, target <span class="op">=</span> <span class="st">"I2"</span>, comment <span class="op">=</span> <span class="st">""</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">class_issue</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   issueId level targetId scope target comment</span></span>
-<span><span class="co">#&gt; 1      V3 class       K1  item     I2</span></span></code></pre></div>
-<p>Resolve the affected responses:</p>
+<code class="sourceCode R"><span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo</a></span><span class="op">(</span></span>
+<span>  <span class="va">dat</span>, incidents <span class="op">=</span> <span class="va">incidents</span>, booklets <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">booklets</span>,</span>
+<span>  blocks <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">blocks</span>, rotation <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">rotation</span>,</span>
+<span>  subunits <span class="op">=</span> <span class="va">inputList</span><span class="op">$</span><span class="va">subunits</span>, dataLevel <span class="op">=</span> <span class="va">data_level</span>,</span>
+<span>  ID <span class="op">=</span> <span class="va">student_id</span>, classID <span class="op">=</span> <span class="va">class_id</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>In unit mode, <strong>any affected subunit selects its entire
+unit</strong>. Here I1 and I2 both select U12, which is displayed and
+recoded once per person. Supply the complete
+<code>inputList$subunits</code> table; subunit names and unit response
+names may differ.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">class_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo</a></span><span class="op">(</span><span class="va">review_data</span>, <span class="va">class_issue</span>, persons <span class="op">=</span> <span class="va">persons</span><span class="op">)</span></span>
-<span><span class="va">class_info</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"issueId"</span>, <span class="st">"ID"</span>, <span class="st">"datCols"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;   issueId ID datCols</span></span>
-<span><span class="co">#&gt; 1      V3 P1      I2</span></span>
-<span><span class="co">#&gt; 2      V3 P2      I2</span></span></code></pre></div>
-<p>The single class report selects <strong>P1/I2 and P2/I2</strong>.
-Both rows retain <code>issueId = "V3"</code>, so you review them
-together and make <strong>one decision for the class report</strong>. P3
-belongs to K2 and is outside the selection.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">class_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualSubsetRecode.html">visualSubsetRecode</a></span><span class="op">(</span><span class="va">review_data</span>, <span class="va">class_info</span>, toRecodeVal <span class="op">=</span> <span class="st">"mci"</span><span class="op">)</span></span></code></pre></div>
-<p>Choose <strong>yes, all values</strong>, then <strong>yes</strong> to
-end the review:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">class_result</span><span class="op">$</span><span class="va">dat</span></span>
-<span><span class="co">#&gt;   ID I1  I2</span></span>
-<span><span class="co">#&gt; 1 P1  1 mci</span></span>
-<span><span class="co">#&gt; 2 P2  0 mci</span></span>
-<span><span class="co">#&gt; 3 P3  1   0</span></span></code></pre></div>
-<p>The difference from workflow 1 is the affected people: <strong>the
-same item is recoded for everyone in K1</strong>, while P3’s responses
-stay unchanged. Class IDs must identify classes uniquely across the data
-set, including across schools.</p>
-</div>
-<div class="section level2">
-<h2 id="workflow-3-mixed-reports">Workflow 3: mixed reports<a class="anchor" aria-label="anchor" href="#workflow-3-mixed-reports"></a>
-</h2>
-<p><strong>Example: process the two person reports and the class report
-together.</strong> Combine them in one table. Each row keeps its own
-<code>level</code>, <code>targetId</code>, and unique
-<code>issueId</code>:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">issues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">person_issues</span>, <span class="va">class_issue</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">issues</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   issueId  level targetId scope target       comment</span></span>
-<span><span class="co">#&gt; 1      V1 person       P1  item     I2 Display error</span></span>
-<span><span class="co">#&gt; 2      V2 person       P3  item     I2              </span></span>
-<span><span class="co">#&gt; 3      V3  class       K1  item     I2</span></span></code></pre></div>
-<p>Supply the class membership table <code>persons</code>, as in
-workflow 2:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">subset_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo</a></span><span class="op">(</span><span class="va">review_data</span>, <span class="va">issues</span>, persons <span class="op">=</span> <span class="va">persons</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">subset_info</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   issueId  level targetId persons items cells overlappingCells</span></span>
-<span><span class="co">#&gt; 1      V1 person       P1       1     1     1                1</span></span>
-<span><span class="co">#&gt; 2      V2 person       P3       1     1     1                0</span></span>
-<span><span class="co">#&gt; 3      V3  class       K1       2     1     2                1</span></span></code></pre></div>
-<p>Start one review for the whole table:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mixed_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualSubsetRecode.html">visualSubsetRecode</a></span><span class="op">(</span><span class="va">review_data</span>, <span class="va">subset_info</span>, toRecodeVal <span class="op">=</span> <span class="st">"mci"</span><span class="op">)</span></span></code></pre></div>
-<p>The review presents <strong>V1 (P1), V2 (P3), and V3 (class
-K1)</strong> separately. Choose <strong>yes, all values</strong> for
-each report, then <strong>yes</strong> to end the review:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mixed_result</span><span class="op">$</span><span class="va">dat</span></span>
-<span><span class="co">#&gt;   ID I1  I2</span></span>
-<span><span class="co">#&gt; 1 P1  1 mci</span></span>
-<span><span class="co">#&gt; 2 P2  0 mci</span></span>
-<span><span class="co">#&gt; 3 P3  1 mci</span></span></code></pre></div>
-<p>All three people’s responses to I2 are recoded. P1/I2 occurs in both
-V1 and V3; resetting one report keeps a recoding still required by the
-other. Choose <strong>reset to original values</strong> to withdraw a
-previous recoding; <strong>no</strong> leaves it unchanged. All three
-workflows preserve existing <code>NA</code> responses.</p>
-</div>
-<div class="section level2">
-<h2 id="if-the-incident-affects-a-block">If the incident affects a block<a class="anchor" aria-label="anchor" href="#if-the-incident-affects-a-block"></a>
-</h2>
-<p>In all three workflows, <code>level</code> answers <strong>who is
-affected?</strong> and <code>scope</code> answers <strong>which
-responses are affected?</strong> An item report uses
-<code>scope = "item"</code>. For an entire block, also supply
-<code>booklets</code>, <code>blocks</code>, and
-<code>rotation</code>.</p>
-<p>For example, P1 and P2 are both in K1 but use different block
-orders:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">booklets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  booklet <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>, <span class="st">"Y"</span><span class="op">)</span>, block1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, block2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="st">"A"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">blocks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  subunit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"I1"</span>, <span class="st">"I2"</span><span class="op">)</span>, block <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, subunitBlockPosition <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">rotation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P1"</span>, <span class="st">"P2"</span>, <span class="st">"P3"</span><span class="op">)</span>, booklet <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X"</span>, <span class="st">"Y"</span>, <span class="st">"X"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>To report a problem with <strong>the first block in class
-K1</strong>, keep the class target and change the scope to
-<code>"blockPosition"</code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">block_issue</span> <span class="op">&lt;-</span> <span class="va">class_issue</span></span>
-<span><span class="va">block_issue</span><span class="op">$</span><span class="va">scope</span> <span class="op">&lt;-</span> <span class="st">"blockPosition"</span></span>
-<span><span class="va">block_issue</span><span class="op">$</span><span class="va">target</span> <span class="op">&lt;-</span> <span class="st">"1"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">block_issue</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   issueId level targetId         scope target comment</span></span>
-<span><span class="co">#&gt; 1      V3 class       K1 blockPosition      1</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">block_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo</a></span><span class="op">(</span></span>
-<span>  <span class="va">review_data</span>, <span class="va">block_issue</span>, persons <span class="op">=</span> <span class="va">persons</span>,</span>
-<span>  booklets <span class="op">=</span> <span class="va">booklets</span>, blocks <span class="op">=</span> <span class="va">blocks</span>, rotation <span class="op">=</span> <span class="va">rotation</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">block_info</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID"</span>, <span class="st">"datCols"</span>, <span class="st">"block"</span>, <span class="st">"blockPosition"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;   ID datCols block blockPosition</span></span>
-<span><span class="co">#&gt; 1 P1      I1     A             1</span></span>
-<span><span class="co">#&gt; 2 P2      I2     B             1</span></span></code></pre></div>
-<p>This selects <strong>P1/I1 and P2/I2</strong>: the first block is A
-for P1 and B for P2. Review <code>block_info</code> just like
-<code>class_info</code> above. To select <strong>named block A</strong>
-instead, use <code>scope = "block", target = "A"</code>; that selects I1
-for both people.</p>
-</div>
-<div class="section level2">
-<h2 id="pause-and-continue">Pause and continue<a class="anchor" aria-label="anchor" href="#pause-and-continue"></a>
-</h2>
-<p>For a longer review, choose a new checkpoint filename when
-starting:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualSubsetRecode.html">visualSubsetRecode</a></span><span class="op">(</span></span>
-<span>  <span class="va">review_data</span>, <span class="va">subset_info</span>, toRecodeVal <span class="op">=</span> <span class="st">"mci"</span>, checkpoint <span class="op">=</span> <span class="st">"review.rds"</span></span>
+<span>  <span class="va">dat</span>, <span class="va">info</span>, toRecodeVal <span class="op">=</span> <span class="st">"mci"</span>, nonValidValues <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mbi"</span>, <span class="st">"mnr"</span><span class="op">)</span>,</span>
+<span>  positions <span class="op">=</span> <span class="cn">TRUE</span>, comments <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>This gives <strong>one decision per class</strong>. Different
+item/position layouts appear in separate tables within that decision.
+<code>positions = TRUE</code> adds the two rows below the responses and
+enables block selection; <code>comments = TRUE</code> shows incident
+comments. Both switches accept <code>TRUE</code> or <code>FALSE</code>.
+For the first class:</p>
+<pre><code><span><span class="co">#&gt;        learner_key  U12 U3</span></span>
+<span><span class="co">#&gt;                  A  mbi  1</span></span>
+<span><span class="co">#&gt;  ----------------- ---- --</span></span>
+<span><span class="co">#&gt;     Block position    1  2</span></span>
+<span><span class="co">#&gt;  Position in block 1, 2  1</span></span>
+<span><span class="co">#&gt;        learner_key  U3</span></span>
+<span><span class="co">#&gt;                  B mnr</span></span>
+<span><span class="co">#&gt;  ----------------- ---</span></span>
+<span><span class="co">#&gt;     Block position   1</span></span>
+<span><span class="co">#&gt;  Position in block   1</span></span></code></pre>
+<p>Multiple within-block positions are comma-separated. Semicolons
+separate paired block groups when a unit spans several blocks; selecting
+any reported block position selects the whole unit. The full mapping
+remains in <code>info</code>.</p>
+<p>Choose <strong>all values</strong>, <strong>all non-valid
+values</strong>, or <strong>specific blocks</strong> in the menu.
+<code>nonValidValues</code> controls only the second choice: supply
+numeric codes or text codes as in the example. Its default is
+<code>c(-99, -98, -97, -96)</code>; matching uses original responses,
+even after revisiting a group. <code>NA</code> responses stay missing.
+<strong>Reset</strong> withdraws the group’s previous recoding;
+<strong>no</strong> leaves it unchanged.</p>
+</div>
+<div class="section level2">
+<h2 id="individual-review-and-resuming">4. Individual review and resuming<a class="anchor" aria-label="anchor" href="#individual-review-and-resuming"></a>
+</h2>
+<p>For one decision per person, pass <code>useGroups = NULL</code>
+explicitly:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualSubsetRecode.html">visualSubsetRecode</a></span><span class="op">(</span></span>
+<span>  <span class="va">dat</span>, <span class="va">info</span>, useGroups <span class="op">=</span> <span class="cn">NULL</span>, nonValidValues <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mbi"</span>, <span class="st">"mnr"</span><span class="op">)</span>, toRecodeVal <span class="op">=</span> <span class="st">"mci"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>All incident rows for a person are combined. For data without
+classes, use <code>classID = NULL</code> in both checking and
+preparation; every incident must then name a person, and class-level
+reports are not allowed.</p>
+<p>For longer reviews, choose a new checkpoint file and use the pause
+menu:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualSubsetRecode.html">visualSubsetRecode</a></span><span class="op">(</span></span>
+<span>  <span class="va">dat</span>, <span class="va">info</span>, nonValidValues <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mbi"</span>, <span class="st">"mnr"</span><span class="op">)</span>,</span>
+<span>  toRecodeVal <span class="op">=</span> <span class="st">"mci"</span>, checkpoint <span class="op">=</span> <span class="st">"review.rds"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co"># Choose "pause review (resume later)". In a later R session:</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sachseka.github.io/eatPrep/">eatPrep</a></span><span class="op">)</span></span>
+<span><span class="co"># After pausing, including in a later R session:</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualSubsetRecode.html">visualSubsetRecode</a></span><span class="op">(</span>state <span class="op">=</span> <span class="st">"review.rds"</span><span class="op">)</span></span></code></pre></div>
-<p>Completed decisions are saved automatically. Resume with
-<code>state</code> to keep the original values and earlier decisions.
-Continue your data preparation with <code>result$dat</code>;
-<code>result$subsetInfo</code> contains the decision history.</p>
-<p>For project data, the design tables can come from
-<code>inputList</code>. After <code><a href="../reference/recodeData.html">recodeData()</a></code>, also pass
-<code>subunits = inputList$subunits</code> to map original item names to
-recoded columns. See <code><a href="../reference/prepareSubsetInfo.html">?prepareSubsetInfo</a></code> and
-<code><a href="../reference/visualSubsetRecode.html">?visualSubsetRecode</a></code> for input requirements, review options,
-and checkpoint recovery.</p>
+<p>Resume with <code>state</code> alone: it retains the original data,
+decisions and settings, including <code>nonValidValues</code>. Continue
+processing with <code>result$dat</code>; inspect decisions in
+<code>result$subsetInfo</code>. For the legacy <code>issues</code>
+format and all argument details, see <a href="../reference/prepareSubsetInfo.html">prepareSubsetInfo()</a> and
+<a href="../reference/visualSubsetRecode.html">visualSubsetRecode()</a>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
