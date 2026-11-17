@@ -414,7 +414,8 @@ test_that("unit data resolve through the input-list mapping and retain subunit p
   expect_equal(attr(grouped$state$subset_info, "dataLevel"), "unit")
   display <- capture.output(.subset_display(args$dat, info, "ID", positions = TRUE))
   expect_false(any(grepl("U12.1", display, fixed = TRUE)))
-  expect_true(any(grepl("subunit", display, fixed = TRUE)))
+  expect_true(any(grepl("Position in block", display, fixed = TRUE)))
+  expect_false(any(grepl("datCols|subunitBlockPosition", display)))
 })
 
 test_that("missing unit totals deduplicate subunits and retain successful mappings", {

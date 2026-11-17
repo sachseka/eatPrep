@@ -191,6 +191,55 @@ test_that("group recoding changes only flagged cells with and without positions"
   }
 })
 
+test_that("positions print below responses in the matching columns", {
+  old_options <- options(width = 100)
+  on.exit(options(old_options), add = TRUE)
+  dat <- data.frame(learner_key = c("P1", "P2"), I1 = c(5, 9), I2 = c(-99, NA))
+  info <- data.frame(learner_key = rep(c("P1", "P2"), each = 2),
+                     datCols = rep(c("I1", "I2"), 2), blockPosition = c(2, 1),
+                     subunitBlockPosition = c(1, 3))
+  original <- dat
+  displayed <- capture.output(.subset_display(dat, info, "learner_key", positions = TRUE))
+  expect_equal(gsub(" +", " ", trimws(displayed)),
+    c("learner_key I2 I1", "P1 -99 5", "P2 NA 9",
+      "Block position 1 2", "Position in block 3 1"))
+  plain <- capture.output(.subset_display(dat, info, "learner_key", positions = FALSE))
+  expect_equal(gsub(" +", " ", trimws(plain)),
+    c("learner_key I1 I2", "P1 5 -99", "P2 9 NA"))
+  expect_identical(dat, original)
+})
+
+test_that("position footers stay with the right persons in different layouts", {
+  old_options <- options(width = 100)
+  on.exit(options(old_options), add = TRUE)
+  dat <- data.frame(ID = c("P1", "P2"), I1 = c(5, 9))
+  info <- data.frame(ID = c("P1", "P2"), datCols = "I1",
+                     blockPosition = c(1, 2), subunitBlockPosition = c(2, 3))
+  displayed <- capture.output(.subset_display(dat, info, "ID", positions = TRUE))
+  expect_equal(gsub(" +", " ", trimws(displayed)),
+    c("ID I1", "P1 5", "Block position 1", "Position in block 2",
+      "ID I1", "P2 9", "Block position 2", "Position in block 3"))
+})
+
+test_that("unit footers preserve block-position pairs without duplicate responses", {
+  old_options <- options(width = 100)
+  on.exit(options(old_options), add = TRUE)
+  dat <- data.frame(ID = c("P1", "P2"), U12 = c(7, 9), U3 = c(5, 6))
+  info <- data.frame(ID = rep(c("P1", "P2"), each = 5),
+                     datCols = c("U12", "U12", "U12", "U3", "U12"),
+                     blockPosition = c(3, 1, 1, 2, 1),
+                     subunitBlockPosition = c(2, 2, 1, 1, 1),
+                     subunit = paste0("I", 1:10),
+                     unit = c("U12", "U12", "U12", "U3", "U12"))
+  attr(info, "dataLevel") <- "unit"
+  original <- info
+  displayed <- capture.output(.subset_display(dat, info, "ID", positions = TRUE))
+  expect_equal(gsub(" +", " ", trimws(displayed)),
+    c("ID U12 U3", "P1 7 5", "P2 9 6",
+      "Block position 1; 3 2", "Position in block 1, 2; 2 1"))
+  expect_identical(info, original)
+})
+
 test_that("prepared incidents stay separate when the same person appears twice", {
   args <- subset_fixture()
   args$issues$target[2] <- "I3"

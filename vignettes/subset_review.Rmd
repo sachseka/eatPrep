@@ -403,14 +403,21 @@ info_units <- prepareSubsetInfo(
 unit_result <- visualSubsetRecode(dat_units, info_units, toRecodeVal = "mci")
 ```
 
-The class review displays each response column once and retains the originating
-subunit positions in its position table:
+The class review displays each response column once. With `positions = TRUE`,
+two rows directly below the answers show **Block position** and **Position in
+block**, aligned with the response columns. For U12, the latter is `1, 2`
+because two subunits contribute to the unit:
 
 ```{r unit-display, echo=FALSE}
 unit_result <- review_example(dat_units, info_units, show = TRUE)
 ```
 
-If a unit spans several block positions, selecting **any reported position**
+If a unit spans several block positions, semicolons keep their position groups
+paired: `1; 3` in **Block position** and `1, 2; 2` in **Position in block** mean
+positions 1 and 2 in the first block, and position 2 in the third block.
+The complete subunit-to-unit mapping remains in `info_units`.
+
+Selecting **any reported position**
 selects the whole unit for that person. An aggregated response cannot be recoded
 component by component. Class versus individual grouping and pause/resume work
 the same way at both response levels.
@@ -463,8 +470,10 @@ class_result <- visualSubsetRecode(dat, info, toRecodeVal = "mci")
 
 The two steps are K1 (A and B) and K2 (D and E). Students with the same item and
 position layout appear in one table. Different layouts produce separate tables
-**within the same review step and decision**. Here is the actual response and
-position display when choosing **yes, all values** for each class:
+**within the same review step and decision**. With `positions = TRUE`, the two
+position rows appear directly beneath the answers in each table. Explicit
+`positions = FALSE` hides them and disables selection by block position.
+Here is the actual display when choosing **yes, all values** for each class:
 
 ```{r class-display, echo=FALSE}
 class_result <- review_example(dat, info, show = TRUE)

@@ -45,11 +45,12 @@ visualSubsetRecode(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
     \code{issues} selections, omission selects \code{"issueId"}.}
   \item{positions}{A single logical (boolean) value, \code{TRUE} or \code{FALSE};
     \code{NA}, \code{NULL}, numbers and strings are not allowed. \code{TRUE} shows
-    \code{blockPosition} and \code{subunitBlockPosition} and offers selection by
-    block position. Both columns must then exist in \code{subsetInfo} and contain
+    two rows below the responses, aligned with their columns: \sQuote{Block position}
+    (\code{blockPosition}) and \sQuote{Position in block} (\code{subunitBlockPosition}).
+    It also offers selection by block position. Both columns must then exist in \code{subsetInfo} and contain
     positive, finite whole numbers without missing values (e.g. \code{1},
     \code{2}, or their character equivalents \code{"1"}, \code{"2"}).
-    \code{FALSE} hides the position table and removes that menu option.
+    \code{FALSE} hides these two rows and removes that menu option.
     Default for manual selections: \code{FALSE}. If omitted for a prepared
     selection, it is \code{TRUE} when all positions are available, otherwise
     \code{FALSE}. Explicit \code{FALSE} overrides this automatic setting.}
@@ -85,8 +86,13 @@ the summary and retained by all recoding actions.
 
 Selections prepared with \code{dataLevel = "unit"} map design subunits to unit
 response columns. A unit is displayed and recoded once per person, even when
-several originating subunits or positions are reported. The position table
-retains those subunits and their unit assignments. Choosing any affected block
+several originating subunits or positions are reported. Its within-block positions
+are listed together in the row below the responses, e.g. \code{1, 2}. When a unit
+spans multiple block positions, semicolons separate corresponding groups in both
+rows: \sQuote{Block position} \code{1; 3} with \sQuote{Position in block}
+\code{1, 2; 2} means positions 1 and 2 in block position 1, and position 2 in
+block position 3. Repeated incident rows do not repeat the positions. The full
+subunit-to-unit mapping remains in \code{subsetInfo}. Choosing any affected block
 position selects the entire unit; individual components of an aggregate cannot
 be recoded separately. The response level and mapping survive pause/resume.
 
