@@ -9,37 +9,86 @@ or provide a manually constructed selection table.
 \usage{
 visualSubsetRecode(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
                    useGroups = NULL, positions = FALSE, comments = FALSE,
-                   state = NULL, checkpoint = NULL)
+                   state = NULL, checkpoint = NULL,
+                   nonValidValues = c(-99, -98, -97, -96))
 }
 \arguments{
-  \item{dat}{Data frame of responses in wide format, with unique, nonmissing IDs.
-    Required for a new review; omit when resuming through \code{state}.}
-  \item{subsetInfo}{A data frame with columns named by \code{ID} and \code{datCols}.
-    Each row selects exactly one person--item pair. Optional columns provide review
-    groups, positions and comments. Alternatively, the result of
-    \code{\link{prepareSubsetInfo}}.}
-  \item{ID}{Person identifier column name; defaults to \code{"ID"}, or the stored
-    ID column for a prepared selection if this argument is omitted.}
-  \item{toRecodeVal}{Single nonmissing replacement value, e.g. \code{-91} or \code{"mci"}.
+  \item{dat}{A nonempty data frame of responses in wide format: one row per person,
+    one column per response, and a person-ID column named by \code{ID}. IDs must
+    be unique, nonmissing and nonblank; response values may be \code{NA}.
+    Required for a new review. Default: \code{NULL}; omit when resuming through
+    \code{state}.}
+  \item{subsetInfo}{A nonempty data frame, usually the result of
+    \code{\link{prepareSubsetInfo}}, or a manually constructed table with columns
+    named by \code{ID} and \code{datCols}. Each row selects one person--response
+    pair: its ID must occur in \code{dat}, and \code{datCols} must name an existing
+    response column other than the ID column. Neither entry may be missing or
+    blank. Optional columns provide groups, positions and comments as described
+    below. Required for a new review; default \code{NULL} is used when resuming.}
+  \item{ID}{A single nonempty character string naming the person-ID column in
+    both \code{dat} and \code{subsetInfo}, e.g. \code{"learner_key"}. Default:
+    \code{"ID"} for a manual selection; if omitted for a prepared selection,
+    its stored ID column is used. Supply a column name, not a vector of IDs.}
+  \item{toRecodeVal}{A single nonmissing atomic replacement value (length one),
+    usually a number such as \code{-91} or a character string such as \code{"mci"}.
+    Default: \code{-91}. \code{NA}, \code{NULL} and vectors of multiple values are
+    not allowed. The same value is used for every accepted recoding in the review.
     A character replacement can convert numeric response columns to character.
     Factor columns retain their class, adding the replacement level if necessary.}
-  \item{useGroups}{Optional column identifying review subsets. With \code{NULL},
-    review one person at a time. For prepared selections, omission selects
-    \code{"issueId"}, so each incident is reviewed separately.}
-  \item{positions}{Show \code{blockPosition} and \code{subunitBlockPosition}, and
-    offer block-position selection. Both columns must contain positive whole numbers.
-    For prepared selections, enabled automatically if all positions are available.}
-  \item{comments}{Show the \code{comment} column. Missing comments are allowed.
-    Enabled automatically for prepared selections.}
-  \item{state}{A \code{subsetReviewState} object from a previous result's
-    \code{$state}, or the path to an RDS checkpoint containing such an object.
+  \item{useGroups}{\code{NULL} or a single character string naming a column in
+    \code{subsetInfo}, e.g. \code{"group_key"} or \code{"issueId"}; this is not a
+    logical/boolean switch. The named column must have nonmissing, nonblank group
+    identifiers; all rows with the same value form one review step. Explicit
+    \code{NULL} reviews one person at a time, combining all their reported rows.
+    For a manual selection the default is \code{NULL}.
+    For prepared long incidents, omission selects the stored class column, or
+    the person ID when prepared with \code{classID = NULL}. For legacy
+    \code{issues} selections, omission selects \code{"issueId"}.}
+  \item{positions}{A single logical (boolean) value, \code{TRUE} or \code{FALSE};
+    \code{NA}, \code{NULL}, numbers and strings are not allowed. \code{TRUE} shows
+    two rows below the responses, separated by a dashed rule and aligned with
+    their columns: \sQuote{Block position}
+    (\code{blockPosition}) and \sQuote{Position in block} (\code{subunitBlockPosition}).
+    It also offers selection by block position. Both columns must then exist in \code{subsetInfo} and contain
+    positive, finite whole numbers without missing values (e.g. \code{1},
+    \code{2}, or their character equivalents \code{"1"}, \code{"2"}).
+    \code{FALSE} hides these two rows and removes that menu option.
+    Default for manual selections: \code{FALSE}. If omitted for a prepared
+    selection, it is \code{TRUE} when all positions are available, otherwise
+    \code{FALSE}. Explicit \code{FALSE} overrides this automatic setting.}
+  \item{comments}{A single logical (boolean) value, \code{TRUE} or \code{FALSE};
+    \code{NA}, \code{NULL}, numbers and strings are not allowed. \code{TRUE} shows
+    the \code{comment} column, which must exist in \code{subsetInfo}; individual
+    comments may be missing. \code{FALSE} hides comments and does not require that
+    column. Default for manual selections: \code{FALSE}. If omitted for a prepared
+    selection, it is \code{TRUE}; explicit \code{FALSE} disables the display.}
+  \item{state}{\code{NULL} (default) to start a new review, a
+    \code{subsetReviewState} object from a previous result's \code{$state}, or a
+    single nonempty character string giving the path to an existing RDS checkpoint
+    containing such an object, e.g. \code{"review.rds"}.
     When resuming, omit \code{dat}, \code{subsetInfo}, and all recoding/display
-    settings: the state retains the original inputs and settings.}
-  \item{checkpoint}{Optional RDS file for automatic saving. Its parent directory
-    must exist. A new review refuses to overwrite an existing file. When
+    settings: supply only \code{state} and optionally \code{checkpoint}. Even
+    explicitly passing \code{dat = NULL} is not allowed when resuming; the state
+    retains the original inputs and settings.}
+  \item{checkpoint}{\code{NULL} (default) or a single nonempty character string
+    naming an RDS file for automatic saving, e.g. \code{"review.rds"}.
+    This is a file path, not a \code{TRUE}/\code{FALSE} switch. Its parent directory
+    must exist. \code{NULL} means no automatic disk saving for a new review or
+    when resuming from an in-memory state object. A new review refuses to
+    overwrite an existing file. When
     \code{state} is a file path, that file is also used as the checkpoint unless
     a different \code{checkpoint} path is supplied. An object supplied through
     \code{state} does not enable disk saving by itself.}
+  \item{nonValidValues}{A nonempty numeric or character vector defining the values
+    selected by the \sQuote{yes, all non-valid values} menu action. Default:
+    \code{c(-99, -98, -97, -96)}. For text-coded responses, for example, use
+    \code{c("mbi", "mnr")}. Values are matched exactly against the original
+    responses after conversion to character; matching is case-sensitive.
+    Duplicates are removed. \code{NA}, \code{NULL}, blank strings, infinite values,
+    logical vectors, factors and lists are not allowed. Missing responses remain
+    unchanged. The menu shows the configured values; the \sQuote{all values}
+    action is unaffected. The filter is stored in \code{state}; omit this argument
+    when resuming. Older checkpoints retain the historical four-code filter.}
 }
 \details{
 Only the selected person--item pairs are displayed and modified, including when
@@ -47,8 +96,20 @@ people in the same review group have different selected items. Persons with the
 same item layout are displayed together. Missing response values are counted in
 the summary and retained by all recoding actions.
 
+Selections prepared with \code{dataLevel = "unit"} map design subunits to unit
+response columns. A unit is displayed and recoded once per person, even when
+several originating subunits or positions are reported. Its within-block positions
+are listed together in the row below the responses, e.g. \code{1, 2}. When a unit
+spans multiple block positions, semicolons separate corresponding groups in both
+rows: \sQuote{Block position} \code{1; 3} with \sQuote{Position in block}
+\code{1, 2; 2} means positions 1 and 2 in block position 1, and position 2 in
+block position 3. Repeated incident rows do not repeat the positions. The full
+subunit-to-unit mapping remains in \code{subsetInfo}. Choosing any affected block
+position selects the entire unit; individual components of an aggregate cannot
+be recoded separately. The response level and mapping survive pause/resume.
+
 Options include recoding all selected nonmissing values, recoding only original
-values \code{-99}, \code{-98}, \code{-97}, \code{-96}, choosing block positions,
+values listed in \code{nonValidValues}, choosing block positions,
 leaving the current selection unchanged, flagging for later review, going back,
 resetting, pausing, and exiting. The non-valid-code filter uses the original input values,
 so revisiting a subset does not change which cells qualify.
@@ -144,6 +205,14 @@ result <- visualSubsetRecode(state = "review.rds")
 # Without automatic disk saving, an assigned result can be resumed in memory.
 result <- visualSubsetRecode(dat, info, toRecodeVal = "mci")
 result <- visualSubsetRecode(state = result$state)
+
+# Explicit logical flags override the prepared selection's display defaults.
+result <- visualSubsetRecode(dat, info, useGroups = NULL,
+                             positions = FALSE, comments = TRUE)
+
+# For responses with text missing codes, configure the non-valid menu action.
+result <- visualSubsetRecode(dat, info, nonValidValues = c("mbi", "mnr"),
+                             toRecodeVal = "mci")
 
 # Manually constructed selections remain supported.
 selection <- data.frame(ID = c("P1", "P2"), datCols = c("I1", "I2"), group = "G")

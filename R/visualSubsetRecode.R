@@ -1,11 +1,13 @@
 visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
                                useGroups = NULL, positions = FALSE, comments = FALSE,
-                               state = NULL, checkpoint = NULL) {
+                               state = NULL, checkpoint = NULL,
+                               nonValidValues = c(-99, -98, -97, -96)) {
   resuming <- !is.null(state)
   if (resuming) {
     supplied <- c(dat = !missing(dat), subsetInfo = !missing(subsetInfo), ID = !missing(ID),
                   toRecodeVal = !missing(toRecodeVal), useGroups = !missing(useGroups),
-                  positions = !missing(positions), comments = !missing(comments))
+                  positions = !missing(positions), comments = !missing(comments),
+                  nonValidValues = !missing(nonValidValues))
     if (any(supplied)) {
       stop("When resuming, supply only state and optionally checkpoint; the original inputs and settings are stored in state.", call. = FALSE)
     }
@@ -19,12 +21,16 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
   } else {
     if (inherits(subsetInfo, "preparedSubsetInfo")) {
       if (missing(ID)) ID <- attr(subsetInfo, "ID")
-      if (missing(useGroups)) useGroups <- "issueId"
+      if (missing(useGroups)) {
+        useGroups <- attr(subsetInfo, "reviewGroup")
+        if (is.null(useGroups)) useGroups <- "issueId"
+      }
       if (missing(positions)) positions <- !anyNA(subsetInfo[c("blockPosition", "subunitBlockPosition")])
       if (missing(comments)) comments <- TRUE
     }
     settings <- list(ID = ID, toRecodeVal = toRecodeVal, useGroups = useGroups,
-                     positions = positions, comments = comments)
+                     positions = positions, comments = comments,
+                     nonValidValues = .subset_nonvalid_values(nonValidValues))
     session <- .subset_new_state(dat, subsetInfo, settings)
   }
   checkpoint <- .subset_checkpoint_path(checkpoint)
@@ -33,7 +39,7 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
   positions <- session$settings$positions
   comments <- session$settings$comments
   group_col <- .subset_group_column(session$settings)
-  choices <- .subset_review_choices(positions)
+  choices <- .subset_review_choices(positions, .subset_state_nonvalid(session$settings))
 
   # UI and submenu work never mutate session. Publish a complete transition only
   # after its checkpoint was replaced successfully, with interrupts deferred.
@@ -189,9 +195,35 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
   for (i in seq_along(layouts)) {
     layout <- layouts[[i]]
     rows <- match(members[[i]], ids)
-    display <- dat[rows, c(ID, layout$datCols), drop = FALSE]
+    display <- dat[rows, c(ID, unique(layout$datCols)), drop = FALSE]
     display[[ID]] <- ids[rows]
+    if (positions) {
+      # Print responses and their positions together so column widths align,
+      # including when the console wraps a wide table into several panels.
+      display <- format(display, trim = TRUE)
+      footer <- as.data.frame(lapply(display, function(x) rep("", 2L)),
+                              check.names = FALSE, stringsAsFactors = FALSE)
+      footer[[ID]] <- c("Block position", "Position in block")
+      for (column in unique(layout$datCols)) {
+        selected <- unique(layout[layout$datCols == column,
+                                   c("blockPosition", "subunitBlockPosition")])
+        blocks <- unique(selected$blockPosition)
+        footer[[column]][1L] <- paste(blocks, collapse = "; ")
+        # Semicolon groups keep within-block positions paired with their block
+        # when an aggregated unit spans more than one reported block position.
+        within <- vapply(blocks, function(block) {
+          paste(selected$subunitBlockPosition[selected$blockPosition == block], collapse = ", ")
+        }, character(1))
+        footer[[column]][2L] <- paste(within, collapse = "; ")
+      }
+      separator <- lapply(names(display), function(column) {
+        width <- max(nchar(c(column, display[[column]], footer[[column]]), type = "width"))
+        strrep("-", width)
+      })
+      names(separator) <- names(display)
+      separator <- as.data.frame(separator, check.names = FALSE, stringsAsFactors = FALSE)
+      display <- rbind(display, separator, footer)
+    }
     print(display, row.names = FALSE)
-    if (positions) print(layout, row.names = FALSE)
   }
 }

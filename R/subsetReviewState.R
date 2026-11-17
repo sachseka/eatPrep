@@ -2,8 +2,29 @@
   if (is.null(settings$useGroups)) settings$ID else settings$useGroups
 }
 
-.subset_review_choices <- function(positions) {
-  choices <- c("yes, all values", "yes, all non-valid values (-99, -98, -97, -96)")
+.subset_nonvalid_values <- function(values) {
+  if (!(is.numeric(values) || is.character(values)) || !is.null(dim(values)) ||
+      !length(values) || anyNA(values) ||
+      (is.numeric(values) && any(!is.finite(values))) ||
+      any(!nzchar(trimws(as.character(values))))) {
+    stop("nonValidValues must be a nonempty numeric or character vector without missing, blank or nonfinite values.", call. = FALSE)
+  }
+  unique(as.character(values))
+}
+
+.subset_state_nonvalid <- function(settings) {
+  # Version-1 checkpoints used a fixed filter. Keep their state unchanged so
+  # checkpoint identity checks and saved decision histories remain valid.
+  if (!"nonValidValues" %in% names(settings)) return(c("-99", "-98", "-97", "-96"))
+  .subset_nonvalid_values(settings$nonValidValues)
+}
+
+.subset_nonvalid_choice <- function(values) {
+  paste0("yes, all non-valid values (", paste(encodeString(values), collapse = ", "), ")")
+}
+
+.subset_review_choices <- function(positions, nonValidValues = c("-99", "-98", "-97", "-96")) {
+  choices <- c("yes, all values", .subset_nonvalid_choice(nonValidValues))
   if (positions) choices <- c(choices, "yes, specific blocks (submenu to select blocks follows)")
   c(choices, "no", "flag for later review", "go back to previous subset",
     "reset to original values", "exit visualSubsetRecode", "pause review (resume later)")
@@ -17,11 +38,14 @@
   checkmate::assert_flag(settings$positions)
   checkmate::assert_flag(settings$comments)
   checkmate::assert_scalar(settings$toRecodeVal, na.ok = FALSE)
+  .subset_state_nonvalid(settings)
   checkmate::assert_data_frame(dat, min.rows = 1)
   dat <- as.data.frame(dat)
   dat_ids <- .subset_table(dat, ID, "dat")
   .subset_unique_key(dat_ids, ID, "dat")
   subsetInfo <- .subset_table(subsetInfo, c(ID, "datCols", useGroups), "subsetInfo")
+  unit_level <- identical(attr(subsetInfo, "dataLevel"), "unit")
+  if (unit_level) subsetInfo <- .subset_table(subsetInfo, "unit", "subsetInfo")
   if (any(!subsetInfo[[ID]] %in% dat_ids[[ID]])) {
     stop("subsetInfo contains IDs absent from dat.", call. = FALSE)
   }
@@ -44,9 +68,10 @@
   for (group in groups) {
     selected <- subsetInfo[subsetInfo[[group_col]] == group, , drop = FALSE]
     keys <- c(ID, "datCols")
-    if (settings$positions) keys <- c(keys, "blockPosition", "subunitBlockPosition")
+    if (unit_level) keys <- c(keys, "unit") else if (settings$positions) keys <- c(keys, "blockPosition", "subunitBlockPosition")
     selected <- unique(selected[keys])
     if (anyDuplicated(selected[c(ID, "datCols")])) {
+      if (unit_level) stop("Different units resolve to the same response within a review subset.", call. = FALSE)
       stop("A data cell has conflicting positions within a review subset.", call. = FALSE)
     }
   }
@@ -56,7 +81,7 @@
 .subset_new_state <- function(dat, subsetInfo, settings) {
   inputs <- .subset_review_inputs(dat, subsetInfo, settings)
   structure(list(
-    version = 1L, session_id = basename(tempfile("subset-review-")), revision = 0L,
+    version = 2L, session_id = basename(tempfile("subset-review-")), revision = 0L,
     original_dat = inputs$dat, subset_info = inputs$subset_info, settings = settings,
     groups = inputs$groups, index = 1L, phase = "review", completed = FALSE,
     selections = vector("list", length(inputs$groups)), history = list()
@@ -78,8 +103,9 @@
     cells <- unique(current[current$blockPosition %in% blocks, c(ID, "datCols"), drop = FALSE])
   }
   values <- .subset_values(state$original_dat, cells, ID)
-  take <- if (choice == "yes, all non-valid values (-99, -98, -97, -96)") {
-    values %in% c(-99, -98, -97, -96)
+  nonvalid <- .subset_state_nonvalid(state$settings)
+  take <- if (choice == .subset_nonvalid_choice(nonvalid)) {
+    values %in% nonvalid
   } else !is.na(values)
   cells[take, , drop = FALSE]
 }
@@ -103,12 +129,19 @@
       anyDuplicated(names(state)) || !all(required %in% names(state))) {
     stop("Invalid subset review state: expected a complete subsetReviewState object.", call. = FALSE)
   }
-  if (!identical(state$version, 1L)) stop("Unsupported subset review state version.", call. = FALSE)
+  if (!identical(state$version, 1L) && !identical(state$version, 2L)) {
+    stop("Unsupported subset review state version.", call. = FALSE)
+  }
   checkmate::assert_string(state$session_id, min.chars = 1)
   checkmate::assert_integerish(state$revision, len = 1, lower = 0, any.missing = FALSE)
   settings_names <- c("ID", "toRecodeVal", "useGroups", "positions", "comments")
+  if (state$version == 2L) settings_names <- c(settings_names, "nonValidValues")
   if (!is.list(state$settings) || !identical(names(state$settings), settings_names)) {
     stop("Invalid subset review state settings.", call. = FALSE)
+  }
+  if (state$version == 2L &&
+      !identical(state$settings$nonValidValues, .subset_state_nonvalid(state$settings))) {
+    stop("Invalid subset review state nonValidValues.", call. = FALSE)
   }
   inputs <- .subset_review_inputs(state$original_dat, state$subset_info, state$settings)
   if (!identical(inputs$dat, state$original_dat) ||
@@ -122,7 +155,7 @@
   if (!is.list(state$selections) || length(state$selections) != n || !is.list(state$history)) {
     stop("Invalid subset review state selections or history.", call. = FALSE)
   }
-  choices <- setdiff(.subset_review_choices(state$settings$positions),
+  choices <- setdiff(.subset_review_choices(state$settings$positions, .subset_state_nonvalid(state$settings)),
                      c("go back to previous subset", "exit visualSubsetRecode", "pause review (resume later)"))
   replayed <- vector("list", n)
   reviewed <- rep(FALSE, n)

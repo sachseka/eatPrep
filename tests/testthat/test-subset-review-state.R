@@ -36,6 +36,50 @@ script_review <- function(answers, ..., writer = NULL) {
   result
 }
 
+test_that("custom non-valid filters survive checkpoints and overlapping selections", {
+  x <- resume_fixture()
+  x$dat$I1 <- c("mbi", "2")
+  x$dat$I3 <- c("5", "mnr")
+  path <- tempfile(fileext = ".rds")
+  on.exit(unlink(path))
+  choice <- "yes, all non-valid values (mbi, mnr)"
+  paused <- script_review(c(choice, "pause review (resume later)"), x$dat, x$info,
+                          nonValidValues = c("mbi", "mnr"), toRecodeVal = "mci", checkpoint = path)
+  expect_identical(paused$state$version, 2L)
+  expect_identical(readRDS(path)$settings$nonValidValues, c("mbi", "mnr"))
+  expect_error(visualSubsetRecode(state = path, nonValidValues = "mbi"), "When resuming")
+  damaged <- paused$state
+  damaged$settings$nonValidValues <- "mnr"
+  expect_error(visualSubsetRecode(state = damaged))
+  resumed <- script_review(c(choice, "yes"), state = path)
+  direct <- script_review(c(choice, choice, "yes"), x$dat, x$info,
+                          nonValidValues = c("mbi", "mnr"), toRecodeVal = "mci")
+  expect_identical(resumed$dat, direct$dat)
+  expect_identical(resumed$state$selections, direct$state$selections)
+  expect_identical(resumed$dat$I1, c("mci", "2"))
+  expect_identical(resumed$dat$I3, c("5", "mci"))
+  expect_true(is.na(resumed$dat$I2[1]))
+  expect_identical(readRDS(path), resumed$state)
+})
+
+test_that("version-1 checkpoints retain the historical non-valid filter", {
+  x <- resume_fixture()
+  paused <- script_review(c(2, "pause review (resume later)"), x$dat, x$info)
+  legacy <- paused$state
+  legacy$version <- 1L
+  legacy$settings$nonValidValues <- NULL
+  expect_silent(.subset_validate_state(legacy))
+  path <- tempfile(fileext = ".rds")
+  on.exit(unlink(path))
+  saveRDS(legacy, path)
+  resumed <- script_review(c(2, 1), state = path)
+  direct <- script_review(c(2, 2, 1), x$dat, x$info)
+  expect_identical(resumed$dat, direct$dat)
+  expect_identical(resumed$state$selections, direct$state$selections)
+  expect_identical(resumed$state$version, 1L)
+  expect_identical(readRDS(path), resumed$state)
+})
+
 test_that("pause and disk resume give the same selections as uninterrupted review", {
   x <- resume_fixture()
   path <- tempfile(fileext = ".rds")
@@ -173,7 +217,7 @@ test_that("malformed and incompatible states fail before menus or file writes", 
   paused <- script_review("pause review (resume later)", x$dat, x$info)
   expect_error(visualSubsetRecode(state = list()), "Invalid subset review state")
   bad <- paused$state
-  bad$version <- 2L
+  bad$version <- 99L
   expect_error(visualSubsetRecode(state = bad), "Unsupported")
   bad <- paused$state
   bad$index <- 99L

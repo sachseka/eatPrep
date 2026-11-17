@@ -191,6 +191,95 @@ test_that("group recoding changes only flagged cells with and without positions"
   }
 })
 
+test_that("custom numeric non-valid codes filter original values only", {
+  dat <- data.frame(ID = paste0("P", 1:5), I1 = c(-88, -99, 1, NA, -77))
+  info <- data.frame(ID = dat$ID, datCols = "I1", group = "G")
+  expected <- dat
+  expected$I1[c(1, 5)] <- -91
+  selected <- run_subset_review(dat, info, c(2, 1), useGroups = "group",
+                                nonValidValues = c(-88, -77))
+  expect_identical(selected$dat, expected)
+  expect_identical(selected$state$settings$nonValidValues, c("-88", "-77"))
+  expect_identical(selected$state$history[[1]]$choice, "yes, all non-valid values (-88, -77)")
+  # Revisiting after recoding all cells must still inspect their original values.
+  revisited <- run_subset_review(dat, info, c(1, 2, 2, 1), useGroups = "group",
+                                 nonValidValues = c(-88, -77))
+  expect_identical(revisited$dat, expected)
+  all_values <- run_subset_review(dat, info, c(1, 1), useGroups = "group",
+                                  nonValidValues = -88)
+  expect_equal(all_values$dat$I1, c(-91, -91, -91, NA, -91))
+})
+
+test_that("text non-valid codes match factor responses exactly and retain NAs", {
+  dat <- data.frame(ID = paste0("P", 1:5), I1 = factor(c("mbi", "mnr", "MNR", "1", NA)))
+  info <- data.frame(ID = dat$ID, datCols = "I1", group = "G")
+  result <- run_subset_review(dat, info, c(2, 1), useGroups = "group",
+                              nonValidValues = c("mbi", "mnr", "mbi"), toRecodeVal = "mci")
+  expect_identical(as.character(result$dat$I1), c("mci", "mci", "MNR", "1", NA))
+  expect_s3_class(result$dat$I1, "factor")
+  expect_identical(result$state$settings$nonValidValues, c("mbi", "mnr"))
+  expect_identical(result$state$history[[1]]$choice, "yes, all non-valid values (mbi, mnr)")
+})
+
+test_that("invalid non-valid filters fail before opening menus", {
+  dat <- data.frame(ID = "P1", I1 = 1)
+  info <- data.frame(ID = "P1", datCols = "I1")
+  invalid <- list(NULL, numeric(), character(), TRUE, NA_real_, c("mbi", NA),
+                  c("mbi", " "), Inf, list("mbi"), matrix("mbi"), factor("mbi"))
+  for (values in invalid) {
+    expect_error(visualSubsetRecode(dat, info, nonValidValues = values), "nonValidValues")
+  }
+})
+
+test_that("positions print below responses in the matching columns", {
+  old_options <- options(width = 100)
+  on.exit(options(old_options), add = TRUE)
+  dat <- data.frame(learner_key = c("P1", "P2"), I1 = c(5, 9), I2 = c(-99, NA))
+  info <- data.frame(learner_key = rep(c("P1", "P2"), each = 2),
+                     datCols = rep(c("I1", "I2"), 2), blockPosition = c(2, 1),
+                     subunitBlockPosition = c(1, 3))
+  original <- dat
+  displayed <- capture.output(.subset_display(dat, info, "learner_key", positions = TRUE))
+  expect_equal(gsub(" +", " ", trimws(displayed)),
+    c("learner_key I2 I1", "P1 -99 5", "P2 NA 9", "----------------- --- --",
+      "Block position 1 2", "Position in block 3 1"))
+  plain <- capture.output(.subset_display(dat, info, "learner_key", positions = FALSE))
+  expect_equal(gsub(" +", " ", trimws(plain)),
+    c("learner_key I1 I2", "P1 5 -99", "P2 9 NA"))
+  expect_identical(dat, original)
+})
+
+test_that("position footers stay with the right persons in different layouts", {
+  old_options <- options(width = 100)
+  on.exit(options(old_options), add = TRUE)
+  dat <- data.frame(ID = c("P1", "P2"), I1 = c(5, 9))
+  info <- data.frame(ID = c("P1", "P2"), datCols = "I1",
+                     blockPosition = c(1, 2), subunitBlockPosition = c(2, 3))
+  displayed <- capture.output(.subset_display(dat, info, "ID", positions = TRUE))
+  expect_equal(gsub(" +", " ", trimws(displayed)),
+    c("ID I1", "P1 5", "----------------- --", "Block position 1", "Position in block 2",
+      "ID I1", "P2 9", "----------------- --", "Block position 2", "Position in block 3"))
+})
+
+test_that("unit footers preserve block-position pairs without duplicate responses", {
+  old_options <- options(width = 100)
+  on.exit(options(old_options), add = TRUE)
+  dat <- data.frame(ID = c("P1", "P2"), U12 = c(7, 9), U3 = c(5, 6))
+  info <- data.frame(ID = rep(c("P1", "P2"), each = 5),
+                     datCols = c("U12", "U12", "U12", "U3", "U12"),
+                     blockPosition = c(3, 1, 1, 2, 1),
+                     subunitBlockPosition = c(2, 2, 1, 1, 1),
+                     subunit = paste0("I", 1:10),
+                     unit = c("U12", "U12", "U12", "U3", "U12"))
+  attr(info, "dataLevel") <- "unit"
+  original <- info
+  displayed <- capture.output(.subset_display(dat, info, "ID", positions = TRUE))
+  expect_equal(gsub(" +", " ", trimws(displayed)),
+    c("ID U12 U3", "P1 7 5", "P2 9 6", "----------------- ------- --",
+      "Block position 1; 3 2", "Position in block 1, 2; 2 1"))
+  expect_identical(info, original)
+})
+
 test_that("prepared incidents stay separate when the same person appears twice", {
   args <- subset_fixture()
   args$issues$target[2] <- "I3"
