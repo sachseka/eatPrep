@@ -213,7 +213,13 @@ visualSubsetRecode <- function(dat = NULL, subsetInfo = NULL, ID = "ID", toRecod
         }, character(1))
         footer[[column]][2L] <- paste(within, collapse = "; ")
       }
-      display <- rbind(display, footer)
+      separator <- lapply(names(display), function(column) {
+        width <- max(nchar(c(column, display[[column]], footer[[column]]), type = "width"))
+        strrep("-", width)
+      })
+      names(separator) <- names(display)
+      separator <- as.data.frame(separator, check.names = FALSE, stringsAsFactors = FALSE)
+      display <- rbind(display, separator, footer)
     }
     print(display, row.names = FALSE)
   }

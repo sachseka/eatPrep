@@ -405,7 +405,8 @@ unit_result <- visualSubsetRecode(dat_units, info_units, toRecodeVal = "mci")
 
 The class review displays each response column once. With `positions = TRUE`,
 two rows directly below the answers show **Block position** and **Position in
-block**, aligned with the response columns. For U12, the latter is `1, 2`
+block**, aligned with the response columns. A dashed line separates these
+position rows from the students' responses. For U12, the latter is `1, 2`
 because two subunits contribute to the unit:
 
 ```{r unit-display, echo=FALSE}

@@ -201,7 +201,7 @@ test_that("positions print below responses in the matching columns", {
   original <- dat
   displayed <- capture.output(.subset_display(dat, info, "learner_key", positions = TRUE))
   expect_equal(gsub(" +", " ", trimws(displayed)),
-    c("learner_key I2 I1", "P1 -99 5", "P2 NA 9",
+    c("learner_key I2 I1", "P1 -99 5", "P2 NA 9", "----------------- --- --",
       "Block position 1 2", "Position in block 3 1"))
   plain <- capture.output(.subset_display(dat, info, "learner_key", positions = FALSE))
   expect_equal(gsub(" +", " ", trimws(plain)),
@@ -217,8 +217,8 @@ test_that("position footers stay with the right persons in different layouts", {
                      blockPosition = c(1, 2), subunitBlockPosition = c(2, 3))
   displayed <- capture.output(.subset_display(dat, info, "ID", positions = TRUE))
   expect_equal(gsub(" +", " ", trimws(displayed)),
-    c("ID I1", "P1 5", "Block position 1", "Position in block 2",
-      "ID I1", "P2 9", "Block position 2", "Position in block 3"))
+    c("ID I1", "P1 5", "----------------- --", "Block position 1", "Position in block 2",
+      "ID I1", "P2 9", "----------------- --", "Block position 2", "Position in block 3"))
 })
 
 test_that("unit footers preserve block-position pairs without duplicate responses", {
@@ -235,7 +235,7 @@ test_that("unit footers preserve block-position pairs without duplicate response
   original <- info
   displayed <- capture.output(.subset_display(dat, info, "ID", positions = TRUE))
   expect_equal(gsub(" +", " ", trimws(displayed)),
-    c("ID U12 U3", "P1 7 5", "P2 9 6",
+    c("ID U12 U3", "P1 7 5", "P2 9 6", "----------------- ------- --",
       "Block position 1; 3 2", "Position in block 1, 2; 2 1"))
   expect_identical(info, original)
 })

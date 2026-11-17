@@ -45,7 +45,8 @@ visualSubsetRecode(dat = NULL, subsetInfo = NULL, ID = "ID", toRecodeVal = -91,
     \code{issues} selections, omission selects \code{"issueId"}.}
   \item{positions}{A single logical (boolean) value, \code{TRUE} or \code{FALSE};
     \code{NA}, \code{NULL}, numbers and strings are not allowed. \code{TRUE} shows
-    two rows below the responses, aligned with their columns: \sQuote{Block position}
+    two rows below the responses, separated by a dashed rule and aligned with
+    their columns: \sQuote{Block position}
     (\code{blockPosition}) and \sQuote{Position in block} (\code{subunitBlockPosition}).
     It also offers selection by block position. Both columns must then exist in \code{subsetInfo} and contain
     positive, finite whole numbers without missing values (e.g. \code{1},
